@@ -154,15 +154,23 @@ namespace UnityExtensions.Collections
         /// <returns>The string.</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("{");
+            using var _0 = StringBuilderPool.Get(out var sb);
+            sb.Append('{');
+            sb.AppendLine();
             foreach (var item in m_List)
             {
-                sb.AppendLine(item == null ? "  null," : $"  {item.ToString()},");
+                if (item == null)
+                {
+                    sb.AppendLine("  null,");
+                }
+                else
+                {
+                    sb.Append(' ').Append(' ').Append(item).Append(',').AppendLine();
+                }
             }
-            sb.Append("}");
+            sb.Append('}');
             return sb.ToString();
         }
-        #endregion // Unity.XR.CoreUtils.Collections
+#endregion // Unity.XR.CoreUtils.Collections
     }
 }

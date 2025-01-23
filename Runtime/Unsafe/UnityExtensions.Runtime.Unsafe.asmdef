@@ -1,0 +1,16 @@
+{
+    "name": "UnityExtensions.Runtime.Unsafe",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7dabed3724aa64f438f2ac84f705af03"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

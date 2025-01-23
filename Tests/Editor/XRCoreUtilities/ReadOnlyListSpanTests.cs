@@ -28,7 +28,7 @@ namespace UnityExtensions.Editor.Tests
             });
 
             using var enumerator = readOnlyListSpan.GetEnumerator();
-            Assert.AreEqual(false, enumerator.MoveNext());
+            Assert.IsFalse(enumerator.MoveNext());
 
             Assert.AreEqual(0, readOnlyListSpan.Count);
         }

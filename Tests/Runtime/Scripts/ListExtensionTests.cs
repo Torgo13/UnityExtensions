@@ -53,7 +53,7 @@ namespace UnityExtensions.Tests
             where T : new()
         {
             Assert.NotNull(assertEqual);
-            Assert.AreNotEqual(fillNum, 0);
+            Assert.AreNotEqual(0, fillNum);
 
             var beforeCount = list.Count;
 

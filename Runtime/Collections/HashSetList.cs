@@ -8,7 +8,7 @@ namespace UnityExtensions.Collections
     /// Wrapper data structure for hashset, that leans on a list for deterministic sort order
     /// </summary>
     /// <typeparam name="T">HashSetList type</typeparam>
-    public class HashSetList<T> : ICollection<T>, IEnumerable<T>, IEnumerable, ISerializable, IDeserializationCallback, ISet<T>, IReadOnlyCollection<T>
+    public class HashSetList<T> : ISerializable, IDeserializationCallback, ISet<T>, IReadOnlyCollection<T>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/HashSetList.cs
         #region Unity.XR.CoreUtils.Collections

@@ -246,14 +246,15 @@ namespace UnityExtensions
         {
             if (name.StartsWith("m_"))
                 name = name.Substring(2, name.Length - 2);
-            else if (name.StartsWith("_"))
+            else if (name.StartsWith('_'))
                 name = name.Substring(1, name.Length - 1);
 
             if (name[0] == 'k' && name[1] >= 'A' && name[1] <= 'Z')
                 name = name.Substring(1, name.Length - 1);
 
             // Insert a space before any capital letter unless it is the beginning or end of a word
-            name = Regex.Replace(name, @"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))", " $1");
+            name = Regex.Replace(name, @"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))", " $1",
+                RegexOptions.None, TimeSpan.FromSeconds(0.1));
             name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
             return name;
         }

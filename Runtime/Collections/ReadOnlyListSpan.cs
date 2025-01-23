@@ -39,7 +39,7 @@ namespace UnityExtensions.Collections
             {
                 index += m_Enumerator.start;
                 if (index < m_Enumerator.start || index >= m_Enumerator.end)
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(index));
 
                 return m_Enumerator.list[index];
             }
@@ -72,8 +72,11 @@ namespace UnityExtensions.Collections
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (start < 0 || start + length > list.Count)
-                throw new ArgumentOutOfRangeException();
+            if (start < 0)
+                throw new ArgumentOutOfRangeException(nameof(start));
+
+            if (start + length > list.Count)
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             m_Enumerator = new Enumerator(list, start, start + length);
         }
@@ -89,8 +92,11 @@ namespace UnityExtensions.Collections
         public ReadOnlyListSpan<T> Slice(int start, int length)
         {
             var newStart = m_Enumerator.start + start;
-            if (newStart < m_Enumerator.start || newStart + length > m_Enumerator.end)
-                throw new ArgumentOutOfRangeException();
+            if (newStart < m_Enumerator.start)
+                throw new ArgumentOutOfRangeException(nameof(start));
+
+            if (newStart + length > m_Enumerator.end)
+                throw new ArgumentOutOfRangeException(nameof(length));
 
             return new ReadOnlyListSpan<T>(m_Enumerator.list, m_Enumerator.start + start, length);
         }
@@ -183,14 +189,22 @@ namespace UnityExtensions.Collections
         /// <returns>The string.</returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("{");
+            using var _0 = StringBuilderPool.Get(out var sb);
+            sb.Append('{');
+            sb.AppendLine();
             for (var i = m_Enumerator.start; i < m_Enumerator.end; i++)
             {
                 var item = m_Enumerator.list[i];
-                sb.AppendLine(item == null ? "  null," : $"  {m_Enumerator.list[i].ToString()},");
+                if (item == null)
+                {
+                    sb.AppendLine("  null,");
+                }
+                else
+                {
+                    sb.Append(' ').Append(' ').Append(m_Enumerator.list[i]).Append(',').AppendLine();
+                }
             }
-            sb.Append("}");
+            sb.Append('}');
             return sb.ToString();
         }
 
@@ -219,7 +233,7 @@ namespace UnityExtensions.Collections
                 get
                 {
                     if (m_CurrentIndex < start || m_CurrentIndex >= end)
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException(nameof(m_CurrentIndex));
 
                     return list[m_CurrentIndex];
                 }
@@ -263,6 +277,6 @@ namespace UnityExtensions.Collections
 
             void IDisposable.Dispose() { }
         }
-        #endregion // Unity.XR.CoreUtils.Collections
+#endregion // Unity.XR.CoreUtils.Collections
     }
 }

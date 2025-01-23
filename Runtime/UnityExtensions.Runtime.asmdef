@@ -1,5 +1,5 @@
 {
-	"name": "UnityExtensions.Runtime",
+    "name": "UnityExtensions.Runtime",
     "rootNamespace": "",
     "references": [
         "Unity.InputSystem",
@@ -62,6 +62,11 @@
             "name": "Unity",
             "expression": "2022.3",
             "define": "HAS_GET_POSITION_AND_ROTATION"
+        },
+        {
+            "name": "com.xperiandri.stringbuilderextensions",
+            "expression": "1.0.0",
+            "define": "INCLUDE_STRINGBUILDER_EXTENSIONS"
         }
     ],
     "noEngineReferences": false

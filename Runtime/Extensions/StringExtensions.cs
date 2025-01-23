@@ -9,8 +9,6 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/StringExtensions.cs
         #region Unity.XR.CoreUtils
-        static readonly StringBuilder k_StringBuilder = new StringBuilder();
-
         /// <summary>
         /// Capitalizes the first letter of a string.
         /// </summary>
@@ -42,7 +40,7 @@ namespace UnityExtensions
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            k_StringBuilder.Length = 0;
+            using var _0 = StringBuilderPool.Get(out var k_StringBuilder);
             k_StringBuilder.Append(str[0]);
 
             var strLength = str.Length;
@@ -73,6 +71,6 @@ namespace UnityExtensions
 
             return k_StringBuilder.ToString();
         }
-        #endregion // Unity.XR.CoreUtils
+#endregion // Unity.XR.CoreUtils
     }
 }

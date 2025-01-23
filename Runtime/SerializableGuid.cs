@@ -34,7 +34,7 @@ namespace UnityExtensions
         /// <summary>
         /// Reconstructs the <c>Guid</c> from the serialized data.
         /// </summary>
-        public Guid Guid => GuidUtil.Compose(m_GuidLow, m_GuidHigh);
+        public readonly Guid Guid => GuidUtil.Compose(m_GuidLow, m_GuidHigh);
 
         /// <summary>
         /// Constructs a <see cref="SerializableGuid"/> from two 64-bit <c>ulong</c> values.
@@ -51,7 +51,7 @@ namespace UnityExtensions
         /// Gets the hash code for this SerializableGuid.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {
@@ -65,7 +65,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if <paramref name="obj"/> is a SerializableGuid with the same field values.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (!(obj is SerializableGuid serializableGuid))
                 return false;
@@ -79,7 +79,7 @@ namespace UnityExtensions
         /// for more details.
         /// </summary>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
-        public override string ToString() => Guid.ToString();
+        public override readonly string ToString() => Guid.ToString();
 
         /// <summary>
         /// Generates a string representation of the <c>Guid</c>. Same as <see cref="Guid.ToString(string)"/>.
@@ -88,7 +88,7 @@ namespace UnityExtensions
         /// See <a href="https://docs.microsoft.com/en-us/dotnet/api/system.guid.tostring?view=netframework-4.7.2#System_Guid_ToString_System_String_">Microsoft's documentation</a>
         /// for more details.</param>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
-        public string ToString(string format) => Guid.ToString(format);
+        public readonly string ToString(string format) => Guid.ToString(format);
 
         /// <summary>
         /// Generates a string representation of the <c>Guid</c>. Same as <see cref="Guid.ToString(string, IFormatProvider)"/>.
@@ -98,14 +98,14 @@ namespace UnityExtensions
         /// for more details.</param>
         /// <param name="provider">An object that supplies culture-specific formatting information.</param>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
-        public string ToString(string format, IFormatProvider provider) => Guid.ToString(format, provider);
+        public readonly string ToString(string format, IFormatProvider provider) => Guid.ToString(format, provider);
 
         /// <summary>
         /// Check if this SerializableGuid is equal to another SerializableGuid.
         /// </summary>
         /// <param name="other">The other SerializableGuid</param>
         /// <returns>True if this SerializableGuid has the same field values as the other one.</returns>
-        public bool Equals(SerializableGuid other)
+        public readonly bool Equals(SerializableGuid other)
         {
             return m_GuidLow == other.m_GuidLow &&
                 m_GuidHigh == other.m_GuidHigh;
