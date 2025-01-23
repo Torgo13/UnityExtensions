@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.Tests
+namespace UnityExtensions.Tests
 {
     abstract class PerformanceTestBase : MonoBehaviour
     {

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility methods for common reflection-based operations.

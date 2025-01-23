@@ -1,6 +1,6 @@
 using System;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Helper class for caching enum values.

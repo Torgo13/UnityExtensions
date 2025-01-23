@@ -1,6 +1,6 @@
 using Unity.Collections;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility methods for working with <see cref="NativeArray{T}"/> objects.

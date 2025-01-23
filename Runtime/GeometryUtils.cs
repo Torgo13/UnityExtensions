@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility methods for common geometric operations.

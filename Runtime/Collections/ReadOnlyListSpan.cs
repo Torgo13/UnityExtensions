@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Unity.XR.CoreUtils.Collections
+namespace UnityExtensions.Collections
 {
     /// <summary>
     /// Wraps a list or array to provide a read-only view of some or all elements. Elements are not copied, so if the

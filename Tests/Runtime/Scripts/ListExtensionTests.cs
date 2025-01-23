@@ -2,9 +2,9 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.XR.CoreUtils;
+using UnityExtensions;
 
-namespace Unity.XR.CoreUtils.Tests
+namespace UnityExtensions.Tests
 {
     class ListExtensionTests
     {

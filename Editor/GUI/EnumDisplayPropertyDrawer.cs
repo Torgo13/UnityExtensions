@@ -2,7 +2,7 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.GUI.Editor
+namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(EnumDisplayAttribute))]
     sealed class EnumDisplayPropertyDrawer : PropertyDrawer

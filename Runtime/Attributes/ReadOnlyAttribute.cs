@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Serialized fields marked with this ReadOnly attribute use a CustomPropertyDrawer that

@@ -7,7 +7,7 @@ using UnityObject = UnityEngine.Object;
 using UnityEngine.UI;
 #endif
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Runtime Material utilities.

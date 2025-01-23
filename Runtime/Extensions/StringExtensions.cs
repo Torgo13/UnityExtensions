@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Extension methods for <see cref="string"/> objects.

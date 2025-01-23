@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.GUI.Editor
+namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
     class ReadOnlyPropertyDrawer : PropertyDrawer

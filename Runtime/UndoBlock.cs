@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Represents a series of object actions as a single undo-operation.

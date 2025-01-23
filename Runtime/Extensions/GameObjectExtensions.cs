@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Extensions methods for the <see cref="GameObject"/> class.

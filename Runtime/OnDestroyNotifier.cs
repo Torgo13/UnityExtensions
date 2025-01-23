@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// <see cref="MonoBehaviour"/> that invokes a callback when it is destroyed.

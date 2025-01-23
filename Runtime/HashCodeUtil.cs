@@ -1,4 +1,4 @@
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     static class HashCodeUtil
     {

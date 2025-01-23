@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// A helper class for accessing settings stored in <see cref="ScriptableObject"/> instances from `UnityEditor` code.

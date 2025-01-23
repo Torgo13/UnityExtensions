@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Unity.XR.CoreUtils.Collections
+namespace UnityExtensions.Collections
 {
     /// <summary>
     /// Wrapper data structure for hashset, that leans on a list for deterministic sort order

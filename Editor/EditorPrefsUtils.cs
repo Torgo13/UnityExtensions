@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Utilities for getting and setting values stored in <see cref="EditorPrefs"/>.

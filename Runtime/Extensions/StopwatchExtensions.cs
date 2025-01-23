@@ -1,7 +1,7 @@
 #if !NET_4_6
 using System.Diagnostics;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Extension methods for `System.Diagnostics.Stopwatch` objects.

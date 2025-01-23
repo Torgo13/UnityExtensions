@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Utility methods for use in Editor GUI code.

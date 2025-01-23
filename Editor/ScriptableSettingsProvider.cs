@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Expose a <see cref="ScriptableSettings{T}"/> object as a settings provider.

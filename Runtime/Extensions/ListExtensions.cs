@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Extension methods for <see cref="List{T}"/> objects.

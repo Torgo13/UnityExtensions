@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine.UI;
 #endif
 
-namespace Unity.XR.CoreUtils.Editor.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class MaterialUtilsTests
     {

@@ -7,11 +7,11 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-#if ENABLE_VR && !ENABLE_XR_MODULE
+#if !ENABLE_VR || !ENABLE_XR_MODULE
 using XRLoggingUtils = UnityEngine.Debug;
 #endif
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Base class for all scriptable settings that is easier to look up via-reflection.

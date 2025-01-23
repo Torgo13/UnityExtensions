@@ -1,8 +1,8 @@
 using System;
 using NUnit.Framework;
-using Unity.XR.CoreUtils.Editor;
+using UnityExtensions.Editor;
 
-namespace Unity.XR.CoreUtils.Editor.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class PackageVersionTests
     {

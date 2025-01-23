@@ -1,7 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Stores a package version in a logically comparable format.

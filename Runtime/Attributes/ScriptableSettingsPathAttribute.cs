@@ -1,6 +1,6 @@
 using System;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Allows a class inheriting from <see cref="ScriptableSettings{T}"/> to specify that its instance Asset

@@ -1,4 +1,4 @@
-namespace Unity.XR.CoreUtils.Tests
+namespace UnityExtensions.Tests
 {
     abstract class PerformanceTest : PerformanceTestBase
     {

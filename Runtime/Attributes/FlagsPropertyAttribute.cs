@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.GUI
+namespace UnityExtensions.GUI
 {
     /// <summary>
     /// Used to denote fields that should be represented by a custom dropdown/mask property in the inspector.

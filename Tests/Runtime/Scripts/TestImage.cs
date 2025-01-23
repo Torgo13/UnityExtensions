@@ -3,7 +3,7 @@ using UnityEngine;
 
 using UnityEngine.UI;
 
-namespace Unity.XR.CoreUtils.Tests
+namespace UnityExtensions.Tests
 {
     /// <summary>
     /// This class exists to allow testing of the overload for MaterialUtils.GetMaterialClone that takes a Graphic-derived class

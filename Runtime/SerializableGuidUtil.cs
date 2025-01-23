@@ -1,6 +1,6 @@
 using System;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility for creating a <see cref="SerializableGuid"/>.

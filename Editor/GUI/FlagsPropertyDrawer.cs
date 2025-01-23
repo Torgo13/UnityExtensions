@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Unity.XR.CoreUtils.Editor;
+using UnityExtensions.Editor;
 using UnityEditor;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.GUI.Editor
+namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(FlagsPropertyAttribute))]
     sealed class FlagsPropertyDrawer : PropertyDrawer

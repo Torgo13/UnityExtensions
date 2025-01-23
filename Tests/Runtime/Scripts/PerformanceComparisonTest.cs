@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Unity.XR.CoreUtils.Tests
+namespace UnityExtensions.Tests
 {
     abstract class PerformanceComparisonTest : PerformanceTestBase
     {

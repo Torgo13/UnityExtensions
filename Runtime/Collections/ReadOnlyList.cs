@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Unity.XR.CoreUtils.Collections
+namespace UnityExtensions.Collections
 {
     /// <summary>
     /// Wraps a <see cref="List{T}"/> to provide a read-only view of its memory without copying any elements.

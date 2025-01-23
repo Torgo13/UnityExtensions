@@ -1,6 +1,6 @@
 using System;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility for dealing with <see cref="System.Guid"/> objects.

@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// Math utilities.

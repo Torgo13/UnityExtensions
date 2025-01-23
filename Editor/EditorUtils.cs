@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
-namespace Unity.XR.CoreUtils.Editor
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Utility methods for use in Editor code.

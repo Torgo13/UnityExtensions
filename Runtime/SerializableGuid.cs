@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// A <c>Guid</c> that can be serialized by Unity.

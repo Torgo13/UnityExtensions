@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils
+namespace UnityExtensions
 {
     /// <summary>
     /// A helper class for accessing settings stored in <see cref="ScriptableObject"/> instances.
