@@ -1,0 +1,15 @@
+{
+  "name": "com.tw0catsgames.unityextensions",
+  "version": "1.0.0",
+  "displayName": "Unity Extensions",
+  "description": "Collection of extension methods from Unity.",
+  "documentationUrl": "https://github.com/Torgo13/UnityExtensions/blob/main/README.md",
+  "unity": "2022.3",
+  "unityRelease": "20f1",
+  "author": "Unity",
+  "license": "Unity Companion License",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Torgo13/UnityExtensions"
+  }
+}
