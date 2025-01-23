@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -13,10 +14,6 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/TypeExtensions.cs
         #region Unity.XR.CoreUtils
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<FieldInfo> k_Fields = new List<FieldInfo>();
-        static readonly List<string> k_TypeNames = new List<string>();
-
         /// <summary>
         /// Adds all types assignable to this one to a list, using an optional predicate test.
         /// </summary>
@@ -187,6 +184,7 @@ namespace UnityExtensions
                     throw new ArgumentException($"Type {type} in interfaceTypes is not an interface!");
             }
 
+            List<FieldInfo> k_Fields = ListPool<FieldInfo>.Get();
             foreach (var type in classes)
             {
                 if (!type.IsClass)
@@ -207,6 +205,8 @@ namespace UnityExtensions
                     }
                 }
             }
+
+            ListPool<FieldInfo>.Release(k_Fields);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace UnityExtensions
             var declaringType = type.DeclaringType;
             if (declaringType != null && !type.IsGenericParameter)
             {
-                k_TypeNames.Clear();
+                List<string> k_TypeNames = ListPool<string>.Get();
                 var name = type.GetNameWithFullGenericArguments();
                 k_TypeNames.Add(name);
                 while (true)
@@ -348,6 +348,7 @@ namespace UnityExtensions
                 }
 
                 var result = string.Join(".", k_TypeNames.ToArray());
+                ListPool<string>.Release(k_TypeNames);
                 return result;
             }
 

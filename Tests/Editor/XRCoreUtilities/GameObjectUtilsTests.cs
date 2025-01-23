@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
-namespace Unity.XR.CoreUtils.Editor.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class GameObjectUtilsTests
     {

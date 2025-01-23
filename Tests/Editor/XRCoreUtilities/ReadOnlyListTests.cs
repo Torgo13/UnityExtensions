@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using Unity.XR.CoreUtils.Collections;
+using UnityExtensions.Collections;
 using UnityEngine;
 
-namespace Unity.XR.CoreUtils.Editor.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class ReadOnlyListTests
     {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -15,9 +16,6 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/ComponentUtils.cs
         #region Unity.XR.CoreUtils
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<T> k_RetrievalList = new List<T>();
-
         /// <summary>
         /// Gets a single component of type T using the non-allocating GetComponents API.
         /// </summary>
@@ -26,11 +24,12 @@ namespace UnityExtensions
         public static T GetComponent(GameObject gameObject)
         {
             var foundComponent = default(T);
-            // k_RetrievalList is cleared by GetComponents
+            List<T> k_RetrievalList = ListPool<T>.Get();
             gameObject.GetComponents(k_RetrievalList);
             if (k_RetrievalList.Count > 0)
                 foundComponent = k_RetrievalList[0];
 
+            ListPool<T>.Release(k_RetrievalList);
             return foundComponent;
         }
 
@@ -42,11 +41,12 @@ namespace UnityExtensions
         public static T GetComponentInChildren(GameObject gameObject)
         {
             var foundComponent = default(T);
-            // k_RetrievalList is cleared by GetComponentsInChildren
+            List<T> k_RetrievalList = ListPool<T>.Get();
             gameObject.GetComponentsInChildren(k_RetrievalList);
             if (k_RetrievalList.Count > 0)
                 foundComponent = k_RetrievalList[0];
 
+            ListPool<T>.Release(k_RetrievalList);
             return foundComponent;
         }
         #endregion // Unity.XR.CoreUtils

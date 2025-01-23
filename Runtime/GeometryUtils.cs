@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -20,10 +21,6 @@ namespace UnityExtensions
         static readonly Vector3 k_Zero = Vector3.zero;
         static readonly Quaternion k_VerticalCorrection = Quaternion.AngleAxis(180.0f, k_Up);
         const float k_MostlyVertical = 0.95f;
-
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<Vector3> k_HullEdgeDirections = new List<Vector3>();
-        static readonly HashSet<int> k_HullIndices = new HashSet<int>();
 
         /// <summary>
         /// Finds the side of a polygon closest to a specified world space position.
@@ -556,7 +553,7 @@ namespace UnityExtensions
             if (points.Count < 3)
                 return false;
 
-            k_HullIndices.Clear();
+            HashSet<int> k_HullIndices = HashSetPool<int>.Get();
             var pointsCount = points.Count;
             var leftmostPointIndex = 0;
             for (var i = 1; i < pointsCount; ++i)
@@ -636,6 +633,8 @@ namespace UnityExtensions
 
                 currentIndex = pIndex;
             } while (currentIndex != leftmostPointIndex);
+
+            HashSetPool<int>.Release(k_HullIndices);
 
             return true;
         }
@@ -756,7 +755,7 @@ namespace UnityExtensions
             }
 
             // compute & store the direction of every edge in the hull
-            k_HullEdgeDirections.Clear();
+            List<Vector3> k_HullEdgeDirections = ListPool<Vector3>.Get();
             var lastVertexIndex = vertexCount - 1;
             for (var i = 0; i < lastVertexIndex; i++)
             {
@@ -851,6 +850,8 @@ namespace UnityExtensions
                     boundingBox[3] = upperLeft;
                 }
             }
+
+            ListPool<Vector3>.Release(k_HullEdgeDirections);
 
             // compute the size of the 2d bounds
             var topLeft = boundingBox[0];

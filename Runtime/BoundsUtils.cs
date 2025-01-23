@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -10,10 +11,6 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/BoundsUtils.cs
         #region Unity.XR.CoreUtils
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<Renderer> k_Renderers = new List<Renderer>();
-        static readonly List<Transform> k_Transforms = new List<Transform>();
-
         /// <summary>
         /// Get the aggregated bounds of a list of GameObjects and their children.
         /// </summary>
@@ -70,13 +67,15 @@ namespace UnityExtensions
         /// <returns>The aggregated bounds.</returns>
         public static Bounds GetBounds(Transform transform)
         {
-            // Static collections used below are cleared by the methods that use them
+            List<Renderer> k_Renderers = ListPool<Renderer>.Get();
             transform.GetComponentsInChildren(k_Renderers);
             var b = GetBounds(k_Renderers);
+            ListPool<Renderer>.Release(k_Renderers);
 
             // As a fallback when there are no bounds, collect all transform positions
             if (b.size == Vector3.zero)
             {
+                List<Transform> k_Transforms = ListPool<Transform>.Get();
                 transform.GetComponentsInChildren(k_Transforms);
 
                 if (k_Transforms.Count > 0)
@@ -86,6 +85,8 @@ namespace UnityExtensions
                 {
                     b.Encapsulate(t.position);
                 }
+
+                ListPool<Transform>.Release(k_Transforms);
             }
 
             return b;

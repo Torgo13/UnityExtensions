@@ -1,10 +1,10 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-using Unity.XR.CoreUtils.Collections;
+using UnityExtensions.Collections;
 using System.Collections.Generic;
 
-namespace Unity.XR.CoreUtils.Editor.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class ReadOnlyListSpanTests
     {

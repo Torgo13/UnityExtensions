@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Pool;
 using UnityObject = UnityEngine.Object;
 
 #if UNITY_EDITOR
@@ -18,10 +19,6 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/GameObjectUtils.cs
         #region Unity.XR.CoreUtils
-        // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<GameObject> k_GameObjects = new List<GameObject>();
-        static readonly List<Transform> k_Transforms = new List<Transform>();
-
         /// <summary>
         /// Called when a GameObject has been instantiated through the <see cref="GameObjectUtils"/> versions of
         /// `Instantiate`.
@@ -273,7 +270,7 @@ namespace UnityExtensions
         /// <returns>The first component found in the active scene, or null if none exists</returns>
         public static T GetComponentInScene<T>(Scene scene) where T : Component
         {
-            // k_GameObjects is cleared by GetRootGameObjects
+            using var _0 = ListPool<GameObject>.Get(out var k_GameObjects);
             scene.GetRootGameObjects(k_GameObjects);
             foreach (var gameObject in k_GameObjects)
             {
@@ -294,7 +291,7 @@ namespace UnityExtensions
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
         public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false) where T : Component
         {
-            // k_GameObjects is cleared by GetRootGameObjects
+            using var _0 = ListPool<GameObject>.Get(out var k_GameObjects);
             scene.GetRootGameObjects(k_GameObjects);
             foreach (var gameObject in k_GameObjects)
             {
@@ -370,10 +367,10 @@ namespace UnityExtensions
         /// <returns>The returned child GameObject or null if no child is found.</returns>
         public static GameObject GetNamedChild(this GameObject go, string name)
         {
-            k_Transforms.Clear();
+            List<Transform> k_Transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(k_Transforms);
             var foundObject = k_Transforms.Find(currentTransform => currentTransform.name == name);
-            k_Transforms.Clear();
+            ListPool<Transform>.Release(k_Transforms);
 
             if (foundObject != null)
                 return foundObject.gameObject;
