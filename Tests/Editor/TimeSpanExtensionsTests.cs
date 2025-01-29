@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System;
 
-namespace UnityExtensions.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class TimeSpanExtensionsTests
     {

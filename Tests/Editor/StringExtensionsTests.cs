@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace UnityExtensions.Tests
+namespace UnityExtensions.Editor.Tests
 {
     class StringExtensionsTests
     {

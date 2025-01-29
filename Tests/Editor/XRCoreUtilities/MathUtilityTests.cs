@@ -29,5 +29,19 @@ namespace UnityExtensions.Editor.Tests
                 Assert.AreEqual(mathfResult, ourResult, $"comparing {pair.x} to {pair.y} - Mathf said {mathfResult} , we said {ourResult}");
             }
         }
+
+        //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture.tests/Tests/Editor/Core/MathUtilityTests.cs
+        #region Unity.LiveCapture.Tests.Editor
+        [TestCase(0d, 0d, 1d, ExpectedResult = 0d)]
+        [TestCase(-1d, 0d, 1d, ExpectedResult = 0d)]
+        [TestCase(0d, -1d, 1d, ExpectedResult = 0d)]
+        [TestCase(0d, 0d, -1d, ExpectedResult = 0d)]
+        [TestCase(3d, 0d, -1d, ExpectedResult = 0d)]
+        [TestCase(3d, 0d, 1d, ExpectedResult = 1d)]
+        public double Clamp(double value, double min, double max)
+        {
+            return MathUtility.Clamp(value, min, max);
+        }
+        #endregion // Unity.LiveCapture.Tests.Editor
     }
 }
