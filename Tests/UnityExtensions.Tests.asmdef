@@ -1,20 +1,12 @@
 {
-    "name": "UnityExtensions.Editor.Tests",
+    "name": "UnityExtensions.Tests",
     "rootNamespace": "",
-    "references": [
-        "GUID:16b707dc5319ad24facbdf7282f85fdc",
-        "GUID:7dabed3724aa64f438f2ac84f705af03",
-        "GUID:1427a2291daa26248ae50ca4b4271389"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "references": [],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
+    "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [

@@ -2,7 +2,9 @@
     "name": "UnityExtensions.Runtime.Tests",
     "rootNamespace": "",
     "references": [
-        "GUID:7dabed3724aa64f438f2ac84f705af03"
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:7dabed3724aa64f438f2ac84f705af03",
+        "GUID:1427a2291daa26248ae50ca4b4271389"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,8 +13,10 @@
     "precompiledReferences": [
         "nunit.framework.dll"
     ],
-    "autoReferenced": false,
-    "defineConstraints": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
     "versionDefines": [
         {
             "name": "com.unity.modules.physics",

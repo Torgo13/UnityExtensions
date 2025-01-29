@@ -54,5 +54,10 @@ namespace UnityExtensions
             (list[first], list[second]) = (list[second], list[first]);
         }
         #endregion // Unity.XR.CoreUtils
+
+        //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.CodeGen/ListExtensions.cs
+        #region Unity.Entities.CodeGen
+        public static void Add<T>(this List<T> list, IEnumerable<T> elementsToAdd) => list.AddRange(elementsToAdd);
+        #endregion // Unity.Entities.CodeGen
     }
 }
