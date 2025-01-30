@@ -1,3 +1,4 @@
+using System;
 using System.Text.RegularExpressions;
 
 namespace UnityExtensions
@@ -13,7 +14,8 @@ namespace UnityExtensions
 
         public string Format(string name)
         {
-            return Regex.Replace(name, s_InvalidRegStr, "_");
+            return Regex.Replace(name, s_InvalidRegStr, "_",
+                RegexOptions.None, TimeSpan.FromSeconds(0.1));
         }
         #endregion // Unity.LiveCapture
     }

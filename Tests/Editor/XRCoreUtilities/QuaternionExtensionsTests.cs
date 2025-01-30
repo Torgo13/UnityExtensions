@@ -1,10 +1,13 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityExtensions.Tests;
 
 namespace UnityExtensions.Editor.Tests
 {
     class QuaternionExtensionsTests
     {
+        //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Tests/Editor/XRCoreUtilities/QuaternionExtensionsTests.cs
+        #region Unity.XR.CoreUtils.Editor.Tests
         [Test]
         public void ConstrainYawRotation()
         {
@@ -28,5 +31,6 @@ namespace UnityExtensions.Editor.Tests
             var newRotation = rotation.ConstrainYawPitchNormalized();
             Assert.IsTrue(Quaternion.Euler(15, 30, 0) == newRotation);
         }
+        #endregion // Unity.XR.CoreUtils.Editor.Tests
     }
 }

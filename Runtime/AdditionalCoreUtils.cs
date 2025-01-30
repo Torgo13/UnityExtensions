@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -25,7 +27,8 @@ namespace UnityExtensions
         {
             var result = GameObject.CreatePrimitive(PrimitiveType.Cube);
             // Strip all components but the transform to get an empty game object.
-            var components = result.GetComponents<Component>();
+            List<Component> components = ListPool<Component>.Get();
+            result.GetComponents(components);
             foreach (var component in components)
             {
                 if (component is Transform)
@@ -34,6 +37,7 @@ namespace UnityExtensions
                 Object.DestroyImmediate(component);
             }
 
+            ListPool<Component>.Release(components);
             return result;
         }
 

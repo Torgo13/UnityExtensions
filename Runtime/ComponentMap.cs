@@ -21,8 +21,8 @@ namespace UnityExtensions
         static ComponentMap<TKey, TValue> s_Default = new ComponentMap<TKey, TValue>();
         public static ComponentMap<TKey, TValue> Instance => s_Default;
 
-        Dictionary<TKey, TValue> s_KeyToValueMap = new Dictionary<TKey, TValue>();
-        Dictionary<TValue, TKey> s_ValueToKeyMap = new Dictionary<TValue, TKey>();
+        readonly Dictionary<TKey, TValue> s_KeyToValueMap = new Dictionary<TKey, TValue>();
+        readonly Dictionary<TValue, TKey> s_ValueToKeyMap = new Dictionary<TValue, TKey>();
 
         void Add(TKey key, TValue value)
         {

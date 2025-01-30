@@ -54,7 +54,7 @@ namespace UnityExtensions
         /// <param name="comparer">Comparator if Comparer&lt;T&gt;. Default is not suite</param>
         /// <typeparam name="T"></typeparam>
         /// <exception cref="ArgumentNullException">Can throw exception if list is null</exception>
-        internal static void AddSorted<T>([DisallowNull] this List<T> list, T item, IComparer<T> comparer = null)
+        public static void AddSorted<T>([DisallowNull] this List<T> list, T item, IComparer<T> comparer = null)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list), $"{nameof(list)} must not be null.");
@@ -149,7 +149,7 @@ namespace UnityExtensions
         /// <typeparam name="T">Collection type</typeparam>
         /// <returns>Serialized collection</returns>
         /// <exception cref="ArgumentNullException">Can produce exception if collection or serialize method is null</exception>
-        internal static string SerializedView<T>([DisallowNull] this IEnumerable<T> collection, [DisallowNull] Func<T, string> serializeElement)
+        public static string SerializedView<T>([DisallowNull] this IEnumerable<T> collection, [DisallowNull] Func<T, string> serializeElement)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");

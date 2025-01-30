@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,7 +52,18 @@ namespace UnityExtensions
         /// <returns>The camera that has the higher depth, if any.</returns>
         public static Camera GetTopCamera()
         {
-            return Camera.allCameras.OrderByDescending(c => c.depth).FirstOrDefault();
+            int allCamerasCount = Camera.allCamerasCount;
+            if (allCamerasCount == 0)
+                return null;
+
+            Camera[] allCameras = ArrayPool<Camera>.Shared.Rent(allCamerasCount);
+
+            Camera.GetAllCameras(allCameras);
+            Camera topCamera = Camera.allCameras.OrderByDescending(c => c.depth).FirstOrDefault();
+
+            ArrayPool<Camera>.Shared.Return(allCameras);
+
+            return topCamera;
         }
 
 #if !NETSTANDARD2_1

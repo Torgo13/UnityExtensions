@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -12,8 +13,6 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/AnimatorExtensions.cs
         #region Unity.LiveCapture
-        static List<string> s_Names = new List<string>();
-
         /// <summary>
         /// Attempts to calculate the path from the specified Animator to the specified Transform.
         /// </summary>
@@ -30,7 +29,7 @@ namespace UnityExtensions
                 || transform.root != animator.transform.root)
                 return false;
 
-            s_Names.Clear();
+            List<string> s_Names = ListPool<string>.Get();
 
             var root = animator.transform;
 
@@ -44,9 +43,11 @@ namespace UnityExtensions
             {
                 path = string.Join("/", s_Names.Reverse<string>());
 
+                ListPool<string>.Release(s_Names);
                 return true;
             }
 
+            ListPool<string>.Release(s_Names);
             return false;
         }
         #endregion // Unity.LiveCapture

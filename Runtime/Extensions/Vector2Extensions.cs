@@ -51,5 +51,51 @@ namespace UnityExtensions
             return vector;
         }
         #endregion // Unity.XR.CoreUtils
+
+        /// <summary>
+        /// Returns a new Vector2 that multiplies each component of both input vectors together.
+        /// </summary>
+        /// <param name="value">Input value to scale.</param>
+        /// <param name="scale">Vector2 used to scale components of input value.</param>
+        /// <returns>Scaled input value.</returns>
+        public static Vector2 Multiply(this Vector2 value, Vector2 scale)
+        {
+            return new Vector2(value.x * scale.x, value.y * scale.y);
+        }
+
+        /// <summary>
+        /// Returns a new `Vector2` that divides each component of the input value by each component of the scale value.
+        /// </summary>
+        /// <param name="value">Input value to scale.</param>
+        /// <param name="scale">`Vector2` used to scale components of input value.</param>
+        /// <returns>Scaled input value.</returns>
+        /// <exception cref="System.DivideByZeroException">Thrown if scale parameter has any 0 values. Consider using <see cref="SafeDivide"/>.</exception>
+        public static Vector2 Divide(this Vector2 value, Vector2 scale)
+        {
+            return new Vector2(value.x / scale.x, value.y / scale.y);
+        }
+
+        /// <summary>
+        /// Returns a new `Vector2` that divides each component of the input value by each component of the scale value.
+        /// If any divisor is 0 or the output of the division is a `NaN`, then the output of that component will be zero.
+        /// </summary>
+        /// <param name="value">Input value to scale.</param>
+        /// <param name="scale">`Vector2` used to scale components of input value.</param>
+        /// <returns>Scaled input value.</returns>
+        public static Vector2 SafeDivide(this Vector2 value, Vector2 scale)
+        {
+            float x = Mathf.Approximately(scale.x, 0f) ? 0f : value.x / scale.x;
+            if (float.IsNaN(x))
+            {
+                x = 0f;
+            }
+
+            float y = Mathf.Approximately(scale.y, 0f) ? 0f : value.y / scale.y;
+            if (float.IsNaN(y))
+            {
+                y = 0f;
+            }
+            return new Vector2(x, y);
+        }
     }
 }

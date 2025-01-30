@@ -9,7 +9,8 @@ namespace UnityExtensions
         #region Unity.LiveCapture
         public static Version GetVersion(string version)
         {
-            var versionNumbers = Regex.Split(version, @"\D+");
+            var versionNumbers = Regex.Split(version, @"\D+",
+                RegexOptions.None, TimeSpan.FromSeconds(0.1));
 
             if (versionNumbers.Length >= 4)
             {

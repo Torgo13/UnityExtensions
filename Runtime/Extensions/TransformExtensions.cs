@@ -110,5 +110,18 @@ namespace UnityExtensions
                 transform.InverseTransformDirection(ray.direction));
         }
         #endregion // Unity.XR.CoreUtils
+
+        /// <summary>
+        /// Transforms a <see cref="Ray"/>.
+        /// </summary>
+        /// <param name="transform">The <c>Transform</c> component.</param>
+        /// <param name="ray">The <c>Ray</c> to transform.</param>
+        /// <returns>A new <c>Ray</c> representing the transformed <paramref name="ray"/>.</returns>
+        public static Ray TransformRay(this Transform transform, Ray ray)
+        {
+            return new Ray(
+                transform.TransformPoint(ray.origin),
+                transform.TransformDirection(ray.direction));
+        }
     }
 }

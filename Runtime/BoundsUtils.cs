@@ -175,5 +175,104 @@ namespace UnityExtensions
             return bounds;
         }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/Utils/BoundsUtils.cs
+        #region Unity.HLODSystem.Utils
+        public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
+        {
+            Bounds bounds = renderer.bounds;
+            Vector3 min = bounds.min;
+            Vector3 max = bounds.max;
+            Matrix4x4 matrix = transform.worldToLocalMatrix;
+
+            List<Vector3> points = ListPool<Vector3>.Get();
+            points.EnsureCapacity(8);
+            points.Add(new Vector3(min.x, min.y, min.z));
+            points.Add(new Vector3(max.x, min.y, min.z));
+            points.Add(new Vector3(min.x, min.y, max.z));
+            points.Add(new Vector3(max.x, min.y, max.z));
+            points.Add(new Vector3(min.x, max.y, min.z));
+            points.Add(new Vector3(max.x, max.y, min.z));
+            points.Add(new Vector3(min.x, max.y, max.z));
+            points.Add(new Vector3(max.x, max.y, max.z));
+
+            for (int i = 0; i < points.Count; ++i)
+            {
+                points[i] = matrix.MultiplyPoint(points[i]);
+            }
+
+            Vector3 newMin = points[0];
+            Vector3 newMax = points[0];
+
+            for (int i = 1; i < points.Count; ++i)
+            {
+                if (newMin.x > points[i].x) newMin.x = points[i].x;
+                if (newMax.x < points[i].x) newMax.x = points[i].x;
+                
+                if (newMin.y > points[i].y) newMin.y = points[i].y;
+                if (newMax.y < points[i].y) newMax.y = points[i].y;
+                
+                if (newMin.z > points[i].z) newMin.z = points[i].z;
+                if (newMax.z < points[i].z) newMax.z = points[i].z;
+            }
+
+            Bounds newBounds = new Bounds();
+            newBounds.SetMinMax(newMin, newMax);
+            return newBounds;
+        }
+        #endregion // Unity.HLODSystem.Utils
+        
+        //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
+        #region Unity.HLODSystem
+        public static Bounds GetBounds(List<MeshRenderer> renderers, Transform transform)
+        {
+            Bounds ret = new Bounds();
+            if (renderers.Count == 0)
+            {
+                ret.center = Vector3.zero;
+                ret.size = Vector3.zero;
+                ListPool<MeshRenderer>.Release(renderers);
+                return ret;
+            }
+
+            Bounds bounds = CalcLocalBounds(renderers[0], transform);
+            for (int i = 1; i < renderers.Count; ++i)
+            {
+                bounds.Encapsulate(CalcLocalBounds(renderers[i], transform));
+            }
+
+            ret.center = bounds.center;
+            float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            ret.size = new Vector3(max, max, max);  
+
+            ListPool<MeshRenderer>.Release(renderers);
+            return ret;
+        }
+        #endregion // Unity.HLODSystem
+        
+        //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/SpaceManager/QuadTreeSpaceSplitter.cs
+        #region Unity.HLODSystem.SpaceManager
+#nullable enable
+        public static Bounds? CalculateBounds(GameObject obj, Transform transform)
+        {
+            var renderers = ListPool<MeshRenderer>.Get();
+            obj.GetComponentsInChildren(renderers);
+            if (renderers.Count == 0)
+            {
+                ListPool<MeshRenderer>.Release(renderers);
+                return null;
+            }
+
+            Bounds result = CalcLocalBounds(renderers[0], transform);
+            for (int i = 1; i < renderers.Count; ++i)
+            {
+                result.Encapsulate(CalcLocalBounds(renderers[i], transform));
+            }
+
+            ListPool<MeshRenderer>.Release(renderers);
+            return result;
+        }
+#nullable restore
+        #endregion // #region Unity.HLODSystem.SpaceManager
     }
 }
