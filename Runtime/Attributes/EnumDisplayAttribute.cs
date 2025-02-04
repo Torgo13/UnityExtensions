@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions.GUI
+namespace UnityExtensions.Attributes
 {
     /// <summary>
     /// Used with a special property drawer that can limit which enum options are displayed.

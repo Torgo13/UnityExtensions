@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityExtensions.Attributes;
 
 namespace UnityExtensions.Editor
 {

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityExtensions.Attributes;
 
 #if UNITY_EDITOR
 using UnityEditor;

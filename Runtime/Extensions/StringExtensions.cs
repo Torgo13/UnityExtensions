@@ -80,14 +80,14 @@ namespace UnityExtensions
         #region UnityEditor.GraphToolsFoundation.Overdrive
         static readonly char NoDelimiter = '\0'; //invalid character
 
-        internal static string ToKebabCase(this string text)
+        public static string ToKebabCase(this string text)
         {
             return ConvertCase(text, '-', char.ToLowerInvariant, char.ToLowerInvariant);
         }
 
         static readonly char[] k_WordDelimiters = { ' ', '-', '_' };
 
-        static string ConvertCase(string text,
+        public static string ConvertCase(string text,
             char outputWordDelimiter,
             Func<char, char> startOfStringCaseHandler,
             Func<char, char> middleStringCaseHandler)
@@ -97,7 +97,7 @@ namespace UnityExtensions
                 throw new ArgumentNullException(nameof(text));
             }
 
-            var builder = new StringBuilder();
+            using var _0 = StringBuilderPool.Get(out var builder);
 
             bool startOfString = true;
             bool startOfWord = true;
@@ -155,6 +155,16 @@ namespace UnityExtensions
 
         public static string WithUssModifier(this string blockName, string modifier) => blockName + "--" + modifier;
         #endregion // UnityEditor.GraphToolsFoundation.Overdrive
+
+        //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Runtime/Extensions/StringExtensions.cs
+        #region UnityEngine.GraphToolsFoundation.Overdrive
+        static readonly Regex k_CodifyRegex = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled);
+
+        public static string CodifyString(this string str)
+        {
+            return k_CodifyRegex.Replace(str, "_");
+        }
+        #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.CodeGen/ListExtensions.cs
         #region Unity.Entities.CodeGen
@@ -230,5 +240,102 @@ namespace UnityExtensions
             return str.Substring(0, 1).ToUpper() + str.Substring(1);
         }
         #endregion // Unity.Entities.Editor
+
+        //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.high-definition/Runtime/Core/Debugging/FrameSettingsFieldAttribute.cs
+        #region UnityEngine.Rendering.HighDefinition
+        /// <summary>Runtime alternative to UnityEditor.ObjectNames.NicifyVariableName. Only prefix 'm_' is not skipped.</summary>
+        public static string CamelToPascalCaseWithSpace(this string text, bool preserveAcronyms = true)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
+            using var _0 = StringBuilderPool.Get(out var newText);
+            newText.Append(char.ToUpper(text[0]));
+            for (int i = 1; i < text.Length; i++)
+            {
+                if (char.IsUpper(text[i]))
+                    if ((text[i - 1] != ' ' && !char.IsUpper(text[i - 1])) ||
+                        (preserveAcronyms && char.IsUpper(text[i - 1]) &&
+                         i < text.Length - 1 && !char.IsUpper(text[i + 1])))
+                        newText.Append(' ');
+                newText.Append(text[i]);
+            }
+            return newText.ToString();
+        }
+        #endregion // UnityEngine.Rendering.HighDefinition
+
+        //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.core/Editor/StringExtensions.cs
+        #region UnityEditor.Rendering
+        private static readonly Regex k_InvalidRegEx = new(string.Format(@"([{0}]*\.+$)|([{0}]+)",
+            Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars()))), RegexOptions.Compiled, TimeSpan.FromSeconds(0.1));
+
+        /// <summary>
+        /// Replaces invalid characters for a filename or a directory with a given optional replacemenet string
+        /// </summary>
+        /// <param name="input">The input filename or directory</param>
+        /// <param name="replacement">The replacement</param>
+        /// <returns>The string with the invalid characters replaced</returns>
+        public static string ReplaceInvalidFileNameCharacters(this string input, string replacement = "_") => k_InvalidRegEx.Replace(input, replacement);
+
+        /// <summary>
+        /// Checks if the given string ends with the given extension
+        /// </summary>
+        /// <param name="input">The input string</param>
+        /// <param name="extension">The extension</param>
+        /// <returns>True if the extension is found on the string path</returns>
+        public static bool HasExtension(this string input, string extension) =>
+            input.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+
+
+        /// <summary>
+        /// Checks if a string contains any of the strings given in strings to check and early out if it does
+        /// </summary>
+        /// <param name="input">The input string</param>
+        /// <param name="stringsToCheck">List of strings to check</param>
+        /// <returns>True if the input contains any of the strings from stringsToCheck; otherwise, false.</returns>
+        public static bool ContainsAny(this string input, params string[] stringsToCheck)
+        {
+            if (string.IsNullOrEmpty(input))
+                return false;
+
+            foreach (var value in stringsToCheck)
+            {
+                if (string.IsNullOrEmpty(value))
+                    continue;
+
+                if (input.Contains(value))
+                    return true;
+            }
+
+            return false;
+        }
+        #endregion // UnityEditor.Rendering
+
+        //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.shadergraph/Editor/Utilities/StringBuilderExtensions.cs
+        #region UnityEditor.ShaderGraph
+        public static void AppendIndentedLines(this StringBuilder sb, string lines, string indentation)
+        {
+            sb.EnsureCapacity(sb.Length + lines.Length);
+            var charIndex = 0;
+            while (charIndex < lines.Length)
+            {
+                var nextNewLineIndex = lines.IndexOf(Environment.NewLine, charIndex, StringComparison.Ordinal);
+                if (nextNewLineIndex == -1)
+                {
+                    nextNewLineIndex = lines.Length;
+                }
+
+                sb.Append(indentation);
+
+                for (var i = charIndex; i < nextNewLineIndex; i++)
+                {
+                    sb.Append(lines[i]);
+                }
+
+                sb.AppendLine();
+
+                charIndex = nextNewLineIndex + Environment.NewLine.Length;
+            }
+        }
+        #endregion // UnityEditor.ShaderGraph
     }
 }

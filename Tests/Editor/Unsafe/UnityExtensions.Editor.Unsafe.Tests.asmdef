@@ -1,0 +1,21 @@
+{
+    "name": "UnityExtensions.Editor.Unsafe.Tests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0a9c04c1884aa2c4e95ac7f8916fb5fc",
+        "GUID:c14471476d178cd4dbdc68358f5facb2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

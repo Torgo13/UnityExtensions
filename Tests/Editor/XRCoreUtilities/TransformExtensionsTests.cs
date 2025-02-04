@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
+using UnityExtensions.Tests;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -71,8 +72,8 @@ namespace UnityExtensions.Editor.Tests
 
             var transformedPose = m_TestTransform.TransformPose(testPose);
             var inverseTransformedPose = m_TestTransform.InverseTransformPose(transformedPose);
-            AssertPositionApproximatelyEqual(testPose.position, inverseTransformedPose.position);
-            AssertRotationApproximatelyEqual(testPose.rotation, inverseTransformedPose.rotation);
+            TestUtils.AreEqual(testPose.position, inverseTransformedPose.position, k_DeltaTolerance);
+            TestUtils.AreEqual(testPose.rotation, inverseTransformedPose.rotation, k_DeltaTolerance);
         }
 
         [Test]
@@ -85,8 +86,8 @@ namespace UnityExtensions.Editor.Tests
 
             var inverseTransformedPose = m_TestTransform.InverseTransformPose(testPose);
             var transformedPose = m_TestTransform.TransformPose(inverseTransformedPose);
-            AssertPositionApproximatelyEqual(testPose.position, transformedPose.position);
-            AssertRotationApproximatelyEqual(testPose.rotation, transformedPose.rotation);
+            TestUtils.AreEqual(testPose.position, transformedPose.position, k_DeltaTolerance);
+            TestUtils.AreEqual(testPose.rotation, transformedPose.rotation, k_DeltaTolerance);
         }
 
         [Test]
@@ -96,8 +97,8 @@ namespace UnityExtensions.Editor.Tests
 
             var transformedRay = m_TestTransform.TransformRay(testRay);
             var inverseTransformedRay = m_TestTransform.InverseTransformRay(transformedRay);
-            AssertPositionApproximatelyEqual(testRay.origin, inverseTransformedRay.origin);
-            AssertPositionApproximatelyEqual(testRay.direction, inverseTransformedRay.direction);
+            TestUtils.AreEqual(testRay.origin, inverseTransformedRay.origin, k_DeltaTolerance);
+            TestUtils.AreEqual(testRay.direction, inverseTransformedRay.direction, k_DeltaTolerance);
         }
 
         [Test]
@@ -110,16 +111,8 @@ namespace UnityExtensions.Editor.Tests
 
             var inverseTransformedRay = m_TestTransform.InverseTransformRay(testRay);
             var transformedRay = m_TestTransform.TransformRay(inverseTransformedRay);
-            AssertPositionApproximatelyEqual(testRay.origin, transformedRay.origin);
-            AssertPositionApproximatelyEqual(testRay.direction, transformedRay.direction);
-        }
-
-        // equality comparison on Vector3 using Assert.AreEqual fails when the numbers are almost exactly the same
-        static void AssertPositionApproximatelyEqual(Vector3 left, Vector3 right)
-        {
-            Assert.That(left.x, Is.EqualTo(right.x).Within(k_DeltaTolerance));
-            Assert.That(left.y, Is.EqualTo(right.y).Within(k_DeltaTolerance));
-            Assert.That(left.z, Is.EqualTo(right.z).Within(k_DeltaTolerance));
+            TestUtils.AreEqual(testRay.origin, transformedRay.origin, k_DeltaTolerance);
+            TestUtils.AreEqual(testRay.direction, transformedRay.direction, k_DeltaTolerance);
         }
     }
 }

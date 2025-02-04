@@ -145,5 +145,71 @@ namespace UnityExtensions.Editor.Tests
             Assert.AreEqual("F", buffer[3]);
         }
         #endregion // Unity.LiveCapture.Tests.Editor
+
+        [Test]
+        public void PushIndex_Test()
+        {
+            var buffer = new CircularBuffer<string>(4);
+            buffer.PushIndex(0, "A");
+            buffer.PushIndex(1, "B");
+
+            buffer.PushIndex(buffer.Count, "F");
+
+            Assert.AreEqual("B", buffer[1]);
+            Assert.AreEqual("F", buffer[2]);
+        }
+
+        [Test]
+        public void PopBack_Test()
+        {
+            var buffer = new CircularBuffer<string>(4)
+            {
+                "A",
+                "B",
+                "C"
+            };
+
+            Assert.That(buffer.PopBack(), Is.EqualTo("C"));
+            buffer.PushBack("D");
+            buffer.PushFront("1");
+            Assert.That(buffer.PeekFront(), Is.EqualTo("1"));
+            buffer.PushBack("E");
+            // "1" got overwritten
+            buffer.PushBack("F");
+            // "B" got overwritten
+            Assert.That(buffer.Count, Is.EqualTo(4));
+            Assert.That(buffer.PeekFront(), Is.EqualTo("B"));
+            Assert.That(buffer.PeekBack(), Is.EqualTo("F"));
+            buffer.PushFront("2");
+            Assert.That(buffer, Is.EquivalentTo(new[] { "2", "B", "D", "E" }));
+        }
+
+        [Test]
+        public void SetCapacity_Test()
+        {
+            var buffer = new CircularBuffer<string>(4)
+            {
+                "A",
+                "B",
+                "C"
+            };
+
+            Assert.That(buffer.Count, Is.EqualTo(3));
+            Assert.That(buffer.Capacity, Is.EqualTo(4));
+
+            buffer.Capacity = 4;
+            Assert.That(buffer.Count, Is.EqualTo(3));
+            Assert.That(buffer.Capacity, Is.EqualTo(4));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Capacity = 0);
+
+            buffer.Capacity = 3;
+            Assert.That(buffer.Count, Is.EqualTo(3));
+            Assert.That(buffer.Capacity, Is.EqualTo(3));
+
+            buffer.Capacity = 2;
+            Assert.That(buffer.Count, Is.EqualTo(2));
+            Assert.That(buffer.Capacity, Is.EqualTo(2));
+        }
     }
 }

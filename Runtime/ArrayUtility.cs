@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace UnityExtensions
 {
-    static class ArrayUtility
+    public static class ArrayUtility
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.UI.Editor/Utility/Internal/ArrayUtility.cs
         #region Unity.Entities.UI

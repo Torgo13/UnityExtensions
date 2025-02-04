@@ -2,6 +2,9 @@
     "name": "UnityExtensions.Runtime.Unsafe",
     "rootNamespace": "",
     "references": [
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:7dabed3724aa64f438f2ac84f705af03"
     ],
     "includePlatforms": [],

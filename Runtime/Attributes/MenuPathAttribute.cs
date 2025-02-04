@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions
+namespace UnityExtensions.Attributes
 {
     /// <summary>
     /// An attribute placed to describe a menu path.

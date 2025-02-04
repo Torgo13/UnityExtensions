@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityExtensions.Attributes;
 
 namespace UnityExtensions.GUI.Editor
 {
