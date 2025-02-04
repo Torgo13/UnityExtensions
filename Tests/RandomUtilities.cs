@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using UnityEngine;
 
-namespace UnityExtensions.Editor.Tests
+namespace UnityExtensions.Tests
 {
     static class RandomUtilities
     {

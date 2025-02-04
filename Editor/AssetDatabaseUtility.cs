@@ -6,7 +6,7 @@ using UnityEditor;
 
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace UnityExtensions.Editor
 {
     public static class AssetDatabaseUtility
     {

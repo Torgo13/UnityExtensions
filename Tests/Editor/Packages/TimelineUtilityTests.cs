@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 using UnityEditor;
 using UnityEditor.Timeline;
 
-namespace UnityExtensions.Tests.Editor
+namespace UnityExtensions.Editor.Tests
 {
     public class TimelineUtilityTests
     {

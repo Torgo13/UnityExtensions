@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace UnityExtensions.Editor.Tests
+namespace UnityExtensions.Tests
 {
     static class YAMLUtilities
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 
-namespace UnityExtensions.Editor.Internal
+namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Ensures that all scriptable settings have backing data that can be inspected and edited at compile-time.
