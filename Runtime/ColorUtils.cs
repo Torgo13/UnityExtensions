@@ -304,5 +304,123 @@ namespace UnityExtensions
         /// <returns>A color value.</returns>
         public static Color ToRGBA(uint hex) => new Color(((hex >> 16) & 0xff) / 255f, ((hex >> 8) & 0xff) / 255f, (hex & 0xff) / 255f, ((hex >> 24) & 0xff) / 255f);
         #endregion // UnityEngine.Rendering
+
+        /// <summary>
+        /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static byte Color32ToByte(Color32 c)
+        {
+            int r = c.r & 0b1110_0000;
+            int g = c.g & 0b1110_0000;
+            int b = c.b & 0b1100_0000;
+
+            return (byte)(r | g >> 3 | b >> 6);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color32.RGB values.
+        /// </summary>
+        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color32 containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Color32 ByteToColor32(byte b)
+        {
+            return new Color32(
+                (byte)(b & 0b1110_0000),
+                (byte)(b << 3 & 0b1110_0000),
+                (byte)(b << 6 & 0b1100_0000),
+                byte.MaxValue);
+        }
+
+        /// <summary>
+        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static byte ColorToByte(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 0b1110_0000);
+            int g = Mathf.RoundToInt(c.g * 0b0001_1100);
+            int b = Mathf.RoundToInt(c.b * 0b0000_0011);
+
+            return (byte)(r & 0b1110_0000 | g & 0b0001_1100 | b & 0b0000_0011);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color.RGB values.
+        /// </summary>
+        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Color ByteToColor(byte b)
+        {
+            return new Color(
+                (b & 0b1110_0000) / (float)0b1110_0000,
+                (b & 0b0001_1100) / (float)0b0001_1100,
+                (b & 0b0000_0011) / (float)0b0000_0011);
+        }
+
+        /// <summary>
+        /// Encodes Color32.RGB values to a short, using 5:6:5 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Short containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static short Color32ToShort(Color32 c)
+        {
+            int r = c.r & 0b1111_1000;
+            int g = c.g & 0b1111_1100;
+            int b = c.b & 0b1111_1000;
+
+            return (short)(r << 8 | g << 3 | b >> 3);
+        }
+
+        /// <summary>
+        /// Decodes a short to Color32.RGB values.
+        /// </summary>
+        /// <param name="rgb">Short with RGB colours encoded in 5:6:5 bits.</param>
+        /// <returns>Color32 containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Color32 ShortToColor32(short b)
+        {
+            return new Color32(
+                (byte)(b >> 8 & 0b1111_1000),
+                (byte)(b >> 3 & 0b1111_1100),
+                (byte)(b << 3 & 0b1111_1000),
+                byte.MaxValue);
+        }
+
+        /// <summary>
+        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static short ColorToShort(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 0b1111_1000_0000_0000);
+            int g = Mathf.RoundToInt(c.g * 0b0000_0111_1110_0000);
+            int b = Mathf.RoundToInt(c.b * 0b0000_0000_0001_1111);
+
+            return (short)(r & 0b1111_1000_0000_0000 | g & 0b0000_0111_1110_0000 | b & 0b0000_0000_0001_1111);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color.RGB values.
+        /// </summary>
+        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Color ShortToColor(short b)
+        {
+            return new Color(
+                (b & 0b1111_1000_0000_0000) / (float)0b1111_1000_0000_0000,
+                (b & 0b0000_0111_1110_0000) / (float)0b0000_0111_1110_0000,
+                (b & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
+        }
     }
 }
