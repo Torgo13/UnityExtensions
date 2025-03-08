@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -31,15 +32,19 @@ namespace UnityExtensions
 
         public void Bake()
         {
-            Vector3[] vertices = mesh.vertices;
+            List<Vector3> vertices = ListPool<Vector3>.Get();
+            mesh.GetVertices(vertices);
 
-            for (int i = 0; i < vertices.Length; i++)
-                vertices[i].y = Mathf.Max(vertices[i].y, 0.0f);
+            for (int i = 0; i < vertices.Count; i++)
+                vertices[i].Set(vertices[i].x, Mathf.Max(vertices[i].y, 0.0f), vertices[i].z);
 
             // Isolate slices & bounds
-            slicesY = new List<float>();
+            if (slicesY == null)
+                slicesY = new List<float>();
+            else
+                slicesY.Clear();
             bounds = new Bounds() { min = vertices[0], max = vertices[0] };
-            for (int i = 0; i < vertices.Length; i++)
+            for (int i = 0; i < vertices.Count; i++)
             {
                 bounds.Encapsulate(vertices[i]);
 
@@ -56,13 +61,18 @@ namespace UnityExtensions
                     slicesY.Add(vertices[i].z);
             }
 
+            ListPool<Vector3>.Release(vertices);
+
             // Texture
             result = new Texture2D(resolution, slicesY.Count);
+            var data = result.GetPixelData<Color>(mipLevel: 0);
+
+            List<PointWithUV> slice = ListPool<PointWithUV>.Get();
 
             //int idx = sliceIndex;
             for (int idx = 0; idx < slicesY.Count; idx++)
             {
-                var slice = GetSlice(idx, out float sliceLength);
+                GetSlice(slice, idx, out float sliceLength);
 
                 for (int i = 0; i < resolution; i++)
                 {
@@ -88,9 +98,11 @@ namespace UnityExtensions
 
                     displacement = new Vector3(displacement.x / (2.0f * bounds.size.x) + 0.5f, displacement.y / bounds.size.y, color);
 
-                    result.SetPixel(i, idx, new Color(displacement.x, displacement.y, displacement.z));
+                    data[idx * resolution + i] = new Color(displacement.x, displacement.y, displacement.z);
                 }
             }
+
+            ListPool<PointWithUV>.Release(slice);
 
             result.Apply();
             var bytes = result.EncodeToPNG();
@@ -107,14 +119,14 @@ namespace UnityExtensions
             public float dist;
         }
 
-        List<PointWithUV> GetSlice(int idx, out float sliceLength)
+        void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
         {
             Vector3[] vertices = mesh.vertices;
             Color[] colors = mesh.colors;
             Vector2[] uvs = mesh.uv;
 
             // Isolate slice
-            List<PointWithUV> slice = new();
+            slice.Clear();
             for (int i = 0; i < vertices.Length; i++)
             {
                 vertices[i].y = Mathf.Max(vertices[i].y, 0.0f);
@@ -122,12 +134,13 @@ namespace UnityExtensions
                 if (Mathf.Abs(slicesY[idx] - vertices[i].z) >= sliceThreshold)
                     continue;
 
-                var pos = vertices[i]; pos.z = 0;
+                var pos = vertices[i];
+                pos.z = 0;
                 PointWithUV pointWithUV = new PointWithUV();
                 pointWithUV.pos = pos;
-                if(i < uvs.Length)
+                if (i < uvs.Length)
                     pointWithUV.uv = uvs[i];
-                if(i < colors.Length)
+                if (i < colors.Length)
                     pointWithUV.color = colors[i];
 
                 slice.Add(pointWithUV);
@@ -154,8 +167,6 @@ namespace UnityExtensions
                     dist = sliceLength,
                 };
             }
-
-            return slice;
         }
 
 
@@ -171,7 +182,8 @@ namespace UnityExtensions
             Gizmos.DrawRay(transform.position + new Vector3(bounds.max.x, bounds.max.y, 0.0f), -new Vector3(bounds.size.x, 0.0f, 0.0f));
             Gizmos.DrawRay(transform.position + new Vector3(bounds.max.x, bounds.max.y, 0.0f), -new Vector3(0.0f, bounds.size.y, 0.0f));
 
-            List<PointWithUV> slice = GetSlice(sliceIndex, out float sliceLength);
+            List<PointWithUV> slice = ListPool<PointWithUV>.Get();
+            GetSlice(slice, sliceIndex, out float sliceLength);
 
             var lastPos = slice[0].pos;
             for (int i = 1; i < slice.Count; i++)
@@ -191,6 +203,8 @@ namespace UnityExtensions
 
                 lastPos = displacedPos;
             }
+
+            ListPool<PointWithUV>.Release(slice);
         }
         #endregion // UnityEngine.Rendering
     }

@@ -199,12 +199,11 @@ namespace UnityExtensions
 
             if (m_IsTextureDirty)
             {
-                var pixels = new Color[textureSize];
+                var pixels = m_Texture.GetPixelData<Color>(mipLevel: 0);
 
                 for (int i = 0; i < textureSize; i++)
                     pixels[i] = Evaluate(i * step);
 
-                m_Texture.SetPixels(pixels);
                 m_Texture.Apply(false, false);
                 m_IsTextureDirty = false;
                 m_Texture.IncrementUpdateCount();

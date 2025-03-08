@@ -156,7 +156,7 @@ namespace UnityExtensions.Editor.Tests
         [Test]
         public void ExhaustiveTaggedComponentSearch_ComponentWithTagNotFound_ReturnsNull()
         {
-            string nonExistentTag = "NonExistentTag";
+            const string nonExistentTag = "NonExistentTag";
             TestComponent component = null;
             UnityEngine.TestTools.LogAssert.Expect(LogType.Error, $"Tag: {nonExistentTag} is not defined.");
             Assert.Throws<UnityException>(() => component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, nonExistentTag));

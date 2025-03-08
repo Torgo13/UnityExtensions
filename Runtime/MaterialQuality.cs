@@ -99,7 +99,7 @@ namespace UnityExtensions
             for (var i = requestedLevelIndex + 1; i < Keywords.Length; ++i)
             {
                 var level = FromIndex(i);
-                var diff = Math.Abs(requestedLevel - level);
+                //var diff = Math.Abs(requestedLevel - level);
                 if ((level & availableLevels) != 0)
                 {
                     chosenQuality = level;

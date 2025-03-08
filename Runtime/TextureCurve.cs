@@ -145,12 +145,11 @@ namespace UnityExtensions
 
             if (m_IsTextureDirty)
             {
-                var pixels = new Color[k_Precision];
+                var pixels = m_Texture.GetPixelData<Color>(mipLevel: 0);
 
                 for (int i = 0; i < pixels.Length; i++)
-                    pixels[i].r = Evaluate(i * k_Step);
+                    pixels[i] = new Color(Evaluate(i * k_Step), pixels[i].g, pixels[i].b, pixels[i].a);
 
-                m_Texture.SetPixels(pixels);
                 m_Texture.Apply(false, false);
                 m_IsTextureDirty = false;
             }

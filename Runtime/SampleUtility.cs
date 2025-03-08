@@ -17,8 +17,7 @@ namespace UnityExtensions
         {
             var effector = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             effector.name = name;
-            effector.transform.position = position;
-            effector.transform.rotation = rotation;
+            effector.transform.SetPositionAndRotation(position, rotation);
             effector.transform.localScale = Vector3.one * 0.15f;
             var meshRenderer = effector.GetComponent<MeshRenderer>();
             meshRenderer.material.color = Color.magenta;

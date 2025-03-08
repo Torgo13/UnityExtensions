@@ -86,8 +86,10 @@ namespace UnityExtensions.Unsafe
 #pragma warning disable CS8618
             internal T[] _items; // Do not rename (binary serialization)
 #pragma warning restore CS8618
+#pragma warning disable S4487
             internal int _size; // Do not rename (binary serialization)
             internal int _version; // Do not rename (binary serialization)
+#pragma warning restore S4487
 #pragma warning restore CS0649
         }
         #endregion // UnityEngine

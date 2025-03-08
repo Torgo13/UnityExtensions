@@ -116,7 +116,7 @@ namespace UnityExtensions
         {
             int index = size;
 
-            // Grow array if needed;
+            // Grow array if needed
             if (index >= m_Array.Length)
             {
                 var newArray = new T[Math.Max(m_Array.Length * 2,1)];
@@ -212,8 +212,10 @@ namespace UnityExtensions
                 return;
 
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-            if (index < 0 || index >= size || count < 0 || index + count > size)
-                throw new ArgumentOutOfRangeException();
+            if (index < 0 || index >= size)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            if (count < 0 || index + count > size)
+                throw new ArgumentOutOfRangeException(nameof(count));
 #endif
 
             Array.Copy(m_Array, index + count, m_Array, index, size - index - count);
@@ -225,12 +227,30 @@ namespace UnityExtensions
         /// Searches for an element that matches the conditions defined by the specified predicate, and returns the zero-based index of the first occurrence within the range of elements in the DynamicArray that starts at the specified index and contains the specified number of elements.
         /// </summary>
         /// <param name="startIndex">The zero-based starting index of the search.</param>
+        /// <param name="match">The Predicate delegate that defines the conditions of the element to search for.</param>
+        /// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by match, if found; otherwise, -1.</returns>
+        public int FindIndex(int startIndex, Predicate<T> match)
+        {
+            for (int i = startIndex; i < size; ++i)
+            {
+                if (match(m_Array[i]))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Searches for an element that matches the conditions defined by the specified predicate, and returns the zero-based index of the first occurrence within the range of elements in the DynamicArray that starts at the specified index and contains the specified number of elements.
+        /// </summary>
+        /// <param name="startIndex">The zero-based starting index of the search.</param>
         /// <param name="count">The number of elements in the section to search.</param>
         /// <param name="match">The Predicate delegate that defines the conditions of the element to search for.</param>
         /// <returns>The zero-based index of the first occurrence of an element that matches the conditions defined by match, if found; otherwise, -1.</returns>
         public int FindIndex(int startIndex, int count, Predicate<T> match)
         {
-            for (int i = startIndex; i < size; ++i)
+            for (int i = startIndex; i < count; ++i)
             {
                 if (match(m_Array[i]))
                 {
@@ -363,14 +383,6 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Implicit conversion to regular array.
-        /// </summary>
-        /// <param name="array">Input DynamicArray.</param>
-        /// <returns>The internal array.</returns>
-        [Obsolete("This is deprecated because it returns an incorrect value. It may returns an array with elements beyond the size. Please use Span/ReadOnly if you want safe raw access to the DynamicArray memory.",false)]
-        public static implicit operator T[](DynamicArray<T> array) => array.m_Array;
-
-        /// <summary>
         /// Implicit conversion to ReadOnlySpan.
         /// </summary>
         /// <param name="array">Input DynamicArray.</param>
@@ -412,7 +424,7 @@ namespace UnityExtensions
             {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                 if (setOwner == null)
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException(nameof(setOwner));
 #endif
                 owner = setOwner;
                 index = -1;
@@ -520,9 +532,9 @@ namespace UnityExtensions
                 {
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
                     if (setOwner == null)
-                        throw new ArgumentNullException();
+                        throw new ArgumentNullException(nameof(setOwner));
                     if (first < 0 || first > setOwner.size || (first + numItems) > setOwner.size)
-                        throw new IndexOutOfRangeException();
+                        throw new IndexOutOfRangeException(nameof(first));
 #endif
                     owner = setOwner;
                     this.first = first;

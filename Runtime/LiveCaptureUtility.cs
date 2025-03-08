@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -57,9 +58,14 @@ namespace UnityExtensions
                 return null;
 
             Camera[] allCameras = ArrayPool<Camera>.Shared.Rent(allCamerasCount);
+            _ = Camera.GetAllCameras(allCameras);
 
-            Camera.GetAllCameras(allCameras);
-            Camera topCamera = Camera.allCameras.OrderByDescending(c => c.depth).FirstOrDefault();
+            Camera topCamera = allCameras[0];
+            for (int i = 1; i < allCamerasCount; i++)
+            {
+                if (allCameras[i].depth > topCamera.depth)
+                    topCamera = allCameras[i];
+            }
 
             ArrayPool<Camera>.Shared.Return(allCameras);
 

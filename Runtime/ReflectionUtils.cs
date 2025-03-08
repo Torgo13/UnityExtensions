@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine.Assertions;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -53,13 +55,14 @@ namespace UnityExtensions
                 {
                     try
                     {
-                        var typeMap = new Dictionary<string, Type>();
+                        Dictionary<string, Type> typeMap = DictionaryPool<string, Type>.Get();
                         foreach (var type in types)
                         {
                             typeMap[type.FullName] = type;
                         }
 
                         s_AssemblyTypeMaps.Add(typeMap);
+                        DictionaryPool<string, Type>.Release(typeMap);
                     }
                     catch (ReflectionTypeLoadException)
                     {

@@ -216,6 +216,8 @@ namespace UnityExtensions
                 if (newMax.z < points[i].z) newMax.z = points[i].z;
             }
 
+            ListPool<Vector3>.Release(points);
+
             Bounds newBounds = new Bounds();
             newBounds.SetMinMax(newMin, newMax);
             return newBounds;

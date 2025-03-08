@@ -49,7 +49,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         };
 
         [Test]
-        [TestCaseSource("s_CopyToList")]
+        [TestCaseSource(nameof(s_CopyToList))]
         public void CopyToList(List<TestData> datas)
         {
             var dest = stackalloc TestData[datas.Count];
@@ -72,7 +72,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         };
 
         [Test]
-        [TestCaseSource("s_CopyToArray")]
+        [TestCaseSource(nameof(s_CopyToArray))]
         public void CopyToArray(TestData[] datas)
         {
             var dest = stackalloc TestData[datas.Length];
@@ -90,7 +90,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         };
 
         [Test]
-        [TestCaseSource("s_UintSortData")]
+        [TestCaseSource(nameof(s_UintSortData))]
         public void InsertionSort(uint[] values)
         {
             var array = new NativeArray<uint>(values, Allocator.Temp);
@@ -107,7 +107,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         }
 
         [Test]
-        [TestCaseSource("s_UintSortData")]
+        [TestCaseSource(nameof(s_UintSortData))]
         public void MergeSort(uint[] values)
         {
             NativeArray<uint> supportArray = new NativeArray<uint>();
@@ -127,7 +127,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         }
 
         [Test]
-        [TestCaseSource("s_UintSortData")]
+        [TestCaseSource(nameof(s_UintSortData))]
         public void RadixSort(uint[] values)
         {
             NativeArray<uint> supportArray = new NativeArray<uint>();
@@ -158,7 +158,7 @@ namespace UnityExtensions.Editor.Unsafe.Tests
         };
 
         [Test]
-        [TestCaseSource("s_PartialSortData")]
+        [TestCaseSource(nameof(s_PartialSortData))]
         public void PartialSortInsertionMergeRadix(uint[] values)
         {
             NativeArray<uint> supportArray = new NativeArray<uint>();

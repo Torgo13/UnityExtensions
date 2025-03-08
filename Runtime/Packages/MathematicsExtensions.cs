@@ -7,7 +7,6 @@ namespace UnityExtensions
 {
     public static class MathematicsExtensions
     {
-
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/GPUDriven/GPUDrivenRenderingUtils.cs
         #region UnityEngine.Rendering.Tests
         public static uint4 UnpackUintTo4x8Bit(uint val)
