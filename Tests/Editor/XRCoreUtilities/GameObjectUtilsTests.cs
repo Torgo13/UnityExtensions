@@ -74,5 +74,113 @@ namespace UnityExtensions.Editor.Tests
                 CompareHideFlagsRecursively(obj1Transform.GetChild(i).gameObject, obj2Transform.GetChild(i).gameObject);
             }
         }
+
+        private GameObject testGameObject;
+        private GameObject childGameObject;
+        private const string testTag = "Player";
+
+        private class TestComponent : MonoBehaviour { }
+
+        [SetUp]
+        public void Setup()
+        {
+            testGameObject = new GameObject("TestObject");
+            childGameObject = new GameObject("ChildObject");
+            childGameObject.transform.parent = testGameObject.transform;
+            childGameObject.tag = testTag;
+            childGameObject.AddComponent<TestComponent>();
+            testGameObject.tag = testTag;
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            Object.DestroyImmediate(testGameObject);
+        }
+
+        /// <summary>
+        /// Validates that the function correctly finds a component in the children of the provided GameObject.
+        /// </summary>
+        [Test]
+        public void ExhaustiveComponentSearch_ComponentInChildren_ReturnsComponent()
+        {
+            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject);
+            Assert.IsNotNull(component);
+            Assert.IsInstanceOf<TestComponent>(component);
+        }
+
+        /// <summary>
+        /// Tests that the function returns null when the specified component is not found in the provided GameObject.
+        /// </summary>
+        [Test]
+        public void ExhaustiveComponentSearch_NoComponent_ReturnsNull()
+        {
+            Object.DestroyImmediate(childGameObject.GetComponent<TestComponent>());
+            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject);
+            Assert.IsNull(component);
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Validates that the function finds disabled components in editor mode.
+        /// </summary>
+        [Test]
+        public void ExhaustiveComponentSearch_EditorMode_FindsDisabledComponents()
+        {
+            var disabledGameObject = new GameObject("DisabledObject");
+            disabledGameObject.AddComponent<TestComponent>();
+            disabledGameObject.SetActive(false);
+
+            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(null);
+            Assert.IsNotNull(component);
+            Assert.IsInstanceOf<TestComponent>(component);
+
+            Object.DestroyImmediate(disabledGameObject);
+        }
+#endif
+
+        /// <summary>
+        /// Validates that the function correctly finds a component in the children of the provided GameObject with the specified tag.
+        /// </summary>
+        [Test]
+        public void ExhaustiveTaggedComponentSearch_ComponentInChildrenWithTag_ReturnsComponent()
+        {
+            var component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, testTag);
+            Assert.IsNotNull(component);
+            Assert.IsInstanceOf<TestComponent>(component);
+        }
+
+        /// <summary>
+        /// Tests that the function returns null when no component with the specified tag is found.
+        /// </summary>
+        [Test]
+        public void ExhaustiveTaggedComponentSearch_ComponentWithTagNotFound_ReturnsNull()
+        {
+            string nonExistentTag = "NonExistentTag";
+            TestComponent component = null;
+            UnityEngine.TestTools.LogAssert.Expect(LogType.Error, $"Tag: {nonExistentTag} is not defined.");
+            Assert.Throws<UnityException>(() => component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, nonExistentTag));
+            Assert.IsNull(component);
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Validates that the function finds disabled components with the specified tag in editor mode.
+        /// </summary>
+        [Test]
+        public void ExhaustiveTaggedComponentSearch_EditorMode_FindsDisabledComponentsWithTag()
+        {
+            var disabledGameObject = new GameObject("DisabledObject");
+            disabledGameObject.AddComponent<TestComponent>();
+            disabledGameObject.SetActive(false);
+            disabledGameObject.tag = testTag;
+
+            var component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(null, testTag);
+            Assert.IsNotNull(component);
+            Assert.IsInstanceOf<TestComponent>(component);
+
+            Object.DestroyImmediate(disabledGameObject);
+        }
+#endif
     }
 }

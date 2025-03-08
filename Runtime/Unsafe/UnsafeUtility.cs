@@ -28,7 +28,7 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> GetByteSpanFromList<T>(List<T> list) where T : struct
         {
-            return MemoryMarshal.AsBytes(NoAllocHelpers.ExtractArrayFromList(list).AsSpan());
+            return MemoryMarshal.AsBytes(NoAllocHelpers.ExtractArrayFromList(list).AsSpan(list.Count));
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 

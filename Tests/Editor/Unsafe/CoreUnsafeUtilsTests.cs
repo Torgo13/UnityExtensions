@@ -99,6 +99,11 @@ namespace UnityExtensions.Editor.Unsafe.Tests
                 Assert.LessOrEqual(array[i], array[i + 1]);
 
             array.Dispose();
+
+
+            CoreUnsafeUtils.InsertionSort(values, values.Length);
+            for (int i = 0; i < values.Length - 1; ++i)
+                Assert.LessOrEqual(values[i], values[i + 1]);
         }
 
         [Test]
@@ -113,6 +118,12 @@ namespace UnityExtensions.Editor.Unsafe.Tests
 
             array.Dispose();
             supportArray.Dispose();
+
+
+            var managedSupportArray = new uint[values.Length];
+            CoreUnsafeUtils.MergeSort(values, values.Length, ref managedSupportArray);
+            for (int i = 0; i < values.Length - 1; ++i)
+                Assert.LessOrEqual(values[i], values[i + 1]);
         }
 
         [Test]
@@ -127,6 +138,12 @@ namespace UnityExtensions.Editor.Unsafe.Tests
 
             array.Dispose();
             supportArray.Dispose();
+
+
+            var managedSupportArray = new uint[values.Length];
+            CoreUnsafeUtils.RadixSort(values, values.Length, ref managedSupportArray);
+            for (int i = 0; i < values.Length - 1; ++i)
+                Assert.LessOrEqual(values[i], values[i + 1]);
         }
 
         static object[][] s_PartialSortData = new object[][]

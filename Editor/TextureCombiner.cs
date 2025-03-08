@@ -3,6 +3,7 @@ using UnityEngine;
 using System.IO;
 using UnityEditor;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions.Editor
 {
@@ -26,7 +27,7 @@ namespace UnityExtensions.Editor
             }
         }
 
-        private static Dictionary<Color, Texture2D> singleColorTextures = new Dictionary<Color, Texture2D>();
+        private static Dictionary<Color, Texture2D> singleColorTextures;
 
         /// <summary>
         /// Returns a 1 by 1 Texture that is the color that you pass in.
@@ -37,6 +38,9 @@ namespace UnityExtensions.Editor
         {
             if (color == Color.white) return Texture2D.whiteTexture;
             if (color == Color.black) return Texture2D.blackTexture;
+
+            if (singleColorTextures == null)
+                singleColorTextures = new Dictionary<Color, Texture2D>();
 
             bool makeTexture = !singleColorTextures.ContainsKey(color);
             if (!makeTexture)
@@ -122,8 +126,6 @@ namespace UnityExtensions.Editor
 
         private bool m_bilinearFilter;
 
-        private Dictionary<Texture, Texture> m_RawTextures;
-
         /// <summary>
         /// Creates a TextureCombiner object.
         /// </summary>
@@ -138,6 +140,11 @@ namespace UnityExtensions.Editor
         /// <param name="bilinearFilter">Use bilinear filtering when combining (default = true).</param>
         public TextureCombiner(Texture rSource, int rChanel, Texture gSource, int gChanel, Texture bSource, int bChanel, Texture aSource, int aChanel, bool bilinearFilter = true)
         {
+            Assert.IsNotNull(rSource, nameof(rSource));
+            Assert.IsNotNull(gSource, nameof(gSource));
+            Assert.IsNotNull(bSource, nameof(bSource));
+            Assert.IsNotNull(aSource, nameof(aSource));
+
             m_rSource = rSource;
             m_gSource = gSource;
             m_bSource = bSource;
@@ -192,10 +199,12 @@ namespace UnityExtensions.Editor
             Material combinerMaterial = new Material(Shader.Find("Hidden/SRP_Core/TextureCombiner"));
             combinerMaterial.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            combinerMaterial.SetTexture("_RSource", GetRawTexture(m_rSource));
-            combinerMaterial.SetTexture("_GSource", GetRawTexture(m_gSource));
-            combinerMaterial.SetTexture("_BSource", GetRawTexture(m_bSource));
-            combinerMaterial.SetTexture("_ASource", GetRawTexture(m_aSource));
+            Dictionary<Texture, Texture> m_RawTextures = UnityEngine.Pool.DictionaryPool<Texture, Texture>.Get();
+
+            combinerMaterial.SetTexture("_RSource", GetRawTexture(m_RawTextures, m_rSource));
+            combinerMaterial.SetTexture("_GSource", GetRawTexture(m_RawTextures, m_gSource));
+            combinerMaterial.SetTexture("_BSource", GetRawTexture(m_RawTextures, m_bSource));
+            combinerMaterial.SetTexture("_ASource", GetRawTexture(m_RawTextures, m_aSource));
 
             combinerMaterial.SetFloat("_RChannel", m_rChanel);
             combinerMaterial.SetFloat("_GChannel", m_gChanel);
@@ -255,14 +264,13 @@ namespace UnityExtensions.Editor
 
             Object.DestroyImmediate(combinerMaterial);
 
-            m_RawTextures.Clear();
+            UnityEngine.Pool.DictionaryPool<Texture, Texture>.Release(m_RawTextures);
 
             return combined;
         }
 
-        private Texture GetRawTexture(Texture original, bool sRGBFallback = false)
+        private Texture GetRawTexture(Dictionary<Texture, Texture> m_RawTextures, Texture original, bool sRGBFallback = false)
         {
-            if (m_RawTextures == null) m_RawTextures = new Dictionary<Texture, Texture>();
             if (!m_RawTextures.ContainsKey(original))
             {
                 string path = AssetDatabase.GetAssetPath(original);

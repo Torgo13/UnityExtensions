@@ -60,6 +60,8 @@ namespace UnityExtensions.Editor.Unsafe.Tests
             Assert.True(buffer.TryPush("tempor incididunt ut labore"));
             Assert.True(buffer.TryPop(out string v) && v == "elit, sed do eiusmod");
             Assert.True(buffer.TryPop(out v) && v == "tempor incididunt ut labore");
+
+            Assert.False(buffer.TryPop(out v));
         }
         #endregion // UnityEngine.Rendering.Tests
     }

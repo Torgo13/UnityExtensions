@@ -15,7 +15,10 @@ namespace UnityExtensions.Tests
         {
             while (frames > 0)
             {
+#if UNITY_EDITOR
                 UnityEditor.EditorApplication.QueuePlayerLoopUpdate();
+#endif // UNITY_EDITOR
+
                 yield return null;
                 frames--;
             }

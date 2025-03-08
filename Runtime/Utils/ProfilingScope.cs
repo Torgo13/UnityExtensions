@@ -331,15 +331,6 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Profiling Scope constructor
-        /// </summary>
-        /// <param name="cmd">Command buffer used to add markers and compute execution timings.</param>
-        /// <param name="sampler">Profiling Sampler to be used for this scope.</param>
-        public ProfilingScope(BaseCommandBuffer cmd, ProfilingSampler sampler)
-        {
-        }
-
-        /// <summary>
         ///  Dispose pattern implementation
         /// </summary>
         public void Dispose()

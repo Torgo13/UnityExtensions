@@ -43,5 +43,65 @@ namespace UnityExtensions.Editor.Tests
             return MathUtility.Clamp(value, min, max);
         }
         #endregion // Unity.LiveCapture.Tests.Editor
+
+        /// <summary>
+        /// Validates that the distance from zero to zero degrees is zero.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_ZeroToZero_ReturnsZero()
+        {
+            Assert.AreEqual(0, MathUtility.ShortestAngleDistance(0, 0, 180, 360));
+            Assert.AreEqual(0, MathUtility.ShortestAngleDistance(0.0, 0.0, 180.0, 360.0));
+        }
+
+        /// <summary>
+        /// Tests that the function returns the shortest distance when given positive angles.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_PositiveAngles_ReturnsShortestDistance()
+        {
+            Assert.AreEqual(-20, MathUtility.ShortestAngleDistance(10, 350, 180, 360));
+            Assert.AreEqual(-20, MathUtility.ShortestAngleDistance(10.0, 350.0, 180.0, 360.0));
+        }
+
+        /// <summary>
+        /// Tests that the function returns the shortest distance when given negative angles.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_NegativeAngles_ReturnsShortestDistance()
+        {
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(-10, -350, 180, 360));
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(-10.0, -350.0, 180.0, 360.0));
+        }
+
+        /// <summary>
+        /// Validates that the function returns the shortest distance when the angles cross zero.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_CrossingZero_ReturnsShortestDistance()
+        {
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(350, 10, 180, 360));
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(350.0, 10.0, 180.0, 360.0));
+        }
+
+        /// <summary>
+        /// Tests that the function returns the shortest distance when the angles cross the halfMax value.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_CrossingHalfMax_ReturnsShortestDistance()
+        {
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(170, 190, 180, 360));
+            Assert.AreEqual(20, MathUtility.ShortestAngleDistance(170.0, 190.0, 180.0, 360.0));
+        }
+
+        /// <summary>
+        /// Ensures that the function returns zero when the start and end angles are equal.
+        /// </summary>
+        [Test]
+        public void ShortestAngleDistance_EqualStartEnd_ReturnsZero()
+        {
+            Assert.AreEqual(0, MathUtility.ShortestAngleDistance(45, 45, 180, 360));
+            Assert.AreEqual(0, MathUtility.ShortestAngleDistance(45.0, 45.0, 180.0, 360.0));
+        }
     }
 }
