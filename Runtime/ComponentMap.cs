@@ -32,9 +32,8 @@ namespace UnityExtensions
 
         void Remove(TKey key)
         {
-            if (s_KeyToValueMap.TryGetValue(key, out var value))
+            if (s_KeyToValueMap.Remove(key, out var value))
             {
-                s_KeyToValueMap.Remove(key);
                 s_ValueToKeyMap.Remove(value);
             }
         }

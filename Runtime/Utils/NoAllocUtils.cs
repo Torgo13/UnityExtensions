@@ -41,43 +41,51 @@ namespace UnityExtensions
         // TODO: parallel alternative
         public static void QuickSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
         {
-            int diff = end - start;
-            if (diff < 1)
-                return;
-            if (diff < 8)
+            while (true)
             {
-                InsertionSort(data, start, end, compare);
-                return;
-            }
+                int diff = end - start;
+                if (diff < 1)
+                    return;
+                if (diff < 8)
+                {
+                    InsertionSort(data, start, end, compare);
+                    return;
+                }
 
-            Assertions.Assert.IsTrue((uint)start < data.Length);
-            Assertions.Assert.IsTrue((uint)end < data.Length); // end == inclusive
+                Assertions.Assert.IsTrue((uint)start < data.Length);
+                Assertions.Assert.IsTrue((uint)end < data.Length); // end == inclusive
 
-            if (start < end)
-            {
-                int pivot = Partition<T>(data, start, end, compare);
+                if (start < end)
+                {
+                    int pivot = Partition<T>(data, start, end, compare);
 
-                if (pivot >= 1)
-                    QuickSort<T>(data, start, pivot, compare);
+                    if (pivot >= 1)
+                        QuickSort<T>(data, start, pivot, compare);
 
-                if (pivot + 1 < end)
-                    QuickSort<T>(data, pivot + 1, end, compare);
+                    if (pivot + 1 < end)
+                    {
+                        start = pivot + 1;
+                        continue;
+                    }
+                }
+
+                break;
             }
         }
 
         static T Median3Pivot<T>(T[] data, int start, int pivot, int end, Func<T, T, int> compare)
         {
+            if (compare(data[end], data[start]) < 0) Swap(start, end);
+            if (compare(data[pivot], data[start]) < 0) Swap(start, pivot);
+            if (compare(data[end], data[pivot]) < 0) Swap(pivot, end);
+            return data[pivot];
+
             void Swap(int a, int b)
             {
                 var tmp = data[a];
                 data[a] = data[b];
                 data[b] = tmp;
             }
-
-            if (compare(data[end], data[start]) < 0) Swap(start, end);
-            if (compare(data[pivot], data[start]) < 0) Swap(start, pivot);
-            if (compare(data[end], data[pivot]) < 0) Swap(pivot, end);
-            return data[pivot];
         }
 
         static int Partition<T>(T[] data, int start, int end, Func<T, T, int> compare)

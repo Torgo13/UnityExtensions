@@ -186,10 +186,10 @@ namespace UnityExtensions
 
         //https://github.com/dotnet/runtime/blob/7eb07dde40933cace91d57aae0a3e569fd042def/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/CollectionExtensions.cs
         #region System.Collections.Generic
-#nullable enable
-        public static TValue? GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) =>
+        public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) =>
             dictionary.GetValueOrDefault(key, default!);
 
+#nullable enable
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue)
         {
             if (dictionary is null)

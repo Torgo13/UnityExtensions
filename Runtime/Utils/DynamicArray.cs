@@ -690,15 +690,23 @@ namespace UnityExtensions
 
         static void QuickSort<T>(Span<T> data, int left, int right) where T : IComparable<T>, new()
         {
-            if (left < right)
+            while (true)
             {
-                int pivot = Partition(data, left, right);
+                if (left < right)
+                {
+                    int pivot = Partition(data, left, right);
 
-                if (pivot >= 1)
-                    QuickSort(data, left, pivot);
+                    if (pivot >= 1)
+                        QuickSort(data, left, pivot);
 
-                if (pivot + 1 < right)
-                    QuickSort(data, pivot + 1, right);
+                    if (pivot + 1 < right)
+                    {
+                        left = pivot + 1;
+                        continue;
+                    }
+                }
+
+                break;
             }
         }
 
@@ -746,15 +754,23 @@ namespace UnityExtensions
 
         static void QuickSort<T>(Span<T> data, int left, int right, DynamicArray<T>.SortComparer comparer) where T : new()
         {
-            if (left < right)
+            while (true)
             {
-                int pivot = Partition(data, left, right, comparer);
+                if (left < right)
+                {
+                    int pivot = Partition(data, left, right, comparer);
 
-                if (pivot >= 1)
-                    QuickSort(data, left, pivot, comparer);
+                    if (pivot >= 1)
+                        QuickSort(data, left, pivot, comparer);
 
-                if (pivot + 1 < right)
-                    QuickSort(data, pivot + 1, right, comparer);
+                    if (pivot + 1 < right)
+                    {
+                        left = pivot + 1;
+                        continue;
+                    }
+                }
+
+                break;
             }
         }
 

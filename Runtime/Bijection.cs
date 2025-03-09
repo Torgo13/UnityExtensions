@@ -152,9 +152,8 @@ namespace UnityExtensions
         /// <returns>True if a mapping was removed; false otherwise.</returns>
         public bool RemoveKey(T0 key)
         {
-            if (key != null && m_Forward.TryGetValue(key, out var v1))
+            if (key != null && m_Forward.Remove(key, out var v1))
             {
-                m_Forward.Remove(key);
                 m_Reverse.Remove(v1);
                 return true;
             }

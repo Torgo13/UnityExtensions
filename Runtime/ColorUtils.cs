@@ -323,7 +323,7 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a byte to Color32.RGB values.
         /// </summary>
-        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Color32 ByteToColor32(byte b)
@@ -353,7 +353,7 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a byte to Color.RGB values.
         /// </summary>
-        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
         /// <returns>Color containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Color ByteToColor(byte b)
@@ -382,7 +382,7 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a short to Color32.RGB values.
         /// </summary>
-        /// <param name="rgb">Short with RGB colours encoded in 5:6:5 bits.</param>
+        /// <param name="b">Short with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Color32 ShortToColor32(short b)
@@ -412,7 +412,7 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a byte to Color.RGB values.
         /// </summary>
-        /// <param name="rgb">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
         /// <returns>Color containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Color ShortToColor(short b)

@@ -52,7 +52,7 @@ namespace UnityExtensions.Unsafe
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is ArraySlice<T> && Equals((ArraySlice<T>)obj);
+            return obj is ArraySlice<T> slice && Equals(slice);
         }
 
         public override int GetHashCode()
@@ -111,7 +111,7 @@ namespace UnityExtensions.Unsafe
 
 #endif
 
-        public static unsafe ArraySlice<T> ConvertExistingDataToArraySlice(void* dataPointer, int stride, int length)
+        public static ArraySlice<T> ConvertExistingDataToArraySlice(void* dataPointer, int stride, int length)
         {
             if (length < 0)
                 throw new System.ArgumentException($"Invalid length of '{length}'. It must be greater than 0.",
@@ -154,7 +154,7 @@ namespace UnityExtensions.Unsafe
             }
         }
 
-        internal unsafe void* GetUnsafeReadOnlyPtr()
+        internal void* GetUnsafeReadOnlyPtr()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
@@ -168,16 +168,13 @@ namespace UnityExtensions.Unsafe
             if (Length != array.Length)
                 throw new ArgumentException($"array.Length ({array.Length}) does not match the Length of this instance ({Length}).", nameof(array));
 #endif
-            unsafe
-            {
-                GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-                IntPtr addr = handle.AddrOfPinnedObject();
+            GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+            IntPtr addr = handle.AddrOfPinnedObject();
 
-                var sizeOf = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, m_Length);
+            var sizeOf = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
+            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, m_Length);
 
-                handle.Free();
-            }
+            handle.Free();
         }
 
         internal T[] ToArray()

@@ -75,7 +75,7 @@ namespace UnityExtensions.Unsafe
             /// Pop an element of the queue.
             /// </summary>
             /// <param name="v">Output result string.</param>
-            /// <returns>True if an element was succesfuly poped.</returns>
+            /// <returns>True if an element was successfully popped.</returns>
             public bool TryPop(out string v)
             {
                 var size = *(int*)m_ReadCursor;
@@ -170,7 +170,7 @@ namespace UnityExtensions.Unsafe
             return bitStates * 3 + arrayLength;
         }
 
-        private static unsafe void CalculateRadixSortSupportArrays(
+        private static void CalculateRadixSortSupportArrays(
             int bitStates, int arrayLength, uint* supportArray,
             out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
         {
@@ -180,7 +180,7 @@ namespace UnityExtensions.Unsafe
             arrayOutput = bucketPrefix + bitStates;
         }
 
-        private static unsafe void MergeSort(uint* array, uint* support, int length)
+        private static void MergeSort(uint* array, uint* support, int length)
         {
             for (int k = 1; k < length; k *= 2)
             {
@@ -229,7 +229,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
-        public static unsafe void MergeSort(uint[] arr, int sortSize, ref uint[] supportArray)
+        public static void MergeSort(uint[] arr, int sortSize, ref uint[] supportArray)
         {
             if (arr == null)
                 return;
@@ -252,7 +252,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
-        public static unsafe void MergeSort(NativeArray<uint> arr, int sortSize, ref NativeArray<uint> supportArray)
+        public static void MergeSort(NativeArray<uint> arr, int sortSize, ref NativeArray<uint> supportArray)
         {
             sortSize = Math.Min(sortSize, arr.Length);
             if (!arr.IsCreated || sortSize == 0)
@@ -264,7 +264,7 @@ namespace UnityExtensions.Unsafe
             CoreUnsafeUtils.MergeSort((uint*)arr.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), sortSize);
         }
 
-        private static unsafe void InsertionSort(uint* arr, int length)
+        private static void InsertionSort(uint* arr, int length)
         {
             for (int i = 0; i < length; ++i)
             {
@@ -285,7 +285,7 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
-        public static unsafe void InsertionSort(uint[] arr, int sortSize)
+        public static void InsertionSort(uint[] arr, int sortSize)
         {
             if (arr == null)
                 return;
@@ -303,7 +303,7 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
-        public static unsafe void InsertionSort(NativeArray<uint> arr, int sortSize)
+        public static void InsertionSort(NativeArray<uint> arr, int sortSize)
         {
             sortSize = Math.Min(arr.Length, sortSize);
             if (!arr.IsCreated || sortSize == 0)
@@ -312,7 +312,7 @@ namespace UnityExtensions.Unsafe
             CoreUnsafeUtils.InsertionSort((uint*)arr.GetUnsafePtr(), sortSize);
         }
 
-        private static unsafe void RadixSort(uint* array, uint* support, int radixBits, int bitStates, int length)
+        private static void RadixSort(uint* array, uint* support, int radixBits, int bitStates, int length)
         {
             uint mask = (uint)(bitStates - 1);
             CalculateRadixSortSupportArrays(bitStates, length, support, out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput);
@@ -352,7 +352,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Array of uints that is used for support data. The algorithm will automatically allocate it if necessary.</param>
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
-        public static unsafe void RadixSort(uint[] arr, int sortSize, ref uint[] supportArray, int radixBits = 8)
+        public static void RadixSort(uint[] arr, int sortSize, ref uint[] supportArray, int radixBits = 8)
         {
             if (arr == null)
                 return;
@@ -378,7 +378,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Array of uints that is used for support data. The algorithm will automatically allocate it if necessary.</param>
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
-        public static unsafe void RadixSort(NativeArray<uint> array, int sortSize, ref NativeArray<uint> supportArray, int radixBits = 8)
+        public static void RadixSort(NativeArray<uint> array, int sortSize, ref NativeArray<uint> supportArray, int radixBits = 8)
         {
             sortSize = Math.Min(sortSize, array.Length);
             CalculateRadixParams(radixBits, out int bitStates);

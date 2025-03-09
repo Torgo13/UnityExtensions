@@ -12,6 +12,7 @@ namespace UnityExtensions
         public Color selectionColor = Color.white;
         Renderer rndr;
         MaterialPropertyBlock propertyBlock;
+        private static readonly int SelectionColor = Shader.PropertyToID("_SelectionColor");
 
         void Start()
         {
@@ -29,7 +30,7 @@ namespace UnityExtensions
         {
             rndr.GetPropertyBlock(propertyBlock);
 
-            propertyBlock.SetColor("_SelectionColor", selectionColor);
+            propertyBlock.SetColor(SelectionColor, selectionColor);
 
             rndr.SetPropertyBlock(propertyBlock);
         }

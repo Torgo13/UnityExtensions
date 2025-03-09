@@ -24,7 +24,7 @@ namespace UnityExtensions
                     Debug.LogWarning("Can't load type '" + tle.TypeName + "': " + tle.Message);
                 }
 
-                return new Type[0];
+                return Type.EmptyTypes;
             }
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive

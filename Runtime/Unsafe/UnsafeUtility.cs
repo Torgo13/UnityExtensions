@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace UnityExtensions.Unsafe
 {
-    public static partial class UnsafeUtility
+    public static class UnsafeUtility
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe

@@ -75,7 +75,7 @@ namespace UnityExtensions.Attributes
             /// extra Sprite).
             /// </summary>
             BuiltinExtra,
-        };
+        }
 
 #if UNITY_EDITOR
         /// <summary>

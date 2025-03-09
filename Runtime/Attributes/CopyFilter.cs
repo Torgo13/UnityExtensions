@@ -1,4 +1,3 @@
-/// <summary>
 using System;
 
 namespace UnityExtensions.Attributes

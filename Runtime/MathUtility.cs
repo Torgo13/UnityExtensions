@@ -499,6 +499,22 @@ namespace UnityExtensions
                 a.w / s
             );
         }
+        
+        public static float SafeDivide(this float y, float x, float threshold = 0f)
+        {
+            if (Mathf.Abs(x) > threshold)
+                return y / x;
+            else
+                return default;
+        }
+        
+        public static double SafeDivide(this double y, double x, double threshold = 0)
+        {
+            if (Math.Abs(x) > threshold)
+                return y / x;
+            else
+                return default;
+        }
 
         public static Vector2 SafeDivide(this Vector2 y, float x, float threshold = 0f)
         {

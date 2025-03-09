@@ -78,7 +78,7 @@ namespace UnityExtensions
 
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Editor/GraphElements/Utils/StringUtilsExtensions.cs
         #region UnityEditor.GraphToolsFoundation.Overdrive
-        static readonly char NoDelimiter = '\0'; //invalid character
+        private const char NoDelimiter = '\0'; //invalid character
 
         public static string ToKebabCase(this string text)
         {

@@ -523,7 +523,7 @@ namespace UnityExtensions
                     .SelectMany(t =>
                     {
                         // Ugly hack to handle mis-versioned dlls
-                        var innerTypes = new Type[0];
+                        var innerTypes = Type.EmptyTypes;
                         try
                         {
                             innerTypes = t.GetTypes();
@@ -950,7 +950,7 @@ namespace UnityExtensions
 #if UNITY_EDITOR
         // This is required in Runtime assembly between #if UNITY_EDITOR
         /// <summary>
-        /// AssetDataBase.FindAssets("t:<type>") load all asset in project to check the type.
+        /// AssetDataBase.FindAssets("t:&lt;type&gt;") load all asset in project to check the type.
         /// This utility function will try to filter at much possible before loading anything.
         /// This also works with Interface and inherited types.
         /// This will not find embedded sub assets.
@@ -967,7 +967,7 @@ namespace UnityExtensions
                 throw new ArgumentNullException(nameof(extension), "You must pass a valid extension");
 
             bool isInterface = typeof(T).IsInterface;
-            if (!typeof(UnityEngine.Object).IsAssignableFrom(typeof(T)) && !isInterface)
+            if (!typeof(UnityObject).IsAssignableFrom(typeof(T)) && !isInterface)
                 throw new Exception("T must be an interface or inherite UnityEngine.Object.");
 
             Func<Type, bool> needsLoad = (allowSubTypes || isInterface)

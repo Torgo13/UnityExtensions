@@ -69,7 +69,7 @@ namespace UnityExtensions
         public bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data == byte.MaxValue;
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData => String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0');
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace UnityExtensions
         public bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data == ushort.MaxValue;
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
 
         /// <summary>
@@ -313,7 +313,7 @@ namespace UnityExtensions
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data == uint.MaxValue;
         string humanizedVersion => Convert.ToString(data, 2);
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
 
         /// <summary>
@@ -332,11 +332,11 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="initValue">Initialization value.</param>
         public BitArray32(uint initValue) => data = initValue;
+        
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-
         public BitArray32(IEnumerable<uint> bitIndexTrue)
         {
             data = 0u;
@@ -435,7 +435,7 @@ namespace UnityExtensions
         public bool allFalse => data == 0uL;
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data == ulong.MaxValue;
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString((long)data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
 
         /// <summary>
@@ -559,7 +559,7 @@ namespace UnityExtensions
         public bool allFalse => data1 == 0uL && data2 == 0uL;
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue;
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData =>
             System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.")
             + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data1, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
@@ -712,7 +712,7 @@ namespace UnityExtensions
         public bool allFalse => data1 == 0uL && data2 == 0uL && data3 == 0uL && data4 == 0uL;
         /// <summary>True if all bits are 1.</summary>
         public bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue && data3 == ulong.MaxValue && data4 == ulong.MaxValue;
-        /// <summary>Returns the bit array in a human readable form.</summary>
+        /// <summary>Returns the bit array in a human-readable form.</summary>
         public string humanizedData =>
             System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data4, 2)).Replace(' ', '0'), ".{8}", "$0.")
             + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data3, 2)).Replace(' ', '0'), ".{8}", "$0.")

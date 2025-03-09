@@ -15,6 +15,7 @@ namespace UnityExtensions
         [SerializeField] Light mainLight;
         float previousIntensity;
         Color previousColor;
+        private static readonly int MoonlightForwardDirection = Shader.PropertyToID("_Moonlight_Forward_Direction");
 
         void OnEnable()
         {
@@ -59,7 +60,7 @@ namespace UnityExtensions
             {
                 //Sending the forward vector to the material           
                 Dir = mainLight.gameObject.transform.forward;
-                SkyMat.SetVector("_Moonlight_Forward_Direction", Dir);
+                SkyMat.SetVector(MoonlightForwardDirection, Dir);
             }
         }
         #endregion // UnityEngine.Rendering

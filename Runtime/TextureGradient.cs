@@ -36,11 +36,9 @@ namespace UnityExtensions
         bool m_Precise;
 
         /// <summary>All color keys defined in the gradient.</summary>
-        [HideInInspector]
         public GradientColorKey[] colorKeys => m_Gradient?.colorKeys;
 
         /// <summary>All alpha keys defined in the gradient.</summary>
-        [HideInInspector]
         public GradientAlphaKey[] alphaKeys => m_Gradient?.alphaKeys;
 
         /// <summary>Controls how the gradient colors are interpolated.</summary>
@@ -178,7 +176,7 @@ namespace UnityExtensions
         /// <returns>A texture.</returns>
         public Texture2D GetTexture()
         {
-            float step = 1.0f / (float)(textureSize - 1);
+            float step = 1.0f / (textureSize - 1);
 
             if (m_Texture != null && m_Texture.width != textureSize)
             {

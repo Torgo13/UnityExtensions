@@ -87,14 +87,15 @@ namespace UnityExtensions.Unsafe
 
                     JobHandle.ScheduleBatchedJobs();
 
+                    Swap(ref arraySource, ref arrayDest);
+                    continue;
+
                     static void Swap(ref NativeArray<int> a, ref NativeArray<int> b)
                     {
                         NativeArray<int> temp = a;
                         a = b;
                         b = temp;
                     }
-
-                    Swap(ref arraySource, ref arrayDest);
                 }
 
                 supportArray.Dispose(jobHandle);
@@ -149,7 +150,7 @@ namespace UnityExtensions.Unsafe
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> buckets;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indices;
 
-            private unsafe static int AtomicIncrement(NativeArray<int> counter)
+            private static unsafe int AtomicIncrement(NativeArray<int> counter)
             {
                 return Interlocked.Increment(ref Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AsRef<int>((int*)counter.GetUnsafePtr()));
             }

@@ -22,15 +22,12 @@ namespace UnityExtensions
             foreach (var gameObject in gameObjects)
             {
                 var goBounds = GetBounds(gameObject.transform);
-                if (!bounds.HasValue)
-                {
-                    bounds = goBounds;
-                }
-                else
+                if (bounds.HasValue)
                 {
                     goBounds.Encapsulate(bounds.Value);
-                    bounds = goBounds;
                 }
+
+                bounds = goBounds;
             }
 
             return bounds ?? new Bounds();
@@ -47,15 +44,12 @@ namespace UnityExtensions
             foreach (var t in transforms)
             {
                 var goBounds = GetBounds(t);
-                if (!bounds.HasValue)
-                {
-                    bounds = goBounds;
-                }
-                else
+                if (bounds.HasValue)
                 {
                     goBounds.Encapsulate(bounds.Value);
-                    bounds = goBounds;
                 }
+
+                bounds = goBounds;
             }
             return bounds ?? new Bounds();
         }

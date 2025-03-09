@@ -12,7 +12,7 @@ using UnityEditor;
 
 namespace UnityExtensions
 {
-    public static partial class TextureUtilities
+    public static class TextureUtilities
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/Utilities/HDTextureUtilities.cs
         #region UnityEngine.Rendering.HighDefinition
