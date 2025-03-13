@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Pool;
 using System.IO;
 #if UNITY_EDITOR
@@ -86,13 +87,13 @@ namespace UnityExtensions
 
                     float startP = slice[j - 1].dist / sliceLength;
                     float endP = slice[j].dist / sliceLength;
-                    Debug.Assert(startP <= percentage && percentage <= endP);
+                    Assert.IsTrue(startP <= percentage && percentage <= endP);
                     float lerpFactor = Mathf.InverseLerp(startP, endP, percentage);
 
                     var displacedPos = Vector3.Lerp(slice[j - 1].pos, slice[j].pos, lerpFactor);
                     var origPos = new Vector3((1.0f - percentage) * bounds.size.x + bounds.min.x, bounds.min.y, 0.0f);
                     var displacement = displacedPos - origPos;
-                    Debug.Assert(displacement.y >= 0.0f);
+                    Assert.IsTrue(displacement.y >= 0.0f);
 
                     var color = Mathf.Lerp(slice[j - 1].color.r, slice[j].color.r, lerpFactor);
 

@@ -1,17 +1,19 @@
-using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions.Unsafe
 {
-    // A dynamic array of bits backed by a managed array of floats,
-    // since that's what Unity Shader constant API offers.
-    //
-    // Example:
-    // ShaderBitArray bits;
-    // bits.Resize(8);
-    // bits[0] = true;
-    // cmd.SetGlobalFloatArray("_BitArray", bits.data);
-    // bits.Clear();
+    /// <summary>
+    /// A dynamic array of bits backed by a managed array of floats,
+    /// since that's what Unity Shader constant API offers.
+    /// </summary>
+    /// <example><code>
+    /// ShaderBitArray bits;
+    /// bits.Resize(8);
+    /// bits[0] = true;
+    /// cmd.SetGlobalFloatArray("_BitArray", bits.data);
+    /// bits.Clear();
+    /// </code></example>
     public struct ShaderBitArray
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/ShaderBitArray.cs
@@ -80,10 +82,10 @@ namespace UnityExtensions.Unsafe
                     fixed (float* floatData = m_Data)
                     {
                         uint* uintElem = (uint*)&floatData[elemIndex];
-                        if (value == true)
-                            *uintElem = (*uintElem) | (1u << bitOffset);
+                        if (value)
+                            (*uintElem) |= 1u << bitOffset;
                         else
-                            *uintElem = (*uintElem) & ~(1u << bitOffset);
+                            (*uintElem) &= ~(1u << bitOffset);
                     }
                 }
             }
@@ -93,8 +95,9 @@ namespace UnityExtensions.Unsafe
         {
             unsafe
             {
-                Debug.Assert(bitCapacity < 4096, "Bit string too long! It was truncated!");
-                int len = Math.Min(bitCapacity, 4096);
+                const int maxCapacity = 4096;
+                Assert.IsTrue(bitCapacity < maxCapacity, $"Bit string is too long. It was truncated to {maxCapacity} elements.");
+                int len = Mathf.Min(bitCapacity, maxCapacity);
                 byte* buf = stackalloc byte[len];
                 for (int i = 0; i < len; i++)
                 {

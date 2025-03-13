@@ -1,8 +1,6 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Rendering;
 using Unity.Collections;
 using UnityExtensions.Unsafe;
 

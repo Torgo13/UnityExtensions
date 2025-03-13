@@ -5,8 +5,9 @@ namespace UnityExtensions.Unsafe
 {
     /// <summary>
     /// A list that stores value on a provided memory buffer.
-    ///
+    /// <remarks>
     /// Usually use this to have a list on stack allocated memory.
+    /// </remarks>
     /// </summary>
     /// <typeparam name="T">The type of the data stored in the list.</typeparam>
     public unsafe struct ListBuffer<T>
@@ -37,7 +38,7 @@ namespace UnityExtensions.Unsafe
         /// Instantiate a new list.
         /// </summary>
         /// <param name="bufferPtr">The address in memory to store the data.</param>
-        /// <param name="countPtr">The address in memory to store the number of item of this list..</param>
+        /// <param name="countPtr">The address in memory to store the number of item of this list.</param>
         /// <param name="capacity">The number of <typeparamref name="T"/> that can be stored in the buffer.</param>
         public ListBuffer(T* bufferPtr, int* countPtr, int capacity)
         {
@@ -101,8 +102,8 @@ namespace UnityExtensions.Unsafe
         /// <param name="copyCount">The number of item to copy.</param>
         public void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
         {
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy(dstBuffer + startDstIndex, m_BufferPtr,
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>() * copyCount);
+            UnsafeUtility.MemCpy(dstBuffer + startDstIndex, m_BufferPtr,
+                UnsafeUtility.SizeOf<T>() * copyCount);
         }
 
         /// <summary>
@@ -118,7 +119,7 @@ namespace UnityExtensions.Unsafe
             if (other.Count + Count >= other.m_Capacity)
                 return false;
 
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy(other.m_BufferPtr + other.Count, m_BufferPtr, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>() * Count);
+            UnsafeUtility.MemCpy(other.m_BufferPtr + other.Count, m_BufferPtr, UnsafeUtility.SizeOf<T>() * Count);
             *other.m_CountPtr += Count;
             return true;
         }
@@ -137,7 +138,7 @@ namespace UnityExtensions.Unsafe
             if (count + Count > m_Capacity)
                 return false;
 
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpy(m_BufferPtr + Count, srcPtr, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>() * count);
+            UnsafeUtility.MemCpy(m_BufferPtr + Count, srcPtr, UnsafeUtility.SizeOf<T>() * count);
             *m_CountPtr += count;
             return true;
         }

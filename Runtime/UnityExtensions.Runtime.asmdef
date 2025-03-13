@@ -1,10 +1,7 @@
 {
     "name": "UnityExtensions.Runtime",
     "rootNamespace": "",
-    "references": [
-        "Unity.InputSystem",
-        "UnityEngine.SpatialTracking"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

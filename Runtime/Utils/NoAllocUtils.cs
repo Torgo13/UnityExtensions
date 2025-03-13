@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
-using Assertions = UnityEngine.Assertions;
 
 // Utilities that do not allocate.
 
@@ -52,8 +51,8 @@ namespace UnityExtensions
                     return;
                 }
 
-                Assertions.Assert.IsTrue((uint)start < data.Length);
-                Assertions.Assert.IsTrue((uint)end < data.Length); // end == inclusive
+                Assert.IsTrue((uint)start < data.Length);
+                Assert.IsTrue((uint)end < data.Length); // end == inclusive
 
                 if (start < end)
                 {
@@ -122,8 +121,8 @@ namespace UnityExtensions
         // NOTE: called also from QuickSort for small ranges.
         static public void InsertionSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
         {
-            Assertions.Assert.IsTrue((uint)start < data.Length);
-            Assertions.Assert.IsTrue((uint)end < data.Length);
+            Assert.IsTrue((uint)start < data.Length);
+            Assert.IsTrue((uint)end < data.Length);
 
             for (int i = start + 1; i < end + 1; i++)
             {

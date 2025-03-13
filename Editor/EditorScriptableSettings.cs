@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions.Editor
 {
@@ -34,7 +35,7 @@ namespace UnityExtensions.Editor
 
         static void CreateAndLoad()
         {
-            System.Diagnostics.Debug.Assert(BaseInstance == null);
+            Assert.IsNull(BaseInstance);
 
             // Try to load the singleton
             const string filter = "t:{0}";
@@ -77,7 +78,7 @@ namespace UnityExtensions.Editor
                 Save(HasCustomPath ? k_CustomSavePathFormat : k_SavePathFormat);
             }
 
-            System.Diagnostics.Debug.Assert(BaseInstance != null);
+            Assert.IsNotNull(BaseInstance);
         }
 
         static void FindAssetInPackages(string filename)

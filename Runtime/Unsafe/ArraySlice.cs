@@ -35,10 +35,10 @@ namespace UnityExtensions.Unsafe
                     $"Slice start + length ({start + length}) range must be <= array.Length ({array.Length})");
             m_MinIndex = 0;
             m_MaxIndex = length - 1;
-            m_Safety = Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetAtomicSafetyHandle(array);
+            m_Safety = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(array);
 #endif
 
-            m_Stride = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
+            m_Stride = UnsafeUtility.SizeOf<T>();
             var ptr = (byte*)array.GetUnsafePtr() + m_Stride * start;
             m_Buffer = ptr;
             m_Length = length;
@@ -141,7 +141,7 @@ namespace UnityExtensions.Unsafe
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 CheckReadIndex(index);
 #endif
-                return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.ReadArrayElementWithStride<T>(m_Buffer, index, m_Stride);
+                return UnsafeUtility.ReadArrayElementWithStride<T>(m_Buffer, index, m_Stride);
             }
 
             [WriteAccessRequired]
@@ -150,11 +150,11 @@ namespace UnityExtensions.Unsafe
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 CheckWriteIndex(index);
 #endif
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.WriteArrayElementWithStride(m_Buffer, index, m_Stride, value);
+                UnsafeUtility.WriteArrayElementWithStride(m_Buffer, index, m_Stride, value);
             }
         }
 
-        internal void* GetUnsafeReadOnlyPtr()
+        private void* GetUnsafeReadOnlyPtr()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
@@ -162,7 +162,7 @@ namespace UnityExtensions.Unsafe
             return m_Buffer;
         }
 
-        internal void CopyTo(T[] array)
+        private void CopyTo(T[] array)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             if (Length != array.Length)
@@ -171,8 +171,8 @@ namespace UnityExtensions.Unsafe
             GCHandle handle = GCHandle.Alloc(array, GCHandleType.Pinned);
             IntPtr addr = handle.AddrOfPinnedObject();
 
-            var sizeOf = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<T>();
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, m_Length);
+            var sizeOf = UnsafeUtility.SizeOf<T>();
+            UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, m_Length);
 
             handle.Free();
         }

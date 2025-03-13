@@ -1,6 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.Threading;
+using UnityEngine;
+using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -61,11 +62,11 @@ namespace UnityExtensions.Unsafe
             }
 
             // mask off bits past the length
-            int validLength = Math.Min(oldLength, newLength);
-            int validBitsLength = Math.Min(oldBitsLength, newBitsLength);
+            int validLength = Mathf.Min(oldLength, newLength);
+            int validBitsLength = Mathf.Min(oldBitsLength, newBitsLength);
             for (int chunkIndex = validBitsLength; chunkIndex < m_Bits.Length; ++chunkIndex)
             {
-                int validBitCount = Math.Max(validLength - 64 * chunkIndex, 0);
+                int validBitCount = Mathf.Max(validLength - 64 * chunkIndex, 0);
                 if (validBitCount < 64)
                 {
                     ulong validMask = (1ul << validBitCount) - 1;
@@ -79,7 +80,7 @@ namespace UnityExtensions.Unsafe
         {
             unsafe
             {
-                Debug.Assert(0 <= index && index < m_Length);
+                Assert.IsTrue(0 <= index && index < m_Length);
 
                 int entry_index = index >> 6;
                 long* entries = (long*)m_Bits.GetUnsafePtr();
@@ -101,7 +102,7 @@ namespace UnityExtensions.Unsafe
         {
             unsafe
             {
-                Debug.Assert(0 <= index && index < m_Length);
+                Assert.IsTrue(0 <= index && index < m_Length);
 
                 int entry_index = index >> 6;
                 long* entries = (long*)m_Bits.GetUnsafeReadOnlyPtr();
@@ -160,7 +161,7 @@ namespace UnityExtensions.Unsafe
 
         public void FillZeroes(int length)
         {
-            length = Math.Min(length, m_Length);
+            length = Mathf.Min(length, m_Length);
             int chunkIndex = length / 64;
             int remainder = length & 63;
 

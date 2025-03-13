@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
 namespace UnityExtensions
@@ -107,7 +108,7 @@ namespace UnityExtensions
                 }
             }
 
-            Debug.Assert(chosenQuality != 0);
+            Assert.IsTrue(chosenQuality != 0);
             return chosenQuality;
         }
 

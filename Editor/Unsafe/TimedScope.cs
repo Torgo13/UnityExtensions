@@ -43,12 +43,11 @@ namespace UnityExtensions.Editor.Unsafe
 
         /// <summary>
         /// Obtains a <see cref="TimedScope"/>.
-        ///
         /// Safety: <paramref name="durationMsPtr"/> must be a non-null pointer to a valid memory location for a double.
         /// </summary>
         /// <param name="durationMsPtr">The location to write the duration in milliseconds to.</param>
         /// <returns>A <see cref="TimedScope"/></returns>
-        public static unsafe TimedScope FromPtr([DisallowNull] double* durationMsPtr)
+        public static TimedScope FromPtr([DisallowNull] double* durationMsPtr)
         {
             return new TimedScope(durationMsPtr);
         }

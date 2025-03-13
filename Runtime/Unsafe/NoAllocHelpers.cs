@@ -5,12 +5,14 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine;
+using UnityEngine.Assertions;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityExtensions.Unsafe
 {
     /// <summary>
-    /// Some helpers to handle List&lt;T&gt; in C# api (used for no-alloc apis where user provides list and we fill it):
+    /// Some helpers to handle List&lt;T&gt; in C# api (used for no-alloc apis where user provides the list to be filled):
     /// on il2cpp/mono we can "resize" List&lt;T&gt; (up to Capacity, sure, but this is/should-be handled higher level)
     /// also we can easily "convert" List&lt;T&gt; to System.Array
     /// </summary>
@@ -37,7 +39,7 @@ namespace UnityExtensions.Unsafe
 
             if (count != list.Count)
             {
-                ListPrivateFieldAccess<T> tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+                ListPrivateFieldAccess<T> tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
                 tListAccess._size = count;
                 tListAccess._version++;
             }
@@ -53,14 +55,14 @@ namespace UnityExtensions.Unsafe
             if (list == null)
                 return null;
 
-            var tListAccess = UnsafeUtility.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = CoreUnsafeUtils.As<ListPrivateFieldAccess<T>>(list);
             return tListAccess._items;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ResetListContents<T>(List<T> list, ReadOnlySpan<T> span)
         {
-            var tListAccess = UnsafeUtility.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = CoreUnsafeUtils.As<ListPrivateFieldAccess<T>>(list);
             tListAccess._items = span.ToArray();
             tListAccess._size = span.Length;
             tListAccess._version++;
@@ -69,9 +71,9 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ResetListSize<T>(List<T> list, int size) where T : unmanaged
         {
-            Debug.Assert(list.Capacity >= size);
+            Assert.IsTrue(list.Capacity >= size);
 
-            var tListAccess = UnsafeUtility.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = CoreUnsafeUtils.As<ListPrivateFieldAccess<T>>(list);
             tListAccess._size = size;
             tListAccess._version++;
         }
@@ -93,5 +95,58 @@ namespace UnityExtensions.Unsafe
 #pragma warning restore CS0649
         }
         #endregion // UnityEngine
+        
+        /// <remarks>
+        /// Set the Capacity before calling this function.
+        /// </remarks>
+        public static unsafe void ResetListContents<T>(List<T> list, T[] array) where T : struct
+        {
+            var tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+            tListAccess._size = array.Length;
+
+            UnsafeUtility.MemCpy(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(tListAccess._items, out var listGCHandle),
+                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
+                tListAccess._size * UnsafeUtility.SizeOf<T>());
+
+            tListAccess._version++;
+
+            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
+            UnsafeUtility.ReleaseGCObject(listGCHandle);
+        }
+
+        /// <remarks>
+        /// Set the Capacity before calling this function.
+        /// </remarks>
+        public static unsafe void ResetListContents<T>(List<T> list, NativeArray<T> array) where T : struct
+        {
+            var tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+            tListAccess._size = array.Length;
+
+            UnsafeUtility.MemCpy(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(tListAccess._items, out var listGCHandle),
+                array.GetUnsafeReadOnlyPtr(),
+                tListAccess._size * UnsafeUtility.SizeOf<T>());
+
+            tListAccess._version++;
+
+            UnsafeUtility.ReleaseGCObject(listGCHandle);
+        }
+
+        /// <remarks>
+        /// Set the Capacity before calling this function.
+        /// </remarks>
+        public static unsafe void ResetListContents<T>(List<T> list, NativeList<T> nativeList) where T : unmanaged
+        {
+            var tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+            tListAccess._size = nativeList.Length;
+
+            fixed (T* listPtr = &tListAccess._items[0])
+            {
+                UnsafeUtility.MemCpy(listPtr, nativeList.GetUnsafeReadOnlyPtr(), tListAccess._size * sizeof(T));
+            }
+
+            tListAccess._version++;
+        }
     }
 }

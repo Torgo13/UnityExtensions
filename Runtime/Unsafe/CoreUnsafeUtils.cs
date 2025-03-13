@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -11,6 +12,12 @@ namespace UnityExtensions.Unsafe
     /// </summary>
     public static unsafe class CoreUnsafeUtils
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T As<T>(object from) where T : class
+        {
+            return System.Runtime.CompilerServices.Unsafe.As<T>(from);
+        }
+        
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/CoreUnsafeUtils.cs#L258
         #region UnityEngine.Rendering
         /// <summary>
@@ -99,7 +106,7 @@ namespace UnityExtensions.Unsafe
                 m_WriteCursor = m_BufferStart;
                 m_ReadCursor = m_BufferStart;
                 Count = 0;
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.MemClear(m_BufferStart, m_BufferLength);
+                UnsafeUtility.MemClear(m_BufferStart, m_BufferLength);
             }
         }
 
@@ -138,7 +145,7 @@ namespace UnityExtensions.Unsafe
         {
             var c = Mathf.Min(count, list.Count);
             for (int i = 0; i < c; ++i)
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.WriteArrayElement<T>(dest, i, list[i]);
+                UnsafeUtility.WriteArrayElement(dest, i, list[i]);
         }
 
         /// <summary>
@@ -153,7 +160,7 @@ namespace UnityExtensions.Unsafe
         {
             var c = Mathf.Min(count, list.Length);
             for (int i = 0; i < c; ++i)
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.WriteArrayElement<T>(dest, i, list[i]);
+                UnsafeUtility.WriteArrayElement(dest, i, list[i]);
         }
 
         private static void CalculateRadixParams(int radixBits, out int bitStates)
@@ -234,7 +241,7 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Math.Min(sortSize, arr.Length);
+            sortSize = Mathf.Min(sortSize, arr.Length);
             if (sortSize == 0)
                 return;
 
@@ -243,7 +250,7 @@ namespace UnityExtensions.Unsafe
 
             fixed (uint* arrPtr = arr)
             fixed (uint* supportPtr = supportArray)
-                CoreUnsafeUtils.MergeSort(arrPtr, supportPtr, sortSize);
+                MergeSort(arrPtr, supportPtr, sortSize);
         }
 
         /// <summary>
@@ -254,14 +261,14 @@ namespace UnityExtensions.Unsafe
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
         public static void MergeSort(NativeArray<uint> arr, int sortSize, ref NativeArray<uint> supportArray)
         {
-            sortSize = Math.Min(sortSize, arr.Length);
+            sortSize = Mathf.Min(sortSize, arr.Length);
             if (!arr.IsCreated || sortSize == 0)
                 return;
 
             if (!supportArray.IsCreated || supportArray.Length < sortSize)
                 supportArray.ResizeArray(arr.Length);
 
-            CoreUnsafeUtils.MergeSort((uint*)arr.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), sortSize);
+            MergeSort((uint*)arr.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), sortSize);
         }
 
         private static void InsertionSort(uint* arr, int length)
@@ -290,12 +297,12 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Math.Min(arr.Length, sortSize);
+            sortSize = Mathf.Min(arr.Length, sortSize);
             if (sortSize == 0)
                 return;
 
             fixed (uint* ptr = arr)
-                CoreUnsafeUtils.InsertionSort(ptr, sortSize);
+                InsertionSort(ptr, sortSize);
         }
 
         /// <summary>
@@ -305,11 +312,11 @@ namespace UnityExtensions.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         public static void InsertionSort(NativeArray<uint> arr, int sortSize)
         {
-            sortSize = Math.Min(arr.Length, sortSize);
+            sortSize = Mathf.Min(arr.Length, sortSize);
             if (!arr.IsCreated || sortSize == 0)
                 return;
 
-            CoreUnsafeUtils.InsertionSort((uint*)arr.GetUnsafePtr(), sortSize);
+            InsertionSort((uint*)arr.GetUnsafePtr(), sortSize);
         }
 
         private static void RadixSort(uint* array, uint* support, int radixBits, int bitStates, int length)
@@ -346,7 +353,7 @@ namespace UnityExtensions.Unsafe
         }
 
         /// <summary>
-        /// Radix sort or bucket sort, stable and non in place.
+        /// Radix sort or bucket sort, stable and non in-place.
         /// </summary>
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
@@ -357,7 +364,7 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Math.Min(sortSize, arr.Length);
+            sortSize = Mathf.Min(sortSize, arr.Length);
             CalculateRadixParams(radixBits, out int bitStates);
             if (sortSize == 0)
                 return;
@@ -368,11 +375,11 @@ namespace UnityExtensions.Unsafe
 
             fixed (uint* ptr = arr)
             fixed (uint* supportArrayPtr = supportArray)
-                CoreUnsafeUtils.RadixSort(ptr, supportArrayPtr, radixBits, bitStates, sortSize);
+                RadixSort(ptr, supportArrayPtr, radixBits, bitStates, sortSize);
         }
 
         /// <summary>
-        /// Radix sort or bucket sort, stable and non in place.
+        /// Radix sort or bucket sort, stable and non in-place.
         /// </summary>
         /// <param name="array">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
@@ -380,7 +387,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
         public static void RadixSort(NativeArray<uint> array, int sortSize, ref NativeArray<uint> supportArray, int radixBits = 8)
         {
-            sortSize = Math.Min(sortSize, array.Length);
+            sortSize = Mathf.Min(sortSize, array.Length);
             CalculateRadixParams(radixBits, out int bitStates);
             if (!array.IsCreated || sortSize == 0)
                 return;
@@ -389,7 +396,7 @@ namespace UnityExtensions.Unsafe
             if (!supportArray.IsCreated || supportArray.Length < supportSize)
                 supportArray.ResizeArray(supportSize);
 
-            CoreUnsafeUtils.RadixSort((uint*)array.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), radixBits, bitStates, sortSize);
+            RadixSort((uint*)array.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), radixBits, bitStates, sortSize);
         }
 
         /// <summary>
@@ -405,7 +412,7 @@ namespace UnityExtensions.Unsafe
         {
             for (int i = 0; i < count; ++i)
             {
-                if (Unity.Collections.LowLevel.Unsafe.UnsafeUtility.ReadArrayElement<T>(data, i).Equals(v))
+                if (UnsafeUtility.ReadArrayElement<T>(data, i).Equals(v))
                     return i;
             }
             return -1;

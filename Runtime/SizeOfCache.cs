@@ -7,7 +7,7 @@ namespace UnityExtensions
     /// Stores the marshalled size of a struct.
     /// </summary>
     /// <typeparam name="T">The type of struct to get the size of.</typeparam>
-    class SizeOfCache<T> where T : struct
+    public class SizeOfCache<T> where T : struct
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Networking/Utilities/SizeOfCache.cs
         #region Unity.LiveCapture.Networking

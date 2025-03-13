@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions
 {
@@ -31,7 +32,7 @@ namespace UnityExtensions
 
         internal static T CreateAndLoad()
         {
-            System.Diagnostics.Debug.Assert(BaseInstance == null);
+            Assert.IsNull(BaseInstance);
 
             // Try to load the singleton
             var path = HasCustomPath ? GetFilePath() : string.Format(k_LoadPathFormat, GetFilePath());
@@ -46,7 +47,7 @@ namespace UnityExtensions
                 Save(HasCustomPath ? k_CustomSavePathFormat : k_SavePathFormat);
             }
 
-            System.Diagnostics.Debug.Assert(BaseInstance != null);
+            Assert.IsNotNull(BaseInstance);
 
             return BaseInstance;
         }
