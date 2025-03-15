@@ -36,7 +36,7 @@ namespace UnityExtensions.Unsafe
 
         #region ToArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void CopyToArray<T>(this List<T> list, ref T[] array) where T : struct
+        public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
         {
             Assert.IsFalse(
                 list.Count < array.Length,
@@ -57,7 +57,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the List and set the Capacity before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this T[] array, ref List<T> list) where T : struct
+        public static void CopyTo<T>(this T[] array, List<T> list) where T : struct
         {
             NoAllocHelpers.ResetListContents(list, array);
         }
@@ -66,7 +66,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the List and set the Capacity before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this NativeArray<T> nativeArray, ref List<T> list) where T : struct
+        public static void CopyTo<T>(this NativeArray<T> nativeArray, List<T> list) where T : struct
         {
             NoAllocHelpers.ResetListContents(list, nativeArray);
         }
@@ -75,7 +75,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the List and set the Capacity before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this NativeList<T> nativeList, ref List<T> list) where T : unmanaged
+        public static void CopyTo<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
             NoAllocHelpers.ResetListContents(list, nativeList);
         }
@@ -83,7 +83,7 @@ namespace UnityExtensions.Unsafe
 
         #region ToNativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
+        public static void CopyTo<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
         {
             Assert.IsFalse(
                 array.Length < nativeArray.Length,
@@ -93,7 +93,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
+        public static void CopyTo<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
         {
             Assert.IsFalse(
                 list.Count < nativeArray.Length,
@@ -103,7 +103,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
+        public static void CopyTo<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
         {
             Assert.IsFalse(
                 nativeList.Length < nativeArray.Length,
@@ -118,7 +118,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the NativeList before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
         {
             nativeList.AddRange(array);
         }
@@ -127,7 +127,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the NativeList before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
         {
             nativeList.AddRange(list);
         }
@@ -136,7 +136,7 @@ namespace UnityExtensions.Unsafe
         /// Clear the NativeList before calling this function.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
         {
             nativeList.CopyFrom(nativeArray);
         }

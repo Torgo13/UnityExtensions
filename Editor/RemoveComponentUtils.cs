@@ -1,10 +1,7 @@
-using JetBrains.Annotations;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEditor;
 
 namespace UnityExtensions.Editor
@@ -34,7 +31,7 @@ namespace UnityExtensions.Editor
 
         public static bool CanRemoveComponent([DisallowNull] Component component, IEnumerable<Component> dependencies)
         {
-            if (dependencies.Count() == 0)
+            if (!dependencies.Any())
                 return true;
 
             Component firstDependency = dependencies.First();
@@ -45,11 +42,11 @@ namespace UnityExtensions.Editor
 
         public static bool RemoveComponent([DisallowNull] Component component, IEnumerable<Component> dependencies)
         {
-            var additionalDatas = dependencies
+            var additionalData = dependencies
                     .Where(c => c != component && c is IAdditionalData)
                     .ToList();
 
-            if (!RemoveComponentUtils.CanRemoveComponent(component, dependencies.Where(c => !additionalDatas.Contains(c))))
+            if (!CanRemoveComponent(component, dependencies.Where(c => !additionalData.Contains(c))))
                 return false;
 
             bool removed = true;
@@ -62,8 +59,8 @@ namespace UnityExtensions.Editor
                 }
                 Undo.SetCurrentGroupName($"Remove {component.GetType()} and additional data components");
 
-                // The components with RequireComponent(typeof(T)) also contain the AdditionalData attribute, proceed with the remove
-                foreach (var additionalDataComponent in additionalDatas)
+                // The components with RequireComponent(typeof(T)) also contain the AdditionalData attribute, proceed with removal
+                foreach (var additionalDataComponent in additionalData)
                 {
                     if (additionalDataComponent != null)
                     {
@@ -89,11 +86,11 @@ namespace UnityExtensions.Editor
 
         public static void RemoveComponent([DisallowNull] Component comp)
         {
-            var dependencies = RemoveComponentUtils.ComponentDependencies(comp);
+            var dependencies = ComponentDependencies(comp);
             if (!RemoveComponent(comp, dependencies))
             {
                 //preserve built-in behavior
-                if (RemoveComponentUtils.CanRemoveComponent(comp, dependencies))
+                if (CanRemoveComponent(comp, dependencies))
                     Undo.DestroyObjectImmediate(comp);
             }
         }

@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace UnityExtensions
     {
         public static int GetBatchSizeByCore(int totalSize, int minSizePerCore = 8)
         {
-            return Math.Max(totalSize / Environment.ProcessorCount, minSizePerCore);
+            return Mathf.Max(totalSize / Environment.ProcessorCount, minSizePerCore);
         }
     }
     #endregion // UnityEditor.Search
@@ -219,7 +218,7 @@ namespace UnityExtensions
                         var gradientOutput = new Color();
                         for (var k = 0; k < 3; ++k)
                         {
-                            var mag = Mathf.Clamp(Mathf.Sqrt((colorX[k] * colorX[k]) + (colorY[k] * colorY[k])), 0f, 1.0f);
+                            var mag = Mathf.Clamp01(Mathf.Sqrt(colorX[k] * colorX[k] + colorY[k] * colorY[k]));
                             edgeOutput[k] = mag >= threshold ? 1f : 0f;
                             gradientOutput[k] = Mathf.Atan2(colorY[k], colorX[k]);
                         }
@@ -383,16 +382,9 @@ namespace UnityExtensions
         public virtual int bins => histogramSize;
         public int channels => 3;
 
-        public float[] valuesR;
-        public float[] valuesG;
-        public float[] valuesB;
-
-        public Histogram()
-        {
-            valuesR = new float[histogramSize];
-            valuesG = new float[histogramSize];
-            valuesB = new float[histogramSize];
-        }
+        public float[] valuesR = new float[histogramSize];
+        public float[] valuesG = new float[histogramSize];
+        public float[] valuesB = new float[histogramSize];
 
         public void AddPixel(Color32 pixel)
         {
@@ -685,15 +677,9 @@ namespace UnityExtensions
         public RGBClusters()
         {
             m_Clusters = new List<ColorCluster>(k_AxisDivisions * k_AxisDivisions * k_AxisDivisions);
-            for (var i = 0; i < k_AxisDivisions; ++i)
+            for (var i = 0; i < k_AxisDivisions * k_AxisDivisions * k_AxisDivisions; i++)
             {
-                for (var j = 0; j < k_AxisDivisions; ++j)
-                {
-                    for (var k = 0; k < k_AxisDivisions; ++k)
-                    {
-                        m_Clusters.Add(new ColorCluster());
-                    }
-                }
+                m_Clusters.Add(new ColorCluster());
             }
         }
 
@@ -715,7 +701,7 @@ namespace UnityExtensions
         public IEnumerable<ColorCluster> GetBestClusters(int count)
         {
             m_Clusters.Sort((cluster1, cluster2) => cluster2.count.CompareTo(cluster1.count));
-            return m_Clusters.Take(count);
+            return m_Clusters.GetRange(0, count);
         }
 
         public void Combine(RGBClusters clusters)
@@ -967,10 +953,11 @@ namespace UnityExtensions
             using var _1 = ListPool<KeyValuePair<uint, long>>.Get(out var orderedColors);
             // Order in reverse order so the highest count is first
             orderedColors.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
-            using var _2 = ListPool<KeyValuePair<uint, long>>.Get(out var bestOrderedColors);
-            for (int i = 0; i < 5; i++)
-                bestOrderedColors.Add(orderedColors[i]);
-            using var _3 = ListPool<ColorCluster>.Get(out var bestClusters);
+
+            var bestOrderedColors = orderedColors;
+            bestOrderedColors.RemoveRange(5, bestOrderedColors.Count - 5);
+            
+            using var _2 = ListPool<ColorCluster>.Get(out var bestClusters);
             bestClusters.AddRange(rgbClusters.GetBestClusters(5));
             for (var i = bestOrderedColors.Count; i < 5; ++i)
             {
@@ -987,7 +974,7 @@ namespace UnityExtensions
         public static void ComputeBestColorsAndHistogram_Parallel(Color32[] pixels, ColorInfo[] bestColors, ColorInfo[] bestShades, Histogram histogram)
         {
             var nbPixels = pixels.Length;
-            var colorMap = new Dictionary<uint, long>();
+            using var _0 = DictionaryPool<uint, long>.Get(out var colorMap);
             var rgbClusters = new RGBClusters();
 
             var batchSize = ThreadUtils.GetBatchSizeByCore(pixels.Length);
@@ -1024,12 +1011,17 @@ namespace UnityExtensions
             histogram.Normalize(nbPixels);
 
             // Get the best colors
-            //using var _0 = ListPool<>
-            var orderedColors = colorMap.ToList();
+            using var _1 = ListPool<KeyValuePair<uint, long>>.Get(out var orderedColors);
+            orderedColors.AddRange(colorMap);
             // Order in reverse order so the highest count is first
             orderedColors.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
-            var bestOrderedColors = orderedColors.Take(5).ToList();
-            var bestClusters = rgbClusters.GetBestClusters(5).ToList();
+
+            var bestOrderedColors = orderedColors;
+            bestOrderedColors.RemoveRange(5, bestOrderedColors.Count - 5);
+            
+            using var _2 = ListPool<ColorCluster>.Get(out var bestClusters);
+            bestClusters.AddRange(rgbClusters.GetBestClusters(5));
+            
             for (var i = bestOrderedColors.Count; i < 5; ++i)
             {
                 bestOrderedColors.Add(new KeyValuePair<uint, long>(0, 0));
@@ -1079,7 +1071,7 @@ namespace UnityExtensions
                             var rad = gradients[index][c];
                             var deg = Mathf.Rad2Deg * rad;
 
-                            // Edges have been threshold and are either 1 or 0
+                            // Edges have been thresholded and are either 1 or 0
                             if (pixel[c] >= 0.5f)
                             {
                                 localData.histogram.AddEdge(c, deg);
@@ -1156,7 +1148,7 @@ namespace UnityExtensions
                     distances[c] += diff * diff;
                 }
             }
-
+            
             // Values are between [0, sqrt(2)], divide by sqrt(2) to get [0, 1]
             return Mathf.Sqrt(distances.Sum()) / (histogramA.channels * Mathf.Sqrt(2));
         }
@@ -1236,7 +1228,7 @@ namespace UnityExtensions
 
         public static double[] ComputeRawMoment(Color[] pixels, int width, int height, int p, int q)
         {
-            return ComputeRawMoments(pixels, width, height, new[] { new MomentOrder(p, q) }).First();
+            return ComputeRawMoments(pixels, width, height, new[] { new MomentOrder(p, q) })[0];
         }
 
         static IList<double[]> ComputeCentralMoments(Color[] pixels, int width, int height, in IList<MomentOrder> momentOrders, in Centroid centroid)
@@ -1358,9 +1350,9 @@ namespace UnityExtensions
             return allSums;
         }
 
-        static double[] ComputeCentralMoment(Color[] pixels, int width, int height, int p, int q, in IList<Centroid> centroids)
+        static double[] ComputeCentralMoment(Color[] pixels, int width, int height, int p, int q, in List<Centroid> centroids)
         {
-            return ComputeCentralMoments(pixels, width, height, new[] { new MomentOrder(p, q) }, centroids).First();
+            return ComputeCentralMoments(pixels, width, height, new[] { new MomentOrder(p, q) }, centroids)[0];
         }
 
         static IList<Centroid> ComputeCentroidsAndAreas(Color[] pixels, int width, int height, out double[] areas)
@@ -1424,11 +1416,10 @@ namespace UnityExtensions
             var n02 = CentralMomentToScaleInvariant(u02, areas, moment02);
             var n11 = CentralMomentToScaleInvariant(u11, areas, moment11);
 
-            var diff = ListPool<double>.Get();
-            diff.EnsureCapacity(n20.Length);
+            var diff = new NativeArray<double>(n20.Length, Allocator.Temp);
             for (var i = 0; i < n20.Length; ++i)
             {
-                diff.Add(n20[i] - n02[i]);
+                diff[i] = n20[i] - n02[i];
             }
 
             for (var i = 0; i < geometricMoments.Length; ++i)
@@ -1436,7 +1427,7 @@ namespace UnityExtensions
                 geometricMoments[i] = (diff[i] * diff[i]) + 4 * (n11[i] * n11[i]);
             }
             
-            ListPool<double>.Release(diff);
+            diff.Dispose();
         }
 
         public static MinMaxColor GetMinMax(ImagePixels image)

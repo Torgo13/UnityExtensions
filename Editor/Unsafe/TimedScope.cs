@@ -9,14 +9,14 @@ namespace UnityExtensions.Editor.Unsafe
     /// <summary>
     /// Allows time measurements
     /// </summary>
-    /// <example>
+    /// <example><code>
     /// double duration = 0;
     /// using (TimedScope.FromPtr(&amp;duration))
     /// {
     ///     // something to get the time
     /// }
     /// Debug.Log($"Duration: {duration}")
-    /// </example>
+    /// </code></example>
     public unsafe struct TimedScope : IDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/Utilities/TimedScope.cs

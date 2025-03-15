@@ -15,20 +15,20 @@ namespace UnityExtensions
         /// Calibration constant (K) used for our virtual reflected light meter. Modifying this will lead to a change on how average scene luminance
         /// gets mapped to exposure.
         /// </summary>
-        static public float s_LightMeterCalibrationConstant = 12.5f;
+        public static float s_LightMeterCalibrationConstant = 12.5f;
 
         /// <summary>
         /// Factor used for our lens system w.r.t. exposure calculation. Modifying this will lead to a change on how linear exposure
-        /// multipliers are computed from EV100 values (and viceversa). s_LensAttenuation models transmission attenuation and lens vignetting.
+        /// multipliers are computed from EV100 values (and vice versa). s_LensAttenuation models transmission attenuation and lens vignetting.
         /// Note that according to the standard ISO 12232, a lens saturates at s_LensAttenuation = 0.78f (under ISO 100).
         /// </summary>
-        static public float s_LensAttenuation = 0.65f;
+        public static float s_LensAttenuation = 0.65f;
 
         /// <summary>
-        /// Scale applied to exposure caused by lens imperfection. It is computed from s_LensAttenuation as follow:
+        /// Scale applied to exposure caused by lens imperfection. It is computed from s_LensAttenuation as follows:
         ///  (78 / ( S * q )) where S = 100 and q = s_LensAttenuation
         /// </summary>
-        static public float lensImperfectionExposureScale
+        public static float lensImperfectionExposureScale
         {
             get => (78.0f / (100.0f * s_LensAttenuation));
         }
@@ -36,7 +36,7 @@ namespace UnityExtensions
         /// <summary>
         /// An analytical model of chromaticity of the standard illuminant, by Judd et al.
         /// http://en.wikipedia.org/wiki/Standard_illuminant#Illuminant_series_D
-        /// Slightly modifed to adjust it with the D65 white point (x=0.31271, y=0.32902).
+        /// Slightly modified to adjust it with the D65 white point (x=0.31271, y=0.32902).
         /// </summary>
         /// <param name="x">The input value representing the chromaticity measure.</param>
         /// <returns>Returns the calculated value of the standard illuminant's Y-coordinate based on the input x.</returns>

@@ -1,14 +1,12 @@
 using System;
 using System.IO;
-using System.Linq.Expressions;
-using System.Reflection;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UnityExtensions.Editor
 {
-    static class PackagesUtilities
+    public static class PackagesUtilities
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/Internal/PackagesUtilities.cs
         #region UnityEditor.ShaderAnalysis.Internal

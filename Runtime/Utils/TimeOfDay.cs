@@ -31,7 +31,7 @@ namespace UnityExtensions
         [SerializeField, HideInInspector]
 	    private GUIStyle sliderStyle;
 
-        static internal TimeOfDay instance;
+        private static TimeOfDay instance;
 
 	    private void OnEnable()
 	    {
@@ -67,7 +67,7 @@ namespace UnityExtensions
 
         void SetSunPosition()
         {
-            CalculateSunPosition(time, latitude, longitude, timeOfDay, out var azi, out var alt);
+            CalculateSunPosition(time, latitude, timeOfDay, out var azi, out var alt);
 
             if (double.IsNaN(azi))
                 azi = transform.localRotation.y;
@@ -76,7 +76,7 @@ namespace UnityExtensions
             transform.localRotation = Quaternion.Euler(angles);
         }
 
-        public void CalculateSunPosition(DateTime dateTime, double latitude, double longitude, float timeOfDay, out double outAzimuth, out double outAltitude)
+        public void CalculateSunPosition(DateTime dateTime, float latitude, float timeOfDay, out double outAzimuth, out double outAltitude)
         {
             float declination = -23.45f * Mathf.Cos(Mathf.PI * 2f * (dateTime.DayOfYear + 10) / 365f);
 
@@ -85,7 +85,7 @@ namespace UnityExtensions
             localHourAngle *= Mathf.Deg2Rad;
 
             declination *= Mathf.Deg2Rad;
-            float latRad = (float)latitude * Mathf.Deg2Rad;
+            float latRad = latitude * Mathf.Deg2Rad;
 
             float lat_sin = Mathf.Sin(latRad);
             float lat_cos = Mathf.Cos(latRad);
@@ -131,13 +131,12 @@ namespace UnityExtensions
         {
             Handles.BeginGUI();
 
-            float windowHeight = 15 + 30;
+            const float windowHeight = 15 + 30;
             UnityEngine.GUI.Window(0, new Rect(Screen.width * 0.1f, Screen.height * 0.89f, Screen.width * 0.8f, windowHeight), Window_StatusPanel, "", GUIStyle.none);
 
             Handles.EndGUI();
         }
 
-        public static float hSliderValue = 0.0F;
         internal static void Window_StatusPanel(int windowID)
         {
             if (instance == null)
@@ -162,13 +161,13 @@ namespace UnityExtensions
     }
 
     #if UNITY_EDITOR
-    [CustomEditor( typeof( TimeOfDay ) )]
+    [CustomEditor(typeof(TimeOfDay))]
     public class DrawLineEditor : Editor
     {
         void OnSceneGUI()
         {
-            var t = target as TimeOfDay;
-            t.DrawWindow();
+            if (target is TimeOfDay t)
+                t.DrawWindow();
         }
     }
     #endif

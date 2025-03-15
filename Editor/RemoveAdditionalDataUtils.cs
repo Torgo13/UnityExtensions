@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Rendering;
 using UnityEditor;
 
 namespace UnityExtensions.Editor
@@ -17,7 +16,7 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/RemoveAdditionalDataUtils.cs
         #region UnityEditor.Rendering
-        static int s_DialogToSkip = 0;
+        static int s_DialogToSkip;
 
         /// <summary>
         /// Removes a <see cref="IAdditionalData"/> and it's components defined by <see cref="RequireComponent"/>
@@ -30,9 +29,9 @@ namespace UnityExtensions.Editor
             if (command.context is not Component component)
                 return;
 
-            //If the user agree to remove component, everything is removed in the current selection.
-            //So other components will not trigger this (contextual menu implementation check component existance)
-            //But if the user chose to cancel, we need to skip the prompt for a certain amount of component given by the selection size.
+            //If the user agrees to remove the component, everything is removed in the current selection.
+            //So other components will not trigger this (contextual menu implementation check component existence)
+            //But if the user chose to cancel, we need to skip the prompt for a certain number of components given by the selection size.
             if (ShouldPrompt())
                 RemoveAdditionalData(component, promptDisplay);
         }
@@ -41,13 +40,13 @@ namespace UnityExtensions.Editor
         {
             using (ListPool<Type>.Get(out var componentTypesToRemove))
             {
-                if (!TryGetComponentsToRemove(additionalDataComponent as IAdditionalData, componentTypesToRemove, out var error))
+                if (!TryGetComponentsToRemove((IAdditionalData)additionalDataComponent, componentTypesToRemove, out var error))
                     throw error;
 
                 if (!promptDisplay || EditorUtility.DisplayDialog(
-                    title: $"Are you sure you want to proceed?",
+                    title: "Are you sure you want to proceed?",
                     message: $"This operation will also remove {string.Join($"{Environment.NewLine} - ", componentTypesToRemove)}.",
-                    ok: $"Remove everything",
+                    ok: "Remove everything",
                     cancel: "Cancel"))
                 {
                     RemoveAdditionalDataComponentOnSelection(additionalDataComponent.GetType(), componentTypesToRemove);
@@ -103,18 +102,6 @@ namespace UnityExtensions.Editor
         [MustUseReturnValue]
         internal static bool TryGetComponentsToRemove([DisallowNull] IAdditionalData additionalData, [DisallowNull] List<Type> componentsToRemove, [NotNullWhen(false)] out Exception error)
         {
-            if (additionalData == null)
-            {
-                error = new ArgumentNullException(nameof(additionalData));
-                return false;
-            }
-
-            if (componentsToRemove == null)
-            {
-                error = new ArgumentNullException(nameof(componentsToRemove));
-                return false;
-            }
-
             var type = additionalData.GetType();
             var requiredComponents = type.GetCustomAttributes(typeof(RequireComponent), true).Cast<RequireComponent>();
 

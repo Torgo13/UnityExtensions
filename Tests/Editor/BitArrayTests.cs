@@ -1,7 +1,5 @@
 using NUnit.Framework;
-using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Rendering;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -39,7 +37,7 @@ namespace UnityExtensions.Editor.Tests
         }
 
         //[TearDown]
-        //nothing to do as they are non static struct
+        //nothing to do as they are non-static struct
 
         string GetLastHumanizedBits(string a, uint bitNumber) => a.Substring(a.Length - ((int)bitNumber + ((int)bitNumber - 1) / 8));  //handle '.' separators
 
@@ -70,9 +68,9 @@ namespace UnityExtensions.Editor.Tests
             Assert.AreEqual(capacity, ba[3].capacity);
             Assert.AreEqual(false, ba[3].allFalse);
             Assert.AreEqual(true, ba[3].allTrue);
-            var trimmedMaxHumnized = GetLastHumanizedBits(maxHumanized, capacity);
+            var trimmedMaxHumanized = GetLastHumanizedBits(maxHumanized, capacity);
             humanized = ba[3].humanizedData;
-            Assert.AreEqual(trimmedMaxHumnized, humanized);
+            Assert.AreEqual(trimmedMaxHumanized, humanized);
         }
 
         void TestBitArrayOperator<T>(T[] ba)

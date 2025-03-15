@@ -65,6 +65,12 @@ namespace UnityExtensions.Unsafe
 
     public static class StringExtensions
     {
+        /// <summary>
+        /// Calculate the size of the array or span required to store the result of
+        /// System.Convert.TryFromBase64String.
+        /// </summary>
+        /// <param name="input">String to be converted from Base64.</param>
+        /// <returns>Length of the byte array needed to allocate.</returns>
         public static unsafe int FromBase64_ComputeResultLength(this string input)
         {
             fixed (char* p = input)

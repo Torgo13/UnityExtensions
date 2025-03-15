@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// Class to serizalize Enum as string and recover it's state
+    /// Class to serialize Enum as string and recover its state
     /// </summary>
     [Serializable]
     public class SerializableEnum
@@ -24,7 +24,7 @@ namespace UnityExtensions
         /// <summary>
         /// Construct an enum to be serialized with a type
         /// </summary>
-        /// <param name="enumType">The underliying type of the enum</param>
+        /// <param name="enumType">The underlying type of the enum</param>
         public SerializableEnum(Type enumType)
         {
             m_EnumTypeAsString = enumType.AssemblyQualifiedName;

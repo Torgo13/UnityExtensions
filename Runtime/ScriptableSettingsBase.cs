@@ -254,7 +254,7 @@ namespace UnityExtensions
                 {
                     lower = assetPath.Substring(packagesLength);
                     folderEnd = lower.IndexOf('/') + 1;
-                    folderEnd += lower.Substring(folderEnd).IndexOf('/') + packagesLength;
+                    folderEnd += lower.AsSpan(folderEnd).IndexOf('/') + packagesLength;
                 }
 
                 var specializationPath = string.Concat(assetPath.Substring(0, folderEnd), "/");

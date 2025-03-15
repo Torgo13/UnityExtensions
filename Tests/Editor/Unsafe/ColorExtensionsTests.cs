@@ -19,7 +19,6 @@ namespace UnityExtensions.Unsafe.Tests
 
             // Verify the color of the pixels within the circle
             var textureData = texture.GetRawTextureData<Color32>();
-            var halfWidth = radius;
             var rSquared = radius * radius;
 
             for (int y = -radius; y < radius; y++)

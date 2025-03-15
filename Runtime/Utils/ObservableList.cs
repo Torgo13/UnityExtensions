@@ -186,7 +186,7 @@ namespace UnityExtensions
         /// Remove an item from the list.
         /// </summary>
         /// <param name="item">Item to remove from the list.</param>
-        /// <returns>True if the item was successfuly removed. False otherise.</returns>
+        /// <returns>True if the item was successfully removed. False otherwise.</returns>
         public bool Remove(T item)
         {
             int index = m_List.IndexOf(item);

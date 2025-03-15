@@ -7,7 +7,7 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/TileLayoutUtils.cs
         #region UnityEngine.Rendering
-        /// <summary>Try decompose the givent rect into tiles given the parameter</summary>
+        /// <summary>Try to decompose the given rect into tiles given the parameter</summary>
         /// <param name="src">The rect to split</param>
         /// <param name="tileSize">The size of the tiles</param>
         /// <param name="main">Computed main area</param>
@@ -69,7 +69,7 @@ namespace UnityExtensions
             return true;
         }
 
-        /// <summary>Try decompose the givent rect into rows given the parameter</summary>
+        /// <summary>Try to decompose the given rect into rows given the parameter</summary>
         /// <param name="src">The rect to split</param>
         /// <param name="tileSize">The size of the tiles</param>
         /// <param name="main">Computed main area</param>
@@ -109,7 +109,7 @@ namespace UnityExtensions
             return true;
         }
 
-        /// <summary>Try decompose the givent rect into columns given the parameter</summary>
+        /// <summary>Try to decompose the given rect into columns given the parameter</summary>
         /// <param name="src">The rect to split</param>
         /// <param name="tileSize">The size of the tiles</param>
         /// <param name="main">Computed main area</param>

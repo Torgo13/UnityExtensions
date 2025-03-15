@@ -209,8 +209,7 @@ namespace UnityExtensions
             float toeM = 0f;
             float shoulderM = 0f;
             {
-                float m, b;
-                AsSlopeIntercept(out m, out b, paramsCopy.x0, paramsCopy.x1, paramsCopy.y0, paramsCopy.y1);
+                AsSlopeIntercept(out float m, out float b, paramsCopy.x0, paramsCopy.x1, paramsCopy.y0, paramsCopy.y1);
 
                 float g = srcParams.gamma;
 
@@ -256,8 +255,7 @@ namespace UnityExtensions
                 toeSegment.scaleX = 1f;
                 toeSegment.scaleY = 1f;
 
-                float lnA, B;
-                SolveAB(out lnA, out B, paramsCopy.x0, paramsCopy.y0, toeM);
+                SolveAB(out float lnA, out float B, paramsCopy.x0, paramsCopy.y0, toeM);
                 toeSegment.lnA = lnA;
                 toeSegment.B = B;
             }
@@ -270,8 +268,7 @@ namespace UnityExtensions
                 float x0 = (1f + paramsCopy.overshootX) - paramsCopy.x1;
                 float y0 = (1f + paramsCopy.overshootY) - paramsCopy.y1;
 
-                float lnA, B;
-                SolveAB(out lnA, out B, x0, y0, shoulderM);
+                SolveAB(out float lnA, out float B, x0, y0, shoulderM);
 
                 shoulderSegment.offsetX = (1f + paramsCopy.overshootX);
                 shoulderSegment.offsetY = (1f + paramsCopy.overshootY);
@@ -282,7 +279,7 @@ namespace UnityExtensions
                 shoulderSegment.B = B;
             }
 
-            // Normalize so that we hit 1.0 at our white point. We wouldn't have do this if we
+            // Normalize so that we hit 1.0 at our white point. We wouldn't have to do this if we
             // skipped the overshoot part.
             {
                 // Evaluate shoulder at the end of the curve
@@ -334,7 +331,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// An utility class to ease the binding of curve parameters to shaders.
+        /// A utility class to ease the binding of curve parameters to shaders.
         /// </summary>
         public class Uniforms
         {

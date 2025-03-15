@@ -221,10 +221,7 @@ namespace UnityExtensions.Editor
                 return;
             }
 
-            if (k_EditorPrefsValueSessionCache.ContainsKey(prefsKey))
-                k_EditorPrefsValueSessionCache[prefsKey] = value;
-            else
-                k_EditorPrefsValueSessionCache.Add(prefsKey, value);
+            k_EditorPrefsValueSessionCache[prefsKey] = value;
         }
 
         static void GetEditorPrefsValue<T>(string prefsKey, out T prefValue)

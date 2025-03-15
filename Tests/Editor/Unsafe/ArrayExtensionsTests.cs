@@ -8,11 +8,18 @@ namespace UnityExtensions.Unsafe.Tests
         [Test]
         public void CalculateOffset_ShouldReturnCorrectOffset()
         {
-            int[] array = new int[2];
-            array[0] = 5;
-            array[1] = 10;
+            int[] array = {
+                5, 10
+            };
             int offset = ArrayExtensions.CalculateOffset(ref array[1], ref array[0]);
             Assert.AreEqual(UnsafeUtility.SizeOf<int>(), offset);
+
+            array = new int[]
+            {
+                0, 1, 2, 3
+            };
+            offset = ArrayExtensions.CalculateOffset(ref array[3], ref array[1]);
+            Assert.AreEqual(UnsafeUtility.SizeOf<int>() * 2, offset);
         }
     }
 }

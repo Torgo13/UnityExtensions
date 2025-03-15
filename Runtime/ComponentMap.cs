@@ -98,7 +98,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="key">The key component.</param>
         /// <param name="instance">The value component.</param>
-        /// <returns>Indicates whether or not a corresponding value component was found.</returns>
+        /// <returns>Indicates whether a corresponding value component was found.</returns>
         public bool TryGetInstance(TKey key, out TValue instance)
         {
             return s_KeyToValueMap.TryGetValue(key, out instance);

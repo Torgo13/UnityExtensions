@@ -1,7 +1,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// An utility class to compute samples on the Halton sequence.
+    /// A utility class to compute samples on the Halton sequence.
     /// https://en.wikipedia.org/wiki/Halton_sequence
     /// </summary>
     public static class HaltonSequence

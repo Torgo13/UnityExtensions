@@ -1,7 +1,5 @@
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using UnityEngine.Rendering;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -9,7 +7,7 @@ namespace UnityExtensions.Editor.Tests
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/Swap.Extensions.Tests.cs
         #region UnityEditor.Rendering.Tests
-        static TestCaseData[] s_ListTestsCaseDatas =
+        static TestCaseData[] s_ListTestsCaseData =
         {
             new TestCaseData(new int[] {1,2,3,4,5,6}, 0, 5)
                 .SetName("Swap first for last")
@@ -28,7 +26,7 @@ namespace UnityExtensions.Editor.Tests
                 .Returns(new int[] {1,2,6,4,5,3}),
         };
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatas))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseData))]
         public int[] TrySwap(int[] ints, int from, int to)
         {
             int[] copy = new int[ints.Length];
@@ -38,7 +36,7 @@ namespace UnityExtensions.Editor.Tests
             return copy;
         }
 
-        static TestCaseData[] s_ListTestsCaseDatasExceptions =
+        static TestCaseData[] s_ListTestsCaseDataExceptions =
         {
             new TestCaseData(null, -1, 1).SetName("Null list").Returns(typeof(ArgumentNullException)),
             new TestCaseData(new int[] {1,2,3,4,5,6}, -1, 1).SetName("From negative").Returns(typeof(ArgumentOutOfRangeException)),
@@ -47,7 +45,7 @@ namespace UnityExtensions.Editor.Tests
             new TestCaseData(new int[] {1,2,3,4,5,6}, 1, 6).SetName("To larger than collection").Returns(typeof(ArgumentOutOfRangeException)),
         };
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatasExceptions))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseDataExceptions))]
         public Type ExceptionsAreCorrect(int[] ints, int from, int to)
         {
             if (ints != null)

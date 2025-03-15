@@ -1,7 +1,5 @@
 using System;
-using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Rendering;
 
 // Utilities that do not allocate.
 
@@ -13,15 +11,15 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/NoAllocUtils.cs
         #region UnityEngine.Rendering.Universal
-        // Add profling samplers to sorts as they often are a bottleneck when scaling things up.
-        // By default avoid sampling recursion, but these can be used externally as well.
-        static public ProfilingSampler s_QuickSortSampler = new ProfilingSampler("QuickSort");
-        static public ProfilingSampler s_InsertionSortSampler = new ProfilingSampler("InsertionSort");
+        // Add profiling samplers to sorts as they are often a bottleneck when scaling things up.
+        // By default, avoid sampling recursion, but these can be used externally as well.
+        static ProfilingSampler s_QuickSortSampler = new ProfilingSampler("QuickSort");
+        static ProfilingSampler s_InsertionSortSampler = new ProfilingSampler("InsertionSort");
 
         public static void QuickSort<T>(T[] data, Func<T, T, int> compare)
         {
             using var scope = new ProfilingScope(s_QuickSortSampler);
-            QuickSort<T>(data, 0, data.Length - 1, compare);
+            QuickSort(data, 0, data.Length - 1, compare);
         }
 
         // <summary>
@@ -56,10 +54,10 @@ namespace UnityExtensions
 
                 if (start < end)
                 {
-                    int pivot = Partition<T>(data, start, end, compare);
+                    int pivot = Partition(data, start, end, compare);
 
                     if (pivot >= 1)
-                        QuickSort<T>(data, start, pivot, compare);
+                        QuickSort(data, start, pivot, compare);
 
                     if (pivot + 1 < end)
                     {
@@ -110,16 +108,16 @@ namespace UnityExtensions
             }
         }
 
-        static public void InsertionSort<T>(T[] data, Func<T, T, int> compare)
+        public static void InsertionSort<T>(T[] data, Func<T, T, int> compare)
         {
             using var scope = new ProfilingScope(s_InsertionSortSampler);
-            InsertionSort<T>(data, 0, data.Length - 1, compare);
+            InsertionSort(data, 0, data.Length - 1, compare);
         }
 
         // A non-allocating predicated sub-array insertion sort for managed arrays.
         //
         // NOTE: called also from QuickSort for small ranges.
-        static public void InsertionSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
+        public static void InsertionSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
         {
             Assert.IsTrue((uint)start < data.Length);
             Assert.IsTrue((uint)end < data.Length);

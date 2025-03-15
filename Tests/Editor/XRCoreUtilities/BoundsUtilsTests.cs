@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -43,7 +42,7 @@ namespace UnityExtensions.Editor.Tests
             boundsB.transform.position += new Vector3(2, 6, 4);
             var transforms = new[] { boundsA.transform, boundsB.transform };
 
-            // if you want to work with more than one object in a test, add them to cleanup list manually
+            // if you want to work with more than one object in a test, add them to clean-up list manually
             m_ToCleanupAfterEach.AddRange(new[] { boundsA, boundsB });
 
             var bounds = BoundsUtils.GetBounds(transforms);

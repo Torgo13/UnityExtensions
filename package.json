@@ -1,8 +1,8 @@
 {
-  "name": "com.tw0catsgames.unityextensions",
+  "name": "com.tw0catsgames.builtinextensions",
   "version": "1.0.0",
   "displayName": "Unity Extensions",
-  "description": "Collection of extension methods from Unity.",
+  "description": "A collection of extension methods and utilities from Unity.",
   "documentationUrl": "https://github.com/Torgo13/UnityExtensions/blob/main/README.md",
   "unity": "2022.3",
   "unityRelease": "20f1",

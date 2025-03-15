@@ -69,11 +69,11 @@ namespace UnityExtensions.Editor
                 UpdatePackageVersions();
             }
 
-            return s_PackageCache.TryGetValue(packageName, out var version) ? version : default;
+            return s_PackageCache.GetValueOrDefault(packageName);
         }
 
         /// <summary>
-        /// Is the a package with the <paramref name="packageName"/> installed in the Package Manager
+        /// Is there a package with the <paramref name="packageName"/> installed in the Package Manager?
         /// <see cref="UnityEditor.PackageManager.Client"/>.
         /// </summary>
         /// <param name="packageName">The package in the Package Manager.</param>
@@ -153,7 +153,7 @@ namespace UnityExtensions.Editor
                     if (string.IsNullOrEmpty(lhSub) && string.IsNullOrEmpty(rhSub))
                         return compare;
 
-                    compare = lhSub.CompareTo(rhSub);
+                    compare = string.Compare(lhSub, rhSub);
                     if (compare != 0)
                         return compare;
                 }

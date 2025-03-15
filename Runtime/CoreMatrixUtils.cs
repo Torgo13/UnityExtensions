@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityObject = UnityEngine.Object;
 
 namespace UnityExtensions
 {
@@ -56,7 +51,7 @@ namespace UnityExtensions
         /// The operation order is perspective * rhs.
         /// </summary>
         /// <param name="perspective">The perspective matrix to multiply with rhs.</param>
-        /// <param name="rhs">A matrix to be multiply to perspective.</param>
+        /// <param name="rhs">A matrix to be multiplied to perspective.</param>
         /// <returns>Returns the matrix that is the result of the multiplication.</returns>
         public static Matrix4x4 MultiplyPerspectiveMatrix(Matrix4x4 perspective, Matrix4x4 rhs)
         {
@@ -142,7 +137,7 @@ namespace UnityExtensions
         /// The operation order is ortho * rhs.
         /// </summary>
         /// <param name="ortho">The ortho matrix to multiply with rhs.</param>
-        /// <param name="rhs">A matrix to be multiply to perspective.</param>
+        /// <param name="rhs">A matrix to be multiplied to perspective.</param>
         /// <param name="centered">If true, it means that right and left are equivalently distant from center and similarly top/bottom are equivalently distant from center.</param>
         /// <returns>Returns the matrix that is the result of the multiplication.</returns>
         public static Matrix4x4 MultiplyOrthoMatrix(Matrix4x4 ortho, Matrix4x4 rhs, bool centered)
@@ -155,8 +150,8 @@ namespace UnityExtensions
         /// The operation order is projMatrix * rhs.
         /// </summary>
         /// <param name="projMatrix">The projection matrix to multiply with rhs.</param>
-        /// <param name="rhs">A matrix to be multiply to perspective.</param>
-        /// <param name="orthoCentered">If true, the projection matrix is a centered ( right+left == top+bottom == 0) orthographic projection, otherwise it is a perspective matrix..</param>
+        /// <param name="rhs">A matrix to be multiplied to perspective.</param>
+        /// <param name="orthoCentered">If true, the projection matrix is a centered ( right+left == top+bottom == 0) orthographic projection, otherwise it is a perspective matrix.</param>
         /// <returns>Returns the matrix that is the result of the multiplication.</returns>
         public static Matrix4x4 MultiplyProjectionMatrix(Matrix4x4 projMatrix, Matrix4x4 rhs, bool orthoCentered)
         {

@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -26,14 +25,14 @@ namespace UnityExtensions.Editor.Tests
                         list.Add(4);
                     }),
                     (Comparison<int>)((x, y) => x.CompareTo(y)), new [] {1, 3, 4})
-                    .SetName("AddMultipleELements_Sort");
+                    .SetName("AddMultipleElements_Sort");
                 yield return new TestCaseData((Action<ObservableList<int>>)(list =>
                         {
                             list.Add(3);
                             list.Add(1);
                             list.Add(4);
                         }), null, new [] {3, 1, 4})
-                    .SetName("AddMultipleELements");
+                    .SetName("AddMultipleElements");
 
                 yield return new TestCaseData((Action<ObservableList<int>>)(
                         list => list.Add(3, 1, 4)), (Comparison<int>)((x, y) => x.CompareTo(y)), new [] {1, 3, 4})
@@ -148,7 +147,7 @@ namespace UnityExtensions.Editor.Tests
                         list.Insert(0, 2);
                     }),
                     (Comparison<int>)((x, y) => x.CompareTo(y)), new [] {2, 3, 6, 7, 8, 10})
-                    .SetName("InsertultipleElements_Sort");
+                    .SetName("InsertMultipleElements_Sort");
                 yield return new TestCaseData(new int[] {8,6,7},(Action<ObservableList<int>>)(list =>
                         {
                             list.Insert(0, 0);

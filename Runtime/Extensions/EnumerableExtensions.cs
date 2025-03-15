@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace UnityExtensions
 {
@@ -60,5 +61,35 @@ namespace UnityExtensions
             return -1;
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
+        
+        public static double Sum(this double[] enumerable)
+        {
+            double sum = 0;
+            
+            foreach (double t in enumerable)
+                sum += t;
+
+            return sum;
+        }
+        
+        public static float Sum(this float[] enumerable)
+        {
+            float sum = 0;
+            
+            foreach (float t in enumerable)
+                sum += t;
+
+            return sum;
+        }
+
+        public static int Max(this int[] enumerable)
+        {
+            int max = int.MaxValue;
+            
+            foreach (int t in enumerable)
+                max = Mathf.Max(max, t);
+            
+            return max;
+        }
     }
 }

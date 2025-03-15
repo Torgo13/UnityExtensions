@@ -108,6 +108,21 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // UnityEngine.Rendering.Universal
         
+        /// <summary>
+        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAt<T>(this NativeList<T> list, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(list.GetUnsafeReadOnlyPtr(), index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> list, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(list.GetUnsafePtr(), index);
+        }
+        
         public static unsafe void Resize<TValue>(ref NativeArray<TValue> array, int newSize, Allocator allocator)
             where TValue : struct
         {

@@ -35,7 +35,7 @@ namespace UnityExtensions.Editor
         /// <returns>True if value are the same</returns>
         public bool Equals(T other) => (int)(object)value == (int)(object)other;
 
-        /// <summary>Test if this EditorPrefBoolFlags is the same than the given one</summary>
+        /// <summary>Test if this EditorPrefBoolFlags is the same as the given one</summary>
         /// <param name="other">Given EditorPrefBoolFlags</param>
         /// <returns>True if they use the same value</returns>
         public bool Equals(EditorPrefBoolFlags<T> other) => m_Key == other.m_Key;

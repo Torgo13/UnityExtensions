@@ -120,7 +120,7 @@ namespace UnityExtensions.Editor
             WindowsIdentity user = null;
             try
             {
-                //get the currently logged in user
+                //get the currently logged-in user
                 user = WindowsIdentity.GetCurrent();
                 WindowsPrincipal principal = new WindowsPrincipal(user);
                 isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);

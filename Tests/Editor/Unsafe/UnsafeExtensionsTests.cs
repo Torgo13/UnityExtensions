@@ -81,7 +81,7 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             var list = new List<int>(array.Length);
 
-            array.CopyToList(ref list);
+            array.CopyTo(list);
 
             Assert.AreEqual(array.Length, list.Count);
             for (int i = 0; i < array.Length; i++)
@@ -96,7 +96,7 @@ namespace UnityExtensions.Unsafe.Tests
             var nativeArray = new NativeArray<int>(new int[] { 1, 2, 3, 4, 5 }, Allocator.Temp);
             var list = new List<int>(nativeArray.Length);
 
-            nativeArray.CopyToList(ref list);
+            nativeArray.CopyTo(list);
 
             Assert.AreEqual(nativeArray.Length, list.Count);
             for (int i = 0; i < nativeArray.Length; i++)
@@ -114,7 +114,7 @@ namespace UnityExtensions.Unsafe.Tests
             nativeList.AddRange(new int[] { 1, 2, 3, 4, 5 });
             var list = new List<int>(nativeList.Length);
 
-            nativeList.CopyToList(ref list);
+            nativeList.CopyTo(list);
 
             Assert.AreEqual(nativeList.Length, list.Count);
             for (int i = 0; i < nativeList.Length; i++)
@@ -131,7 +131,7 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             var nativeArray = new NativeArray<int>(array.Length, Allocator.Temp);
 
-            array.CopyToNativeArray(ref nativeArray);
+            array.CopyTo(ref nativeArray);
 
             for (int i = 0; i < array.Length; i++)
             {
@@ -147,7 +147,7 @@ namespace UnityExtensions.Unsafe.Tests
             var list = new List<int> { 1, 2, 3, 4, 5 };
             var nativeArray = new NativeArray<int>(list.Count, Allocator.Temp);
 
-            list.CopyToNativeArray(ref nativeArray);
+            list.CopyTo(ref nativeArray);
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -164,7 +164,7 @@ namespace UnityExtensions.Unsafe.Tests
             nativeList.AddRange(new int[] { 1, 2, 3, 4, 5 });
             var nativeArray = new NativeArray<int>(nativeList.Length, Allocator.Temp);
 
-            nativeList.CopyToNativeArray(ref nativeArray);
+            nativeList.CopyTo(ref nativeArray);
 
             for (int i = 0; i < nativeList.Length; i++)
             {
@@ -181,7 +181,7 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             var nativeList = new NativeList<int>(Allocator.Temp);
 
-            array.CopyToNativeList(ref nativeList);
+            array.CopyTo(ref nativeList);
 
             Assert.AreEqual(array.Length, nativeList.Length);
             for (int i = 0; i < array.Length; i++)
@@ -198,7 +198,7 @@ namespace UnityExtensions.Unsafe.Tests
             var list = new List<int> { 1, 2, 3, 4, 5 };
             var nativeList = new NativeList<int>(Allocator.Temp);
 
-            list.CopyToNativeList(ref nativeList);
+            list.CopyTo(ref nativeList);
 
             Assert.AreEqual(list.Count, nativeList.Length);
             for (int i = 0; i < list.Count; i++)
@@ -215,7 +215,7 @@ namespace UnityExtensions.Unsafe.Tests
             var nativeArray = new NativeArray<int>(new int[] { 1, 2, 3, 4, 5 }, Allocator.Temp);
             var nativeList = new NativeList<int>(Allocator.Temp);
 
-            nativeArray.CopyToNativeList(ref nativeList);
+            nativeArray.CopyTo(ref nativeList);
 
             Assert.AreEqual(nativeArray.Length, nativeList.Length);
             for (int i = 0; i < nativeArray.Length; i++)

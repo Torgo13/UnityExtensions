@@ -191,7 +191,7 @@ namespace UnityExtensions.Editor.Tests
         }
 
         [Test]
-        public void TestIndexingIsReletiveToSlicedList()
+        public void TestIndexingIsRelativeToSlicedList()
         {
             var list = new List<int>();
             list.Add(1);

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using UnityEngine.Assertions;
 
 namespace UnityExtensions
@@ -10,7 +9,7 @@ namespace UnityExtensions
         #region Unity.LiveCapture.VideoStreaming.Client.Utils
         public static ArraySegment<T> SubSegment<T>(this ArraySegment<T> arraySegment, int offset)
         {
-            Assert.IsNotNull(arraySegment.Array, "arraySegment.Array is null");
+            Assert.IsNotNull(arraySegment.Array, $"{nameof(arraySegment.Array)} is null.");
             return new ArraySegment<T>(arraySegment.Array, arraySegment.Offset + offset, arraySegment.Count - offset);
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -220,7 +219,7 @@ namespace UnityExtensions
         {
             base.DrawDefaultInspector();
 
-            var baker = (target as MeshBaker);
+            var baker = target as MeshBaker;
             if (GUILayout.Button("Bake"))
                 baker.Bake();
 

@@ -8,7 +8,7 @@ namespace UnityExtensions.Editor
     /// <summary>
     /// Contains a set of method to be able to manage Menu Items for the editor
     /// </summary>
-    static class MenuManager
+    public static class MenuManager
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/MenuManager.cs
         #region UnityEditor.Rendering
@@ -47,10 +47,10 @@ namespace UnityExtensions.Editor
         /// </summary>
         /// <param name="path">The path to the menu item</param>
         /// <param name="shortcut">The shortcut of the menu item</param>
-        /// <param name="checked">If the item can have an state, pressed or not</param>
+        /// <param name="checked">If the item can have a state, pressed or not</param>
         /// <param name="priority">The priority of the menu item</param>
         /// <param name="execute">The action that will be called once the menu item is pressed</param>
-        /// <param name="validate">The action that will be called to know if the menu itme is enabled</param>
+        /// <param name="validate">The action that will be called to know if the menu item is enabled</param>
         public static void AddMenuItem(string path, string shortcut, bool @checked, int priority, System.Action execute, System.Func<bool> validate)
         {
             s_AddMenuItem(path, shortcut, @checked, priority, execute, validate);

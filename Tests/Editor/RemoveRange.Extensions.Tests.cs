@@ -3,7 +3,6 @@ using System.Collections;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Rendering;
 using UnityEngine.Pool;
 
 namespace UnityExtensions.Editor.Tests
@@ -12,7 +11,7 @@ namespace UnityExtensions.Editor.Tests
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/RemoveRange.Extensions.Tests.cs
         #region UnityEditor.Rendering.Tests
-        static TestCaseData[] s_ListTestsCaseDatas =
+        static TestCaseData[] s_ListTestsCaseData =
         {
             new TestCaseData(new int[] {1,2,3,4,5,6}, 1, 2).SetName("Remove middle"),
             new TestCaseData(new int[] {1,2,3,4,5,6}, 0, 2).SetName("Remove front"),
@@ -40,27 +39,27 @@ namespace UnityExtensions.Editor.Tests
             }
         }
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatas))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseData))]
         public void ItemInRangeAreRemovedAfterRemoveRangeForList(int[] ints, int startIndex, int count)
         {
             using (GenericPool<SimpleList>.Get(out var copy))
             {
                 copy.AddRange(ints);
-                Assert.IsTrue(ItemInRangeAreRemovedAfterRemoveRange<IList<int>>(copy as IList<int>, startIndex, count));
+                Assert.IsTrue(ItemInRangeAreRemovedAfterRemoveRange<IList<int>>(copy, startIndex, count));
             }
         }
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatas))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseData))]
         public void ItemInRangeAreRemovedAfterRemoveRangeForSimpleList(int[] ints, int startIndex, int count)
         {
             using (ListPool<int>.Get(out var copy))
             {
                 copy.AddRange(ints);
-                Assert.IsTrue(ItemInRangeAreRemovedAfterRemoveRange<List<int>>(copy, startIndex, count));
+                Assert.IsTrue(ItemInRangeAreRemovedAfterRemoveRange(copy, startIndex, count));
             }
         }
 
-        static TestCaseData[] s_ListTestsCaseDatasExceptions =
+        static TestCaseData[] s_ListTestsCaseDataExceptions =
         {
             new TestCaseData(new int[] {1,2,3,4,5,6}, 5, -1).SetName("Count negative").Returns(typeof(ArgumentOutOfRangeException)),
             new TestCaseData(new int[] {1,2,3,4,5,6}, -1, 2).SetName("Index negative").Returns(typeof(ArgumentOutOfRangeException)),
@@ -74,7 +73,7 @@ namespace UnityExtensions.Editor.Tests
             return error;
         }
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatasExceptions))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseDataExceptions))]
         public Type ExceptionsAreCorrectForList(int[] ints, int startIndex, int count)
         {
             using (ListPool<int>.Get(out var copy))
@@ -84,7 +83,7 @@ namespace UnityExtensions.Editor.Tests
             }
         }
 
-        [Test, TestCaseSource(nameof(s_ListTestsCaseDatasExceptions))]
+        [Test, TestCaseSource(nameof(s_ListTestsCaseDataExceptions))]
         public Type ExceptionsAreCorrectForSimpleList(int[] ints, int startIndex, int count)
         {
             using (GenericPool<SimpleList>.Get(out var copy))

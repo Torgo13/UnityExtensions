@@ -12,7 +12,7 @@ namespace UnityExtensions
     /// A class used to define a singleton instance that is stored as an asset.
     /// </summary>
     /// <remarks>
-    /// Unlike ScriptableSingleton, this class can be used outside of the editor.
+    /// Unlike ScriptableSingleton, this class can be used outside the editor.
     /// </remarks>
     /// <typeparam name="T">The type of the setting asset.</typeparam>
     public abstract class SettingAsset<T> : ScriptableObject where T : ScriptableObject

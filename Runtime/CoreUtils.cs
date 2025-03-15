@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
 using UnityObject = UnityEngine.Object;
 
 namespace UnityExtensions
@@ -21,7 +22,7 @@ namespace UnityExtensions
         /// List of look at matrices for cubemap faces.
         /// Ref: https://msdn.microsoft.com/en-us/library/windows/desktop/bb204881(v=vs.85).aspx
         /// </summary>
-        static public readonly Vector3[] lookAtList =
+        public static readonly Vector3[] lookAtList =
         {
             new Vector3(1.0f, 0.0f, 0.0f),
             new Vector3(-1.0f, 0.0f, 0.0f),
@@ -35,7 +36,7 @@ namespace UnityExtensions
         /// List of up vectors for cubemap faces.
         /// Ref: https://msdn.microsoft.com/en-us/library/windows/desktop/bb204881(v=vs.85).aspx
         /// </summary>
-        static public readonly Vector3[] upVectorList =
+        public static readonly Vector3[] upVectorList =
         {
             new Vector3(0.0f, 1.0f, 0.0f),
             new Vector3(0.0f, 1.0f, 0.0f),
@@ -184,7 +185,7 @@ namespace UnityExtensions
             }
         }
 
-        internal static Texture3D m_WhiteVolumeTexture;
+        private static Texture3D m_WhiteVolumeTexture;
 
         /// <summary>
         /// White 3D texture.
@@ -385,7 +386,6 @@ namespace UnityExtensions
                 return null;
             }
 
-
             return new Material(shader)
             {
                 hideFlags = HideFlags.HideAndDontSave
@@ -580,21 +580,18 @@ namespace UnityExtensions
         {
             Mesh mesh = new Mesh();
 
-            var vertices = UnityEngine.Pool.ListPool<Vector3>.Get();
-            if (vertices.Capacity < 8)
-                vertices.Capacity = 8;
-
-            vertices.Add(new Vector3(min.x, min.y, min.z));
-            vertices.Add(new Vector3(max.x, min.y, min.z));
-            vertices.Add(new Vector3(max.x, max.y, min.z));
-            vertices.Add(new Vector3(min.x, max.y, min.z));
-            vertices.Add(new Vector3(min.x, min.y, max.z));
-            vertices.Add(new Vector3(max.x, min.y, max.z));
-            vertices.Add(new Vector3(max.x, max.y, max.z));
-            vertices.Add(new Vector3(min.x, max.y, max.z));
+            var vertices = new NativeArray<Vector3>(8, Allocator.Temp);
+            vertices[0] = new Vector3(min.x, min.y, min.z);
+            vertices[1] = new Vector3(max.x, min.y, min.z);
+            vertices[2] = new Vector3(max.x, max.y, min.z);
+            vertices[3] = new Vector3(min.x, max.y, min.z);
+            vertices[4] = new Vector3(min.x, min.y, max.z);
+            vertices[5] = new Vector3(max.x, min.y, max.z);
+            vertices[6] = new Vector3(max.x, max.y, max.z);
+            vertices[7] = new Vector3(min.x, max.y, max.z);
 
             mesh.SetVertices(vertices);
-            UnityEngine.Pool.ListPool<Vector3>.Release(vertices);
+            vertices.Dispose();
 
             var triangles = UnityEngine.Pool.ListPool<int>.Get();
             if (triangles.Capacity < 36)
@@ -636,12 +633,11 @@ namespace UnityExtensions
                 // Determine whether the "Post Processes" checkbox is checked for the current view.
                 for (int i = 0; i < UnityEditor.SceneView.sceneViews.Count; i++)
                 {
-                    var sv = UnityEditor.SceneView.sceneViews[i] as UnityEditor.SceneView;
-
                     // Post-processing is disabled in scene view if either showImageEffects is disabled or we are
                     // rendering in wireframe mode.
-                    if (sv.camera == camera &&
-                        (sv.sceneViewState.imageEffectsEnabled && sv.cameraMode.drawMode != UnityEditor.DrawCameraMode.Wireframe))
+                    if (UnityEditor.SceneView.sceneViews[i] is UnityEditor.SceneView sv
+                        && sv.camera == camera
+                        && sv.sceneViewState.imageEffectsEnabled && sv.cameraMode.drawMode != UnityEditor.DrawCameraMode.Wireframe)
                     {
                         enabled = true;
                         break;
@@ -672,11 +668,11 @@ namespace UnityExtensions
                 // Determine whether the "Animated Materials" checkbox is checked for the current view.
                 for (int i = 0; i < UnityEditor.SceneView.sceneViews.Count; i++) // Using a foreach on an ArrayList generates garbage ...
                 {
-                    var sv = UnityEditor.SceneView.sceneViews[i] as UnityEditor.SceneView;
+                    if (UnityEditor.SceneView.sceneViews[i] is UnityEditor.SceneView sv
 #if UNITY_2020_2_OR_NEWER
-                    if (sv.camera == camera && sv.sceneViewState.alwaysRefreshEnabled)
+                        && sv.camera == camera && sv.sceneViewState.alwaysRefreshEnabled)
 #else
-                    if (sv.camera == camera && sv.sceneViewState.materialUpdateEnabled)
+                        && sv.camera == camera && sv.sceneViewState.materialUpdateEnabled)
 #endif
                     {
                         animateMaterials = true;
@@ -696,7 +692,7 @@ namespace UnityExtensions
             }
 
             // IMHO, a better solution would be:
-            // A window invokes a camera render. The camera knows which window called it, so it can query its properies
+            // A window invokes a camera render. The camera knows which window called it, so it can query its properties
             // (such as animated materials). This camera provides the space-time position. It should also be able
             // to access the rendering settings somehow. Using this information, it is then able to construct the
             // primary view with information about camera-relative rendering, LOD, time, rendering passes/features
@@ -726,8 +722,8 @@ namespace UnityExtensions
                 // Determine whether the "No Scene Lighting" checkbox is checked for the current view.
                 for (int i = 0; i < UnityEditor.SceneView.sceneViews.Count; i++)
                 {
-                    var sv = UnityEditor.SceneView.sceneViews[i] as UnityEditor.SceneView;
-                    if (sv.camera == camera && !sv.sceneLighting)
+                    if (UnityEditor.SceneView.sceneViews[i] is UnityEditor.SceneView sv
+                        && sv.camera == camera && !sv.sceneLighting)
                     {
                         disabled = true;
                         break;
@@ -752,8 +748,8 @@ namespace UnityExtensions
                 // Determine whether the "LightOverlap" mode is enabled for the current view.
                 for (int i = 0; i < UnityEditor.SceneView.sceneViews.Count; i++)
                 {
-                    var sv = UnityEditor.SceneView.sceneViews[i] as UnityEditor.SceneView;
-                    if (sv.camera == camera && sv.cameraMode.drawMode == UnityEditor.DrawCameraMode.LightOverlap)
+                    if (UnityEditor.SceneView.sceneViews[i] is UnityEditor.SceneView sv
+                        && sv.camera == camera && sv.cameraMode.drawMode == UnityEditor.DrawCameraMode.LightOverlap)
                     {
                         enabled = true;
                         break;
@@ -782,7 +778,8 @@ namespace UnityExtensions
                 // Determine whether the "Animated Materials" checkbox is checked for the current view.
                 for (int i = 0; i < sceneViews.Count; i++)
                 {
-                    if (sceneViews[i] is UnityEditor.SceneView sv && sv.camera == camera && sv.sceneViewState.fogEnabled)
+                    if (sceneViews[i] is UnityEditor.SceneView sv
+                        && sv.camera == camera && sv.sceneViewState.fogEnabled)
                     {
                         fogEnable = true;
                         break;
@@ -804,7 +801,8 @@ namespace UnityExtensions
             var sceneViews = UnityEditor.SceneView.sceneViews;
             for (int i = 0; i < sceneViews.Count; i++)
             {
-                if (sceneViews[i] is UnityEditor.SceneView sv && sv.isUsingSceneFiltering)
+                if (sceneViews[i] is UnityEditor.SceneView sv
+                    && sv.isUsingSceneFiltering)
                     return true;
             }
 #endif
@@ -968,7 +966,7 @@ namespace UnityExtensions
 
             bool isInterface = typeof(T).IsInterface;
             if (!typeof(UnityObject).IsAssignableFrom(typeof(T)) && !isInterface)
-                throw new Exception("T must be an interface or inherite UnityEngine.Object.");
+                throw new Exception("T must be an interface or inherit UnityEngine.Object.");
 
             Func<Type, bool> needsLoad = (allowSubTypes || isInterface)
                 ? (type) => typeof(T).IsAssignableFrom(type)
@@ -995,7 +993,8 @@ namespace UnityExtensions
                 throw new ArgumentException($"Path should start with \"Assets/\". Got {filePath}.", filePath);
             var folderPath = Path.GetDirectoryName(path);
 
-            if (!UnityEditor.AssetDatabase.IsValidFolder(folderPath))
+            if (folderPath != null
+                && !UnityEditor.AssetDatabase.IsValidFolder(folderPath))
             {
                 var folderNames = folderPath.Split(Path.DirectorySeparatorChar);
                 string rootPath = "";
@@ -1011,11 +1010,11 @@ namespace UnityExtensions
 #endif
 
         /// <summary>
-        /// Calcualte frustum corners at specified camera depth given projection matrix and depth z.
+        /// Calculate frustum corners at specified camera depth given projection matrix and depth z.
         /// </summary>
-        /// <param name="proj"> Projection matrix used by the view frustrum. </param>
+        /// <param name="proj"> Projection matrix used by the view frustum. </param>
         /// <param name="z"> Z-depth from the camera origin at which the corners will be calculated. </param>
-        /// <returns> Return conner vectors for left-bottom, right-bottm, right-top, left-top in view space. </returns>
+        /// <returns> Return conner vectors for left-bottom, right-bottom, right-top, left-top in view space. </returns>
         public static Vector3[] CalculateViewSpaceCorners(Matrix4x4 proj, float z)
         {
             Vector3[] outCorners = new Vector3[4];
@@ -1035,6 +1034,31 @@ namespace UnityExtensions
                 outCorners[r] *= z / (-outCorners[r].z);
 
             return outCorners;
+        }
+        
+        /// <summary>
+        /// Calculate frustum corners at specified camera depth given projection matrix and depth z.
+        /// </summary>
+        /// <param name="proj"> Projection matrix used by the view frustum. </param>
+        /// <param name="z"> Z-depth from the camera origin at which the corners will be calculated. </param>
+        /// <param name="outCorners"> Return conner vectors for left-bottom, right-bottom, right-top, left-top in view space. </param>
+        public static void CalculateViewSpaceCornersNonAlloc(Matrix4x4 proj, float z, List<Vector3> outCorners)
+        {
+            outCorners.Clear();
+            Matrix4x4 invProj = Matrix4x4.Inverse(proj);
+
+            // We transform a point further than near plane and closer than far plane, for precision reasons.
+            // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
+            // 5 units from the camera.
+            const float projZ = 0.95f;
+            outCorners.Add(invProj.MultiplyPoint(new Vector3(-1, -1, projZ)));
+            outCorners.Add(invProj.MultiplyPoint(new Vector3(1, -1, projZ)));
+            outCorners.Add(invProj.MultiplyPoint(new Vector3(1, 1, projZ)));
+            outCorners.Add(invProj.MultiplyPoint(new Vector3(-1, 1, projZ)));
+
+            // Rescale vectors to have the desired z distance.
+            for (int r = 0; r < 4; ++r)
+                outCorners[r] *= z / (-outCorners[r].z);
         }
 
         /// <summary>

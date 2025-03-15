@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -59,44 +58,37 @@ namespace UnityExtensions.Editor
 
         public bool GetBool(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) && t.@bool;
+            return m_Items.TryGetValue(key, out Item t) && t.@bool;
         }
 
         public byte GetByte(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@byte : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@byte : default;
         }
 
         public short GetShort(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@short : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@short : default;
         }
 
         public ushort GetUShort(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@ushort : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@ushort : default;
         }
 
         public int GetInt(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@int : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@int : default;
         }
 
         public uint GetUInt(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@uint : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@uint : default;
         }
 
         public string GetString(int key)
         {
-            Item t;
-            return m_Items.TryGetValue(key, out t) ? t.@string : default;
+            return m_Items.TryGetValue(key, out Item t) ? t.@string : default;
         }
 
         public void Clear()

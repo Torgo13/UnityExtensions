@@ -29,7 +29,7 @@ namespace UnityExtensions
         /// <summary>
         /// Keywords strings for Material Quality levels.
         /// </summary>
-        public static string[] KeywordNames =
+        public static readonly string[] KeywordNames =
         {
             "MATERIAL_QUALITY_LOW",
             "MATERIAL_QUALITY_MEDIUM",
@@ -44,7 +44,7 @@ namespace UnityExtensions
         /// <summary>
         /// Keywords for Material Quality levels.
         /// </summary>
-        public static ShaderKeyword[] Keywords =
+        public static readonly ShaderKeyword[] Keywords =
         {
             new ShaderKeyword(KeywordNames[0]),
             new ShaderKeyword(KeywordNames[1]),
@@ -96,7 +96,7 @@ namespace UnityExtensions
             if (chosenQuality != 0)
                 return chosenQuality;
 
-            // If none is found then we fallback to the closest above.
+            // If none are found then we fall back to the closest above.
             for (var i = requestedLevelIndex + 1; i < Keywords.Length; ++i)
             {
                 var level = FromIndex(i);
@@ -131,7 +131,7 @@ namespace UnityExtensions
         /// Set the global keyword for the provided MaterialQuality.
         /// </summary>
         /// <param name="level">MaterialQuality level to set the keyword for.</param>
-        /// <param name="cmd">Command Buffer used to setup the keyword.</param>
+        /// <param name="cmd">Command Buffer used to set up the keyword.</param>
         public static void SetGlobalShaderKeywords(this MaterialQuality level, CommandBuffer cmd)
         {
             for (var i = 0; i < KeywordNames.Length; ++i)

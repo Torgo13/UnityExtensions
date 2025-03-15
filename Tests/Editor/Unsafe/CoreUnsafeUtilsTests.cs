@@ -48,13 +48,13 @@ namespace UnityExtensions.Editor.Unsafe.Tests
 
         [Test]
         [TestCaseSource(nameof(s_CopyToList))]
-        public void CopyToList(List<TestData> datas)
+        public void CopyToList(List<TestData> data)
         {
-            var dest = stackalloc TestData[datas.Count];
-            datas.CopyTo(dest, datas.Count);
+            var dest = stackalloc TestData[data.Count];
+            data.CopyTo(dest, data.Count);
 
-            for (int i = 0; i < datas.Count; ++i)
-                Assert.AreEqual(datas[i], dest[i]);
+            for (int i = 0; i < data.Count; ++i)
+                Assert.AreEqual(data[i], dest[i]);
         }
 
         static object[][] s_CopyToArray = new object[][]
@@ -71,13 +71,13 @@ namespace UnityExtensions.Editor.Unsafe.Tests
 
         [Test]
         [TestCaseSource(nameof(s_CopyToArray))]
-        public void CopyToArray(TestData[] datas)
+        public void CopyToArray(TestData[] data)
         {
-            var dest = stackalloc TestData[datas.Length];
-            datas.CopyTo(dest, datas.Length);
+            var dest = stackalloc TestData[data.Length];
+            data.CopyTo(dest, data.Length);
 
-            for (int i = 0; i < datas.Length; ++i)
-                Assert.AreEqual(datas[i], dest[i]);
+            for (int i = 0; i < data.Length; ++i)
+                Assert.AreEqual(data[i], dest[i]);
         }
 
         static object[][] s_UintSortData = new object[][]

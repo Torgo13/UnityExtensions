@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions
 {
@@ -17,9 +18,16 @@ namespace UnityExtensions
         /// <param name="texture">The destination <see cref="Texture2D" />.</param>
         public static void RenderTextureToTexture2D(RenderTexture renderTexture, Texture2D texture)
         {
+            Assert.IsNotNull(renderTexture);
+            Assert.IsNotNull(texture);
+            Assert.AreEqual(renderTexture.width, texture.width);
+            Assert.AreEqual(renderTexture.height, texture.height);
+
+            var temp = RenderTexture.active;
             RenderTexture.active = renderTexture;
             texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
             texture.Apply();
+            RenderTexture.active = temp;
         }
         #endregion // Unity.XR.CoreUtils
     }

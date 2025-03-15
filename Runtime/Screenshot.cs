@@ -11,12 +11,7 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/Screenshot.cs
         #region Unity.LiveCapture
-        public static Texture2D Take(Camera camera)
-        {
-            return Take(camera, 1f);
-        }
-
-        public static Texture2D Take(Camera camera, float scale)
+        public static Texture2D Take(Camera camera, float scale = 1f)
         {
             if (camera == null)
             {

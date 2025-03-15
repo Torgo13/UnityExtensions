@@ -66,7 +66,6 @@ namespace UnityExtensions
 
         /// <summary>
         /// Export a render texture to a texture2D/3D.
-        ///
         /// <list type="bullet">
         /// <item>Cubemap will be exported in a Texture2D of size (size * 6, size) and with a layout +X,-X,+Y,-Y,+Z,-Z</item>
         /// <item>Texture2D will be copied to a Texture2D</item>
@@ -91,10 +90,12 @@ namespace UnityExtensions
                 {
                     var resolution = source.width;
 
-                    var result = RenderTexture.GetTemporary(resolution * 6, resolution, 0, source.format);
+                    var result = RenderTexture.GetTemporary(resolution * 6, resolution, 
+                        0, source.format);
                     var cmd = new CommandBuffer();
                     for (var i = 0; i < 6; ++i)
-                        cmd.CopyTexture(source, i, 0, 0, 0, resolution, resolution, result, 0, 0, i * resolution, 0);
+                        cmd.CopyTexture(source, i, 0, 0, 0, resolution, 
+                            resolution, result, 0, 0, i * resolution, 0);
                     Graphics.ExecuteCommandBuffer(cmd);
 
                     var t2D = new Texture2D(resolution * 6, resolution, format, TextureCreationFlags.None);
@@ -123,7 +124,8 @@ namespace UnityExtensions
                     var result = new Texture3D(source.width, source.height, source.volumeDepth, format, TextureCreationFlags.None);
 
                     // Determine the number of bytes elements that need to be read based on the texture format.
-                    int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format) * (source.width * source.height * source.volumeDepth);
+                    int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format)
+                                            * (source.width * source.height * source.volumeDepth);
 
                     // Staging memory for the readback.
                     var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.Persistent);

@@ -13,7 +13,7 @@ namespace UnityExtensions.Editor
     ///
     /// <see cref="PackageVersion"/> follows all the standard for valid and invalid formatting of a version
     /// except for limiting the <see cref="MajorVersion"/>, <see cref="MinorVersion"/>, and <see cref="PatchVersion"/>
-    /// to the <c>ulong.MaxValue</c>. Their is no such restriction for the values of <see cref="Prerelease"/> or <see cref="BuildMetaData"/>.
+    /// to the <c>ulong.MaxValue</c>. There is no such restriction for the values of <see cref="Prerelease"/> or <see cref="BuildMetaData"/>.
     /// </remarks>
     public readonly struct PackageVersion : IEquatable<PackageVersion>, IComparable<PackageVersion>
     {

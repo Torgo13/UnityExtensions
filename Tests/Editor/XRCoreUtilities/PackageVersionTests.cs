@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using UnityExtensions.Editor;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -217,9 +216,9 @@ namespace UnityExtensions.Editor.Tests
         [Test]
         public void GetPackageVersionTest()
         {
-            Assert.That(PackageVersionUtility.IsPackageInstalled("com.tw0catsgames.unityextensions"));
+            Assert.That(PackageVersionUtility.IsPackageInstalled("com.tw0catsgames.builtinextensions"));
             Assert.That(!PackageVersionUtility.IsPackageInstalled("com.unity.super-flux-capacitor"));
-            Assert.That(PackageVersionUtility.GetPackageVersion("com.tw0catsgames.unityextensions") >= "1.0.0");
+            Assert.That(PackageVersionUtility.GetPackageVersion("com.tw0catsgames.builtinextensions") >= "1.0.0");
         }
 
         [Test]

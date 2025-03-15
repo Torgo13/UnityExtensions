@@ -11,7 +11,8 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Modules/UIElementsEditor/StringBuilderPool.cs
         #region UnityEditor.UIElements
-        internal static readonly ObjectPool<StringBuilder> s_Pool = new(() => new StringBuilder(), null, sb => sb.Clear());
+        private static readonly ObjectPool<StringBuilder> s_Pool = new(() => new StringBuilder(), null,
+            sb => sb.Clear());
 
         public static StringBuilder Get() => s_Pool.Get();
         public static PooledObject<StringBuilder> Get(out StringBuilder value) => s_Pool.Get(out value);

@@ -13,7 +13,7 @@ namespace UnityExtensions.Attributes
     /// When using them, resource reloading is handled automatically by the engine and does not require calling ResourceReloader.
     /// 
     /// While ResourceReloader was originally created for handling Scriptable Render Pipeline (SRP) resources, it has been replaced by <see cref="IRenderPipelineResources"/>.
-    /// The <see cref="ResourceReloader"/>, <see cref="ResourceReloader"/> and <see cref="ReloadGroupAttribute"/> remain available for for user-defined assets.
+    /// The <see cref="ResourceReloader"/>, <see cref="ResourceReloader"/> and <see cref="ReloadGroupAttribute"/> remain available for user-defined assets.
     /// </remarks>
     /// <seealso cref="ResourceReloader"/>
     /// <seealso cref="ReloadGroupAttribute"/>

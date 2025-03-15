@@ -1,19 +1,19 @@
 // TProfilingSampler<TEnum>.samples should just be an array. Unfortunately, Enum cannot be converted to int without generating garbage.
-// This could be worked around by using Unsafe but it's not available at the moment.
+// This could be worked around by using Unsafe, but it's not available at the moment.
 // So in the meantime we use a Dictionary with a perf hit...
-//#define USE_UNSAFE
+#define USE_UNSAFE
 
 #if UNITY_2020_1_OR_NEWER
 #define UNITY_USE_RECORDER
 #endif
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Runtime.CompilerServices;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Unity.Profiling;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityExtensions
 {
@@ -30,7 +30,8 @@ namespace UnityExtensions
         {
             var names = Enum.GetNames(typeof(TEnum));
 #if USE_UNSAFE
-            var values = Enum.GetValues(typeof(TEnum)).Cast<int>().ToArray();
+            var enumValues = Enum.GetValues(typeof(TEnum));
+            var values = UnsafeUtility.As<Array, int[]>(ref enumValues);
             samples = new TProfilingSampler<TEnum>[values.Max() + 1];
 #else
             var values = Enum.GetValues(typeof(TEnum));
@@ -267,7 +268,7 @@ namespace UnityExtensions
         public ProfilingScope(CommandBuffer cmd, ProfilingSampler sampler)
         {
             // NOTE: Do not mix with named CommandBuffers.
-            // Currently there's an issue which results in mismatched markers.
+            // Currently, there's an issue which results in mismatched markers.
             // The named CommandBuffer will close its "profiling scope" on execution.
             // That will orphan ProfilingScope markers as the named CommandBuffer marker
             // is their "parent".

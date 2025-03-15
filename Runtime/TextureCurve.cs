@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 
 namespace UnityExtensions
@@ -234,7 +233,8 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Smoothes the in and out tangents of the keyframe at <paramref name="index"/>. A <paramref name="weight"/> of 0 evens out tangents.
+        /// Smoothes the in and out tangents of the keyframe at <paramref name="index"/>.
+        /// A <paramref name="weight"/> of 0 evens out tangents.
         /// </summary>
         /// <param name="index">The index of the keyframe to be smoothed.</param>
         /// <param name="weight">The smoothing weight to apply to the keyframe's tangents.</param>

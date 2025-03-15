@@ -4,7 +4,7 @@ using UnityEditor;
 namespace UnityExtensions.Editor
 {
     /// <summary>Serialisation of BitArray, Utility class</summary>
-    public static partial class SerializedBitArrayUtilities
+    public static class SerializedBitArrayUtilities
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/Utilities/SerializedBitArray.cs
         #region UnityEditor.Rendering
@@ -66,7 +66,7 @@ namespace UnityExtensions.Editor
             const string baseTypeName = "BitArray";
             string type = serializedProperty.type;
             return type.StartsWith(baseTypeName)
-                && uint.TryParse(type.Substring(baseTypeName.Length), out capacity);
+                && uint.TryParse(type.AsSpan(baseTypeName.Length), out capacity);
         }
         #endregion // UnityEditor.Rendering
     }
@@ -105,7 +105,7 @@ namespace UnityExtensions.Editor
         // - We are in Editor only here so we can use Unity serialization to do this access, using a bunch of SerializedProperty. We just need to keep them in sync.
         // - For the bit isolation:
         //      - If we want to isolate and only work on 1 bit, we want to modify it, whatever the data was in other bits.
-        //      - If the data on other bits was different per targets beffore writting on 1 bit, it should still be different per targets.
+        //      - If the data on other bits was different per targets before writing on 1 bit, it should still be different per targets.
         //      - Internal method HasMultipleDifferentValuesBitwise and SetBitAtIndexForAllTargetsImmediate is only supported for 32bits formats.
         //Todo: Ideally, if we move this BitArray to Unity, we can rewrite a little the HasMultipleDifferentValuesBitwise and SetBitAtIndexForAllTargetsImmediate to work on other format and thus we should not need this m_SerializedPropertyPerTargets anymore.
         SerializedProperty[] m_SerializedPropertyPerTargets;
@@ -153,7 +153,7 @@ namespace UnityExtensions.Editor
                 case 1: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data2").boxedValue = value; break;
                 case 2: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data3").boxedValue = value; break;
                 case 3: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data4").boxedValue = value; break;
-            };
+            }
         }
 
         //we cannot directly cast from boxed value to the ulong we want in C#, We first need to unbox in the true type

@@ -165,7 +165,7 @@ namespace UnityExtensions.Editor
             {
                 if (part == "Array")
                 {
-                    currentType = field.FieldType.GetElementType();
+                    currentType = field?.FieldType.GetElementType();
                     continue;
                 }
 

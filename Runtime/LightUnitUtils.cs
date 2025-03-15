@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace UnityExtensions
 {
@@ -30,7 +29,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Get the solid angle of a Spot light.
+        /// Get the solid angle of a Spotlight.
         /// </summary>
         /// <param name="spotAngle">The spot angle in degrees.</param>
         /// <returns>Solid angle in steradians.</returns>
@@ -106,7 +105,7 @@ namespace UnityExtensions
         /// Get the projected surface area of a Tube light.
         /// </summary>
         /// <remarks>Note that Tube lights have no physical surface area.
-        /// Instead this method returns a value suitable for Nits&lt;=&gt;Lumen unit conversion.</remarks>
+        /// Instead, this method returns a value suitable for Nits&lt;=&gt;Lumen unit conversion.</remarks>
         /// <param name="tubeLength">The length of the tube.</param>
         /// <returns>4 * Pi * (tube length).</returns>
         public static float GetAreaFromTubeLight(float tubeLength)

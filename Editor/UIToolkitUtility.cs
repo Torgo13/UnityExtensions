@@ -30,6 +30,8 @@ namespace UnityExtensions.Editor
         public static void RegisterGeometryChangedEventCallbackOnce(this VisualElement owner, Action callback)
         {
             owner.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+            return;
+            
             void OnGeometryChanged(GeometryChangedEvent _)
             {
                 owner.UnregisterCallback<GeometryChangedEvent>(OnGeometryChanged); // call only once

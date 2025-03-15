@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using UnityEditor;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Assertions;
+using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 namespace UnityExtensions.Editor
 {
@@ -14,7 +17,7 @@ namespace UnityExtensions.Editor
         static Texture2D _midGrey;
 
         /// <summary>
-        /// Returns a 1 by 1 mid grey (0.5, 0.5, 0.5, 1) Texture.
+        /// Returns a 1 by 1 mid-grey (0.5, 0.5, 0.5, 1) Texture.
         /// </summary>
         public static Texture2D midGrey
         {
@@ -44,7 +47,7 @@ namespace UnityExtensions.Editor
 
             bool makeTexture = !singleColorTextures.ContainsKey(color);
             if (!makeTexture)
-                makeTexture = (singleColorTextures[color] == null);
+                makeTexture = singleColorTextures[color] == null;
 
             if (makeTexture)
             {
@@ -87,8 +90,8 @@ namespace UnityExtensions.Editor
             Texture tex = srcMaterial.GetTexture(propertyName);
             if (tex == null)
                 return fallback;
-            else
-                return tex;
+            
+            return tex;
         }
 
         /// <summary>
@@ -108,15 +111,15 @@ namespace UnityExtensions.Editor
         private Texture m_bSource;
         private Texture m_aSource;
 
-        // Chanels are : r=0, g=1, b=2, a=3, greyscale from rgb = 4
+        // Channels are : r=0, g=1, b=2, a=3, greyscale from rgb = 4
         // If negative, the chanel is inverted
         private int m_rChanel;
         private int m_gChanel;
         private int m_bChanel;
         private int m_aChanel;
 
-        // Chanels remaping
-        private Vector4[] m_remapings =
+        // Channels remapping
+        private Vector4[] m_remappings =
         {
             new Vector4(0f, 1f, 0f, 0f),
             new Vector4(0f, 1f, 0f, 0f),
@@ -166,8 +169,8 @@ namespace UnityExtensions.Editor
         {
             if (channel > 3 || channel < 0) return;
 
-            m_remapings[channel].x = min;
-            m_remapings[channel].y = max;
+            m_remappings[channel].x = min;
+            m_remappings[channel].y = max;
         }
 
         /// <summary>
@@ -199,7 +202,7 @@ namespace UnityExtensions.Editor
             Material combinerMaterial = new Material(Shader.Find("Hidden/SRP_Core/TextureCombiner"));
             combinerMaterial.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            Dictionary<Texture, Texture> m_RawTextures = UnityEngine.Pool.DictionaryPool<Texture, Texture>.Get();
+            Dictionary<Texture, Texture> m_RawTextures = DictionaryPool<Texture, Texture>.Get();
 
             combinerMaterial.SetTexture("_RSource", GetRawTexture(m_RawTextures, m_rSource));
             combinerMaterial.SetTexture("_GSource", GetRawTexture(m_RawTextures, m_gSource));
@@ -211,10 +214,10 @@ namespace UnityExtensions.Editor
             combinerMaterial.SetFloat("_BChannel", m_bChanel);
             combinerMaterial.SetFloat("_AChannel", m_aChanel);
 
-            combinerMaterial.SetVector("_RRemap", m_remapings[0]);
-            combinerMaterial.SetVector("_GRemap", m_remapings[1]);
-            combinerMaterial.SetVector("_BRemap", m_remapings[2]);
-            combinerMaterial.SetVector("_ARemap", m_remapings[3]);
+            combinerMaterial.SetVector("_RRemap", m_remappings[0]);
+            combinerMaterial.SetVector("_GRemap", m_remappings[1]);
+            combinerMaterial.SetVector("_BRemap", m_remappings[2]);
+            combinerMaterial.SetVector("_ARemap", m_remappings[3]);
 
             RenderTexture combinedRT = new RenderTexture(xMin, yMin, 0, GraphicsFormat.R32G32B32A32_SFloat);
 
@@ -227,14 +230,14 @@ namespace UnityExtensions.Editor
             combined.Apply();
             RenderTexture.active = previousActive;
 
-            byte[] bytes = new byte[0];
+            byte[] bytes = Array.Empty<byte>();
 
             if (savePath.EndsWith("png"))
-                bytes = ImageConversion.EncodeToPNG(combined);
-            if (savePath.EndsWith("exr"))
-                bytes = ImageConversion.EncodeToEXR(combined);
-            if (savePath.EndsWith("jpg"))
-                bytes = ImageConversion.EncodeToJPG(combined);
+                bytes = combined.EncodeToPNG();
+            else if (savePath.EndsWith("exr"))
+                bytes = combined.EncodeToEXR();
+            else if (savePath.EndsWith("jpg"))
+                bytes = combined.EncodeToJPG();
 
             string systemPath = Path.Combine(Application.dataPath.Remove(Application.dataPath.Length - 6), savePath);
             File.WriteAllBytes(systemPath, bytes);
@@ -250,7 +253,7 @@ namespace UnityExtensions.Editor
             if (savePath.EndsWith("exr"))
             {
                 // The options for the platform string are: "Standalone", "iPhone", "Android", "WebGL", "Windows Store Apps", "PSP2", "PS4", "XboxOne", "Nintendo 3DS", "WiiU", "tvOS".
-                combinedImporter.SetPlatformTextureSettings(new TextureImporterPlatformSettings() { name = "Standalone", format = TextureImporterFormat.DXT5, overridden = true });
+                combinedImporter.SetPlatformTextureSettings(new TextureImporterPlatformSettings { name = "Standalone", format = TextureImporterFormat.DXT5, overridden = true });
             }
 
             combined = AssetDatabase.LoadAssetAtPath<Texture2D>(savePath);
@@ -264,7 +267,7 @@ namespace UnityExtensions.Editor
 
             Object.DestroyImmediate(combinerMaterial);
 
-            UnityEngine.Pool.DictionaryPool<Texture, Texture>.Release(m_RawTextures);
+            DictionaryPool<Texture, Texture>.Release(m_RawTextures);
 
             return combined;
         }
@@ -290,7 +293,7 @@ namespace UnityExtensions.Editor
                     rawImporter.wrapMode = TextureWrapMode.Clamp;
 
                     Texture2D originalTex2D = original as Texture2D;
-                    rawImporter.sRGBTexture = (originalTex2D == null) ? sRGBFallback : (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(original)) as TextureImporter).sRGBTexture;
+                    rawImporter.sRGBTexture = originalTex2D == null ? sRGBFallback : ((TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(original))).sRGBTexture;
 
                     rawImporter.maxTextureSize = 8192;
 

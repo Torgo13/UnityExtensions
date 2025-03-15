@@ -26,10 +26,10 @@ namespace UnityExtensions.Unsafe
         public static void EnsureListElemCount<T>(List<T> list, int count)
         {
             if (list == null)
-                throw new ArgumentNullException(nameof(list), "list");
+                throw new ArgumentNullException(nameof(list));
 
             if (count < 0)
-                throw new ArgumentException("invalid size to resize.", nameof(list));
+                throw new ArgumentException($"{nameof(count)} must not be negative.", nameof(count));
 
             list.Clear();
 
@@ -63,7 +63,14 @@ namespace UnityExtensions.Unsafe
         public static void ResetListContents<T>(List<T> list, ReadOnlySpan<T> span)
         {
             var tListAccess = CoreUnsafeUtils.As<ListPrivateFieldAccess<T>>(list);
-            tListAccess._items = span.ToArray();
+            
+            // Do not reallocate the _items array if it is already
+            // large enough to contain all the elements of span
+            if (tListAccess._items.Length >= span.Length)
+                span.CopyTo(tListAccess._items);
+            else
+                tListAccess._items = span.ToArray();
+            
             tListAccess._size = span.Length;
             tListAccess._version++;
         }
@@ -88,10 +95,8 @@ namespace UnityExtensions.Unsafe
 #pragma warning disable CS8618
             internal T[] _items; // Do not rename (binary serialization)
 #pragma warning restore CS8618
-#pragma warning disable S4487
             internal int _size; // Do not rename (binary serialization)
             internal int _version; // Do not rename (binary serialization)
-#pragma warning restore S4487
 #pragma warning restore CS0649
         }
         #endregion // UnityEngine

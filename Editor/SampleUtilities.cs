@@ -44,7 +44,7 @@ namespace UnityExtensions.Editor
                 if (!Directory.Exists(localFolderPath))
                     Directory.CreateDirectory(localFolderPath);
 
-                // Create the file if does not exist.
+                // Create the file if it does not exist.
                 if (!File.Exists(localFilePath))
                 {
                     FileUtil.CopyFileOrDirectory(remotePath, localFilePath);
@@ -55,9 +55,9 @@ namespace UnityExtensions.Editor
 
         
         /// <summary>
-        /// Copy the folder named Common in each of the packages mentionned 
+        /// Copy the folder named Common in each of the packages mentioned 
         /// </summary>
-        /// <param name="packages">A list of packages (com.unity..) </param>
+        /// <param name="packages">A list of packages (com.unity.) </param>
         /// <param name="parentFolderName">The name of the folder that is created locally</param>
         /// <param name="foldersToRemove">A list of folders to delete after import to avoid conflicts</param>
         public static void CopyCommonSampleFolders(string[] packages, string parentFolderName, string[] foldersToRemove = null)

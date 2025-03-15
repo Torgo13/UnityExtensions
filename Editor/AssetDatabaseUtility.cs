@@ -32,7 +32,7 @@ namespace UnityExtensions.Editor
             }
 
             var guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", new[] { directory });
-            var paths = guids.Select(guid => AssetDatabase.GUIDToAssetPath(guid));
+            var paths = guids.Select(AssetDatabase.GUIDToAssetPath);
 
             if (!includeSubDirectories)
             {
@@ -40,7 +40,7 @@ namespace UnityExtensions.Editor
                 paths = paths.Where(p => Path.GetDirectoryName(p) == directoryOS);
             }
 
-            return paths.Select(path => AssetDatabase.LoadAssetAtPath<T>(path)).ToList();
+            return paths.Select(AssetDatabase.LoadAssetAtPath<T>).ToList();
         }
 
         /// <summary>

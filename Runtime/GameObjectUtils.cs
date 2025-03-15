@@ -57,8 +57,9 @@ namespace UnityExtensions
         /// <seealso cref="UnityObject.Instantiate(UnityObject, Transform, bool)"/>
         /// <param name="original">An existing GameObject that you want to make a copy of.</param>
         /// <param name="parent">Parent <see cref="Transform"/> to assign to the new object.</param>
-        /// <param name="worldPositionStays">Set <see langword="true"/> to instantiate the new object in world space, which places it in the
-        /// same position as the cloned GameObject, or to offset the new object from <paramref name="parent"/>.</param>
+        /// <param name="worldPositionStays">Set <see langword="true"/> to instantiate the new object in world space,
+        /// which places it in the same position as the cloned GameObject,
+        /// or to offset the new object from <paramref name="parent"/>.</param>
         /// <returns>The instantiated clone.</returns>
         public static GameObject Instantiate(GameObject original, Transform parent = null, bool worldPositionStays = true)
         {
@@ -136,17 +137,20 @@ namespace UnityExtensions
 
         static void CopyHideFlagsRecursively(GameObject copyFrom, GameObject copyTo)
         {
+            CopyHideFlagsRecursively(copyFrom.transform, copyTo.transform);
+        }
+        
+        static void CopyHideFlagsRecursively(Transform copyFrom, Transform copyTo)
+        {
             copyTo.hideFlags = copyFrom.hideFlags;
-            var copyFromTransform = copyFrom.transform;
-            var copyToTransform = copyTo.transform;
-            for (var i = 0; i < copyFromTransform.childCount; ++i)
+            for (var i = 0; i < copyFrom.childCount; ++i)
             {
-                CopyHideFlagsRecursively(copyFromTransform.GetChild(i).gameObject, copyToTransform.GetChild(i).gameObject);
+                CopyHideFlagsRecursively(copyFrom.GetChild(i), copyTo.GetChild(i));
             }
         }
 
         /// <summary>
-        /// Searches for a component in a scene with a 3 step process, getting more comprehensive with each step
+        /// Searches for a component in a scene with a 3-step process, getting more comprehensive with each step
         /// At edit time will find *all* objects in the scene, even if they are disabled
         /// At play time, will be unable to find disabled objects that are not a child of desiredSource
         /// </summary>
@@ -166,7 +170,7 @@ namespace UnityExtensions
 
             if (foundObject == null)
             {
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_2022_3_OR_NEWER
                 foundObject = UnityObject.FindAnyObjectByType<T>();
 #else
                 foundObject = UnityObject.FindObjectOfType<T>();
@@ -194,7 +198,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Searches for a component in a scene with a 3 step process, getting more comprehensive with each step
+        /// Searches for a component in a scene with a 3-step process, getting more comprehensive with each step
         /// At edit time will find *all* objects in the scene, even if they are disabled
         /// At play time, will be unable to find disabled objects that are not a child of desiredSource
         /// </summary>
@@ -212,7 +216,8 @@ namespace UnityExtensions
             // - All loaded assets (Editor Only)
             if (desiredSource != null)
             {
-                var matchingObjects = desiredSource.GetComponentsInChildren<T>(true);
+                var matchingObjects = ListPool<T>.Get();
+                desiredSource.GetComponentsInChildren(includeInactive: true, matchingObjects);
                 foreach (var possibleMatch in matchingObjects)
                 {
                     if (possibleMatch.gameObject.CompareTag(tag))
@@ -221,6 +226,8 @@ namespace UnityExtensions
                         break;
                     }
                 }
+                
+                ListPool<T>.Release(matchingObjects);
             }
 
             if (foundObject == null)
@@ -238,7 +245,7 @@ namespace UnityExtensions
 
             if (foundObject == null)
             {
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_2022_3_OR_NEWER
                 foundObject = UnityObject.FindAnyObjectByType<T>();
 #else
                 foundObject = UnityObject.FindObjectOfType<T>();
@@ -289,16 +296,20 @@ namespace UnityExtensions
         /// <param name="scene">The scene to search</param>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false) where T : Component
+        public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
+            where T : Component
         {
             using var _0 = ListPool<GameObject>.Get(out var k_GameObjects);
+            using var _1 = ListPool<T>.Get(out var children);
             scene.GetRootGameObjects(k_GameObjects);
             foreach (var gameObject in k_GameObjects)
             {
                 if (!includeInactive && !gameObject.activeInHierarchy)
                     continue;
 
-                components.AddRange(gameObject.GetComponentsInChildren<T>(includeInactive));
+                children.Clear();
+                gameObject.GetComponentsInChildren(includeInactive, children);
+                components.AddRange(children);
             }
         }
 
@@ -318,7 +329,8 @@ namespace UnityExtensions
         /// <typeparam name="T">The type of components to retrieve</typeparam>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInActiveScene<T>(List<T> components, bool includeInactive = false) where T : Component
+        public static void GetComponentsInActiveScene<T>(List<T> components, bool includeInactive = false)
+            where T : Component
         {
             GetComponentsInScene(SceneManager.GetActiveScene(), components, includeInactive);
         }
@@ -329,7 +341,8 @@ namespace UnityExtensions
         /// <typeparam name="T">The type of components to retrieve</typeparam>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInAllScenes<T>(List<T> components, bool includeInactive = false) where T : Component
+        public static void GetComponentsInAllScenes<T>(List<T> components, bool includeInactive = false)
+            where T : Component
         {
             var sceneCount = SceneManager.sceneCount;
             for (var i = 0; i < sceneCount; i++)

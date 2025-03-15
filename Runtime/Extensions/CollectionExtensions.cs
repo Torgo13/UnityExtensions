@@ -48,7 +48,7 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Runtime/Export/Collections/CollectionExtensions.cs
         #region Unity.Collections
         /// <summary>
-        /// Add element to the correct position in presorted List. This methods reduces a need to call Sort() on the List.
+        /// Add an element to the correct position in presorted List. These methods remove the need to call Sort() on the List.
         /// </summary>
         /// <param name="list">Presorted List</param>
         /// <param name="item">Element to add</param>
@@ -143,7 +143,7 @@ namespace UnityExtensions
 
         /// <summary>
         /// Returns collections as a string. This can be useful for debug collections in Debug.Log.
-        /// String is also Json compatible. It use [ , , ] convention.
+        /// String is also Json compatible. It uses the [ , , ] convention.
         /// </summary>
         /// <param name="collection">Serializable collection</param>
         /// <param name="serializeElement">Function to serialize element of collection</param>
@@ -184,6 +184,7 @@ namespace UnityExtensions
         }
         #endregion // Unity.Collections
 
+        /*
         //https://github.com/dotnet/runtime/blob/7eb07dde40933cace91d57aae0a3e569fd042def/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/CollectionExtensions.cs
         #region System.Collections.Generic
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) =>
@@ -295,5 +296,6 @@ namespace UnityExtensions
                 destination[i] = list[i];
         }
         #endregion // System.Collections.Generic
+        */
     }
 }

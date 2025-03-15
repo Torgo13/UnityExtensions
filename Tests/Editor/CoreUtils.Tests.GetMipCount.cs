@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEngine.Rendering;
 
 namespace UnityExtensions.Editor.Tests
 {
@@ -7,7 +6,7 @@ namespace UnityExtensions.Editor.Tests
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/CoreUtils.Tests.GetMipCount.cs
         #region UnityEditor.Rendering.Tests
-        static TestCaseData[] s_TestsCaseDatasInt =
+        static TestCaseData[] s_TestCaseDataInt =
         {
             new TestCaseData(8192).Returns(14),
             new TestCaseData(4096).Returns(13),
@@ -25,13 +24,13 @@ namespace UnityExtensions.Editor.Tests
             new TestCaseData(1).Returns(1),
         };
 
-        [Test, TestCaseSource(nameof(s_TestsCaseDatasInt))]
+        [Test, TestCaseSource(nameof(s_TestCaseDataInt))]
         public int GetMipCountInt(int size)
         {
             return CoreUtils.GetMipCount(size);
         }
 
-        static TestCaseData[] s_TestsCaseDatasFloat =
+        static TestCaseData[] s_TestCaseDataFloat =
         {
             new TestCaseData(8192.0f).Returns(14),
             new TestCaseData(4096.0f).Returns(13),
@@ -49,7 +48,7 @@ namespace UnityExtensions.Editor.Tests
             new TestCaseData(1.0f).Returns(1),
         };
 
-        [Test, TestCaseSource(nameof(s_TestsCaseDatasFloat))]
+        [Test, TestCaseSource(nameof(s_TestCaseDataFloat))]
         public int GetMipCountFloat(float size)
         {
             return CoreUtils.GetMipCount(size);

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -235,7 +234,7 @@ namespace UnityExtensions
                 if (assemblies[i].GetName().Name != assemblyName)
                     continue;
 
-                return assemblyTypeMaps[i].TryGetValue(typeName, out var type) ? type : null;
+                return assemblyTypeMaps[i].GetValueOrDefault(typeName);
             }
 
             return null;

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,7 +40,7 @@ namespace UnityExtensions
 
             if (transform == root)
             {
-                path = string.Join("/", s_Names.Reverse<string>());
+                path = string.Join('/', s_Names.Reverse<string>());
 
                 ListPool<string>.Release(s_Names);
                 return true;

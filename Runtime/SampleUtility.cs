@@ -20,7 +20,7 @@ namespace UnityExtensions
             effector.transform.SetPositionAndRotation(position, rotation);
             effector.transform.localScale = Vector3.one * 0.15f;
             var meshRenderer = effector.GetComponent<MeshRenderer>();
-            meshRenderer.material.color = Color.magenta;
+            meshRenderer.sharedMaterial.color = Color.magenta;
             return effector;
         }
         #endregion // SampleUtility

@@ -2,7 +2,7 @@ Shader "Hidden/SRP_Core/TextureCombiner"
 {
     Properties
     {
-        // Chanels are : r=0, g=1, b=2, a=3, greyscale from rgb = 4
+        // Channels are : r=0, g=1, b=2, a=3, greyscale from rgb = 4
         // If the chanel value is negative, we invert the value
 
         [Linear][NoScaleOffset] _RSource ("R Source", 2D) = "white" {}

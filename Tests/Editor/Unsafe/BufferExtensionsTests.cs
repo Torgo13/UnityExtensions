@@ -9,8 +9,8 @@ namespace UnityExtensions.Unsafe.Tests
         [Test]
         public void ToByte_ShouldConvertBoolToByte()
         {
-            bool valueTrue = true;
-            bool valueFalse = false;
+            const bool valueTrue = true;
+            const bool valueFalse = false;
 
             byte byteTrue = valueTrue.ToByte();
             byte byteFalse = valueFalse.ToByte();

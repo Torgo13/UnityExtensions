@@ -283,7 +283,7 @@ namespace UnityExtensions
         /// Disposes of the cached component filter.
         /// </summary>
         /// <seealso href="https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose">Implement a Dispose method</seealso>
-        /// <param name="disposing">Whether or not to dispose the contents of this object.</param>
+        /// <param name="disposing">Whether to dispose the contents of this object.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (m_DisposedValue)

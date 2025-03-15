@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -35,7 +33,7 @@ namespace UnityExtensions
 
             if (mainLight != null)
             {
-                //This is to force the mainlight to specific intensity and color for good presentation
+                //Force the mainLight to specific intensity and color to approximate the Sun
                 previousIntensity = mainLight.intensity;
                 previousColor = mainLight.color;
                 mainLight.intensity = 1000f;

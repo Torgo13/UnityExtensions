@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
 
 namespace UnityExtensions
@@ -71,12 +70,15 @@ namespace UnityExtensions
         /// <param name="colorSpace">Controls how the gradient colors are interpolated.</param>
         /// <param name="requestedTextureSize">Texture Size used internally, if '-1' using Nyquist-Shannon limits.</param>
         /// <param name="precise">if precise uses 4*Nyquist-Shannon limits, 2* otherwise.</param>
-        public TextureGradient(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, GradientMode mode = GradientMode.PerceptualBlend, ColorSpace colorSpace = ColorSpace.Uninitialized, int requestedTextureSize = -1, bool precise = false)
+        public TextureGradient(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys,
+            GradientMode mode = GradientMode.PerceptualBlend, ColorSpace colorSpace = ColorSpace.Uninitialized,
+            int requestedTextureSize = -1, bool precise = false)
         {
             Rebuild(colorKeys, alphaKeys, mode, colorSpace, requestedTextureSize, precise);
         }
 
-        void Rebuild(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, GradientMode mode, ColorSpace colorSpace, int requestedTextureSize, bool precise)
+        void Rebuild(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, GradientMode mode,
+            ColorSpace colorSpace, int requestedTextureSize, bool precise)
         {
             m_Gradient = new Gradient();
             m_Gradient.mode = mode;
@@ -231,7 +233,8 @@ namespace UnityExtensions
         /// <param name="alphaKeys">Alpha keys of the gradient (maximum 8 alpha keys).</param>
         /// <param name="mode">Indicates the color space that the gradient color keys are using.</param>
         /// <param name="colorSpace">Controls how the gradient colors are interpolated.</param>
-        public void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, GradientMode mode, ColorSpace colorSpace)
+        public void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys,
+            GradientMode mode, ColorSpace colorSpace)
         {
             m_Gradient.SetKeys(colorKeys, alphaKeys);
             m_Gradient.mode = mode;

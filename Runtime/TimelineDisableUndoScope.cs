@@ -48,8 +48,8 @@ namespace UnityExtensions
         const string s_FieldStr = "enableUndo";
         static FieldInfo s_EnableUndo = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
-            .FirstOrDefault(t => t.FullName.Equals(s_TypeStr))
-            .GetField(s_FieldStr, BindingFlags.NonPublic | BindingFlags.Static);
+            .FirstOrDefault(t => string.Equals(t.FullName, s_TypeStr))
+            ?.GetField(s_FieldStr, BindingFlags.NonPublic | BindingFlags.Static);
 
         bool m_Disposed;
 

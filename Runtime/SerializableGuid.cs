@@ -51,7 +51,7 @@ namespace UnityExtensions
         /// Gets the hash code for this SerializableGuid.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override readonly int GetHashCode()
+        public readonly override int GetHashCode()
         {
             unchecked
             {
@@ -65,7 +65,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if <paramref name="obj"/> is a SerializableGuid with the same field values.</returns>
-        public override readonly bool Equals(object obj)
+        public readonly override bool Equals(object obj)
         {
             if (!(obj is SerializableGuid serializableGuid))
                 return false;
@@ -79,7 +79,7 @@ namespace UnityExtensions
         /// for more details.
         /// </summary>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
-        public override readonly string ToString() => Guid.ToString();
+        public readonly override string ToString() => Guid.ToString();
 
         /// <summary>
         /// Generates a string representation of the <c>Guid</c>. Same as <see cref="Guid.ToString(string)"/>.

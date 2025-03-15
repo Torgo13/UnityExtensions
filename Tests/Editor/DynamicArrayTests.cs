@@ -114,7 +114,7 @@ namespace UnityExtensions.Editor.Tests
         }
 
         [Test]
-        public void TestRemoveInexistantElementReturnFalse()
+        public void TestRemoveNonexistentElementReturnFalse()
         {
             m_DynamicArray.Add(2);
             m_DynamicArray.Add(4);
@@ -310,7 +310,7 @@ namespace UnityExtensions.Editor.Tests
             Assert.AreEqual(0, m_DynamicArray.size);
 
             // Resize it back to 32 elements, the memory should not have been reallocated
-            // it also shouln't have been cleared (for peformance reasons)
+            // it also shouldn't have been cleared (for performance reasons)
             m_DynamicArray.Resize(32);
             Assert.AreEqual(32, m_DynamicArray.size);
             Assert.AreEqual(0xFFFF, m_DynamicArray[31]);

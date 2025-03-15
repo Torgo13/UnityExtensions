@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -45,7 +44,7 @@ namespace UnityExtensions.Editor.Tests
         #endregion
 
         protected Type[] GenericRemoveComponent(
-                [DisallowNull] int selectionAmount,
+                int selectionAmount,
                 [DisallowNull] Type componentToRemove,
                 [DisallowNull] Type[] componentsToAdd,
                 [DisallowNull] Action<Component> removeMethod)
@@ -95,22 +94,22 @@ namespace UnityExtensions.Editor.Tests
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/RemoveComponentTests.cs
         #region UnityEngine.Rendering.Tests
-        //No multiedition test needed as this is not Selection dependant
-        static TestCaseData[] s_RemoveComponentTestCaseDatas =
+        //No multi-edition test needed as this is not Selection dependant
+        static TestCaseData[] s_RemoveComponentTestCaseData =
         {
             new TestCaseData(typeof(Banana), new Type[] {typeof(Banana), typeof(AdditionalBanana)})
                 .SetName("Removal of target component removes it's additional data")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(typeof(Banana), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(AdditionalBananaColor)})
-                .SetName("Removal of target component removes all it's additional datas")
+                .SetName("Removal of target component removes all it's additional data")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(typeof(Apple), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(Apple), typeof(AdditionalApple)})
-                .SetName("Given multiple components, each with additional datas, the removal of the component only removes its additional datas")
+                .SetName("Given multiple components, each with additional data, the removal of the component only removes its additional data")
                 .Returns(new Type[] {typeof(Banana), typeof(AdditionalBanana) }),
         };
 
-        [Test, TestCaseSource(nameof(s_RemoveComponentTestCaseDatas))]
-        public Type[] RemoveComponentAndPropagateTheDeleteToAdditionalDatas([DisallowNull] Type componentToRemove, [DisallowNull] Type[] componentsToAdd)
+        [Test, TestCaseSource(nameof(s_RemoveComponentTestCaseData))]
+        public Type[] RemoveComponentAndPropagateTheDeleteToAdditionalData([DisallowNull] Type componentToRemove, [DisallowNull] Type[] componentsToAdd)
         {
             return GenericRemoveComponent(1, componentToRemove, componentsToAdd, RemoveComponentUtils.RemoveComponent);
         }
@@ -122,8 +121,8 @@ namespace UnityExtensions.Editor.Tests
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/RemoveComponentTests.cs
         #region UnityEngine.Rendering.Tests
-        //No multiedition test needed as this is not Selection dependant
-        static TestCaseData[] s_TryGetComponentsToRemoveTestCaseDatas =
+        //No multi-edition test needed as this is not Selection dependant
+        static TestCaseData[] s_TryGetComponentsToRemoveTestCaseData =
         {
             new TestCaseData(typeof(AdditionalBanana))
                 .Returns(new string[] {"Banana"})
@@ -133,10 +132,10 @@ namespace UnityExtensions.Editor.Tests
                 .SetName("For additional data targeting multiple components, return all the targeted components"),
             new TestCaseData(typeof(WaterMelon))
                 .Returns(Array.Empty<string>())
-                .SetName("For additional data targetting no component, return empty collection."),
+                .SetName("For additional data targeting no component, return empty collection."),
         };
 
-        [Test, TestCaseSource(nameof(s_TryGetComponentsToRemoveTestCaseDatas))]
+        [Test, TestCaseSource(nameof(s_TryGetComponentsToRemoveTestCaseData))]
         public string[] TryGetComponentsToRemove([DisallowNull] Type type)
         {
             string[] result = Array.Empty<string>();
@@ -150,36 +149,36 @@ namespace UnityExtensions.Editor.Tests
             return result;
         }
 
-        //No multiedition RECQUIRED: This is Selection dependent to handle correctly the popup
-        static TestCaseData[] s_RemoveAdditionalDataComponentTestCaseDatas =
+        //No multi-edition REQUIRED: This is Selection dependent to handle correctly the popup
+        static TestCaseData[] s_RemoveAdditionalDataComponentTestCaseData =
         {
             new TestCaseData(1, typeof(AdditionalBanana), new Type[] {typeof(Banana), typeof(AdditionalBanana) })
                 .SetName("For single additional data, when removing it, the target component is deleted")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(1, typeof(AdditionalBananaColor), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(AdditionalBananaColor)})
-                .SetName("For multiple additional datas, when removing one of them, target component is deleted, and the other additional data")
+                .SetName("For multiple additional data, when removing one of them, target component is deleted, and the other additional data")
                 .Returns(Array.Empty<Type>()),
            new TestCaseData(1, typeof(AdditionalBananaColor), new Type[] {typeof(Banana), typeof(Banana), typeof(AdditionalBanana), typeof(AdditionalBananaColor)})
-                .SetName("For multiple additional component and datas, when removing one of them everything is removed")
+                .SetName("For multiple additional component and data, when removing one of them everything is removed")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(1, typeof(AdditionalApple), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(Apple), typeof(AdditionalApple)})
                 .SetName("For multiple types of target component, when deleting an additional data, only the target component is being removed")
                 .Returns(new Type[] {typeof(Banana), typeof(AdditionalBanana)}),
             new TestCaseData(3, typeof(AdditionalBanana), new Type[] {typeof(Banana), typeof(AdditionalBanana) })
-                .SetName("For single additional data, when removing it, the target component is deleted (multiedition case)")
+                .SetName("For single additional data, when removing it, the target component is deleted (multi-edition case)")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(3, typeof(AdditionalBananaColor), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(AdditionalBananaColor)})
-                .SetName("For multiple additional datas, when removing one of them, target component is deleted, and the other additional data (multiedition case)")
+                .SetName("For multiple additional data, when removing one of them, target component is deleted, and the other additional data (multi-edition case)")
                 .Returns(Array.Empty<Type>()),
            new TestCaseData(3, typeof(AdditionalBananaColor), new Type[] {typeof(Banana), typeof(Banana), typeof(AdditionalBanana), typeof(AdditionalBananaColor)})
-                .SetName("For multiple additional component and datas, when removing one of them everything is removed (multiedition case)")
+                .SetName("For multiple additional component and data, when removing one of them everything is removed (multi-edition case)")
                 .Returns(Array.Empty<Type>()),
             new TestCaseData(3, typeof(AdditionalApple), new Type[] {typeof(Banana), typeof(AdditionalBanana), typeof(Apple), typeof(AdditionalApple)})
-                .SetName("For multiple types of target component, when deleting an additional data, only the target component is being removed (multiedition case)")
+                .SetName("For multiple types of target component, when deleting an additional data, only the target component is being removed (multi-edition case)")
                 .Returns(new Type[] {typeof(Banana), typeof(AdditionalBanana)})
         };
 
-        [Test, TestCaseSource(nameof(s_RemoveAdditionalDataComponentTestCaseDatas))]
+        [Test, TestCaseSource(nameof(s_RemoveAdditionalDataComponentTestCaseData))]
         [NUnit.Framework.Property("FogBugz", "1396805")]
         [NUnit.Framework.Property("Jira", "UUM-5452")]
         public Type[] RemoveAdditionalDataComponentAndPropagateToComponent(int selectionAmount, [DisallowNull] Type componentToRemove, [DisallowNull] Type[] componentsToAdd)

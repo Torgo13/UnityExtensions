@@ -17,7 +17,7 @@ namespace UnityExtensions.Unsafe
         const int kMinRadixSortArraySize = 2048;
         const int kMinRadixSortBatchSize = 256;
 
-        internal static JobHandle ParallelSort(this NativeArray<int> array)
+        public static JobHandle ParallelSort(this NativeArray<int> array)
         {
             if (array.Length <= 1)
                 return new JobHandle();
@@ -112,7 +112,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
-        internal struct RadixSortBucketCountJob : IJobFor
+        private struct RadixSortBucketCountJob : IJobFor
         {
             [ReadOnly] public int radix;
             [ReadOnly] public int jobsCount;
@@ -138,7 +138,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
-        internal struct RadixSortBatchPrefixSumJob : IJobFor
+        private struct RadixSortBatchPrefixSumJob : IJobFor
         {
             [ReadOnly] public int radix;
             [ReadOnly] public int jobsCount;
@@ -217,7 +217,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
-        internal struct RadixSortPrefixSumJob : IJobFor
+        private struct RadixSortPrefixSumJob : IJobFor
         {
             [ReadOnly] public int jobsCount;
 
@@ -243,7 +243,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
-        internal struct RadixSortBucketSortJob : IJobFor
+        private struct RadixSortBucketSortJob : IJobFor
         {
             [ReadOnly] public int radix;
             [ReadOnly] public int batchSize;
