@@ -25,22 +25,22 @@ namespace UnityExtensions
         /// <returns>A string with all elements in the collection converted to strings and separated by commas.</returns>
         public static string Stringify<T>(this ICollection<T> collection)
         {
-            using var _0 = StringBuilderPool.Get(out var k_String);
+            using var _0 = StringBuilderPool.Get(out var sb);
             var endIndex = collection.Count - 1;
             var counter = 0;
             foreach (var t in collection)
             {
                 if (counter++ == endIndex)
                 {
-                    k_String.Append(t);
+                    sb.Append(t);
                 }
                 else
                 {
-                    k_String.Append(t).Append(',').Append(' ');
+                    sb.Append(t).Append(',').Append(' ');
                 }
             }
 
-            return k_String.ToString();
+            return sb.ToString();
         }
 #endregion // Unity.XR.CoreUtils
 

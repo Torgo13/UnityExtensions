@@ -43,8 +43,8 @@ namespace UnityExtensions
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            using var _0 = StringBuilderPool.Get(out var k_StringBuilder);
-            k_StringBuilder.Append(str[0]);
+            using var _0 = StringBuilderPool.Get(out var stringBuilder);
+            stringBuilder.Append(str[0]);
 
             var strLength = str.Length;
             for (var i = 0; i < strLength - 1; i++)
@@ -55,24 +55,24 @@ namespace UnityExtensions
                 var firstIsLower = char.IsLower(thisChar);
                 var secondIsLower = char.IsLower(nextChar);
 
-                // Need a space when lower case followed by upper case eg. aB -> a B
+                // Need a space when lower case followed by upper case e.g. aB -> a B
                 var needsSpace = firstIsLower && !secondIsLower;
 
                 if (i + 2 < strLength)
                 {
-                    // Also need space at the beginning of a word after an all-uppercase word eg. ABc -> A Bc
+                    // Also need space at the beginning of a word after an all-uppercase word e.g. ABc -> A Bc
                     var nextNextChar = str[i + 2];
                     var thirdIsLower = char.IsLower(nextNextChar);
                     needsSpace |= !firstIsLower && !secondIsLower && thirdIsLower;
                 }
 
                 if (needsSpace)
-                    k_StringBuilder.Append(' ');
+                    stringBuilder.Append(' ');
 
-                k_StringBuilder.Append(nextChar);
+                stringBuilder.Append(nextChar);
             }
 
-            return k_StringBuilder.ToString();
+            return stringBuilder.ToString();
         }
         #endregion // Unity.XR.CoreUtils
 
@@ -85,7 +85,7 @@ namespace UnityExtensions
             return ConvertCase(text, '-', char.ToLowerInvariant, char.ToLowerInvariant);
         }
 
-        static readonly char[] k_WordDelimiters = { ' ', '-', '_' };
+        static readonly char[] WordDelimiters = { ' ', '-', '_' };
 
         /// <exception cref="ArgumentNullException"></exception>
         public static string ConvertCase(string text,
@@ -107,7 +107,7 @@ namespace UnityExtensions
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];
-                if (k_WordDelimiters.Contains(c))
+                if (WordDelimiters.Contains(c))
                 {
                     if (c == outputWordDelimiter)
                     {
@@ -159,11 +159,11 @@ namespace UnityExtensions
 
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Runtime/Extensions/StringExtensions.cs
         #region UnityEngine.GraphToolsFoundation.Overdrive
-        static readonly Regex k_CodifyRegex = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled);
+        static readonly Regex CodifyRegex = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled);
 
         public static string CodifyString(this string str)
         {
-            return k_CodifyRegex.Replace(str, "_");
+            return CodifyRegex.Replace(str, "_");
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
@@ -190,8 +190,8 @@ namespace UnityExtensions
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/StringExtensions.cs
         #region Unity.Entities.Editor
-        static readonly Regex s_ToWordRegex = new Regex(@"[^\w]", RegexOptions.Compiled);
-        static readonly Regex s_SplitCaseRegex = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
+        static readonly Regex ToWordRegex = new Regex(@"[^\w]", RegexOptions.Compiled);
+        static readonly Regex SplitCaseRegex = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
 
         public static string SingleQuoted(this string value, bool onlyIfSpaces = false)
         {
@@ -216,14 +216,14 @@ namespace UnityExtensions
 
         public static string ToIdentifier(this string value)
         {
-            return s_ToWordRegex.Replace(value, "_");
+            return ToWordRegex.Replace(value, "_");
         }
 
         public static string ToForwardSlash(this string value) => value.Replace('\\', '/');
 
         public static string ReplaceLastOccurrence(this string value, string oldValue, string newValue)
         {
-            var index = value.LastIndexOf(oldValue);
+            var index = value.LastIndexOf(oldValue, StringComparison.CurrentCulture);
             return index >= 0 ? value.Remove(index, oldValue.Length).Insert(index, newValue) : value;
         }
 
@@ -237,7 +237,7 @@ namespace UnityExtensions
         /// </summary>
         public static string SplitPascalCase(this string str)
         {
-            str = s_SplitCaseRegex.Replace(str, " $1");
+            str = SplitCaseRegex.Replace(str, " $1");
             return str.Substring(0, 1).ToUpper() + str.Substring(1);
         }
         #endregion // Unity.Entities.Editor
@@ -266,16 +266,16 @@ namespace UnityExtensions
 
         //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.core/Editor/StringExtensions.cs
         #region UnityEditor.Rendering
-        private static readonly Regex k_InvalidRegEx = new(string.Format(@"([{0}]*\.+$)|([{0}]+)",
+        private static readonly Regex InvalidRegEx = new Regex(string.Format(@"([{0}]*\.+$)|([{0}]+)",
             Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars()))), RegexOptions.Compiled, TimeSpan.FromSeconds(0.1));
 
         /// <summary>
-        /// Replaces invalid characters for a filename or a directory with a given optional replacemenet string
+        /// Replaces invalid characters for a filename or a directory with a given optional replacement string
         /// </summary>
         /// <param name="input">The input filename or directory</param>
         /// <param name="replacement">The replacement</param>
         /// <returns>The string with the invalid characters replaced</returns>
-        public static string ReplaceInvalidFileNameCharacters(this string input, string replacement = "_") => k_InvalidRegEx.Replace(input, replacement);
+        public static string ReplaceInvalidFileNameCharacters(this string input, string replacement = "_") => InvalidRegEx.Replace(input, replacement);
 
         /// <summary>
         /// Checks if the given string ends with the given extension

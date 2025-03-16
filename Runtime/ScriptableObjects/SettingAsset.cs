@@ -93,7 +93,7 @@ namespace UnityExtensions
 
             if (!Directory.Exists(folderPath))
             {
-                Directory.CreateDirectory(folderPath);
+                Directory.CreateDirectory(folderPath!);
             }
 
             UnityEditorInternal.InternalEditorUtility.SaveToSerializedFileAndForget(new[] { _instance },

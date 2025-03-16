@@ -14,25 +14,25 @@ namespace UnityExtensions
         /// <summary>
         /// Event that is triggered when the value changes.
         /// </summary>
-        public event Action<T> onValueChanged;
+        public event Action<T> OnValueChanged;
 
-        private T m_Value;
+        private T _value;
 
         /// <summary>
         /// The current value.
         /// </summary>
         public T value
         {
-            get => m_Value;
+            get => _value;
             set
             {
                 // Only invoke the event if the new value is different from the current value
-                if (!EqualityComparer<T>.Default.Equals(value, m_Value))
+                if (!EqualityComparer<T>.Default.Equals(value, _value))
                 {
-                    m_Value = value;
+                    _value = value;
 
                     // Notify subscribers when the value changes
-                    onValueChanged?.Invoke(value);
+                    OnValueChanged?.Invoke(value);
                 }
             }
         }
@@ -43,8 +43,8 @@ namespace UnityExtensions
         /// <param name="newValue">The new value to be assigned.</param>
         public Observable(T newValue)
         {
-            m_Value = newValue;
-            onValueChanged = null;
+            _value = newValue;
+            OnValueChanged = null;
         }
         #endregion // UnityEngine.Rendering
     }

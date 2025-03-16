@@ -18,32 +18,32 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/VirtualCamera/Utilities/ComponentMap.cs
         #region Unity.LiveCapture.VirtualCamera
-        static ComponentMap<TKey, TValue> s_Default = new ComponentMap<TKey, TValue>();
-        public static ComponentMap<TKey, TValue> Instance => s_Default;
+        static readonly ComponentMap<TKey, TValue> Default = new ComponentMap<TKey, TValue>();
+        public static ComponentMap<TKey, TValue> Instance => Default;
 
-        readonly Dictionary<TKey, TValue> s_KeyToValueMap = new Dictionary<TKey, TValue>();
-        readonly Dictionary<TValue, TKey> s_ValueToKeyMap = new Dictionary<TValue, TKey>();
+        readonly Dictionary<TKey, TValue> _keyToValueMap = new Dictionary<TKey, TValue>();
+        readonly Dictionary<TValue, TKey> _valueToKeyMap = new Dictionary<TValue, TKey>();
 
         void Add(TKey key, TValue value)
         {
-            s_KeyToValueMap.Add(key, value);
-            s_ValueToKeyMap.Add(value, key);
+            _keyToValueMap.Add(key, value);
+            _valueToKeyMap.Add(value, key);
         }
 
         void Remove(TKey key)
         {
-            if (s_KeyToValueMap.Remove(key, out var value))
+            if (_keyToValueMap.Remove(key, out var value))
             {
-                s_ValueToKeyMap.Remove(value);
+                _valueToKeyMap.Remove(value);
             }
         }
 
         void Remove(TValue value)
         {
-            if (s_ValueToKeyMap.TryGetValue(value, out var key))
+            if (_valueToKeyMap.TryGetValue(value, out var key))
             {
-                s_KeyToValueMap.Remove(key);
-                s_ValueToKeyMap.Remove(value);
+                _keyToValueMap.Remove(key);
+                _valueToKeyMap.Remove(value);
             }
         }
 
@@ -53,7 +53,7 @@ namespace UnityExtensions
             Assert.IsNotNull(instance);
 
             // In case the key exists already, check if the instance should be updated.
-            if (s_KeyToValueMap.TryGetValue(key, out var existingValue))
+            if (_keyToValueMap.TryGetValue(key, out var existingValue))
             {
                 // No modification needed.
                 if (instance.Equals(existingValue))
@@ -63,7 +63,7 @@ namespace UnityExtensions
             }
 
             // In case the instance was already registered, check if the key should be updated.
-            if (s_ValueToKeyMap.TryGetValue(instance, out var existingKey))
+            if (_valueToKeyMap.TryGetValue(instance, out var existingKey))
             {
                 // No modification needed.
                 if (key.Equals(existingKey))
@@ -101,7 +101,7 @@ namespace UnityExtensions
         /// <returns>Indicates whether a corresponding value component was found.</returns>
         public bool TryGetInstance(TKey key, out TValue instance)
         {
-            return s_KeyToValueMap.TryGetValue(key, out instance);
+            return _keyToValueMap.TryGetValue(key, out instance);
         }
         #endregion // Unity.LiveCapture.VirtualCamera
     }

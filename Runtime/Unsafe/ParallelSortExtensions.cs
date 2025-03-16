@@ -1,12 +1,12 @@
 using System.Threading;
-using UnityEngine;
-using UnityEngine.Assertions;
-using Unity.Mathematics;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Burst;
+using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UnityExtensions.Unsafe
 {
@@ -14,8 +14,8 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/ParallelSortExtensions.cs
         #region UnityEngine.Rendering
-        const int kMinRadixSortArraySize = 2048;
-        const int kMinRadixSortBatchSize = 256;
+        const int MinRadixSortArraySize = 2048;
+        const int MinRadixSortBatchSize = 256;
 
         public static JobHandle ParallelSort(this NativeArray<int> array)
         {
@@ -24,10 +24,10 @@ namespace UnityExtensions.Unsafe
 
             var jobHandle = new JobHandle();
 
-            if (array.Length >= kMinRadixSortArraySize)
+            if (array.Length >= MinRadixSortArraySize)
             {
                 int workersCount = Mathf.Max(JobsUtility.JobWorkerCount + 1, 1);
-                int batchSize = Mathf.Max(kMinRadixSortBatchSize, Mathf.CeilToInt((float)array.Length / workersCount));
+                int batchSize = Mathf.Max(MinRadixSortBatchSize, Mathf.CeilToInt((float)array.Length / workersCount));
                 int jobsCount = Mathf.CeilToInt((float)array.Length / batchSize);
 
                 Assert.IsTrue(jobsCount * batchSize >= array.Length);
@@ -45,38 +45,38 @@ namespace UnityExtensions.Unsafe
                 {
                     var bucketCountJobData = new RadixSortBucketCountJob
                     {
-                        radix = radix,
-                        jobsCount = jobsCount,
-                        batchSize = batchSize,
-                        buckets = buckets,
-                        array = arraySource
+                        Radix = radix,
+                        JobsCount = jobsCount,
+                        BatchSize = batchSize,
+                        Buckets = buckets,
+                        Array = arraySource
                     };
 
                     var batchPrefixSumJobData = new RadixSortBatchPrefixSumJob
                     {
-                        radix = radix,
-                        jobsCount = jobsCount,
-                        array = arraySource,
-                        counter = counter,
-                        buckets = buckets,
-                        indices = indices,
-                        indicesSum = indicesSum
+                        Radix = radix,
+                        JobsCount = jobsCount,
+                        Array = arraySource,
+                        Counter = counter,
+                        Buckets = buckets,
+                        Indices = indices,
+                        IndicesSum = indicesSum
                     };
 
                     var prefixSumJobData = new RadixSortPrefixSumJob
                     {
-                        jobsCount = jobsCount,
-                        indices = indices,
-                        indicesSum = indicesSum
+                        JobsCount = jobsCount,
+                        Indices = indices,
+                        IndicesSum = indicesSum
                     };
 
                     var bucketSortJobData = new RadixSortBucketSortJob
                     {
-                        radix = radix,
-                        batchSize = batchSize,
-                        indices = indices,
-                        array = arraySource,
-                        arraySorted = arrayDest
+                        Radix = radix,
+                        BatchSize = batchSize,
+                        Indices = indices,
+                        Array = arraySource,
+                        ArraySorted = arrayDest
                     };
 
                     jobHandle = bucketCountJobData.ScheduleParallel(jobsCount, 1, jobHandle);
@@ -91,9 +91,7 @@ namespace UnityExtensions.Unsafe
 
                     static void Swap(ref NativeArray<int> a, ref NativeArray<int> b)
                     {
-                        NativeArray<int> temp = a;
-                        a = b;
-                        b = temp;
+                        (a, b) = (b, a);
                     }
                 }
 
@@ -105,7 +103,7 @@ namespace UnityExtensions.Unsafe
             }
             else
             {
-                jobHandle = NativeSortExtension.SortJob(array).Schedule();
+                jobHandle = array.SortJob().Schedule();
             }
 
             return jobHandle;
@@ -114,25 +112,25 @@ namespace UnityExtensions.Unsafe
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
         private struct RadixSortBucketCountJob : IJobFor
         {
-            [ReadOnly] public int radix;
-            [ReadOnly] public int jobsCount;
-            [ReadOnly] public int batchSize;
-            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> array;
+            [ReadOnly] public int Radix;
+            [ReadOnly] public int JobsCount;
+            [ReadOnly] public int BatchSize;
+            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> buckets;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
 
             public void Execute(int index)
             {
-                int start = index * batchSize;
-                int end = math.min(start + batchSize, array.Length);
+                int start = index * BatchSize;
+                int end = math.min(start + BatchSize, Array.Length);
 
                 int jobBuckets = index * 256;
 
                 for (int i = start; i < end; ++i)
                 {
-                    int value = array[i];
-                    int bucket = (value >> radix * 8) & 0xFF;
-                    buckets[jobBuckets + bucket] += 1;
+                    int value = Array[i];
+                    int bucket = (value >> Radix * 8) & 0xFF;
+                    Buckets[jobBuckets + bucket] += 1;
                 }
             }
         }
@@ -140,14 +138,14 @@ namespace UnityExtensions.Unsafe
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
         private struct RadixSortBatchPrefixSumJob : IJobFor
         {
-            [ReadOnly] public int radix;
-            [ReadOnly] public int jobsCount;
-            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> array;
+            [ReadOnly] public int Radix;
+            [ReadOnly] public int JobsCount;
+            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> counter;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indicesSum;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> buckets;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indices;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Counter;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
             private static unsafe int AtomicIncrement(NativeArray<int> counter)
             {
@@ -156,13 +154,13 @@ namespace UnityExtensions.Unsafe
 
             private int JobIndexPrefixSum(int sum, int i)
             {
-                for (int j = 0; j < jobsCount; ++j)
+                for (int j = 0; j < JobsCount; ++j)
                 {
                     int k = i + j * 256;
 
-                    indices[k] = sum;
-                    sum += buckets[k];
-                    buckets[k] = 0;
+                    Indices[k] = sum;
+                    sum += Buckets[k];
+                    Buckets[k] = 0;
                 }
 
                 return sum;
@@ -178,18 +176,18 @@ namespace UnityExtensions.Unsafe
                 for (int i = start; i < end; ++i)
                     jobSum = JobIndexPrefixSum(jobSum, i);
 
-                indicesSum[index] = jobSum;
+                IndicesSum[index] = jobSum;
 
-                if (AtomicIncrement(counter) == 16)
+                if (AtomicIncrement(Counter) == 16)
                 {
                     int sum = 0;
 
-                    if(radix < 3)
+                    if(Radix < 3)
                     {
                         for (int i = 0; i < 16; ++i)
                         {
-                            int indexSum = indicesSum[i];
-                            indicesSum[i] = sum;
+                            int indexSum = IndicesSum[i];
+                            IndicesSum[i] = sum;
                             sum += indexSum;
                         }
                     }
@@ -197,21 +195,21 @@ namespace UnityExtensions.Unsafe
                     {
                         for (int i = 8; i < 16; ++i)
                         {
-                            int indexSum = indicesSum[i];
-                            indicesSum[i] = sum;
+                            int indexSum = IndicesSum[i];
+                            IndicesSum[i] = sum;
                             sum += indexSum;
                         }
                         for (int i = 0; i < 8; ++i)
                         {
-                            int indexSum = indicesSum[i];
-                            indicesSum[i] = sum;
+                            int indexSum = IndicesSum[i];
+                            IndicesSum[i] = sum;
                             sum += indexSum;
                         }
                     }
 
-                    Assert.AreEqual(sum, array.Length);
+                    Assert.AreEqual(sum, Array.Length);
 
-                    counter[0] = 0;
+                    Counter[0] = 0;
                 }
             }
         }
@@ -219,24 +217,24 @@ namespace UnityExtensions.Unsafe
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
         private struct RadixSortPrefixSumJob : IJobFor
         {
-            [ReadOnly] public int jobsCount;
+            [ReadOnly] public int JobsCount;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indicesSum;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indices;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
             public void Execute(int index)
             {
                 int start = index * 16;
                 int end = start + 16;
 
-                int jobSum = indicesSum[index];
+                int jobSum = IndicesSum[index];
 
-                for (int j = 0; j < jobsCount; ++j)
+                for (int j = 0; j < JobsCount; ++j)
                 {
                     for (int i = start; i < end; ++i)
                     {
                         int k = j * 256 + i;
-                        indices[k] += jobSum;
+                        Indices[k] += jobSum;
                     }
                 }
             }
@@ -245,26 +243,26 @@ namespace UnityExtensions.Unsafe
         [BurstCompile(DisableSafetyChecks = true, OptimizeFor = OptimizeFor.Performance)]
         private struct RadixSortBucketSortJob : IJobFor
         {
-            [ReadOnly] public int radix;
-            [ReadOnly] public int batchSize;
-            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> array;
+            [ReadOnly] public int Radix;
+            [ReadOnly] public int BatchSize;
+            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> indices;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> arraySorted;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> ArraySorted;
 
             public void Execute(int index)
             {
-                int start = index * batchSize;
-                int end = math.min(start + batchSize, array.Length);
+                int start = index * BatchSize;
+                int end = math.min(start + BatchSize, Array.Length);
 
                 int jobIndices = index * 256;
 
                 for (int i = start; i < end; ++i)
                 {
-                    int value = array[i];
-                    int bucket = (value >> radix * 8) & 0xFF;
-                    int sortedIndex = indices[jobIndices + bucket]++;
-                    arraySorted[sortedIndex] = value;
+                    int value = Array[i];
+                    int bucket = (value >> Radix * 8) & 0xFF;
+                    int sortedIndex = Indices[jobIndices + bucket]++;
+                    ArraySorted[sortedIndex] = value;
                 }
             }
         }

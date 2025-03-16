@@ -9,7 +9,7 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/CameraExtensions.cs
         #region Unity.XR.CoreUtils
-        const float k_OneOverSqrt2 = 0.707106781f;
+        const float OneOverSqrt2 = 0.707106781f;
 
         /// <summary>
         /// Calculates the vertical field of view from an aspect neutral (diagonal) field of view and the camera's aspect ratio.
@@ -23,7 +23,7 @@ namespace UnityExtensions
         public static float GetVerticalFieldOfView(this Camera camera, float aspectNeutralFieldOfView)
         {
             var verticalHalfFieldOfViewTangent = Mathf.Tan(aspectNeutralFieldOfView * 0.5f * Mathf.Deg2Rad) *
-                k_OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
+                OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
             return Mathf.Atan(verticalHalfFieldOfViewTangent) * 2 * Mathf.Rad2Deg;
         }
 
@@ -46,7 +46,7 @@ namespace UnityExtensions
         /// <returns>The vertical orthographic size calculated.</returns>
         public static float GetVerticalOrthographicSize(this Camera camera, float size)
         {
-            return size * k_OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
+            return size * OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
         }
         #endregion // Unity.XR.CoreUtils
     }

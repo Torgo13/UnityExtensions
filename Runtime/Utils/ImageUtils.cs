@@ -23,14 +23,14 @@ namespace UnityExtensions
     #region UnityEditor.Search
     class Kernel
     {
-        public int sizeX;
-        public int sizeY;
+        public readonly int SizeX;
+        public readonly int SizeY;
 
-        public double[] values;
+        public readonly double[] Values;
 
         public double factor { get; }
 
-        public double this[int y, int x] => values[y * sizeX + x];
+        public double this[int y, int x] => Values[y * SizeX + x];
 
         public Kernel(int sizeX, int sizeY, double[] values)
             : this(sizeX, sizeY, MathUtility.SafeDivide(1.0, values.Sum()), values)
@@ -38,9 +38,9 @@ namespace UnityExtensions
 
         public Kernel(int sizeX, int sizeY, double factor, double[] values)
         {
-            this.sizeX = sizeX;
-            this.sizeY = sizeY;
-            this.values = values;
+            this.SizeX = sizeX;
+            this.SizeY = sizeY;
+            this.Values = values;
             this.factor = factor;
         }
     }
@@ -49,14 +49,14 @@ namespace UnityExtensions
     {
         public static ImagePixels Convolve(ImagePixels texture, Kernel kernel)
         {
-            var width = texture.width;
-            var height = texture.height;
+            var width = texture.Width;
+            var height = texture.Height;
             var outputPixels = new Color[width * height];
 
-            var pixels = texture.pixels;
+            var pixels = texture.Pixels;
 
-            var halfXOffset = kernel.sizeX / 2;
-            var halfYOffset = kernel.sizeY / 2;
+            var halfXOffset = kernel.SizeX / 2;
+            var halfYOffset = kernel.SizeY / 2;
 
             var rangeSize = ThreadUtils.GetBatchSizeByCore(height);
             var result = Parallel.ForEach(Partitioner.Create(0, height, rangeSize), range =>
@@ -104,15 +104,15 @@ namespace UnityExtensions
 
         public static ImagePixels Subtract(ImagePixels sourceA, ImagePixels sourceB)
         {
-            if (sourceA.height != sourceB.height || sourceA.width != sourceB.width)
+            if (sourceA.Height != sourceB.Height || sourceA.Width != sourceB.Width)
                 throw new ArgumentException("Images don't have the same size");
 
-            var width = sourceA.width;
-            var height = sourceA.height;
+            var width = sourceA.Width;
+            var height = sourceA.Height;
             var outputPixels = new Color[width * height];
 
-            var pixelsA = sourceA.pixels;
-            var pixelsB = sourceB.pixels;
+            var pixelsA = sourceA.Pixels;
+            var pixelsB = sourceB.Pixels;
 
             var batchSize = ThreadUtils.GetBatchSizeByCore(height);
             Parallel.ForEach(Partitioner.Create(0, height, batchSize), range =>
@@ -136,22 +136,22 @@ namespace UnityExtensions
     #region UnityEditor.Search
     public class ImagePixels
     {
-        public int width;
-        public int height;
-        public Color[] pixels;
+        public readonly int Width;
+        public readonly int Height;
+        public readonly Color[] Pixels;
 
         public ImagePixels(Texture2D texture)
         {
-            width = texture.width;
-            height = texture.height;
-            pixels = texture.GetPixels();
+            Width = texture.width;
+            Height = texture.height;
+            Pixels = texture.GetPixels();
         }
 
         public ImagePixels(int width, int height, Color[] pixels)
         {
-            this.width = width;
-            this.height = height;
-            this.pixels = pixels;
+            this.Width = width;
+            this.Height = height;
+            this.Pixels = pixels;
         }
     }
     #endregion // UnityEditor.Search
@@ -190,11 +190,11 @@ namespace UnityExtensions
 
         public Color[] gradients { get; private set; }
 
-        public float threshold;
+        public readonly float Threshold;
 
         public SobelFilter(float threshold)
         {
-            this.threshold = threshold;
+            this.Threshold = threshold;
         }
 
         public ImagePixels Apply(ImagePixels source)
@@ -202,24 +202,24 @@ namespace UnityExtensions
             var edgeX = Filtering.Convolve(source, SobelX);
             var edgeY = Filtering.Convolve(source, SobelY);
 
-            var magnitudePixels = new Color[source.height * source.width];
-            gradients = new Color[source.height * source.width];
-            var rangeSize = ThreadUtils.GetBatchSizeByCore(source.height);
-            Parallel.ForEach(Partitioner.Create(0, source.height, rangeSize), range =>
+            var magnitudePixels = new Color[source.Height * source.Width];
+            gradients = new Color[source.Height * source.Width];
+            var rangeSize = ThreadUtils.GetBatchSizeByCore(source.Height);
+            Parallel.ForEach(Partitioner.Create(0, source.Height, rangeSize), range =>
             {
                 for (var i = range.Item1; i < range.Item2; ++i)
                 {
-                    for (var j = 0; j < source.width; ++j)
+                    for (var j = 0; j < source.Width; ++j)
                     {
-                        var index = i * source.width + j;
-                        var colorX = edgeX.pixels[index];
-                        var colorY = edgeY.pixels[index];
+                        var index = i * source.Width + j;
+                        var colorX = edgeX.Pixels[index];
+                        var colorY = edgeY.Pixels[index];
                         var edgeOutput = new Color();
                         var gradientOutput = new Color();
                         for (var k = 0; k < 3; ++k)
                         {
                             var mag = Mathf.Clamp01(Mathf.Sqrt(colorX[k] * colorX[k] + colorY[k] * colorY[k]));
-                            edgeOutput[k] = mag >= threshold ? 1f : 0f;
+                            edgeOutput[k] = mag >= Threshold ? 1f : 0f;
                             gradientOutput[k] = Mathf.Atan2(colorY[k], colorX[k]);
                         }
 
@@ -229,39 +229,39 @@ namespace UnityExtensions
                 }
             });
 
-            return new ImagePixels(source.width, source.height, magnitudePixels);
+            return new ImagePixels(source.Width, source.Height, magnitudePixels);
         }
     }
 
     class GaussianFilter : IImageFilter
     {
-        Kernel m_KernelX;
-        Kernel m_KernelY;
+        Kernel _kernelX;
+        Kernel _kernelY;
 
-        int m_Size;
+        int _size;
         public int size
         {
             get
             {
-                return m_Size;
+                return _size;
             }
             set
             {
-                m_Size = value;
+                _size = value;
                 RebuildKernels(size, sigma);
             }
         }
 
-        double m_Sigma;
+        double _sigma;
         public double sigma
         {
             get
             {
-                return m_Sigma;
+                return _sigma;
             }
             set
             {
-                m_Sigma = value;
+                _sigma = value;
                 RebuildKernels(size, sigma);
             }
         }
@@ -273,8 +273,8 @@ namespace UnityExtensions
 
         public ImagePixels Apply(ImagePixels source)
         {
-            var resultX = Filtering.Convolve(source, m_KernelX);
-            return Filtering.Convolve(resultX, m_KernelY);
+            var resultX = Filtering.Convolve(source, _kernelX);
+            return Filtering.Convolve(resultX, _kernelY);
         }
 
         void RebuildKernels(int size, double sigma)
@@ -292,8 +292,8 @@ namespace UnityExtensions
                 kernelValues[halfX + halfSize] = value;
             }
 
-            m_KernelX = new Kernel(size, 1, kernelValues);
-            m_KernelY = new Kernel(1, size, kernelValues);
+            _kernelX = new Kernel(size, 1, kernelValues);
+            _kernelY = new Kernel(1, size, kernelValues);
         }
 
         public static int GetSizeFromSigma(double sigma)
@@ -307,28 +307,28 @@ namespace UnityExtensions
 
     class DifferenceOfGaussian : IImageFilter
     {
-        GaussianFilter m_SmallFilter;
-        GaussianFilter m_LargeFilter;
+        readonly GaussianFilter _smallFilter;
+        readonly GaussianFilter _largeFilter;
 
         public int smallSize
         {
-            get => m_SmallFilter.size;
-            set => m_SmallFilter.size = value;
+            get => _smallFilter.size;
+            set => _smallFilter.size = value;
         }
 
         public int largeSize
         {
-            get => m_LargeFilter.size;
-            set => m_LargeFilter.size = value;
+            get => _largeFilter.size;
+            set => _largeFilter.size = value;
         }
 
         public double sigma
         {
-            get => m_SmallFilter.sigma;
+            get => _smallFilter.sigma;
             set
             {
-                m_SmallFilter.sigma = value;
-                m_LargeFilter.sigma = value;
+                _smallFilter.sigma = value;
+                _largeFilter.sigma = value;
             }
         }
 
@@ -336,15 +336,15 @@ namespace UnityExtensions
 
         public DifferenceOfGaussian(int sizeSmall, int sizeLarge, double sigma, bool stretchImageForViewing = false)
         {
-            m_SmallFilter = new GaussianFilter(sizeSmall, sigma);
-            m_LargeFilter = new GaussianFilter(sizeLarge, sigma);
+            _smallFilter = new GaussianFilter(sizeSmall, sigma);
+            _largeFilter = new GaussianFilter(sizeLarge, sigma);
             this.stretchImageForViewing = stretchImageForViewing;
         }
 
         public ImagePixels Apply(ImagePixels source)
         {
-            var sourceA = m_SmallFilter.Apply(source);
-            var sourceB = m_LargeFilter.Apply(source);
+            var sourceA = _smallFilter.Apply(source);
+            var sourceB = _largeFilter.Apply(source);
 
             var sub = Filtering.Subtract(sourceA, sourceB);
             if (stretchImageForViewing)
@@ -358,12 +358,12 @@ namespace UnityExtensions
     #region UnityEditor.Search
     public struct ColorInfo
     {
-        public uint color;
-        public double ratio;
+        public uint Color;
+        public double Ratio;
 
         public override string ToString()
         {
-            return $"{ImageUtils.IntToColor32(color)} [{(ratio * 100)}%]";
+            return $"{ImageUtils.IntToColor32(Color)} [{(Ratio * 100)}%]";
         }
     }
 
@@ -377,29 +377,29 @@ namespace UnityExtensions
 
     public class Histogram : IHistogram
     {
-        public const int histogramSize = 256;
+        public const int HistogramSize = 256;
 
-        public virtual int bins => histogramSize;
+        public virtual int bins => HistogramSize;
         public int channels => 3;
 
-        public float[] valuesR = new float[histogramSize];
-        public float[] valuesG = new float[histogramSize];
-        public float[] valuesB = new float[histogramSize];
+        public float[] ValuesR = new float[HistogramSize];
+        public float[] ValuesG = new float[HistogramSize];
+        public float[] ValuesB = new float[HistogramSize];
 
         public void AddPixel(Color32 pixel)
         {
-            ++valuesR[pixel.r];
-            ++valuesG[pixel.g];
-            ++valuesB[pixel.b];
+            ++ValuesR[pixel.r];
+            ++ValuesG[pixel.g];
+            ++ValuesB[pixel.b];
         }
 
         public void Normalize(int totalPixels)
         {
             for (var i = 0; i < bins; ++i)
             {
-                valuesR[i] /= totalPixels;
-                valuesG[i] /= totalPixels;
-                valuesB[i] /= totalPixels;
+                ValuesR[i] /= totalPixels;
+                ValuesG[i] /= totalPixels;
+                ValuesB[i] /= totalPixels;
             }
         }
 
@@ -410,9 +410,9 @@ namespace UnityExtensions
 
             for (var i = 0; i < bins; ++i)
             {
-                valuesR[i] /= totalPixels[0];
-                valuesG[i] /= totalPixels[1];
-                valuesB[i] /= totalPixels[2];
+                ValuesR[i] /= totalPixels[0];
+                ValuesG[i] /= totalPixels[1];
+                ValuesB[i] /= totalPixels[2];
             }
         }
 
@@ -421,9 +421,9 @@ namespace UnityExtensions
         {
             for (var i = 0; i < bins; ++i)
             {
-                valuesR[i] += histogram.valuesR[i];
-                valuesG[i] += histogram.valuesG[i];
-                valuesB[i] += histogram.valuesB[i];
+                ValuesR[i] += histogram.ValuesR[i];
+                ValuesG[i] += histogram.ValuesG[i];
+                ValuesB[i] += histogram.ValuesB[i];
             }
         }
 
@@ -432,11 +432,11 @@ namespace UnityExtensions
             switch (channel)
             {
                 case 0:
-                    return valuesR;
+                    return ValuesR;
                 case 1:
-                    return valuesG;
+                    return ValuesG;
                 case 2:
-                    return valuesB;
+                    return ValuesB;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(channel));
             }
@@ -445,32 +445,32 @@ namespace UnityExtensions
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);
-            sb.Append("R: (").AppendJoin(", ", valuesR).Append(')').AppendLine();
-            sb.Append("G: (").AppendJoin(", ", valuesG).Append(')').AppendLine();
-            sb.Append("B: (").AppendJoin(", ", valuesB).Append(')').AppendLine();
+            sb.Append("R: (").AppendJoin(", ", ValuesR).Append(')').AppendLine();
+            sb.Append("G: (").AppendJoin(", ", ValuesG).Append(')').AppendLine();
+            sb.Append("B: (").AppendJoin(", ", ValuesB).Append(')').AppendLine();
             return sb.ToString();
         }
     }
 
     public enum EdgeDirection
     {
-        DEG_0 = 0,
-        DEG_45 = 1,
-        DEG_90 = 2,
-        DEG_135 = 3
+        Deg0 = 0,
+        Deg45 = 1,
+        Deg90 = 2,
+        Deg135 = 3
     }
 
     public class EdgeHistogram : Histogram
     {
-        public static readonly int edgeDirections = Enum.GetNames(typeof(EdgeDirection)).Length;
+        public static readonly int EdgeDirections = Enum.GetNames(typeof(EdgeDirection)).Length;
 
-        public override int bins => edgeDirections;
+        public override int bins => EdgeDirections;
 
         public EdgeHistogram()
         {
-            valuesR = new float[edgeDirections];
-            valuesG = new float[edgeDirections];
-            valuesB = new float[edgeDirections];
+            ValuesR = new float[EdgeDirections];
+            ValuesG = new float[EdgeDirections];
+            ValuesB = new float[EdgeDirections];
         }
 
         public void AddEdge(int channel, EdgeDirection direction)
@@ -499,36 +499,36 @@ namespace UnityExtensions
 
     public struct ImageData
     {
-        public const int version = 0x03;
+        public const int Version = 0x03;
 
-        public Hash128 guid;
-        public ColorInfo[] bestColors;
-        public ColorInfo[] bestShades;
-        public Histogram histogram;
-        public EdgeHistogram edgeHistogram;
-        public double[] edgeDensities;
-        public double[] geometricMoments;
+        public Hash128 Guid;
+        public ColorInfo[] BestColors;
+        public ColorInfo[] BestShades;
+        public Histogram Histogram;
+        public EdgeHistogram EdgeHistogram;
+        public double[] EdgeDensities;
+        public double[] GeometricMoments;
 
         public ImageData(string assetPath)
         {
-            guid = Hash128.Compute(assetPath);
-            bestColors = new ColorInfo[5];
-            bestShades = new ColorInfo[5];
-            histogram = new Histogram();
-            edgeHistogram = new EdgeHistogram();
-            edgeDensities = new double[3];
-            geometricMoments = new double[3];
+            Guid = Hash128.Compute(assetPath);
+            BestColors = new ColorInfo[5];
+            BestShades = new ColorInfo[5];
+            Histogram = new Histogram();
+            EdgeHistogram = new EdgeHistogram();
+            EdgeDensities = new double[3];
+            GeometricMoments = new double[3];
         }
 
         public ImageData(Hash128 assetGuid)
         {
-            guid = assetGuid;
-            bestColors = new ColorInfo[5];
-            bestShades = new ColorInfo[5];
-            histogram = new Histogram();
-            edgeHistogram = new EdgeHistogram();
-            edgeDensities = new double[3];
-            geometricMoments = new double[3];
+            Guid = assetGuid;
+            BestColors = new ColorInfo[5];
+            BestShades = new ColorInfo[5];
+            Histogram = new Histogram();
+            EdgeHistogram = new EdgeHistogram();
+            EdgeDensities = new double[3];
+            GeometricMoments = new double[3];
         }
     }
     #endregion // UnityEditor.Search
@@ -576,11 +576,11 @@ namespace UnityExtensions
 
     static class XYZReferences
     {
-        static Vector3[,] s_References;
+        static Vector3[,] _references;
 
         static XYZReferences()
         {
-            s_References = new Vector3[Enum.GetNames(typeof(XYZObserver)).Length, Enum.GetNames(typeof(XYZIlluminant)).Length];
+            _references = new Vector3[Enum.GetNames(typeof(XYZObserver)).Length, Enum.GetNames(typeof(XYZIlluminant)).Length];
 
             SetReference(XYZObserver.TwoDeg, XYZIlluminant.A, new Vector3(109.850f, 100.000f, 35.585f));
             SetReference(XYZObserver.TwoDeg, XYZIlluminant.B, new Vector3(99.0927f, 100.000f, 85.313f));
@@ -627,21 +627,21 @@ namespace UnityExtensions
 
         public static Vector3 GetReference(XYZObserver observer, XYZIlluminant illuminant)
         {
-            return s_References[(int)observer, (int)illuminant];
+            return _references[(int)observer, (int)illuminant];
         }
 
         static void SetReference(XYZObserver observer, XYZIlluminant illuminant, Vector3 reference)
         {
-            s_References[(int)observer, (int)illuminant] = reference;
+            _references[(int)observer, (int)illuminant] = reference;
         }
     }
 
     class ColorCluster
     {
-        int[] m_CurrentTotals = {0, 0, 0, 0};
-        Color32 m_Average;
+        readonly int[] _currentTotals = {0, 0, 0, 0};
+        Color32 _average;
 
-        public Color32 average => m_Average;
+        public Color32 average => _average;
         public int count { get; set; }
 
         public void AddColor(Color32 color)
@@ -649,8 +649,8 @@ namespace UnityExtensions
             ++count;
             for (var i = 0; i < 4; ++i)
             {
-                m_CurrentTotals[i] += color[i];
-                m_Average[i] = (byte)(m_CurrentTotals[i] / count);
+                _currentTotals[i] += color[i];
+                _average[i] = (byte)(_currentTotals[i] / count);
             }
         }
 
@@ -661,25 +661,25 @@ namespace UnityExtensions
             count += cluster.count;
             for (var i = 0; i < 4; ++i)
             {
-                m_CurrentTotals[i] += cluster.m_CurrentTotals[i];
-                m_Average[i] = (byte)(m_CurrentTotals[i] / count);
+                _currentTotals[i] += cluster._currentTotals[i];
+                _average[i] = (byte)(_currentTotals[i] / count);
             }
         }
     }
 
     class RGBClusters
     {
-        const int k_AxisDivisions = 8;
-        const int k_BucketSize = 256 / k_AxisDivisions;
+        const int AxisDivisions = 8;
+        const int BucketSize = 256 / AxisDivisions;
 
-        List<ColorCluster> m_Clusters;
+        List<ColorCluster> _clusters;
 
         public RGBClusters()
         {
-            m_Clusters = new List<ColorCluster>(k_AxisDivisions * k_AxisDivisions * k_AxisDivisions);
-            for (var i = 0; i < k_AxisDivisions * k_AxisDivisions * k_AxisDivisions; i++)
+            _clusters = new List<ColorCluster>(AxisDivisions * AxisDivisions * AxisDivisions);
+            for (var i = 0; i < AxisDivisions * AxisDivisions * AxisDivisions; i++)
             {
-                m_Clusters.Add(new ColorCluster());
+                _clusters.Add(new ColorCluster());
             }
         }
 
@@ -688,40 +688,40 @@ namespace UnityExtensions
             var indexR = FindAxisIndex(color.r);
             var indexG = FindAxisIndex(color.g);
             var indexB = FindAxisIndex(color.b);
-            var index = (indexR * k_AxisDivisions + indexG) * k_AxisDivisions + indexB;
+            var index = (indexR * AxisDivisions + indexG) * AxisDivisions + indexB;
 
-            m_Clusters[index].AddColor(color);
+            _clusters[index].AddColor(color);
         }
 
         static int FindAxisIndex(byte color)
         {
-            return color / k_BucketSize;
+            return color / BucketSize;
         }
 
         public IEnumerable<ColorCluster> GetBestClusters(int count)
         {
-            m_Clusters.Sort((cluster1, cluster2) => cluster2.count.CompareTo(cluster1.count));
-            return m_Clusters.GetRange(0, count);
+            _clusters.Sort((cluster1, cluster2) => cluster2.count.CompareTo(cluster1.count));
+            return _clusters.GetRange(0, count);
         }
 
         public void Combine(RGBClusters clusters)
         {
-            for (var i = 0; i < m_Clusters.Count; ++i)
+            for (var i = 0; i < _clusters.Count; ++i)
             {
-                m_Clusters[i].Combine(clusters.m_Clusters[i]);
+                _clusters[i].Combine(clusters._clusters[i]);
             }
         }
     }
 
     public struct MinMaxColor
     {
-        public Color min;
-        public Color max;
+        public Color Min;
+        public Color Max;
 
         public MinMaxColor(Color min, Color max)
         {
-            this.min = min;
-            this.max = max;
+            this.Min = min;
+            this.Max = max;
         }
     }
     #endregion // UnityEditor.Search
@@ -730,9 +730,9 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/com.unity.search.extensions/blob/0896c65212ba17c718719ce75e53b9e97b0d261d/package-examples/Editor/ImageIndexing/ImageUtils.cs
         #region UnityEditor.Search
-        static readonly float k_MaxColorDistance = Vector3.one.magnitude;
-        static readonly float k_MaxColorCIEDistance = k_MaxColorDistance * 100f;
-        static readonly float k_MaxExponentialDistance = Mathf.Exp(k_MaxColorDistance) - 1;
+        static readonly float MaxColorDistance = Vector3.one.magnitude;
+        static readonly float MaxColorCIEDistance = MaxColorDistance * 100f;
+        static readonly float MaxExponentialDistance = Mathf.Exp(MaxColorDistance) - 1;
 
         public static uint ColorToInt(Color32 color)
         {
@@ -896,10 +896,10 @@ namespace UnityExtensions
 
         public static double WeightedSimilarity(Color colorA, double ratio, Color colorB)
         {
-            var distance = ColorDistance(colorA, colorB) / k_MaxColorDistance;
+            var distance = ColorDistance(colorA, colorB) / MaxColorDistance;
 
             // The similarity must drop very quickly based on the distance
-            // var exponentialDistance = (Mathf.Exp(distance) - 1) / k_MaxExponentialDistance;
+            // var exponentialDistance = (Mathf.Exp(distance) - 1) / MaxExponentialDistance;
 
             return ratio * (1.0f - distance);
         }
@@ -921,15 +921,15 @@ namespace UnityExtensions
 
         struct LocalColorMap
         {
-            public Histogram histogram;
-            public Dictionary<uint, long> colorMap;
-            public RGBClusters clusters;
+            public readonly Histogram Histogram;
+            public readonly Dictionary<uint, long> ColorMap;
+            public readonly RGBClusters Clusters;
 
             public LocalColorMap(Histogram histogram, Dictionary<uint, long> colorMap, RGBClusters clusters)
             {
-                this.histogram = histogram;
-                this.colorMap = colorMap;
-                this.clusters = clusters;
+                this.Histogram = histogram;
+                this.ColorMap = colorMap;
+                this.Clusters = clusters;
             }
         }
 
@@ -966,8 +966,8 @@ namespace UnityExtensions
 
             for (var i = 0; i < 5; ++i)
             {
-                bestColors[i] = new ColorInfo { color = bestOrderedColors[i].Key, ratio = bestOrderedColors[i].Value / (double)nbPixels };
-                bestShades[i] = new ColorInfo { color = ColorToInt(bestClusters[i].average), ratio = bestClusters[i].count / (double)nbPixels };
+                bestColors[i] = new ColorInfo { Color = bestOrderedColors[i].Key, Ratio = bestOrderedColors[i].Value / (double)nbPixels };
+                bestShades[i] = new ColorInfo { Color = ColorToInt(bestClusters[i].average), Ratio = bestClusters[i].count / (double)nbPixels };
             }
         }
 
@@ -987,10 +987,10 @@ namespace UnityExtensions
                     {
                         var pixel = pixels[i];
                         var pixelValue = ColorToInt(pixel);
-                        localColorMap.histogram.AddPixel(pixel);
-                        localColorMap.colorMap.TryAdd(pixelValue, 0);
-                        ++localColorMap.colorMap[pixelValue];
-                        localColorMap.clusters.AddColor(pixel);
+                        localColorMap.Histogram.AddPixel(pixel);
+                        localColorMap.ColorMap.TryAdd(pixelValue, 0);
+                        ++localColorMap.ColorMap[pixelValue];
+                        localColorMap.Clusters.AddColor(pixel);
                     }
 
                     return localColorMap;
@@ -998,10 +998,10 @@ namespace UnityExtensions
                 {
                     lock (histogram)
                     {
-                        histogram.Combine(localColorMap.histogram);
-                        rgbClusters.Combine(localColorMap.clusters);
+                        histogram.Combine(localColorMap.Histogram);
+                        rgbClusters.Combine(localColorMap.Clusters);
 
-                        foreach (var kvp in localColorMap.colorMap)
+                        foreach (var kvp in localColorMap.ColorMap)
                         {
                             colorMap.TryAdd(kvp.Key, 0);
                             colorMap[kvp.Key] += kvp.Value;
@@ -1029,20 +1029,20 @@ namespace UnityExtensions
 
             for (var i = 0; i < 5; ++i)
             {
-                bestColors[i] = new ColorInfo { color = bestOrderedColors[i].Key, ratio = bestOrderedColors[i].Value / (double)nbPixels };
-                bestShades[i] = new ColorInfo { color = ColorToInt(bestClusters[i].average), ratio = bestClusters[i].count / (double)nbPixels };
+                bestColors[i] = new ColorInfo { Color = bestOrderedColors[i].Key, Ratio = bestOrderedColors[i].Value / (double)nbPixels };
+                bestShades[i] = new ColorInfo { Color = ColorToInt(bestClusters[i].average), Ratio = bestClusters[i].count / (double)nbPixels };
             }
         }
 
         struct LocalHistogramCount
         {
-            public EdgeHistogram histogram;
-            public int[] edgeCount;
+            public readonly EdgeHistogram Histogram;
+            public readonly int[] EdgeCount;
 
             public LocalHistogramCount(EdgeHistogram histogram, int[] edgeCount)
             {
-                this.histogram = histogram;
-                this.edgeCount = edgeCount;
+                this.Histogram = histogram;
+                this.EdgeCount = edgeCount;
             }
         }
 
@@ -1056,16 +1056,16 @@ namespace UnityExtensions
             var numChannels = histogram.channels;
             var edgeCount = new int[histogram.channels];
 
-            var batchSize = ThreadUtils.GetBatchSizeByCore(edgeImage.pixels.Length);
+            var batchSize = ThreadUtils.GetBatchSizeByCore(edgeImage.Pixels.Length);
 
-            Parallel.ForEach(Partitioner.Create(0, edgeImage.pixels.Length, batchSize), () =>
+            Parallel.ForEach(Partitioner.Create(0, edgeImage.Pixels.Length, batchSize), () =>
             {
                 return new LocalHistogramCount(new EdgeHistogram(), new int[numChannels]);
             }, (range, state, localData) =>
                 {
                     for (var index = range.Item1; index < range.Item2; ++index)
                     {
-                        var pixel = edgeImage.pixels[index];
+                        var pixel = edgeImage.Pixels[index];
                         for (var c = 0; c < numChannels; ++c)
                         {
                             var rad = gradients[index][c];
@@ -1074,8 +1074,8 @@ namespace UnityExtensions
                             // Edges have been thresholded and are either 1 or 0
                             if (pixel[c] >= 0.5f)
                             {
-                                localData.histogram.AddEdge(c, deg);
-                                ++localData.edgeCount[c];
+                                localData.Histogram.AddEdge(c, deg);
+                                ++localData.EdgeCount[c];
                             }
                         }
                     }
@@ -1085,16 +1085,16 @@ namespace UnityExtensions
                 {
                     lock (histogram)
                     {
-                        histogram.Combine(localData.histogram);
+                        histogram.Combine(localData.Histogram);
                         for (var i = 0; i < numChannels; ++i)
-                            edgeCount[i] += localData.edgeCount[i];
+                            edgeCount[i] += localData.EdgeCount[i];
                     }
                 });
 
             histogram.Normalize(edgeCount);
             for (var c = 0; c < edgeCount.Length; ++c)
             {
-                edgeDensities[c] = edgeCount[c] / (double)edgeImage.pixels.Length;
+                edgeDensities[c] = edgeCount[c] / (double)edgeImage.Pixels.Length;
             }
         }
 
@@ -1199,25 +1199,25 @@ namespace UnityExtensions
 
         readonly struct MomentOrder
         {
-            public readonly int p;
-            public readonly int q;
+            public readonly int P;
+            public readonly int Q;
 
             public MomentOrder(int p, int q)
             {
-                this.p = p;
-                this.q = q;
+                this.P = p;
+                this.Q = q;
             }
         }
 
         readonly struct Centroid
         {
-            public readonly double x;
-            public readonly double y;
+            public readonly double X;
+            public readonly double Y;
 
             public Centroid(double x, double y)
             {
-                this.x = x;
-                this.y = y;
+                this.X = x;
+                this.Y = y;
             }
         }
 
@@ -1261,15 +1261,15 @@ namespace UnityExtensions
                         {
                             var diffX = 1.0;
                             var diffY = 1.0;
-                            if (momentOrder.p > 0)
+                            if (momentOrder.P > 0)
                             {
-                                diffX = i - centroids[k].x;
-                                diffX = Math.Pow(diffX, momentOrder.p);
+                                diffX = i - centroids[k].X;
+                                diffX = Math.Pow(diffX, momentOrder.P);
                             }
-                            if (momentOrder.q > 0)
+                            if (momentOrder.Q > 0)
                             {
-                                diffY = j - centroids[k].y;
-                                diffY = Math.Pow(diffY, momentOrder.q);
+                                diffY = j - centroids[k].Y;
+                                diffY = Math.Pow(diffY, momentOrder.Q);
                             }
 
                             allSums[l][k] += diffX * diffY * currentPixel[k];
@@ -1318,16 +1318,16 @@ namespace UnityExtensions
                                 {
                                     var diffX = 1.0;
                                     var diffY = 1.0;
-                                    if (momentOrder.p > 0)
+                                    if (momentOrder.P > 0)
                                     {
-                                        diffX = i - centroids[k].x;
-                                        diffX = Math.Pow(diffX, momentOrder.p);
+                                        diffX = i - centroids[k].X;
+                                        diffX = Math.Pow(diffX, momentOrder.P);
                                     }
 
-                                    if (momentOrder.q > 0)
+                                    if (momentOrder.Q > 0)
                                     {
-                                        diffY = j - centroids[k].y;
-                                        diffY = Math.Pow(diffY, momentOrder.q);
+                                        diffY = j - centroids[k].Y;
+                                        diffY = Math.Pow(diffY, momentOrder.Q);
                                     }
 
                                     localSums[l][k] += diffX * diffY * currentPixel[k];
@@ -1381,7 +1381,7 @@ namespace UnityExtensions
         {
             var scaleInvariant = new double[3];
             for (var i = 0; i < 3; ++i)
-                scaleInvariant[i] = centralMoment[i] / Math.Pow(area[i], 1 + (momentOrder.p + momentOrder.q) / 2.0);
+                scaleInvariant[i] = centralMoment[i] / Math.Pow(area[i], 1 + (momentOrder.P + momentOrder.Q) / 2.0);
             return scaleInvariant;
         }
 
@@ -1438,7 +1438,7 @@ namespace UnityExtensions
         {
             var min = new Color(float.MaxValue, float.MaxValue, float.MaxValue);
             var max = new Color(float.MinValue, float.MinValue, float.MinValue);
-            foreach (var pixel in image.pixels)
+            foreach (var pixel in image.Pixels)
             {
                 for (var c = 0; c < 3; ++c)
                 {
@@ -1455,19 +1455,19 @@ namespace UnityExtensions
         public static ImagePixels StretchImage(ImagePixels image, float newMin, float newMax)
         {
             var newMinColor = new Color(newMin, newMin, newMin);
-            var newColors = new Color[image.height * image.width];
+            var newColors = new Color[image.Height * image.Width];
             var minMax = GetMinMax(image);
             var scale = new Color();
             for (var i = 0; i < 3; ++i)
-                scale[i] = (newMax - newMin) / (minMax.max[i] - minMax.min[i]);
+                scale[i] = (newMax - newMin) / (minMax.Max[i] - minMax.Min[i]);
             var index = 0;
-            foreach (var pixel in image.pixels)
+            foreach (var pixel in image.Pixels)
             {
-                newColors[index] = (pixel - minMax.min) * scale + newMinColor;
+                newColors[index] = (pixel - minMax.Min) * scale + newMinColor;
                 ++index;
             }
 
-            return new ImagePixels(image.width, image.height, newColors);
+            return new ImagePixels(image.Width, image.Height, newColors);
         }
         #endregion // UnityEditor.Search
     }

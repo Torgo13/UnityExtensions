@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -9,18 +8,20 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/Internal/ProcessOperationBase.cs
         #region UnityEditor.ShaderAnalysis.PSSLInternal
-        List<string> m_Errors = new List<string> { string.Empty };
-        StringBuilder m_ErrorBuilder = new StringBuilder();
+        readonly List<string> _errors = new List<string> { string.Empty };
+        readonly StringBuilder _errorBuilder = new StringBuilder();
 
-        List<string> m_Lines = new List<string>();
-        StringBuilder m_OutputBuilder = new StringBuilder();
+        readonly List<string> _lines = new List<string>();
+        readonly StringBuilder _outputBuilder = new StringBuilder();
+
+        readonly Process _process;
 
         public List<string> errors
         {
             get
             {
                 Flush();
-                return m_Errors;
+                return _errors;
             }
         }
 
@@ -29,7 +30,7 @@ namespace UnityExtensions.Editor
             get
             {
                 Flush();
-                return m_Lines;
+                return _lines;
             }
         }
 
@@ -38,45 +39,43 @@ namespace UnityExtensions.Editor
             get
             {
                 Flush();
-                return m_OutputBuilder.ToString();
+                return _outputBuilder.ToString();
             }
         }
 
-        Process m_Process;
-
         public ProcessOperationBase(Process process)
         {
-            m_Process = process;
+            _process = process;
         }
 
         public bool isComplete
         {
             get
             {
-                return m_Process.HasExited;
+                return _process.HasExited;
             }
         }
 
         public void Cancel()
         {
-            if (!m_Process.HasExited)
-                m_Process.Kill();
+            if (!_process.HasExited)
+                _process.Kill();
         }
 
         void Flush()
         {
-            while (m_Process.StandardError.Peek() > -1)
+            while (_process.StandardError.Peek() > -1)
             {
-                var line = m_Process.StandardError.ReadLine();
-                m_ErrorBuilder.AppendLine(line);
+                var line = _process.StandardError.ReadLine();
+                _errorBuilder.AppendLine(line);
             }
-            m_Errors[0] = m_ErrorBuilder.ToString();
+            _errors[0] = _errorBuilder.ToString();
 
-            while (m_Process.StandardOutput.Peek() > -1)
+            while (_process.StandardOutput.Peek() > -1)
             {
-                var line = m_Process.StandardOutput.ReadLine();
-                m_Lines.Add(line);
-                m_OutputBuilder.AppendLine(line);
+                var line = _process.StandardOutput.ReadLine();
+                _lines.Add(line);
+                _outputBuilder.AppendLine(line);
             }
         }
         #endregion // UnityEditor.ShaderAnalysis.PSSLInternal

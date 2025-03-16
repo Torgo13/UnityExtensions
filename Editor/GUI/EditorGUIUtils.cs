@@ -40,7 +40,7 @@ namespace UnityExtensions.Editor
         }
 
         /// <summary>
-        /// Creates a link for richtext.
+        /// Creates a link for rich text.
         /// </summary>
         /// <param name="linkTitle">Title of the link, this is what the user will see and click on.</param>
         /// <param name="linkUrl">The url of the link.</param>

@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace UnityExtensions
 {
     /// <summary>
-    /// A mutable string with a size and capacity so you can do string manipulations wile avoiding GC allocs.
+    /// A mutable string with a size and capacity so you can do string manipulations wile avoiding GC allocations.
     /// </summary>
     [DebuggerDisplay("Size = {size} Capacity = {capacity}")]
     public class DynamicString : DynamicArray<char>
@@ -55,7 +53,7 @@ namespace UnityExtensions
         public void Append(DynamicString s) => AddRange(s);
 
         /// <summary>
-        /// Convert the DyanamicString back to a regular c# string.
+        /// Convert the DynamicString back to a regular c# string.
         /// </summary>
         /// <returns>A new string with the same contents at the dynamic string.</returns>
         public override string ToString()

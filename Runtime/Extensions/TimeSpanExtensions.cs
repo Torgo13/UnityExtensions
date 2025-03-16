@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace UnityExtensions
 {
-    static class TimeSpanExtensions
+    public static class TimeSpanExtensions
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/TimeSpanExtensions.cs
         #region Unity.Entities.Editor

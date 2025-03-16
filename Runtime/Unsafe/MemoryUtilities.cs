@@ -10,7 +10,7 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
-        public static unsafe T* Malloc<T>(int count, Allocator allocator) where T : unmanaged
+        public static T* Malloc<T>(int count, Allocator allocator) where T : unmanaged
         {
             return (T*)UnsafeUtility.Malloc(
                 UnsafeUtility.SizeOf<T>() * count,
@@ -18,7 +18,7 @@ namespace UnityExtensions.Unsafe
                 allocator);
         }
 
-        public static unsafe void Free<T>(T* p, Allocator allocator) where T : unmanaged
+        public static void Free<T>(T* p, Allocator allocator) where T : unmanaged
         {
             UnsafeUtility.Free(p, allocator);
         }
@@ -31,35 +31,35 @@ namespace UnityExtensions.Unsafe
         #region UnityEngine.InputSystem.Utilities
         public struct BitRegion
         {
-            public uint bitOffset;
-            public uint sizeInBits;
+            public readonly uint BITOffset;
+            public readonly uint SizeInBits;
 
-            public bool isEmpty => sizeInBits == 0;
+            public bool isEmpty => SizeInBits == 0;
 
             public BitRegion(uint bitOffset, uint sizeInBits)
             {
-                this.bitOffset = bitOffset;
-                this.sizeInBits = sizeInBits;
+                this.BITOffset = bitOffset;
+                this.SizeInBits = sizeInBits;
             }
 
             public BitRegion(uint byteOffset, uint bitOffset, uint sizeInBits)
             {
-                this.bitOffset = byteOffset * 8 + bitOffset;
-                this.sizeInBits = sizeInBits;
+                this.BITOffset = byteOffset * 8 + bitOffset;
+                this.SizeInBits = sizeInBits;
             }
 
             public BitRegion Overlap(BitRegion other)
             {
                 ////REVIEW: too many branches; this can probably be done much smarter
 
-                var thisEnd = bitOffset + sizeInBits;
-                var otherEnd = other.bitOffset + other.sizeInBits;
+                var thisEnd = BITOffset + SizeInBits;
+                var otherEnd = other.BITOffset + other.SizeInBits;
 
-                if (thisEnd <= other.bitOffset || otherEnd <= bitOffset)
+                if (thisEnd <= other.BITOffset || otherEnd <= BITOffset)
                     return default;
 
                 var end = min(thisEnd, otherEnd);
-                var start = max(bitOffset, other.bitOffset);
+                var start = max(BITOffset, other.BITOffset);
 
                 return new BitRegion(start, end - start);
             }
@@ -67,9 +67,9 @@ namespace UnityExtensions.Unsafe
 
         public static bool Compare(void* ptr1, void* ptr2, BitRegion region)
         {
-            if (region.sizeInBits == 1)
-                return ReadSingleBit(ptr1, region.bitOffset) == ReadSingleBit(ptr2, region.bitOffset);
-            return MemCmpBitRegion(ptr1, ptr2, region.bitOffset, region.sizeInBits);
+            if (region.SizeInBits == 1)
+                return ReadSingleBit(ptr1, region.BITOffset) == ReadSingleBit(ptr2, region.BITOffset);
+            return MemCmpBitRegion(ptr1, ptr2, region.BITOffset, region.SizeInBits);
         }
 
         public static uint ComputeFollowingByteOffset(uint byteOffset, uint sizeInBits)
@@ -148,7 +148,7 @@ namespace UnityExtensions.Unsafe
         }
 
         /// <summary>
-        /// Compare two memory regions that may be offset by a bit count and have a length expressed
+        /// Compare two memory regions that may be offset by a bit-count and have a length expressed
         /// in bits.
         /// </summary>
         /// <param name="ptr1">Pointer to start of first memory region.</param>

@@ -20,7 +20,7 @@ namespace UnityExtensions
         /// <typeparam name="T3">The type of value to map to.</typeparam>
         public class Indexer<T2, T3>
         {
-            readonly Dictionary<T2, T3> m_Dictionary;
+            readonly Dictionary<T2, T3> _dictionary;
 
             /// <summary>
             /// Creates a new <see cref="Indexer{T2, T3}"/> instance.
@@ -32,7 +32,7 @@ namespace UnityExtensions
                 if (dictionary == null)
                     throw new ArgumentNullException(nameof(dictionary));
 
-                m_Dictionary = dictionary;
+                _dictionary = dictionary;
             }
 
             /// <summary>
@@ -42,8 +42,8 @@ namespace UnityExtensions
             /// <returns>The mapped value.</returns>
             public T3 this[T2 key]
             {
-                get => m_Dictionary[key];
-                set => m_Dictionary[key] = value;
+                get => _dictionary[key];
+                set => _dictionary[key] = value;
             }
 
             /// <summary>
@@ -52,11 +52,11 @@ namespace UnityExtensions
             /// <param name="key">The value to map from.</param>
             /// <param name="value">Returns the mapped value.</param>
             /// <returns>True if the key has a mapping defined; false otherwise.</returns>
-            public bool TryGetValue(T2 key, out T3 value) => m_Dictionary.TryGetValue(key, out value);
+            public bool TryGetValue(T2 key, out T3 value) => _dictionary.TryGetValue(key, out value);
         }
 
-        readonly Dictionary<T0, T1> m_Forward = new Dictionary<T0, T1>();
-        readonly Dictionary<T1, T0> m_Reverse = new Dictionary<T1, T0>();
+        readonly Dictionary<T0, T1> _forward = new Dictionary<T0, T1>();
+        readonly Dictionary<T1, T0> _reverse = new Dictionary<T1, T0>();
 
         /// <summary>
         /// The mapping from <typeparamref name="T0"/> values to <typeparamref name="T1"/> values.
@@ -71,7 +71,7 @@ namespace UnityExtensions
         /// <summary>
         /// The number of mappings in the bijection.
         /// </summary>
-        public int Count => m_Forward.Count;
+        public int Count => _forward.Count;
 
         /// <inheritdoc/>
         public bool IsReadOnly => false;
@@ -81,8 +81,8 @@ namespace UnityExtensions
         /// </summary>
         public Bijection()
         {
-            Forward = new Indexer<T0, T1>(m_Forward);
-            Reverse = new Indexer<T1, T0>(m_Reverse);
+            Forward = new Indexer<T0, T1>(_forward);
+            Reverse = new Indexer<T1, T0>(_reverse);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace UnityExtensions
         /// <returns>True if the value is mapped; false otherwise.</returns>
         public bool ContainsKey(T0 key)
         {
-            return key != null && m_Forward.ContainsKey(key);
+            return key != null && _forward.ContainsKey(key);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace UnityExtensions
         /// <returns>True if the value is mapped; false otherwise.</returns>
         public bool ContainsValue(T1 value)
         {
-            return value != null && m_Reverse.ContainsKey(value);
+            return value != null && _reverse.ContainsKey(value);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace UnityExtensions
         /// <returns>True if the mapping exists; false otherwise.</returns>
         public bool Contains(T0 key, T1 value)
         {
-            return key != null && value != null && m_Forward.TryGetValue(key, out var mapped) && value.Equals(mapped);
+            return key != null && value != null && _forward.TryGetValue(key, out var mapped) && value.Equals(mapped);
         }
 
         /// <inheritdoc/>
@@ -132,15 +132,15 @@ namespace UnityExtensions
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-            if (m_Forward.ContainsKey(key))
+            if (_forward.ContainsKey(key))
                 throw new ArgumentException($"Map already contains entry for {key}!", nameof(key));
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            if (m_Reverse.ContainsKey(value))
+            if (_reverse.ContainsKey(value))
                 throw new ArgumentException($"Map already contains entry for {value}!", nameof(value));
 
-            m_Forward.Add(key, value);
-            m_Reverse.Add(value, key);
+            _forward.Add(key, value);
+            _reverse.Add(value, key);
         }
 
         /// <inheritdoc/>
@@ -153,9 +153,9 @@ namespace UnityExtensions
         /// <returns>True if a mapping was removed; false otherwise.</returns>
         public bool RemoveKey(T0 key)
         {
-            if (key != null && m_Forward.Remove(key, out var v1))
+            if (key != null && _forward.Remove(key, out var v1))
             {
-                m_Reverse.Remove(v1);
+                _reverse.Remove(v1);
                 return true;
             }
 
@@ -169,10 +169,10 @@ namespace UnityExtensions
         /// <returns>True if a mapping was removed; false otherwise.</returns>
         public bool RemoveValue(T1 value)
         {
-            if (value != null && m_Reverse.TryGetValue(value, out var v0))
+            if (value != null && _reverse.TryGetValue(value, out var v0))
             {
-                m_Forward.Remove(v0);
-                m_Reverse.Remove(value);
+                _forward.Remove(v0);
+                _reverse.Remove(value);
                 return true;
             }
 
@@ -189,8 +189,8 @@ namespace UnityExtensions
         {
             if (Contains(key, value))
             {
-                m_Forward.Remove(key);
-                m_Reverse.Remove(value);
+                _forward.Remove(key);
+                _reverse.Remove(value);
                 return true;
             }
 
@@ -205,8 +205,8 @@ namespace UnityExtensions
         /// </summary>
         public void Clear()
         {
-            m_Forward.Clear();
-            m_Reverse.Clear();
+            _forward.Clear();
+            _reverse.Clear();
         }
 
         /// <inheritdoc/>
@@ -219,17 +219,17 @@ namespace UnityExtensions
             if (arrayIndex + Count > array.Length)
                 throw new ArgumentException("The number of elements in the collection is greater than the available space from the index to the end of the destination array.");
 
-            foreach (var mapping in m_Forward)
+            foreach (var mapping in _forward)
             {
                 array[arrayIndex++] = mapping;
             }
         }
 
         /// <inheritdoc/>
-        public IEnumerator<KeyValuePair<T0, T1>> GetEnumerator() => m_Forward.GetEnumerator();
+        public IEnumerator<KeyValuePair<T0, T1>> GetEnumerator() => _forward.GetEnumerator();
 
         /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => m_Forward.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _forward.GetEnumerator();
         #endregion // Unity.LiveCapture
     }
 }

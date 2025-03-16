@@ -4,10 +4,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityExtensions.Attributes;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 #if !ENABLE_VR || !ENABLE_XR_MODULE
 using XRLoggingUtils = UnityEngine.Debug;
 #endif
@@ -24,7 +20,7 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/ScriptableSettingsBase.cs
         #region Unity.XR.CoreUtils
-        const string k_AbsolutePathMessage = "Path cannot be absolute";
+        const string AbsolutePathMessage = "Path cannot be absolute";
 
         /// <summary>
         /// Message to display when path is invalid.
@@ -37,7 +33,7 @@ namespace UnityExtensions
         internal const string PathWithInvalidCharacterMessage = "Paths on Windows cannot contain the following " +
             "characters: ':', '*', '?', '\"', '<', '>', '|'";
 
-        static readonly char[] k_PathTrimChars =
+        static readonly char[] PathTrimChars =
         {
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar,
@@ -45,20 +41,21 @@ namespace UnityExtensions
         };
 
         // These characters are invalid in Windows paths, and are not contained in Path.InvalidPathChars on OS X
-        static readonly char[] k_InvalidCharacters = { ':', '*', '?', '"', '<', '>', '|', '\\' };
-        static readonly string[] k_InvalidStrings = { "\\.", "/.", ".\\", "./" };
+        static readonly char[] InvalidCharacters = { ':', '*', '?', '"', '<', '>', '|', '\\' };
+        static readonly string[] InvalidStrings = { "\\.", "/.", ".\\", "./" };
 
         /// <summary>
         /// Looks up the static 'Instance' property of the given ScriptableSettings.
         /// </summary>
-        /// <param name="settingsType">The type that refers to a singleton class, which implements an 'Instance' property.</param>
+        /// <param name="settingsType">The type that refers to a singleton class,
+        /// which implements an 'Instance' property.</param>
         /// <returns>The actual singleton instance of the specified class.</returns>
         public static ScriptableSettingsBase GetInstanceByType(Type settingsType)
         {
             var instanceProperty = settingsType.GetProperty("Instance",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.FlattenHierarchy);
 
-            return (ScriptableSettingsBase)instanceProperty.GetValue(null, null);
+            return (ScriptableSettingsBase)instanceProperty!.GetValue(null, null);
         }
 
         // Awake and OnEnable can potentially have bad behavior in the editor during asset import, so we
@@ -99,7 +96,7 @@ namespace UnityExtensions
                 return false;
             }
 
-            foreach (var invalidCharacter in k_InvalidCharacters)
+            foreach (var invalidCharacter in InvalidCharacters)
             {
                 if (cleanedPath.Contains(invalidCharacter.ToString()))
                 {
@@ -108,7 +105,7 @@ namespace UnityExtensions
                 }
             }
 
-            foreach (var str in k_InvalidStrings)
+            foreach (var str in InvalidStrings)
             {
                 if (cleanedPath.Contains(str))
                 {
@@ -121,7 +118,7 @@ namespace UnityExtensions
             {
                 if (Path.IsPathRooted(cleanedPath))
                 {
-                    Debug.LogWarning(k_AbsolutePathMessage);
+                    Debug.LogWarning(AbsolutePathMessage);
                     return false;
                 }
             }
@@ -131,7 +128,7 @@ namespace UnityExtensions
                 return false;
             }
 
-            cleanedPath = cleanedPath.Trim(k_PathTrimChars);
+            cleanedPath = cleanedPath.Trim(PathTrimChars);
 
             var consecutiveSeparators = 0;
             for (var i = cleanedPath.Length - 1; i >= 0; --i)
@@ -161,7 +158,8 @@ namespace UnityExtensions
     public abstract class ScriptableSettingsBase<T> : ScriptableSettingsBase where T : ScriptableObject
     {
         /// <summary>
-        /// Reports whether the class inheriting from <see cref="ScriptableSettingsBase"/> has a <see cref="ScriptableSettingsPathAttribute"/>
+        /// Reports whether the class inheriting from <see cref="ScriptableSettingsBase"/>
+        /// has a <see cref="ScriptableSettingsPathAttribute"/>
         /// defining a custom path for the asset.
         /// </summary>
         protected static readonly bool HasCustomPath = typeof(T).IsDefined(typeof(ScriptableSettingsPathAttribute), true);
@@ -231,14 +229,15 @@ namespace UnityExtensions
             {
                 // We get the script path, and from there generate the save path.
                 // This way settings will stick with packages/repositories they were created with
-                var scriptData = MonoScript.FromScriptableObject(BaseInstance);
+                var scriptData = UnityEditor.MonoScript.FromScriptableObject(BaseInstance);
                 if (scriptData == null)
                 {
-                    XRLoggingUtils.LogWarning($"Error saving {BaseInstance}. Could not get a MonoScript from the instance", BaseInstance);
+                    XRLoggingUtils.LogWarning($"Error saving {BaseInstance}. Could not get a MonoScript from the instance",
+                        BaseInstance);
                     return;
                 }
 
-                var assetPath = AssetDatabase.GetAssetPath(scriptData);
+                var assetPath = UnityEditor.AssetDatabase.GetAssetPath(scriptData);
 
                 // Get the first folder above 'assets' or 'packages/com.package.name'
                 var lower = assetPath.ToLowerInvariant();
@@ -263,7 +262,7 @@ namespace UnityExtensions
             }
 
             if (!Application.isBatchMode)
-                AssetDatabase.SaveAssets();
+                UnityEditor.AssetDatabase.SaveAssets();
 
             XRLoggingUtils.Log($"Created initial copy of settings: {GetFilePath()} at {savePath}");
 #endif
@@ -289,10 +288,11 @@ namespace UnityExtensions
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
-            var guid = AssetDatabase.AssetPathToGUID(savePath, AssetPathToGUIDOptions.OnlyExistingAssets);
+            var guid = UnityEditor.AssetDatabase.AssetPathToGUID(savePath,
+                UnityEditor.AssetPathToGUIDOptions.OnlyExistingAssets);
 
             if (string.IsNullOrEmpty(guid))
-                AssetDatabase.CreateAsset(BaseInstance, savePath);
+                UnityEditor.AssetDatabase.CreateAsset(BaseInstance, savePath);
         }
 #endif
         #endregion // Unity.XR.CoreUtils

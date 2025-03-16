@@ -13,14 +13,14 @@ namespace UnityExtensions
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/GeometryUtils.cs
         #region Unity.XR.CoreUtils
         // Used in approximate equality checks
-        const float k_TwoPi = Mathf.PI * 2f;
+        const float TwoPi = Mathf.PI * 2f;
 
         // constants/cached constructions for Vector/UV operations
-        static readonly Vector3 k_Up = Vector3.up;
-        static readonly Vector3 k_Forward = Vector3.forward;
-        static readonly Vector3 k_Zero = Vector3.zero;
-        static readonly Quaternion k_VerticalCorrection = Quaternion.AngleAxis(180.0f, k_Up);
-        const float k_MostlyVertical = 0.95f;
+        static readonly Vector3 Up = Vector3.up;
+        static readonly Vector3 Forward = Vector3.forward;
+        static readonly Vector3 Zero = Vector3.zero;
+        static readonly Quaternion VerticalCorrection = Quaternion.AngleAxis(180.0f, Up);
+        const float MostlyVertical = 0.95f;
 
         /// <summary>
         /// Finds the side of a polygon closest to a specified world space position.
@@ -29,7 +29,7 @@ namespace UnityExtensions
         /// <param name="point">The position in space to find the two closest outline vertices to.</param>
         /// <param name="vertexA">The coordinates of the first vertex of the nearest side is assigned to this `out` parameter.</param>
         /// <param name="vertexB">The coordinates of the second vertex of the nearest side is assigned to this `out` parameter.</param>
-        /// <returns>True if a nearest edge could be found.</returns>
+        /// <returns>True if the nearest edge could be found.</returns>
         public static bool FindClosestEdge(List<Vector3> vertices, Vector3 point,
             out Vector3 vertexA, out Vector3 vertexB)
         {
@@ -70,7 +70,7 @@ namespace UnityExtensions
         /// <param name="vertices">Vertices defining the outline of a polygon.</param>
         /// <param name="point">The position in world space to find the furthest intersection point.</param>
         /// <returns>A world space position of a point on the polygon that is as far from the input point as possible.
-        /// Returns <see cref="Vector3.zero"/> if <paramref name="vertices"/> contains less than tree points.</returns>
+        /// Returns <see cref="Vector3.zero"/> if <paramref name="vertices"/> contains less than three points.</returns>
         public static Vector3 PointOnOppositeSideOfPolygon(List<Vector3> vertices, Vector3 point)
         {
             const float oppositeSideBufferScale = 100.0f;
@@ -360,7 +360,7 @@ namespace UnityExtensions
         /// <param name="verticesB">Vertices defining the outline of polygon B.</param>
         /// <param name="pointA">The point on polygon A closest to an edge of polygon B.</param>
         /// <param name="pointB">The point on polygon B closest to an edge of polygon A.</param>
-        /// <param name="parallelTest">The minimum distance between closest approaches used to detect parallel line segments.</param>
+        /// <param name="parallelTest">The minimum distance between the closest approaches used to detect parallel line segments.</param>
         public static void ClosestPolygonApproach(List<Vector3> verticesA, List<Vector3> verticesB,
             out Vector3 pointA, out Vector3 pointB, float parallelTest = 0f)
         {
@@ -411,7 +411,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Determines if a point is inside of a polygon on the XZ plane. (The y value is not used.)
+        /// Determines if a point is inside a polygon on the XZ plane. (The y value is not used.)
         /// </summary>
         /// <param name="testPoint">The point to test.</param>
         /// <param name="vertices">Vertices defining the outline of a polygon.</param>
@@ -490,7 +490,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Determines if a point is inside of a convex polygon and lies on the surface.
+        /// Determines if a point is inside a convex polygon and lies on the surface.
         /// </summary>
         /// <param name="testPoint">The point to test.</param>
         /// <param name="vertices">Vertices defining the outline of the polygon. The polygon must be convex.
@@ -520,7 +520,7 @@ namespace UnityExtensions
             }
             // The sum will only be 2*PI if the point is on the plane of the polygon and on the interior
             const float radiansCompareThreshold = 0.01f;
-            return Mathf.Abs((float)angleSum - k_TwoPi) < radiansCompareThreshold;
+            return Mathf.Abs((float)angleSum - TwoPi) < radiansCompareThreshold;
         }
 
 
@@ -553,7 +553,7 @@ namespace UnityExtensions
             if (points.Count < 3)
                 return false;
 
-            HashSet<int> k_HullIndices = HashSetPool<int>.Get();
+            HashSet<int> hullIndices = HashSetPool<int>.Get();
             var pointsCount = points.Count;
             var leftmostPointIndex = 0;
             for (var i = 1; i < pointsCount; ++i)
@@ -579,7 +579,7 @@ namespace UnityExtensions
             {
                 var currentPoint = points[currentIndex];
                 hull.Add(currentPoint);
-                k_HullIndices.Add(currentIndex);
+                hullIndices.Add(currentIndex);
 
                 // This loop is where we find the next outermost point (next point on the hull clockwise).
                 // To do this we start with a point "p" which is an arbitrary entry in "points".
@@ -596,7 +596,7 @@ namespace UnityExtensions
                     // By explicitly ignoring points that are already on the hull, we prevent the possibility of an infinite loop.
                     // Without this check, a point could potentially be chosen again if a collinearity check results in a
                     // false negative due to floating point error.
-                    if (k_HullIndices.Contains(qIndex) && qIndex != leftmostPointIndex)
+                    if (hullIndices.Contains(qIndex) && qIndex != leftmostPointIndex)
                         continue;
 
                     var q = points[qIndex];
@@ -634,7 +634,7 @@ namespace UnityExtensions
                 currentIndex = pIndex;
             } while (currentIndex != leftmostPointIndex);
 
-            HashSetPool<int>.Release(k_HullIndices);
+            HashSetPool<int>.Release(hullIndices);
 
             return true;
         }
@@ -755,37 +755,37 @@ namespace UnityExtensions
             }
 
             // compute & store the direction of every edge in the hull
-            List<Vector3> k_HullEdgeDirections = ListPool<Vector3>.Get();
+            List<Vector3> hullEdgeDirections = ListPool<Vector3>.Get();
             var lastVertexIndex = vertexCount - 1;
             for (var i = 0; i < lastVertexIndex; i++)
             {
                 var edgeDirection = convexHull[i + 1] - convexHull[i];
                 edgeDirection.Normalize();
-                k_HullEdgeDirections.Add(edgeDirection);
+                hullEdgeDirections.Add(edgeDirection);
             }
 
             // by doing the last vertex on its own, we can skip checking indices while iterating above
             var lastEdgeDirection = convexHull[0] - convexHull[lastVertexIndex];
             lastEdgeDirection.Normalize();
-            k_HullEdgeDirections.Add(lastEdgeDirection);
+            hullEdgeDirections.Add(lastEdgeDirection);
 
             var bestOrientedBoundingBoxArea = double.MaxValue;
             // for every vertex in the hull, try aligning a caliper edge with an edge the vertex lies on
             for (var i = 0; i < vertexCount; i++)
             {
-                var leftEdge = k_HullEdgeDirections[leftIndex];
-                var rightEdge = k_HullEdgeDirections[rightIndex];
-                var topEdge = k_HullEdgeDirections[topIndex];
-                var bottomEdge = k_HullEdgeDirections[bottomIndex];
+                var leftEdge = hullEdgeDirections[leftIndex];
+                var rightEdge = hullEdgeDirections[rightIndex];
+                var topEdge = hullEdgeDirections[topIndex];
+                var bottomEdge = hullEdgeDirections[bottomIndex];
 
                 // find the angles between our caliper lines and the polygon edges, by doing
-                // ` arccosine(caliperEdge · hullEdge) ` for each pair of caliper edge & polygon edge
+                // ` arccosine(caliperEdge ï¿½ hullEdge) ` for each pair of caliper edge & polygon edge
                 var leftAngle = Math.Acos(caliperLeft.x * leftEdge.x + caliperLeft.z * leftEdge.z);
                 var rightAngle = Math.Acos(caliperRight.x * rightEdge.x + caliperRight.z * rightEdge.z);
                 var topAngle = Math.Acos(caliperTop.x * topEdge.x + caliperTop.z * topEdge.z);
                 var bottomAngle = Math.Acos(caliperBottom.x * bottomEdge.x + caliperBottom.z * bottomEdge.z);
 
-                // find smallest angle among the lines
+                // find the smallest angle among the lines
                 var smallestAngleIndex = 0;
                 var smallestAngle = leftAngle;
                 if (rightAngle < smallestAngle)
@@ -851,7 +851,7 @@ namespace UnityExtensions
                 }
             }
 
-            ListPool<Vector3>.Release(k_HullEdgeDirections);
+            ListPool<Vector3>.Release(hullEdgeDirections);
 
             // compute the size of the 2d bounds
             var topLeft = boundingBox[0];
@@ -929,7 +929,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="vertices">The 4 vertices of the bounding box, in the order
         /// `{ top left, bottom left, bottom right, top right }`.</param>
-        /// <returns>The rotation of the box, with the horizontal side aligned to the x axis and the
+        /// <returns>The rotation of the box, with the horizontal side aligned to the x-axis and the
         /// vertical side aligned to the z axis</returns>
         public static Quaternion RotationForBox(Vector3[] vertices)
         {
@@ -1065,18 +1065,18 @@ namespace UnityExtensions
 
         static Quaternion NormalizeRotationKeepingUp(Quaternion rot)
         {
-            var srcUp = (rot * k_Up).normalized;
-            var isMostlyVertical = Mathf.Abs(srcUp.y) > k_MostlyVertical;
+            var srcUp = (rot * Up).normalized;
+            var isMostlyVertical = Mathf.Abs(srcUp.y) > MostlyVertical;
 
             Vector3 modFwd;
 
             if (isMostlyVertical)
             {
-                modFwd = Vector3.Cross(k_Forward, srcUp);
+                modFwd = Vector3.Cross(Forward, srcUp);
             }
             else
             {
-                var side = Vector3.Cross(srcUp, k_Up);
+                var side = Vector3.Cross(srcUp, Up);
                 modFwd = Vector3.Cross(srcUp, side);
             }
 
@@ -1090,7 +1090,7 @@ namespace UnityExtensions
         /// <returns>The rotation-corrected pose for calculating UVs.</returns>
         public static Pose PolygonUVPoseFromPlanePose(Pose pose)
         {
-            return new Pose(k_Zero, NormalizeRotationKeepingUp(pose.rotation));
+            return new Pose(Zero, NormalizeRotationKeepingUp(pose.rotation));
         }
 
         /// <summary>
@@ -1105,7 +1105,7 @@ namespace UnityExtensions
             var worldPos = planePose.position + planePose.rotation * vertexPos;
             var localUv = Quaternion.Inverse(uvPose.rotation) * (worldPos - uvPose.position);
 
-            localUv = k_VerticalCorrection * localUv;
+            localUv = VerticalCorrection * localUv;
 
             return new Vector2(localUv.x, localUv.z);
         }

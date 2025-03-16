@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 using UnityEngine.LowLevel;
 
 namespace UnityExtensions
@@ -170,15 +169,16 @@ namespace UnityExtensions
         /// <param name="system">The system to add the subsystem to.</param>
         /// <param name="index">The index of the subsystem in the subsystem array.</param>
         /// <param name="update">The function called to update the new subsystem.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero or larger then the
-        /// subsystem array length.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is less than zero
+        /// or larger than the subsystem array length.</exception>
         public static void AddSubSystem<T>(this ref PlayerLoopSystem system, int index, PlayerLoopSystem.UpdateFunction update)
         {
             var subSystems = system.subSystemList;
             var oldLength = subSystems != null ? subSystems.Length : 0;
 
             if (index < 0 || index > oldLength)
-                throw new ArgumentOutOfRangeException(nameof(index), index, "Must be non-negative value no larger than subsystem array length.");
+                throw new ArgumentOutOfRangeException(nameof(index), index,
+                    "Must be non-negative value no larger than subsystem array length.");
 
             var newSubSystems = new PlayerLoopSystem[oldLength + 1];
 

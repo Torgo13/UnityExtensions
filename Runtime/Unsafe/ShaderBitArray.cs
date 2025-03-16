@@ -18,44 +18,44 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/ShaderBitArray.cs
         #region UnityEngine.Rendering.Universal
-        const int k_BitsPerElement = 32;
-        const int k_ElementShift = 5;
-        const int k_ElementMask = (1 << k_ElementShift) - 1;
+        const int BitsPerElement = 32;
+        const int ElementShift = 5;
+        const int ElementMask = (1 << ElementShift) - 1;
 
-        private float[] m_Data;
+        private float[] _data;
 
-        public int elemLength => m_Data == null ? 0 : m_Data.Length;
-        public int bitCapacity => elemLength * k_BitsPerElement;
-        public float[] data => m_Data;
+        public int elemLength => _data == null ? 0 : _data.Length;
+        public int bitCapacity => elemLength * BitsPerElement;
+        public float[] data => _data;
 
         public void Resize(int bitCount)
         {
             if (bitCapacity > bitCount)
                 return;
 
-            int newElemCount = ((bitCount + (k_BitsPerElement - 1)) / k_BitsPerElement);
-            if (newElemCount == m_Data?.Length)
+            int newElemCount = ((bitCount + (BitsPerElement - 1)) / BitsPerElement);
+            if (newElemCount == _data?.Length)
                 return;
 
             var newData = new float[newElemCount];
-            if (m_Data != null)
+            if (_data != null)
             {
-                for (int i = 0; i < m_Data.Length; i++)
-                    newData[i] = m_Data[i];
+                for (int i = 0; i < _data.Length; i++)
+                    newData[i] = _data[i];
             }
-            m_Data = newData;
+            _data = newData;
         }
 
         public void Clear()
         {
-            for (int i = 0; i < m_Data.Length; i++)
-                m_Data[i] = 0;
+            for (int i = 0; i < _data.Length; i++)
+                _data[i] = 0;
         }
 
         private void GetElementIndexAndBitOffset(int index, out int elemIndex, out int bitOffset)
         {
-            elemIndex = index >> k_ElementShift;
-            bitOffset = index & k_ElementMask;
+            elemIndex = index >> ElementShift;
+            bitOffset = index & ElementMask;
         }
 
         public bool this[int index]
@@ -66,7 +66,7 @@ namespace UnityExtensions.Unsafe
 
                 unsafe
                 {
-                    fixed (float* floatData = m_Data)
+                    fixed (float* floatData = _data)
                     {
                         uint* uintElem = (uint*)&floatData[elemIndex];
                         bool val = ((*uintElem) & (1u << bitOffset)) != 0u;
@@ -79,7 +79,7 @@ namespace UnityExtensions.Unsafe
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
                 unsafe
                 {
-                    fixed (float* floatData = m_Data)
+                    fixed (float* floatData = _data)
                     {
                         uint* uintElem = (uint*)&floatData[elemIndex];
                         if (value)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
@@ -44,7 +43,7 @@ namespace UnityExtensions
 
         /// <summary>
         /// Finds all types that extend the given class type and appends them to a list
-        /// If the input type is not an class type, no action is taken.
+        /// If the input type is not a class type, no action is taken.
         /// </summary>
         /// <param name="type">The class type of whom list will be found.</param>
         /// <param name="list">The list to which extension types will be appended.</param>
@@ -80,7 +79,8 @@ namespace UnityExtensions
         /// <param name="type">The type which will be searched for fields.</param>
         /// <param name="name">Name of the property to get.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
-        /// <returns>An object representing the field that matches the specified requirements, if found; otherwise, `null`.</returns>
+        /// <returns>An object representing the field that matches the specified requirements, if found;
+        /// otherwise, `null`.</returns>
         public static PropertyInfo GetPropertyRecursively(this Type type, string name, BindingFlags bindingAttr)
         {
             var property = type.GetProperty(name, bindingAttr);
@@ -100,7 +100,8 @@ namespace UnityExtensions
         /// <param name="type">The type which will be searched for fields.</param>
         /// <param name="name">Name of the field to get.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
-        /// <returns>An object representing the field that matches the specified requirements, if found; otherwise, `null`.</returns>
+        /// <returns>An object representing the field that matches the specified requirements, if found;
+        /// otherwise, `null`.</returns>
         public static FieldInfo GetFieldRecursively(this Type type, string name, BindingFlags bindingAttr)
         {
             var field = type.GetField(name, bindingAttr);
@@ -121,7 +122,8 @@ namespace UnityExtensions
         /// <param name="fields">A list to which all fields of this type will be added.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         public static void GetFieldsRecursively(this Type type, List<FieldInfo> fields,
-            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                                       | BindingFlags.DeclaredOnly)
         {
             while (true)
             {
@@ -148,7 +150,8 @@ namespace UnityExtensions
         /// <param name="fields">A list to which all properties of this type will be added.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         public static void GetPropertiesRecursively(this Type type, List<PropertyInfo> fields,
-            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                                       | BindingFlags.DeclaredOnly)
         {
             while (true)
             {
@@ -173,7 +176,8 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="classes">Collection of classes to get fields from.</param>
         /// <param name="fields">A list to which matching fields will be added.</param>
-        /// <param name="interfaceTypes">Collection of interfaceTypes to check if field type implements any interface type.</param>
+        /// <param name="interfaceTypes">Collection of interfaceTypes to check if field type
+        /// implements any interface type.</param>
         /// <param name="bindingAttr">Binding flags of fields.</param>
         public static void GetInterfaceFieldsFromClasses(this IEnumerable<Type> classes, List<FieldInfo> fields,
             List<Type> interfaceTypes, BindingFlags bindingAttr)
@@ -184,15 +188,15 @@ namespace UnityExtensions
                     throw new ArgumentException($"Type {type} in interfaceTypes is not an interface!");
             }
 
-            List<FieldInfo> k_Fields = ListPool<FieldInfo>.Get();
+            List<FieldInfo> tempFields = ListPool<FieldInfo>.Get();
             foreach (var type in classes)
             {
                 if (!type.IsClass)
                     throw new ArgumentException($"Type {type} in classes is not a class!");
 
-                k_Fields.Clear();
-                type.GetFieldsRecursively(k_Fields, bindingAttr);
-                foreach (var field in k_Fields)
+                tempFields.Clear();
+                type.GetFieldsRecursively(tempFields, bindingAttr);
+                foreach (var field in tempFields)
                 {
                     var interfaces = field.FieldType.GetInterfaces();
                     foreach (var @interface in interfaces)
@@ -206,7 +210,7 @@ namespace UnityExtensions
                 }
             }
 
-            ListPool<FieldInfo>.Release(k_Fields);
+            ListPool<FieldInfo>.Release(tempFields);
         }
 
         /// <summary>
@@ -216,7 +220,8 @@ namespace UnityExtensions
         /// <param name="type">The type whose attribute will be returned.</param>
         /// <param name="inherit">Whether to search this type's inheritance chain to find the attribute.</param>
         /// <returns>The first <typeparamref name="TAttribute"/> found.</returns>
-        public static TAttribute GetAttribute<TAttribute>(this Type type, bool inherit = false) where TAttribute : Attribute
+        public static TAttribute GetAttribute<TAttribute>(this Type type, bool inherit = false)
+            where TAttribute : Attribute
         {
             Assert.IsTrue(type.IsDefined(typeof(TAttribute), inherit), "Attribute not found");
             return (TAttribute)type.GetCustomAttributes(typeof(TAttribute), inherit)[0];
@@ -228,7 +233,8 @@ namespace UnityExtensions
         /// <typeparam name="TAttribute">Type of attribute we are checking if is defined.</typeparam>
         /// <param name="type">Type that has the attribute or inherits the attribute.</param>
         /// <param name="types">A list to which matching types will be added.</param>
-        public static void IsDefinedGetInheritedTypes<TAttribute>(this Type type, List<Type> types) where TAttribute : Attribute
+        public static void IsDefinedGetInheritedTypes<TAttribute>(this Type type, List<Type> types)
+            where TAttribute : Attribute
         {
             while (type != null)
             {
@@ -253,7 +259,9 @@ namespace UnityExtensions
                 if (type == null)
                     return null;
 
-                var field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
+                var field = type.GetField(fieldName, BindingFlags.NonPublic
+                                                     | BindingFlags.Public | BindingFlags.FlattenHierarchy
+                                                     | BindingFlags.Instance);
                 if (field != null)
                     return field;
 
@@ -270,7 +278,7 @@ namespace UnityExtensions
         {
             var name = type.Name;
 
-            // Replace + with . for sub-classes
+            // Replace + with . for subclasses
             name = name.Replace('+', '.');
 
             if (!type.IsGenericType)
@@ -299,7 +307,7 @@ namespace UnityExtensions
         {
             var name = type.Name;
 
-            // Replace + with . for sub-classes
+            // Replace + with . for subclasses
             name = name.Replace('+', '.');
 
             if (!type.IsGenericType)
@@ -320,7 +328,8 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Returns a human-readable, assembly qualified name for a class with its assembly qualified generic arguments filled in.
+        /// Returns a human-readable, assembly qualified name for a class with its assembly qualified generic arguments
+        /// filled in.
         /// </summary>
         /// <param name="type">The type to get a name for.</param>
         /// <returns>The human-readable name.</returns>
@@ -330,25 +339,25 @@ namespace UnityExtensions
             var declaringType = type.DeclaringType;
             if (declaringType != null && !type.IsGenericParameter)
             {
-                List<string> k_TypeNames = ListPool<string>.Get();
+                List<string> typeNames = ListPool<string>.Get();
                 var name = type.GetNameWithFullGenericArguments();
-                k_TypeNames.Add(name);
+                typeNames.Add(name);
                 while (true)
                 {
                     var parentDeclaringType = declaringType.DeclaringType;
                     if (parentDeclaringType == null)
                     {
                         name = declaringType.GetFullNameWithGenericArguments();
-                        k_TypeNames.Insert(0, name);
+                        typeNames.Insert(0, name);
                         break;
                     }
                     name = declaringType.GetNameWithFullGenericArguments();
-                    k_TypeNames.Insert(0, name);
+                    typeNames.Insert(0, name);
                     declaringType = parentDeclaringType;
                 }
 
-                var result = string.Join(".", k_TypeNames.ToArray());
-                ListPool<string>.Release(k_TypeNames);
+                var result = string.Join(".", typeNames.ToArray());
+                ListPool<string>.Release(typeNames);
                 return result;
             }
 
@@ -363,7 +372,7 @@ namespace UnityExtensions
                 return name;
 
             // Trim off `1
-            name = name.Split('`')[0];
+            name = name!.Split('`')[0];
 
             var arguments = type.GetGenericArguments();
             var length = arguments.Length;

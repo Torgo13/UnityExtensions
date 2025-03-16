@@ -12,35 +12,38 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ContextContainer.cs
         #region UnityEngine.Rendering
-        Item[] m_Items = new Item[64];
-        List<uint> m_ActiveItemIndices = new();
+        Item[] _items = new Item[64];
+        readonly List<uint> _activeItemIndices = new List<uint>();
 
         /// <summary>
-        /// Retrives a T of class <c>ContextContainerItem</c> if it was previously created without it being disposed.
+        /// Retrieves a T of class <c>ContextContainerItem</c> if it was previously created without it being disposed.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch. T has to inherit from <c>ContextContainerItem</c></typeparam>
+        /// <typeparam name="T">Is the class which you are trying to fetch.
+        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
         /// <returns>The value created previously using <![CDATA[Create<T>]]> .</returns>
-        /// <exception cref="InvalidOperationException">This is thown if the value isn't previously created.</exception>
+        /// <exception cref="InvalidOperationException">This is thrown if the value isn't previously created.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get<T>()
             where T : ContextItem, new()
         {
-            var typeId = TypeId<T>.value;
+            var typeId = TypeId<T>.Value;
             if (!Contains(typeId))
             {
                 throw new InvalidOperationException($"Type {typeof(T).FullName} has not been created yet.");
             }
 
-            return (T) m_Items[typeId].storage;
+            return (T) _items[typeId].Storage;
 
         }
 
         /// <summary>
         /// Creates the value of type T.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch. T has to inherit from <c>ContextContainerItem</c></typeparam>
+        /// <typeparam name="T">Is the class which you are trying to fetch.
+        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
          /// <returns>The value of type T created inside the <c>ContextContainer</c>.</returns>
-        /// <exception cref="InvalidOperationException">Thown if you try to create the value of type T agian after it is already created.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if you try to create the value of type T again
+        /// after it is already created.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
         public T Create<T>([CallerLineNumber] int lineNumber = 0, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "")
@@ -49,11 +52,11 @@ namespace UnityExtensions
 #endif
             where T : ContextItem, new()
         {
-            var typeId = TypeId<T>.value;
+            var typeId = TypeId<T>.Value;
             if (Contains(typeId))
             {
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
-                throw new InvalidOperationException($"Type {typeof(T).FullName} has already been created. It was previously created in member {m_Items[typeId].memberName} at line {m_Items[typeId].lineNumber} in {m_Items[typeId].filePath}.");
+                throw new InvalidOperationException($"Type {typeof(T).FullName} has already been created. It was previously created in member {_items[typeId].memberName} at line {_items[typeId].lineNumber} in {_items[typeId].filePath}.");
 #else
                 throw new InvalidOperationException($"Type {typeof(T).FullName} has already been created.");
 #endif
@@ -69,8 +72,9 @@ namespace UnityExtensions
         /// <summary>
         /// Creates the value of type T if the value is not previously created otherwise try to get the value of type T.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch. T has to inherit from <c>ContextContainerItem</c></typeparam>
-        /// <returns>Returns the value of type T which is created or retrived.</returns>
+        /// <typeparam name="T">Is the class which you are trying to fetch.
+        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
+        /// <returns>Returns the value of type T which is created or retrieved.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
         public T GetOrCreate<T>([CallerLineNumber] int lineNumber = 0, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "")
@@ -79,10 +83,10 @@ namespace UnityExtensions
 #endif
             where T : ContextItem, new()
         {
-            var typeId = TypeId<T>.value;
+            var typeId = TypeId<T>.Value;
             if (Contains(typeId))
             {
-                return (T) m_Items[typeId].storage;
+                return (T) _items[typeId].Storage;
             }
 
 
@@ -96,18 +100,19 @@ namespace UnityExtensions
         /// <summary>
         /// Check if the value of type T has previously been created.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch. T has to inherit from <c>ContextContainerItem</c></typeparam>
+        /// <typeparam name="T">Is the class which you are trying to fetch.
+        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
         /// <returns>Returns true if the value exists and false otherwise.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains<T>()
             where T : ContextItem, new()
         {
-            var typeId = TypeId<T>.value;
+            var typeId = TypeId<T>.Value;
             return Contains(typeId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool Contains(uint typeId) => typeId < m_Items.Length && m_Items[typeId].isSet;
+        bool Contains(uint typeId) => typeId < _items.Length && _items[typeId].IsSet;
 
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
         T CreateAndGetData<T>(uint typeId, int lineNumber, string memberName, string filePath)
@@ -116,27 +121,27 @@ namespace UnityExtensions
 #endif
             where T : ContextItem, new()
         {
-            if (m_Items.Length <= typeId)
+            if (_items.Length <= typeId)
             {
-                var items = new Item[math.max(math.ceilpow2(s_TypeCount), m_Items.Length * 2)];
-                for (var i = 0; i < m_Items.Length; i++)
+                var items = new Item[math.max(math.ceilpow2(_typeCount), _items.Length * 2)];
+                for (var i = 0; i < _items.Length; i++)
                 {
-                    items[i] = m_Items[i];
+                    items[i] = _items[i];
                 }
-                m_Items = items;
+                _items = items;
             }
 
-            m_ActiveItemIndices.Add(typeId);
-            ref var item = ref m_Items[typeId];
-            item.storage ??= new T();
-            item.isSet = true;
+            _activeItemIndices.Add(typeId);
+            ref var item = ref _items[typeId];
+            item.Storage ??= new T();
+            item.IsSet = true;
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
             item.lineNumber = lineNumber;
             item.memberName = memberName;
             item.filePath = filePath;
 #endif
 
-            return (T)item.storage;
+            return (T)item.Storage;
         }
 
         /// <summary>
@@ -144,27 +149,27 @@ namespace UnityExtensions
         /// </summary>
         public void Dispose()
         {
-            foreach (var index in m_ActiveItemIndices)
+            foreach (var index in _activeItemIndices)
             {
-                ref var item = ref m_Items[index];
-                item.storage.Reset();
-                item.isSet = false;
+                ref var item = ref _items[index];
+                item.Storage.Reset();
+                item.IsSet = false;
             }
 
-            m_ActiveItemIndices.Clear();
+            _activeItemIndices.Clear();
         }
 
-        static uint s_TypeCount;
+        static uint _typeCount;
 
         static class TypeId<T>
         {
-            public static uint value = s_TypeCount++;
+            public static uint Value = _typeCount++;
         }
 
         struct Item
         {
-            public ContextItem storage;
-            public bool isSet;
+            public ContextItem Storage;
+            public bool IsSet;
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
             public int lineNumber;
             public string memberName;
@@ -175,7 +180,8 @@ namespace UnityExtensions
     }
 
     /// <summary>
-    /// This is needed to add the data to <c>ContextContainer</c> and will control how the data are removed when calling Dispose on the <c>ContextContainer</c>.
+    /// This is needed to add the data to <c>ContextContainer</c> and will control how the data are removed
+    /// when calling Dispose on the <c>ContextContainer</c>.
     /// </summary>
     public abstract class ContextItem
     {
@@ -188,7 +194,7 @@ namespace UnityExtensions
         /// information (e.g. pointers to objects that will no longer be valid to access).
         /// So it is important the implementation carefully clears all relevant members.
         /// Note that this is different from a Dispose or Destructor as the object in not
-        /// freed but reset. This can be useful when havin large sub-allocated objects like
+        /// freed but reset. This can be useful when having large sub-allocated objects like
         /// arrays or lists which can be cleared and reused without re-allocating.
         /// </summary>
         public abstract void Reset();

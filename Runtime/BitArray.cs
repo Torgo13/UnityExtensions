@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -97,11 +97,16 @@ namespace UnityExtensions
             data = (byte)0u;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex >= capacity) continue;
-                data |= (byte)(1u << (int)bitIndex);
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex >= capacity) continue;
+                    data |= (byte)(1u << (int)bitIndex);
+                }
             }
         }
 
@@ -213,17 +218,21 @@ namespace UnityExtensions
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-
         public BitArray16(IEnumerable<uint> bitIndexTrue)
         {
             data = (ushort)0u;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex >= capacity) continue;
-                data |= (ushort)(1u << (int)bitIndex);
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex >= capacity) continue;
+                    data |= (ushort)(1u << (int)bitIndex);
+                }
             }
         }
 
@@ -342,11 +351,16 @@ namespace UnityExtensions
             data = 0u;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex >= capacity) continue;
-                data |= 1u << (int)bitIndex;
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex >= capacity) continue;
+                    data |= 1u << (int)bitIndex;
+                }
             }
         }
 
@@ -464,11 +478,16 @@ namespace UnityExtensions
             data = 0L;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex >= capacity) continue;
-                data |= 1uL << (int)bitIndex;
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex >= capacity) continue;
+                    data |= 1uL << (int)bitIndex;
+                }
             }
         }
 
@@ -605,13 +624,18 @@ namespace UnityExtensions
             data1 = data2 = 0uL;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex < 64u)
-                    data1 |= 1uL << (int)bitIndex;
-                else if (bitIndex < capacity)
-                    data2 |= 1uL << (int)(bitIndex - 64u);
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex < 64u)
+                        data1 |= 1uL << (int)bitIndex;
+                    else if (bitIndex < capacity)
+                        data2 |= 1uL << (int)(bitIndex - 64u);
+                }
             }
         }
 
@@ -754,17 +778,22 @@ namespace UnityExtensions
             data1 = data2 = data3 = data4 = 0uL;
             if (bitIndexTrue == null)
                 return;
-            for (int index = bitIndexTrue.Count() - 1; index >= 0; --index)
+
+            using (ListPool<uint>.Get(out var list))
             {
-                uint bitIndex = bitIndexTrue.ElementAt(index);
-                if (bitIndex < 64u)
-                    data1 |= 1uL << (int)bitIndex;
-                else if (bitIndex < 128u)
-                    data2 |= 1uL << (int)(bitIndex - 64u);
-                else if (bitIndex < 192u)
-                    data3 |= 1uL << (int)(bitIndex - 128u);
-                else if (bitIndex < capacity)
-                    data4 |= 1uL << (int)(bitIndex - 192u);
+                list.AddRange(bitIndexTrue);
+                for (int index = list.Count - 1; index >= 0; --index)
+                {
+                    uint bitIndex = list[index];
+                    if (bitIndex < 64u)
+                        data1 |= 1uL << (int)bitIndex;
+                    else if (bitIndex < 128u)
+                        data2 |= 1uL << (int)(bitIndex - 64u);
+                    else if (bitIndex < 192u)
+                        data3 |= 1uL << (int)(bitIndex - 128u);
+                    else if (bitIndex < capacity)
+                        data4 |= 1uL << (int)(bitIndex - 192u);
+                }
             }
         }
 

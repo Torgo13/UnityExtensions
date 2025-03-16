@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -12,89 +11,89 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/ParallelBitArray.cs
         #region UnityEngine.Rendering
-        private Allocator m_Allocator;
-        private NativeArray<long> m_Bits;
-        private int m_Length;
+        private readonly Allocator _allocator;
+        private NativeArray<long> _bits;
+        private int _length;
 
-        public int Length => m_Length;
+        public int Length => _length;
 
         public bool IsCreated
         {
-            get { return m_Bits.IsCreated; }
+            get { return _bits.IsCreated; }
         }
 
         public ParallelBitArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
         {
-            m_Allocator = allocator;
-            m_Bits = new NativeArray<long>((length + 63) / 64, allocator, options);
-            m_Length = length;
+            _allocator = allocator;
+            _bits = new NativeArray<long>((length + 63) / 64, allocator, options);
+            _length = length;
         }
 
         public void Dispose()
         {
-            m_Bits.Dispose();
-            m_Length = 0;
+            _bits.Dispose();
+            _length = 0;
         }
 
         public void Dispose(JobHandle inputDeps)
         {
-            m_Bits.Dispose(inputDeps);
-            m_Length = 0;
+            _bits.Dispose(inputDeps);
+            _length = 0;
         }
 
         public void Resize(int newLength)
         {
-            int oldLength = m_Length;
+            int oldLength = _length;
             if (newLength == oldLength)
                 return;
 
-            int oldBitsLength = m_Bits.Length;
+            int oldBitsLength = _bits.Length;
             int newBitsLength = (newLength + 63) / 64;
             if (newBitsLength != oldBitsLength)
             {
-                var newBits = new NativeArray<long>(newBitsLength, m_Allocator, NativeArrayOptions.UninitializedMemory);
-                if (m_Bits.IsCreated)
+                var newBits = new NativeArray<long>(newBitsLength, _allocator, NativeArrayOptions.UninitializedMemory);
+                if (_bits.IsCreated)
                 {
-                    NativeArray<long>.Copy(m_Bits, newBits, m_Bits.Length);
-                    m_Bits.Dispose();
+                    NativeArray<long>.Copy(_bits, newBits, _bits.Length);
+                    _bits.Dispose();
                 }
-                m_Bits = newBits;
+                _bits = newBits;
             }
 
             // mask off bits past the length
             int validLength = Mathf.Min(oldLength, newLength);
             int validBitsLength = Mathf.Min(oldBitsLength, newBitsLength);
-            for (int chunkIndex = validBitsLength; chunkIndex < m_Bits.Length; ++chunkIndex)
+            for (int chunkIndex = validBitsLength; chunkIndex < _bits.Length; ++chunkIndex)
             {
                 int validBitCount = Mathf.Max(validLength - 64 * chunkIndex, 0);
                 if (validBitCount < 64)
                 {
                     ulong validMask = (1ul << validBitCount) - 1;
-                    m_Bits[chunkIndex] &= (long)validMask;
+                    _bits[chunkIndex] &= (long)validMask;
                 }
             }
-            m_Length = newLength;
+            _length = newLength;
         }
 
         public void Set(int index, bool value)
         {
             unsafe
             {
-                Assert.IsTrue(0 <= index && index < m_Length);
+                Assert.IsTrue(0 <= index && index < _length);
 
-                int entry_index = index >> 6;
-                long* entries = (long*)m_Bits.GetUnsafePtr();
+                int entryIndex = index >> 6;
+                long* entries = (long*)_bits.GetUnsafePtr();
 
                 ulong bit = 1ul << (index & 0x3f);
-                long and_mask = (long)(~bit);
-                long or_mask = value ? (long)bit : 0;
+                long andMask = (long)(~bit);
+                long orMask = value ? (long)bit : 0;
 
-                long old_entry, new_entry;
+                long oldEntry, newEntry;
                 do
                 {
-                    old_entry = Interlocked.Read(ref entries[entry_index]);
-                    new_entry = (old_entry & and_mask) | or_mask;
-                } while (Interlocked.CompareExchange(ref entries[entry_index], new_entry, old_entry) != old_entry);
+                    oldEntry = Interlocked.Read(ref entries[entryIndex]);
+                    newEntry = (oldEntry & andMask) | orMask;
+                } while (Interlocked.CompareExchange(ref entries[entryIndex], newEntry, oldEntry) != oldEntry);
             }
         }
 
@@ -102,75 +101,75 @@ namespace UnityExtensions.Unsafe
         {
             unsafe
             {
-                Assert.IsTrue(0 <= index && index < m_Length);
+                Assert.IsTrue(0 <= index && index < _length);
 
-                int entry_index = index >> 6;
-                long* entries = (long*)m_Bits.GetUnsafeReadOnlyPtr();
+                int entryIndex = index >> 6;
+                long* entries = (long*)_bits.GetUnsafeReadOnlyPtr();
 
                 ulong bit = 1ul << (index & 0x3f);
-                long check_mask = (long)bit;
-                return (entries[entry_index] & check_mask) != 0;
+                long checkMask = (long)bit;
+                return (entries[entryIndex] & checkMask) != 0;
             }
         }
 
-        public ulong GetChunk(int chunk_index)
+        public ulong GetChunk(int chunkIndex)
         {
-            return (ulong)m_Bits[chunk_index];
+            return (ulong)_bits[chunkIndex];
         }
 
-        public void SetChunk(int chunk_index, ulong chunk_bits)
+        public void SetChunk(int chunkIndex, ulong chunkBits)
         {
-            m_Bits[chunk_index] = (long)chunk_bits;
+            _bits[chunkIndex] = (long)chunkBits;
         }
 
-        public unsafe ulong InterlockedReadChunk(int chunk_index)
+        public unsafe ulong InterlockedReadChunk(int chunkIndex)
         {
-            long* entries = (long*)m_Bits.GetUnsafeReadOnlyPtr();
-            return (ulong)Interlocked.Read(ref entries[chunk_index]);
+            long* entries = (long*)_bits.GetUnsafeReadOnlyPtr();
+            return (ulong)Interlocked.Read(ref entries[chunkIndex]);
         }
 
-        public unsafe void InterlockedOrChunk(int chunk_index, ulong chunk_bits)
+        public unsafe void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
         {
-            long* entries = (long*)m_Bits.GetUnsafePtr();
+            long* entries = (long*)_bits.GetUnsafePtr();
 
-            long old_entry, new_entry;
+            long oldEntry, newEntry;
             do
             {
-                old_entry = Interlocked.Read(ref entries[chunk_index]);
-                new_entry = old_entry | (long)chunk_bits;
-            } while (Interlocked.CompareExchange(ref entries[chunk_index], new_entry, old_entry) != old_entry);
+                oldEntry = Interlocked.Read(ref entries[chunkIndex]);
+                newEntry = oldEntry | (long)chunkBits;
+            } while (Interlocked.CompareExchange(ref entries[chunkIndex], newEntry, oldEntry) != oldEntry);
         }
 
         public int ChunkCount()
         {
-            return m_Bits.Length;
+            return _bits.Length;
         }
 
         public ParallelBitArray GetSubArray(int length)
         {
             ParallelBitArray array = new ParallelBitArray();
-            array.m_Bits = m_Bits.GetSubArray(0, (length + 63) / 64);
-            array.m_Length = length;
+            array._bits = _bits.GetSubArray(0, (length + 63) / 64);
+            array._length = length;
             return array;
         }
 
         public NativeArray<long> GetBitsArray()
         {
-            return m_Bits;
+            return _bits;
         }
 
         public void FillZeroes(int length)
         {
-            length = Mathf.Min(length, m_Length);
+            length = Mathf.Min(length, _length);
             int chunkIndex = length / 64;
             int remainder = length & 63;
 
-            m_Bits.FillArray(0, 0, chunkIndex);
+            _bits.FillArray(0, 0, chunkIndex);
 
             if(remainder > 0)
             {
                 long lastChunkMask = (1L << remainder) - 1;
-                m_Bits[chunkIndex] &= ~lastChunkMask;
+                _bits[chunkIndex] &= ~lastChunkMask;
             }
         }
         #endregion // UnityEngine.Rendering

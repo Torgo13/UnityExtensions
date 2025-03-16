@@ -10,24 +10,24 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/EditorPrefBoolFlags.cs
         #region UnityEditor.Rendering
-        readonly string m_Key;
+        readonly string _key;
 
         /// <summary>The value as the underlying enum type used</summary>
         public T value
-        { get => (T)(object)EditorPrefs.GetInt(m_Key); set => EditorPrefs.SetInt(m_Key, (int)(object)value); }
+        { get => (T)(object)EditorPrefs.GetInt(_key); set => EditorPrefs.SetInt(_key, (int)(object)value); }
 
         /// <summary>The raw value</summary>
         public uint rawValue
         {
-            get => (uint)EditorPrefs.GetInt(m_Key);
-            set => EditorPrefs.SetInt(m_Key, (int)value);
+            get => (uint)EditorPrefs.GetInt(_key);
+            set => EditorPrefs.SetInt(_key, (int)value);
         }
 
         /// <summary>Constructor</summary>
         /// <param name="key">Name of the Key in EditorPrefs to save the value</param>
         public EditorPrefBoolFlags(string key)
         {
-            m_Key = key;
+            _key = key;
         }
 
         /// <summary>Test if saved value is equal to the one given</summary>
@@ -38,7 +38,7 @@ namespace UnityExtensions.Editor
         /// <summary>Test if this EditorPrefBoolFlags is the same as the given one</summary>
         /// <param name="other">Given EditorPrefBoolFlags</param>
         /// <returns>True if they use the same value</returns>
-        public bool Equals(EditorPrefBoolFlags<T> other) => m_Key == other.m_Key;
+        public bool Equals(EditorPrefBoolFlags<T> other) => _key == other._key;
 
         /// <summary>Test if the given flags are set</summary>
         /// <param name="v">Given flags</param>

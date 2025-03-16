@@ -80,7 +80,7 @@ namespace UnityExtensions
                     {
                         throw new Exception("Exception from worker thread.");
                     }
-                    if (_workers[i].IsWorking() == true)
+                    if (_workers[i].IsWorking())
                     {
                         isFinish = false;
                     }

@@ -13,7 +13,7 @@ namespace UnityExtensions.Editor
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/MenuManager.cs
         #region UnityEditor.Rendering
         #region Add Menu Item
-        static Action<string, string, bool, int, Action, Func<bool>> s_AddMenuItem = GetAddMenuItemMethod();
+        static Action<string, string, bool, int, Action, Func<bool>> _addMenuItem = GetAddMenuItemMethod();
         static Action<string, string, bool, int, Action, Func<bool>> GetAddMenuItemMethod()
         {
             MethodInfo addMenuItemMethodInfo = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
@@ -53,13 +53,13 @@ namespace UnityExtensions.Editor
         /// <param name="validate">The action that will be called to know if the menu item is enabled</param>
         public static void AddMenuItem(string path, string shortcut, bool @checked, int priority, System.Action execute, System.Func<bool> validate)
         {
-            s_AddMenuItem(path, shortcut, @checked, priority, execute, validate);
+            _addMenuItem(path, shortcut, @checked, priority, execute, validate);
         }
 
         #endregion
 
         #region Remove Menu Item
-        static Action<string> s_RemoveMenuItem = GetRemoveMenuItemMethod();
+        static Action<string> _removeMenuItem = GetRemoveMenuItemMethod();
         static Action<string> GetRemoveMenuItemMethod()
         {
             MethodInfo removeMenuItemMethodInfo = typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
@@ -76,7 +76,7 @@ namespace UnityExtensions.Editor
         /// <param name="path">The path of the menu item to be removed</param>
         public static void RemoveMenuItem(string path)
         {
-            s_RemoveMenuItem(path);
+            _removeMenuItem(path);
         }
         #endregion // UnityEditor.Rendering
     }

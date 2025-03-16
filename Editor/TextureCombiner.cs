@@ -30,7 +30,7 @@ namespace UnityExtensions.Editor
             }
         }
 
-        private static Dictionary<Color, Texture2D> singleColorTextures;
+        private static Dictionary<Color, Texture2D> _singleColorTextures;
 
         /// <summary>
         /// Returns a 1 by 1 Texture that is the color that you pass in.
@@ -42,12 +42,12 @@ namespace UnityExtensions.Editor
             if (color == Color.white) return Texture2D.whiteTexture;
             if (color == Color.black) return Texture2D.blackTexture;
 
-            if (singleColorTextures == null)
-                singleColorTextures = new Dictionary<Color, Texture2D>();
+            if (_singleColorTextures == null)
+                _singleColorTextures = new Dictionary<Color, Texture2D>();
 
-            bool makeTexture = !singleColorTextures.ContainsKey(color);
+            bool makeTexture = !_singleColorTextures.ContainsKey(color);
             if (!makeTexture)
-                makeTexture = singleColorTextures[color] == null;
+                makeTexture = _singleColorTextures[color] == null;
 
             if (makeTexture)
             {
@@ -55,10 +55,10 @@ namespace UnityExtensions.Editor
                 tex.SetPixel(0, 0, color);
                 tex.Apply();
 
-                singleColorTextures[color] = tex;
+                _singleColorTextures[color] = tex;
             }
 
-            return singleColorTextures[color];
+            return _singleColorTextures[color];
         }
 
         /// <summary>
@@ -106,20 +106,20 @@ namespace UnityExtensions.Editor
             return GraphicsFormatUtility.HasAlphaChannel(tex.graphicsFormat);
         }
 
-        private Texture m_rSource;
-        private Texture m_gSource;
-        private Texture m_bSource;
-        private Texture m_aSource;
+        private readonly Texture _rSource;
+        private readonly Texture _gSource;
+        private readonly Texture _bSource;
+        private readonly Texture _aSource;
 
         // Channels are : r=0, g=1, b=2, a=3, greyscale from rgb = 4
         // If negative, the chanel is inverted
-        private int m_rChanel;
-        private int m_gChanel;
-        private int m_bChanel;
-        private int m_aChanel;
+        private readonly int _rChannel;
+        private readonly int _gChannel;
+        private readonly int _bChannel;
+        private readonly int _aChannel;
 
         // Channels remapping
-        private Vector4[] m_remappings =
+        private readonly Vector4[] _remappings =
         {
             new Vector4(0f, 1f, 0f, 0f),
             new Vector4(0f, 1f, 0f, 0f),
@@ -127,7 +127,7 @@ namespace UnityExtensions.Editor
             new Vector4(0f, 1f, 0f, 0f)
         };
 
-        private bool m_bilinearFilter;
+        private readonly bool _bilinearFilter;
 
         /// <summary>
         /// Creates a TextureCombiner object.
@@ -148,15 +148,15 @@ namespace UnityExtensions.Editor
             Assert.IsNotNull(bSource, nameof(bSource));
             Assert.IsNotNull(aSource, nameof(aSource));
 
-            m_rSource = rSource;
-            m_gSource = gSource;
-            m_bSource = bSource;
-            m_aSource = aSource;
-            m_rChanel = rChanel;
-            m_gChanel = gChanel;
-            m_bChanel = bChanel;
-            m_aChanel = aChanel;
-            m_bilinearFilter = bilinearFilter;
+            _rSource = rSource;
+            _gSource = gSource;
+            _bSource = bSource;
+            _aSource = aSource;
+            _rChannel = rChanel;
+            _gChannel = gChanel;
+            _bChannel = bChanel;
+            _aChannel = aChanel;
+            _bilinearFilter = bilinearFilter;
         }
 
         /// <summary>
@@ -169,8 +169,8 @@ namespace UnityExtensions.Editor
         {
             if (channel > 3 || channel < 0) return;
 
-            m_remappings[channel].x = min;
-            m_remappings[channel].y = max;
+            _remappings[channel].x = min;
+            _remappings[channel].y = max;
         }
 
         /// <summary>
@@ -184,16 +184,16 @@ namespace UnityExtensions.Editor
             int xMin = int.MaxValue;
             int yMin = int.MaxValue;
 
-            if (m_rSource.width > 4 && m_rSource.width < xMin) xMin = m_rSource.width;
-            if (m_gSource.width > 4 && m_gSource.width < xMin) xMin = m_gSource.width;
-            if (m_bSource.width > 4 && m_bSource.width < xMin) xMin = m_bSource.width;
-            if (m_aSource.width > 4 && m_aSource.width < xMin) xMin = m_aSource.width;
+            if (_rSource.width > 4 && _rSource.width < xMin) xMin = _rSource.width;
+            if (_gSource.width > 4 && _gSource.width < xMin) xMin = _gSource.width;
+            if (_bSource.width > 4 && _bSource.width < xMin) xMin = _bSource.width;
+            if (_aSource.width > 4 && _aSource.width < xMin) xMin = _aSource.width;
             if (xMin == int.MaxValue) xMin = 4;
 
-            if (m_rSource.height > 4 && m_rSource.height < yMin) yMin = m_rSource.height;
-            if (m_gSource.height > 4 && m_gSource.height < yMin) yMin = m_gSource.height;
-            if (m_bSource.height > 4 && m_bSource.height < yMin) yMin = m_bSource.height;
-            if (m_aSource.height > 4 && m_aSource.height < yMin) yMin = m_aSource.height;
+            if (_rSource.height > 4 && _rSource.height < yMin) yMin = _rSource.height;
+            if (_gSource.height > 4 && _gSource.height < yMin) yMin = _gSource.height;
+            if (_bSource.height > 4 && _bSource.height < yMin) yMin = _bSource.height;
+            if (_aSource.height > 4 && _aSource.height < yMin) yMin = _aSource.height;
             if (yMin == int.MaxValue) yMin = 4;
 
             Texture2D combined = new Texture2D(xMin, yMin, GraphicsFormat.R32G32B32A32_SFloat, TextureCreationFlags.MipChain);
@@ -202,22 +202,22 @@ namespace UnityExtensions.Editor
             Material combinerMaterial = new Material(Shader.Find("Hidden/SRP_Core/TextureCombiner"));
             combinerMaterial.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            Dictionary<Texture, Texture> m_RawTextures = DictionaryPool<Texture, Texture>.Get();
+            Dictionary<Texture, Texture> rawTextures = DictionaryPool<Texture, Texture>.Get();
 
-            combinerMaterial.SetTexture("_RSource", GetRawTexture(m_RawTextures, m_rSource));
-            combinerMaterial.SetTexture("_GSource", GetRawTexture(m_RawTextures, m_gSource));
-            combinerMaterial.SetTexture("_BSource", GetRawTexture(m_RawTextures, m_bSource));
-            combinerMaterial.SetTexture("_ASource", GetRawTexture(m_RawTextures, m_aSource));
+            combinerMaterial.SetTexture("_RSource", GetRawTexture(rawTextures, _rSource));
+            combinerMaterial.SetTexture("_GSource", GetRawTexture(rawTextures, _gSource));
+            combinerMaterial.SetTexture("_BSource", GetRawTexture(rawTextures, _bSource));
+            combinerMaterial.SetTexture("_ASource", GetRawTexture(rawTextures, _aSource));
 
-            combinerMaterial.SetFloat("_RChannel", m_rChanel);
-            combinerMaterial.SetFloat("_GChannel", m_gChanel);
-            combinerMaterial.SetFloat("_BChannel", m_bChanel);
-            combinerMaterial.SetFloat("_AChannel", m_aChanel);
+            combinerMaterial.SetFloat("_RChannel", _rChannel);
+            combinerMaterial.SetFloat("_GChannel", _gChannel);
+            combinerMaterial.SetFloat("_BChannel", _bChannel);
+            combinerMaterial.SetFloat("_AChannel", _aChannel);
 
-            combinerMaterial.SetVector("_RRemap", m_remappings[0]);
-            combinerMaterial.SetVector("_GRemap", m_remappings[1]);
-            combinerMaterial.SetVector("_BRemap", m_remappings[2]);
-            combinerMaterial.SetVector("_ARemap", m_remappings[3]);
+            combinerMaterial.SetVector("_RRemap", _remappings[0]);
+            combinerMaterial.SetVector("_GRemap", _remappings[1]);
+            combinerMaterial.SetVector("_BRemap", _remappings[2]);
+            combinerMaterial.SetVector("_ARemap", _remappings[3]);
 
             RenderTexture combinedRT = new RenderTexture(xMin, yMin, 0, GraphicsFormat.R32G32B32A32_SFloat);
 
@@ -259,7 +259,7 @@ namespace UnityExtensions.Editor
             combined = AssetDatabase.LoadAssetAtPath<Texture2D>(savePath);
 
             //cleanup "raw" textures
-            foreach (KeyValuePair<Texture, Texture> prop in m_RawTextures)
+            foreach (KeyValuePair<Texture, Texture> prop in rawTextures)
             {
                 if (prop.Key != prop.Value && AssetDatabase.Contains(prop.Value))
                     AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(prop.Value));
@@ -267,14 +267,14 @@ namespace UnityExtensions.Editor
 
             Object.DestroyImmediate(combinerMaterial);
 
-            DictionaryPool<Texture, Texture>.Release(m_RawTextures);
+            DictionaryPool<Texture, Texture>.Release(rawTextures);
 
             return combined;
         }
 
-        private Texture GetRawTexture(Dictionary<Texture, Texture> m_RawTextures, Texture original, bool sRGBFallback = false)
+        private Texture GetRawTexture(Dictionary<Texture, Texture> rawTextures, Texture original, bool sRGBFallback = false)
         {
-            if (!m_RawTextures.ContainsKey(original))
+            if (!rawTextures.ContainsKey(original))
             {
                 string path = AssetDatabase.GetAssetPath(original);
                 string rawPath = "Assets/raw_" + Path.GetFileName(path);
@@ -288,7 +288,7 @@ namespace UnityExtensions.Editor
                     rawImporter.textureType = TextureImporterType.Default;
                     rawImporter.mipmapEnabled = false;
                     rawImporter.isReadable = true;
-                    rawImporter.filterMode = m_bilinearFilter ? FilterMode.Bilinear : FilterMode.Point;
+                    rawImporter.filterMode = _bilinearFilter ? FilterMode.Bilinear : FilterMode.Point;
                     rawImporter.npotScale = TextureImporterNPOTScale.None;
                     rawImporter.wrapMode = TextureWrapMode.Clamp;
 
@@ -301,13 +301,13 @@ namespace UnityExtensions.Editor
 
                     rawImporter.SaveAndReimport();
 
-                    m_RawTextures.Add(original, AssetDatabase.LoadAssetAtPath<Texture>(rawPath));
+                    rawTextures.Add(original, AssetDatabase.LoadAssetAtPath<Texture>(rawPath));
                 }
                 else
-                    m_RawTextures.Add(original, original);
+                    rawTextures.Add(original, original);
             }
 
-            return m_RawTextures[original];
+            return rawTextures[original];
         }
         #endregion // UnityEditor.Rendering
     }

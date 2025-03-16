@@ -277,9 +277,9 @@ namespace UnityExtensions
         /// <returns>The first component found in the active scene, or null if none exists</returns>
         public static T GetComponentInScene<T>(Scene scene) where T : Component
         {
-            using var _0 = ListPool<GameObject>.Get(out var k_GameObjects);
-            scene.GetRootGameObjects(k_GameObjects);
-            foreach (var gameObject in k_GameObjects)
+            using var _0 = ListPool<GameObject>.Get(out var gameObjects);
+            scene.GetRootGameObjects(gameObjects);
+            foreach (var gameObject in gameObjects)
             {
                 var component = gameObject.GetComponentInChildren<T>();
                 if (component)
@@ -299,10 +299,10 @@ namespace UnityExtensions
         public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
             where T : Component
         {
-            using var _0 = ListPool<GameObject>.Get(out var k_GameObjects);
+            using var _0 = ListPool<GameObject>.Get(out var gameObjects);
             using var _1 = ListPool<T>.Get(out var children);
-            scene.GetRootGameObjects(k_GameObjects);
-            foreach (var gameObject in k_GameObjects)
+            scene.GetRootGameObjects(gameObjects);
+            foreach (var gameObject in gameObjects)
             {
                 if (!includeInactive && !gameObject.activeInHierarchy)
                     continue;
@@ -380,10 +380,10 @@ namespace UnityExtensions
         /// <returns>The returned child GameObject or null if no child is found.</returns>
         public static GameObject GetNamedChild(this GameObject go, string name)
         {
-            List<Transform> k_Transforms = ListPool<Transform>.Get();
-            go.GetComponentsInChildren(k_Transforms);
-            var foundObject = k_Transforms.Find(currentTransform => currentTransform.name == name);
-            ListPool<Transform>.Release(k_Transforms);
+            List<Transform> transforms = ListPool<Transform>.Get();
+            go.GetComponentsInChildren(transforms);
+            var foundObject = transforms.Find(currentTransform => currentTransform.name == name);
+            ListPool<Transform>.Release(transforms);
 
             if (foundObject != null)
                 return foundObject.gameObject;

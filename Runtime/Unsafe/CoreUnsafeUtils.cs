@@ -25,12 +25,12 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         public struct FixedBufferStringQueue
         {
-            byte* m_ReadCursor;
-            byte* m_WriteCursor;
+            byte* _readCursor;
+            byte* _writeCursor;
 
-            readonly byte* m_BufferEnd;
-            readonly byte* m_BufferStart;
-            readonly int m_BufferLength;
+            readonly byte* _bufferEnd;
+            readonly byte* _bufferStart;
+            readonly int _bufferLength;
 
             /// <summary>
             /// Number of element in the queue.
@@ -44,12 +44,12 @@ namespace UnityExtensions.Unsafe
             /// <param name="length">Length of the provided allocated buffer in byte.</param>
             public FixedBufferStringQueue(byte* ptr, int length)
             {
-                m_BufferStart = ptr;
-                m_BufferLength = length;
+                _bufferStart = ptr;
+                _bufferLength = length;
 
-                m_BufferEnd = m_BufferStart + m_BufferLength;
-                m_ReadCursor = m_BufferStart;
-                m_WriteCursor = m_BufferStart;
+                _bufferEnd = _bufferStart + _bufferLength;
+                _readCursor = _bufferStart;
+                _writeCursor = _bufferStart;
                 Count = 0;
                 Clear();
             }
@@ -62,17 +62,17 @@ namespace UnityExtensions.Unsafe
             public bool TryPush(string v)
             {
                 var size = v.Length * sizeof(char) + sizeof(int);
-                if (m_WriteCursor + size >= m_BufferEnd)
+                if (_writeCursor + size >= _bufferEnd)
                     return false;
 
-                *(int*)m_WriteCursor = v.Length;
-                m_WriteCursor += sizeof(int);
+                *(int*)_writeCursor = v.Length;
+                _writeCursor += sizeof(int);
 
-                var charPtr = (char*)m_WriteCursor;
+                var charPtr = (char*)_writeCursor;
                 for (int i = 0; i < v.Length; ++i, ++charPtr)
                     *charPtr = v[i];
 
-                m_WriteCursor += sizeof(char) * v.Length;
+                _writeCursor += sizeof(char) * v.Length;
                 ++Count;
 
                 return true;
@@ -85,12 +85,12 @@ namespace UnityExtensions.Unsafe
             /// <returns>True if an element was successfully popped.</returns>
             public bool TryPop(out string v)
             {
-                var size = *(int*)m_ReadCursor;
+                var size = *(int*)_readCursor;
                 if (size != 0)
                 {
-                    m_ReadCursor += sizeof(int);
-                    v = new string((char*)m_ReadCursor, 0, size);
-                    m_ReadCursor += size * sizeof(char);
+                    _readCursor += sizeof(int);
+                    v = new string((char*)_readCursor, 0, size);
+                    _readCursor += size * sizeof(char);
                     return true;
                 }
 
@@ -103,10 +103,10 @@ namespace UnityExtensions.Unsafe
             /// </summary>
             public void Clear()
             {
-                m_WriteCursor = m_BufferStart;
-                m_ReadCursor = m_BufferStart;
+                _writeCursor = _bufferStart;
+                _readCursor = _bufferStart;
                 Count = 0;
-                UnsafeUtility.MemClear(m_BufferStart, m_BufferLength);
+                UnsafeUtility.MemClear(_bufferStart, _bufferLength);
             }
         }
 
@@ -194,13 +194,13 @@ namespace UnityExtensions.Unsafe
                 for (int left = 0; left + k < length; left += k * 2)
                 {
                     int right = left + k;
-                    int rightend = right + k;
-                    if (rightend > length)
-                        rightend = length;
+                    int rightEnd = right + k;
+                    if (rightEnd > length)
+                        rightEnd = length;
                     int m = left;
                     int i = left;
                     int j = right;
-                    while (i < right && j < rightend)
+                    while (i < right && j < rightEnd)
                     {
                         if (array[i] <= array[j])
                         {
@@ -217,12 +217,12 @@ namespace UnityExtensions.Unsafe
                         support[m] = array[i++];
                         m++;
                     }
-                    while (j < rightend)
+                    while (j < rightEnd)
                     {
                         support[m] = array[j++];
                         m++;
                     }
-                    for (m = left; m < rightend; m++)
+                    for (m = left; m < rightEnd; m++)
                     {
                         array[m] = support[m];
                     }
@@ -280,9 +280,7 @@ namespace UnityExtensions.Unsafe
                     if (arr[j] >= arr[j - 1])
                         break;
 
-                    var tmp = arr[j];
-                    arr[j] = arr[j - 1];
-                    arr[j - 1] = tmp;
+                    (arr[j], arr[j - 1]) = (arr[j - 1], arr[j]);
                 }
             }
         }

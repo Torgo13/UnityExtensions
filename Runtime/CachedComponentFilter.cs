@@ -59,13 +59,13 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/CachedComponentFilter.cs
         #region Unity.XR.CoreUtils
-        readonly List<TFilterType> m_MasterComponentStorage;
+        readonly List<TFilterType> _masterComponentStorage;
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
-        static readonly List<TFilterType> k_TempComponentList = new List<TFilterType>();
-        static readonly List<IComponentHost<TFilterType>> k_TempHostComponentList = new List<IComponentHost<TFilterType>>();
+        static readonly List<TFilterType> TempComponentList = new List<TFilterType>();
+        static readonly List<IComponentHost<TFilterType>> TempHostComponentList = new List<IComponentHost<TFilterType>>();
 
-        bool m_DisposedValue; // To detect redundant calls
+        bool _disposedValue; // To detect redundant calls
 
         /// <summary>
         /// Initializes a new cached component filter.
@@ -75,16 +75,16 @@ namespace UnityExtensions
         /// <param name="includeDisabled">Whether to include components on disabled objects.</param>
         public CachedComponentFilter(TRootType componentRoot, CachedSearchType cachedSearchType = CachedSearchType.Self | CachedSearchType.Children, bool includeDisabled = true)
         {
-            m_MasterComponentStorage = ListPool<TFilterType>.Get();
+            _masterComponentStorage = ListPool<TFilterType>.Get();
 
-            k_TempComponentList.Clear();
-            k_TempHostComponentList.Clear();
+            TempComponentList.Clear();
+            TempHostComponentList.Clear();
 
             // Components on the root get added first
             if ((cachedSearchType & CachedSearchType.Self) == CachedSearchType.Self)
             {
-                componentRoot.GetComponents(k_TempComponentList);
-                componentRoot.GetComponents(k_TempHostComponentList);
+                componentRoot.GetComponents(TempComponentList);
+                componentRoot.GetComponents(TempHostComponentList);
                 FilteredCopyToMaster(includeDisabled);
             }
 
@@ -97,8 +97,8 @@ namespace UnityExtensions
                     if (searchRoot.GetComponent<TRootType>() != null)
                         break;
 
-                    searchRoot.GetComponents(k_TempComponentList);
-                    searchRoot.GetComponents(k_TempHostComponentList);
+                    searchRoot.GetComponents(TempComponentList);
+                    searchRoot.GetComponents(TempHostComponentList);
                     FilteredCopyToMaster(includeDisabled);
 
                     searchRoot = searchRoot.transform.parent;
@@ -111,8 +111,8 @@ namespace UnityExtensions
                 // It's not as graceful going down the hierarchy, so we just use the built-in functions and filter afterwards
                 foreach (Transform child in componentRoot.transform)
                 {
-                    child.GetComponentsInChildren(k_TempComponentList);
-                    child.GetComponentsInChildren(k_TempHostComponentList);
+                    child.GetComponentsInChildren(TempComponentList);
+                    child.GetComponentsInChildren(TempHostComponentList);
                     FilteredCopyToMaster(includeDisabled, componentRoot);
                 }
             }
@@ -128,10 +128,10 @@ namespace UnityExtensions
             if (componentList == null)
                 return;
 
-            m_MasterComponentStorage = ListPool<TFilterType>.Get();
+            _masterComponentStorage = ListPool<TFilterType>.Get();
 
-            k_TempComponentList.Clear();
-            k_TempComponentList.AddRange(componentList);
+            TempComponentList.Clear();
+            TempComponentList.AddRange(componentList);
             FilteredCopyToMaster(includeDisabled);
         }
 
@@ -142,7 +142,7 @@ namespace UnityExtensions
         /// <typeparam name="TChildType">The type for which to search. Must inherit from or be TFilterType.</typeparam>
         public void StoreMatchingComponents<TChildType>(List<TChildType> outputList) where TChildType : class, TFilterType
         {
-            foreach (var currentComponent in m_MasterComponentStorage)
+            foreach (var currentComponent in _masterComponentStorage)
             {
                 if (currentComponent is TChildType asChildType)
                     outputList.Add(asChildType);
@@ -157,7 +157,7 @@ namespace UnityExtensions
         public TChildType[] GetMatchingComponents<TChildType>() where TChildType : class, TFilterType
         {
             var componentCount = 0;
-            foreach (var currentComponent in m_MasterComponentStorage)
+            foreach (var currentComponent in _masterComponentStorage)
             {
                 if (currentComponent is TChildType)
                     componentCount++;
@@ -165,7 +165,7 @@ namespace UnityExtensions
 
             var outputArray = new TChildType[componentCount];
             componentCount = 0;
-            foreach (var currentComponent in m_MasterComponentStorage)
+            foreach (var currentComponent in _masterComponentStorage)
             {
                 var asChildType = currentComponent as TChildType;
                 if (asChildType == null)
@@ -182,30 +182,30 @@ namespace UnityExtensions
         {
             if (includeDisabled)
             {
-                m_MasterComponentStorage.AddRange(k_TempComponentList);
-                foreach (var currentEntry in k_TempHostComponentList)
+                _masterComponentStorage.AddRange(TempComponentList);
+                foreach (var currentEntry in TempHostComponentList)
                 {
-                    m_MasterComponentStorage.AddRange(currentEntry.HostedComponents);
+                    _masterComponentStorage.AddRange(currentEntry.HostedComponents);
                 }
             }
             else
             {
-                foreach (var currentEntry in k_TempComponentList)
+                foreach (var currentEntry in TempComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
                     if (currentBehaviour != null && !currentBehaviour.enabled)
                         continue;
 
-                    m_MasterComponentStorage.Add(currentEntry);
+                    _masterComponentStorage.Add(currentEntry);
                 }
 
-                foreach (var currentEntry in k_TempHostComponentList)
+                foreach (var currentEntry in TempHostComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
                     if (currentBehaviour != null && !currentBehaviour.enabled)
                         continue;
 
-                    m_MasterComponentStorage.AddRange(currentEntry.HostedComponents);
+                    _masterComponentStorage.AddRange(currentEntry.HostedComponents);
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace UnityExtensions
             // cannot have a component of the root type, or it is part of a different collection of objects and should be skipped
             if (includeDisabled)
             {
-                foreach (var currentEntry in k_TempComponentList)
+                foreach (var currentEntry in TempComponentList)
                 {
                     var currentComponent = currentEntry as Component;
 
@@ -227,10 +227,10 @@ namespace UnityExtensions
                     if (currentComponent.GetComponentInParent<TRootType>() != requiredRoot)
                         continue;
 
-                    m_MasterComponentStorage.Add(currentEntry);
+                    _masterComponentStorage.Add(currentEntry);
                 }
 
-                foreach (var currentEntry in k_TempHostComponentList)
+                foreach (var currentEntry in TempHostComponentList)
                 {
                     var currentComponent = currentEntry as Component;
 
@@ -240,12 +240,12 @@ namespace UnityExtensions
                     if (currentComponent.GetComponentInParent<TRootType>() != requiredRoot)
                         continue;
 
-                    m_MasterComponentStorage.AddRange(currentEntry.HostedComponents);
+                    _masterComponentStorage.AddRange(currentEntry.HostedComponents);
                 }
             }
             else
             {
-                foreach (var currentEntry in k_TempComponentList)
+                foreach (var currentEntry in TempComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
 
@@ -258,10 +258,10 @@ namespace UnityExtensions
                     if (currentBehaviour.GetComponentInParent<TRootType>() != requiredRoot)
                         continue;
 
-                    m_MasterComponentStorage.Add(currentEntry);
+                    _masterComponentStorage.Add(currentEntry);
                 }
 
-                foreach (var currentEntry in k_TempHostComponentList)
+                foreach (var currentEntry in TempHostComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
 
@@ -274,7 +274,7 @@ namespace UnityExtensions
                     if (currentBehaviour.GetComponentInParent<TRootType>() != requiredRoot)
                         continue;
 
-                    m_MasterComponentStorage.AddRange(currentEntry.HostedComponents);
+                    _masterComponentStorage.AddRange(currentEntry.HostedComponents);
                 }
             }
         }
@@ -286,13 +286,13 @@ namespace UnityExtensions
         /// <param name="disposing">Whether to dispose the contents of this object.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (m_DisposedValue)
+            if (_disposedValue)
                 return;
 
-            if (disposing && m_MasterComponentStorage != null)
-                ListPool<TFilterType>.Release(m_MasterComponentStorage);
+            if (disposing && _masterComponentStorage != null)
+                ListPool<TFilterType>.Release(_masterComponentStorage);
 
-            m_DisposedValue = true;
+            _disposedValue = true;
         }
 
         /// <summary>

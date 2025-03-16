@@ -30,7 +30,7 @@ namespace UnityExtensions
         /// <summary>
         /// Ensures that the capacity of this list is at least as large the given value.
         /// </summary>
-        /// <remarks>Increases the capacity of the list, if necessary, but doe not decrease the
+        /// <remarks>Increases the capacity of the list, if necessary, but does not decrease the
         /// capacity if it already exceeds the specified value.</remarks>
         /// <typeparam name="T">The list element type.</typeparam>
         /// <param name="list">The list whose capacity will be ensured.</param>
@@ -48,7 +48,7 @@ namespace UnityExtensions
         /// <param name="list">The list to perform the swap on.</param>
         /// <param name="first">The index of the first item to swap.</param>
         /// <param name="second">The index of the second item to swap.</param>
-        /// <typeparam name="T">The type of list items to swapped.</typeparam>
+        /// <typeparam name="T">The type of list items to be swapped.</typeparam>
         public static void SwapAtIndices<T>(this List<T> list, int first, int second)
         {
             (list[first], list[second]) = (list[second], list[first]);

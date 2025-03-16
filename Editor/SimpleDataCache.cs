@@ -19,81 +19,81 @@ namespace UnityExtensions.Editor
             [FieldOffset(0)] internal string @string;
         }
 
-        Dictionary<int, Item> m_Items = new Dictionary<int, Item>();
+        readonly Dictionary<int, Item> _items = new Dictionary<int, Item>();
 
         public void Set(int key, bool v)
         {
-            m_Items[key] = new Item { @bool = v };
+            _items[key] = new Item { @bool = v };
         }
 
         public void Set(int key, byte v)
         {
-            m_Items[key] = new Item { @byte = v };
+            _items[key] = new Item { @byte = v };
         }
 
         public void Set(int key, short v)
         {
-            m_Items[key] = new Item { @short = v };
+            _items[key] = new Item { @short = v };
         }
 
         public void Set(int key, ushort v)
         {
-            m_Items[key] = new Item { @ushort = v };
+            _items[key] = new Item { @ushort = v };
         }
 
         public void Set(int key, int v)
         {
-            m_Items[key] = new Item { @int = v };
+            _items[key] = new Item { @int = v };
         }
 
         public void Set(int key, uint v)
         {
-            m_Items[key] = new Item { @uint = v };
+            _items[key] = new Item { @uint = v };
         }
 
         public void Set(int key, string v)
         {
-            m_Items[key] = new Item { @string = v };
+            _items[key] = new Item { @string = v };
         }
 
         public bool GetBool(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) && t.@bool;
+            return _items.TryGetValue(key, out Item t) && t.@bool;
         }
 
         public byte GetByte(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@byte : default;
+            return _items.TryGetValue(key, out Item t) ? t.@byte : default;
         }
 
         public short GetShort(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@short : default;
+            return _items.TryGetValue(key, out Item t) ? t.@short : default;
         }
 
         public ushort GetUShort(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@ushort : default;
+            return _items.TryGetValue(key, out Item t) ? t.@ushort : default;
         }
 
         public int GetInt(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@int : default;
+            return _items.TryGetValue(key, out Item t) ? t.@int : default;
         }
 
         public uint GetUInt(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@uint : default;
+            return _items.TryGetValue(key, out Item t) ? t.@uint : default;
         }
 
         public string GetString(int key)
         {
-            return m_Items.TryGetValue(key, out Item t) ? t.@string : default;
+            return _items.TryGetValue(key, out Item t) ? t.@string : default;
         }
 
         public void Clear()
         {
-            m_Items.Clear();
+            _items.Clear();
         }
         #endregion // UnityEditor.ShaderAnalysis.Internal
     }

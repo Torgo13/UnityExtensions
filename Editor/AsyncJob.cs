@@ -8,10 +8,10 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/API/AsyncJob.cs
         #region UnityEditor.ShaderAnalysis
-        int m_TaskId;
-        bool m_OnCompleteLaunched;
-        bool m_IsCancelled = false;
-        Action<IAsyncJob> m_OnComplete;
+        protected int TaskId;
+        bool _onCompleteLaunched;
+        bool _isCancelled;
+        Action<IAsyncJob> _onComplete;
 
         public abstract string name { get; }
         /// <inheritdoc cref="IAsyncJob"/>
@@ -23,10 +23,10 @@ namespace UnityExtensions.Editor
         public bool Tick()
         {
 #if UNITY_2020_1_OR_NEWER
-            if (m_TaskId == 0)
+            if (TaskId == 0)
             {
-                m_TaskId = Progress.Start(name, message);
-                Progress.RegisterCancelCallback(m_TaskId, CancelCallback);
+                TaskId = Progress.Start(name, message);
+                Progress.RegisterCancelCallback(TaskId, CancelCallback);
             }
 #endif
             return Internal_Tick();
@@ -38,9 +38,9 @@ namespace UnityExtensions.Editor
         public void Cancel()
         {
 #if UNITY_2020_1_OR_NEWER
-            m_IsCancelled = true;
-            if (m_TaskId != 0)
-                Progress.Cancel(m_TaskId);
+            _isCancelled = true;
+            if (TaskId != 0)
+                Progress.Cancel(TaskId);
             else
 #endif
             Internal_Cancel();
@@ -54,10 +54,10 @@ namespace UnityExtensions.Editor
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
-            if (m_OnCompleteLaunched)
+            if (_onCompleteLaunched)
                 action(this);
             else
-                m_OnComplete += action;
+                _onComplete += action;
         }
 
         /// <summary>Set the progress of this job.</summary>
@@ -74,21 +74,21 @@ namespace UnityExtensions.Editor
             message = messageArg;
 
 #if UNITY_2020_1_OR_NEWER
-            if (m_TaskId != 0)
-                Progress.Report(m_TaskId, progress, message);
+            if (TaskId != 0)
+                Progress.Report(TaskId, progress, message);
 #endif
 
-            if (progressArg >= 1 && !m_OnCompleteLaunched)
+            if (progressArg >= 1 && !_onCompleteLaunched)
             {
-                m_OnCompleteLaunched = true;
-                m_OnComplete?.Invoke(this);
+                _onCompleteLaunched = true;
+                _onComplete?.Invoke(this);
 
 #if UNITY_2020_1_OR_NEWER
                 // Don't remove task when cancelling
-                if (m_TaskId != 0 && !m_IsCancelled)
+                if (TaskId != 0 && !_isCancelled)
                 {
-                    Progress.Remove(m_TaskId);
-                    m_TaskId = 0;
+                    Progress.Remove(TaskId);
+                    TaskId = 0;
                 }
 #endif
             }
@@ -96,14 +96,14 @@ namespace UnityExtensions.Editor
 
         bool CancelCallback()
         {
-            m_IsCancelled = true;
+            _isCancelled = true;
             Internal_Cancel();
             return true;
         }
 
         internal void Fail()
         {
-            Progress.Finish(m_TaskId, Progress.Status.Failed);
+            Progress.Finish(TaskId, Progress.Status.Failed);
         }
         #endregion // UnityEditor.ShaderAnalysis
     }

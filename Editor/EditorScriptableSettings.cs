@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -15,8 +14,8 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/EditorScriptableSettings.cs
         #region Unity.XR.CoreUtils.Editor
-        const string k_CustomSavePathFormat = "{0}{1}.asset";
-        const string k_SavePathFormat = "{0}ScriptableSettings/{1}.asset";
+        const string CustomSavePathFormat = "{0}{1}.asset";
+        const string SavePathFormat = "{0}ScriptableSettings/{1}.asset";
 
         /// <summary>
         /// Retrieves a reference to the given settings class. Loads and initializes the class once, and caches the reference for all future access.
@@ -75,7 +74,7 @@ namespace UnityExtensions.Editor
                 BaseInstance = CreateInstance<T>();
 
                 // And save it back out if appropriate
-                Save(HasCustomPath ? k_CustomSavePathFormat : k_SavePathFormat);
+                Save(HasCustomPath ? CustomSavePathFormat : SavePathFormat);
             }
 
             Assert.IsNotNull(BaseInstance);

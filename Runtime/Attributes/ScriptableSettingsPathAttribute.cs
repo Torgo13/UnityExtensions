@@ -11,12 +11,12 @@ namespace UnityExtensions.Attributes
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Attributes/ScriptableSettingsPathAttribute.cs
         #region Unity.XR.CoreUtils.GUI
-        readonly string m_Path;
+        readonly string _path;
 
         /// <summary>
         /// The path where this ScriptableSettings should be stored.
         /// </summary>
-        public string Path => m_Path;
+        public string Path => _path;
 
         /// <summary>
         /// Initialize a new ScriptableSettingsPathAttribute.
@@ -24,7 +24,7 @@ namespace UnityExtensions.Attributes
         /// <param name="path">The path where the ScriptableSettings should be stored.</param>
         public ScriptableSettingsPathAttribute(string path = "")
         {
-            m_Path = path;
+            _path = path;
         }
         #endregion // Unity.XR.CoreUtils.GUI
     }

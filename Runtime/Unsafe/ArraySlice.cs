@@ -13,14 +13,14 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/2D/UTess2D/ArraySlice.cs
         #region UnityEngine.Rendering.Universal.UTess
-        [NativeDisableUnsafePtrRestriction] internal byte* m_Buffer;
-        internal int m_Stride;
-        internal int m_Length;
+        [NativeDisableUnsafePtrRestriction] internal byte* _buffer;
+        internal int _stride;
+        internal int _length;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        internal int m_MinIndex;
-        internal int m_MaxIndex;
-        internal AtomicSafetyHandle m_Safety;
+        internal int _minIndex;
+        internal int _maxIndex;
+        internal AtomicSafetyHandle _safety;
 #endif
 
         public ArraySlice(NativeArray<T> array, int start, int length)
@@ -33,20 +33,20 @@ namespace UnityExtensions.Unsafe
             if (start + length > array.Length)
                 throw new ArgumentException(
                     $"Slice start + length ({start + length}) range must be <= array.Length ({array.Length})");
-            m_MinIndex = 0;
-            m_MaxIndex = length - 1;
-            m_Safety = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(array);
+            _minIndex = 0;
+            _maxIndex = length - 1;
+            _safety = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(array);
 #endif
 
-            m_Stride = UnsafeUtility.SizeOf<T>();
-            var ptr = (byte*)array.GetUnsafePtr() + m_Stride * start;
-            m_Buffer = ptr;
-            m_Length = length;
+            _stride = UnsafeUtility.SizeOf<T>();
+            var ptr = (byte*)array.GetUnsafePtr() + _stride * start;
+            _buffer = ptr;
+            _length = length;
         }
 
         public bool Equals(ArraySlice<T> other)
         {
-            return m_Buffer == other.m_Buffer && m_Stride == other.m_Stride && m_Length == other.m_Length;
+            return _buffer == other._buffer && _stride == other._stride && _length == other._length;
         }
 
         public override bool Equals(object obj)
@@ -59,9 +59,9 @@ namespace UnityExtensions.Unsafe
         {
             unchecked
             {
-                var hashCode = (int)m_Buffer;
-                hashCode = (hashCode * 397) ^ m_Stride;
-                hashCode = (hashCode * 397) ^ m_Length;
+                var hashCode = (int)_buffer;
+                hashCode = (hashCode * 397) ^ _stride;
+                hashCode = (hashCode * 397) ^ _length;
                 return hashCode;
             }
         }
@@ -82,7 +82,7 @@ namespace UnityExtensions.Unsafe
         void CheckReadIndex(int index)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            if (index < m_MinIndex || index > m_MaxIndex)
+            if (index < _minIndex || index > _maxIndex)
                 FailOutOfRangeError(index);
 #endif
         }
@@ -91,7 +91,7 @@ namespace UnityExtensions.Unsafe
         void CheckWriteIndex(int index)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            if (index < m_MinIndex || index > m_MaxIndex)
+            if (index < _minIndex || index > _maxIndex)
                 FailOutOfRangeError(index);
 #endif
         }
@@ -99,9 +99,9 @@ namespace UnityExtensions.Unsafe
         [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
         private void FailOutOfRangeError(int index)
         {
-            if (index < Length && (m_MinIndex != 0 || m_MaxIndex != Length - 1))
+            if (index < Length && (_minIndex != 0 || _maxIndex != Length - 1))
                 throw new System.IndexOutOfRangeException(
-                    $"Index {index} is out of restricted IJobParallelFor range [{m_MinIndex}...{m_MaxIndex}] in ReadWriteBuffer.\n" +
+                    $"Index {index} is out of restricted IJobParallelFor range [{_minIndex}...{_maxIndex}] in ReadWriteBuffer.\n" +
                     "ReadWriteBuffers are restricted to only read & write the element at the job index. " +
                     "You can use double buffering strategies to avoid race conditions due to " +
                     "reading & writing in parallel to the same elements from a job.");
@@ -122,12 +122,12 @@ namespace UnityExtensions.Unsafe
 
             var newSlice = new ArraySlice<T>
             {
-                m_Stride = stride,
-                m_Buffer = (byte*)dataPointer,
-                m_Length = length,
+                _stride = stride,
+                _buffer = (byte*)dataPointer,
+                _length = length,
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                m_MinIndex = 0,
-                m_MaxIndex = length - 1,
+                _minIndex = 0,
+                _maxIndex = length - 1,
 #endif
             };
 
@@ -141,7 +141,7 @@ namespace UnityExtensions.Unsafe
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 CheckReadIndex(index);
 #endif
-                return UnsafeUtility.ReadArrayElementWithStride<T>(m_Buffer, index, m_Stride);
+                return UnsafeUtility.ReadArrayElementWithStride<T>(_buffer, index, _stride);
             }
 
             [WriteAccessRequired]
@@ -150,16 +150,16 @@ namespace UnityExtensions.Unsafe
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 CheckWriteIndex(index);
 #endif
-                UnsafeUtility.WriteArrayElementWithStride(m_Buffer, index, m_Stride, value);
+                UnsafeUtility.WriteArrayElementWithStride(_buffer, index, _stride, value);
             }
         }
 
         private void* GetUnsafeReadOnlyPtr()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+            AtomicSafetyHandle.CheckReadAndThrow(_safety);
 #endif
-            return m_Buffer;
+            return _buffer;
         }
 
         private void CopyTo(T[] array)
@@ -172,7 +172,7 @@ namespace UnityExtensions.Unsafe
             IntPtr addr = handle.AddrOfPinnedObject();
 
             var sizeOf = UnsafeUtility.SizeOf<T>();
-            UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, m_Length);
+            UnsafeUtility.MemCpyStride((byte*)addr, sizeOf, this.GetUnsafeReadOnlyPtr(), Stride, sizeOf, _length);
 
             handle.Free();
         }
@@ -184,8 +184,8 @@ namespace UnityExtensions.Unsafe
             return array;
         }
 
-        public int Stride => m_Stride;
-        public int Length => m_Length;
+        public int Stride => _stride;
+        public int Length => _length;
         #endregion // UnityEngine.Rendering.Universal.UTess
     }
 
@@ -196,16 +196,16 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/2D/UTess2D/ArraySlice.cs
         #region UnityEngine.Rendering.Universal.UTess
-        ArraySlice<T> m_Slice;
+        ArraySlice<T> _slice;
 
         public ArraySliceDebugView(ArraySlice<T> slice)
         {
-            m_Slice = slice;
+            _slice = slice;
         }
 
         public T[] Items
         {
-            get { return m_Slice.ToArray(); }
+            get { return _slice.ToArray(); }
         }
         #endregion // UnityEngine.Rendering.Universal.UTess
     }

@@ -15,24 +15,24 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ListBuffer.cs
         #region UnityEngine.Rendering
-        private T* m_BufferPtr;
-        private int m_Capacity;
-        private int* m_CountPtr;
+        private T* _bufferPtr;
+        private readonly int _capacity;
+        private readonly int* _countPtr;
 
         /// <summary>
         /// The pointer to the memory storage.
         /// </summary>
-        internal T* BufferPtr => m_BufferPtr;
+        internal T* BufferPtr => _bufferPtr;
 
         /// <summary>
         /// The number of item in the list.
         /// </summary>
-        public int Count => *m_CountPtr;
+        public int Count => *_countPtr;
 
         /// <summary>
         /// The maximum number of item stored in this list.
         /// </summary>
-        public int Capacity => m_Capacity;
+        public int Capacity => _capacity;
 
         /// <summary>
         /// Instantiate a new list.
@@ -42,9 +42,9 @@ namespace UnityExtensions.Unsafe
         /// <param name="capacity">The number of <typeparamref name="T"/> that can be stored in the buffer.</param>
         public ListBuffer(T* bufferPtr, int* countPtr, int capacity)
         {
-            m_BufferPtr = bufferPtr;
-            m_Capacity = capacity;
-            m_CountPtr = countPtr;
+            _bufferPtr = bufferPtr;
+            _capacity = capacity;
+            _countPtr = countPtr;
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace UnityExtensions.Unsafe
                 if (index < 0 || index >= Count)
                     throw new IndexOutOfRangeException(
                         $"Expected a value between 0 and {Count}, but received {index}.");
-                return ref m_BufferPtr[index];
+                return ref _bufferPtr[index];
             }
         }
 
@@ -71,7 +71,7 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         /// <param name="index">The index of the item to get.</param>
         /// <returns>A reference to the item.</returns>
-        public ref T GetUnchecked(in int index) => ref m_BufferPtr[index];
+        public ref T GetUnchecked(in int index) => ref _bufferPtr[index];
 
         /// <summary>
         /// Try to add a value in the list.
@@ -83,11 +83,11 @@ namespace UnityExtensions.Unsafe
         /// </returns>
         public bool TryAdd(in T value)
         {
-            if (Count >= m_Capacity)
+            if (Count >= _capacity)
                 return false;
 
-            m_BufferPtr[Count] = value;
-            ++*m_CountPtr;
+            _bufferPtr[Count] = value;
+            ++*_countPtr;
             return true;
         }
 
@@ -102,7 +102,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="copyCount">The number of item to copy.</param>
         public void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
         {
-            UnsafeUtility.MemCpy(dstBuffer + startDstIndex, m_BufferPtr,
+            UnsafeUtility.MemCpy(dstBuffer + startDstIndex, _bufferPtr,
                 UnsafeUtility.SizeOf<T>() * copyCount);
         }
 
@@ -116,11 +116,11 @@ namespace UnityExtensions.Unsafe
         /// </returns>
         public bool TryCopyTo(ListBuffer<T> other)
         {
-            if (other.Count + Count >= other.m_Capacity)
+            if (other.Count + Count >= other._capacity)
                 return false;
 
-            UnsafeUtility.MemCpy(other.m_BufferPtr + other.Count, m_BufferPtr, UnsafeUtility.SizeOf<T>() * Count);
-            *other.m_CountPtr += Count;
+            UnsafeUtility.MemCpy(other._bufferPtr + other.Count, _bufferPtr, UnsafeUtility.SizeOf<T>() * Count);
+            *other._countPtr += Count;
             return true;
         }
 
@@ -135,11 +135,11 @@ namespace UnityExtensions.Unsafe
         /// </returns>
         public bool TryCopyFrom(T* srcPtr, int count)
         {
-            if (count + Count > m_Capacity)
+            if (count + Count > _capacity)
                 return false;
 
-            UnsafeUtility.MemCpy(m_BufferPtr + Count, srcPtr, UnsafeUtility.SizeOf<T>() * count);
-            *m_CountPtr += count;
+            UnsafeUtility.MemCpy(_bufferPtr + Count, srcPtr, UnsafeUtility.SizeOf<T>() * count);
+            *_countPtr += count;
             return true;
         }
         #endregion // UnityEngine.Rendering

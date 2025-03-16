@@ -15,11 +15,11 @@ namespace UnityExtensions
         /// <summary>
         /// Index
         /// </summary>
-        public readonly int index;
+        public readonly int Index;
         /// <summary>
         /// Item
         /// </summary>
-        public readonly T item;
+        public readonly T Item;
 
         /// <summary>
         /// Constructor.
@@ -28,8 +28,8 @@ namespace UnityExtensions
         /// <param name="item">Item</param>
         public ListChangedEventArgs(int index, T item)
         {
-            this.index = index;
-            this.item = item;
+            this.Index = index;
+            this.Item = item;
         }
         #endregion // UnityEngine.Rendering
     }
@@ -50,8 +50,8 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ObservableList.cs
         #region UnityEngine.Rendering
-        List<T> m_List;
-        private readonly Comparison<T> m_Comparison;
+        readonly List<T> _list;
+        private readonly Comparison<T> _comparison;
 
         /// <summary>
         /// Added item event.
@@ -69,11 +69,11 @@ namespace UnityExtensions
         /// <value>The item at the provided index.</value>
         public T this[int index]
         {
-            get { return m_List[index]; }
+            get { return _list[index]; }
             set
             {
-                OnEvent(ItemRemoved, index, m_List[index]);
-                m_List[index] = value;
+                OnEvent(ItemRemoved, index, _list[index]);
+                _list[index] = value;
                 OnEvent(ItemAdded, index, value);
             }
         }
@@ -83,7 +83,7 @@ namespace UnityExtensions
         /// </summary>
         public int Count
         {
-            get { return m_List.Count; }
+            get { return _list.Count; }
         }
 
         /// <summary>
@@ -107,8 +107,8 @@ namespace UnityExtensions
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
         public ObservableList(int capacity, Comparison<T> comparison = null)
         {
-            m_List = new List<T>(capacity);
-            m_Comparison = comparison;
+            _list = new List<T>(capacity);
+            _comparison = comparison;
         }
 
         /// <summary>
@@ -118,8 +118,8 @@ namespace UnityExtensions
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
         public ObservableList(IEnumerable<T> collection, Comparison<T> comparison = null)
         {
-            m_List = new List<T>(collection);
-            m_Comparison = comparison;
+            _list = new List<T>(collection);
+            _comparison = comparison;
             Sort(); // Make sure the given list is sorted
         }
 
@@ -136,7 +136,7 @@ namespace UnityExtensions
         /// <returns>True if the item is in the list.</returns>
         public bool Contains(T item)
         {
-            return m_List.Contains(item);
+            return _list.Contains(item);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace UnityExtensions
         /// <returns>The index of the item in the list if it exists, -1 otherwise.</returns>
         public int IndexOf(T item)
         {
-            return m_List.IndexOf(item);
+            return _list.IndexOf(item);
         }
 
         /// <summary>
@@ -155,9 +155,9 @@ namespace UnityExtensions
         /// <param name="item">Item to add to the list.</param>
         public void Add(T item)
         {
-            m_List.Add(item);
+            _list.Add(item);
             Sort();
-            OnEvent(ItemAdded, m_List.IndexOf(item), item);
+            OnEvent(ItemAdded, _list.IndexOf(item), item);
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace UnityExtensions
         /// <param name="item">Item to insert in the list.</param>
         public void Insert(int index, T item)
         {
-            m_List.Insert(index, item);
+            _list.Insert(index, item);
             Sort();
             OnEvent(ItemAdded, index, item);
         }
@@ -189,8 +189,8 @@ namespace UnityExtensions
         /// <returns>True if the item was successfully removed. False otherwise.</returns>
         public bool Remove(T item)
         {
-            int index = m_List.IndexOf(item);
-            bool ret = m_List.Remove(item);
+            int index = _list.IndexOf(item);
+            bool ret = _list.Remove(item);
             if (ret)
                 OnEvent(ItemRemoved, index, item);
             return ret;
@@ -220,8 +220,8 @@ namespace UnityExtensions
         /// <param name="index">Index of the item to remove.</param>
         public void RemoveAt(int index)
         {
-            var item = m_List[index];
-            m_List.RemoveAt(index);
+            var item = _list[index];
+            _list.RemoveAt(index);
             OnEvent(ItemRemoved, index, item);
         }
 
@@ -241,7 +241,7 @@ namespace UnityExtensions
         /// <param name="arrayIndex">Starting index.</param>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            m_List.CopyTo(array, arrayIndex);
+            _list.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace UnityExtensions
         /// <returns>The list enumerator.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return m_List.GetEnumerator();
+            return _list.GetEnumerator();
         }
 
         /// <summary>
@@ -264,9 +264,9 @@ namespace UnityExtensions
 
         private void Sort()
         {
-            if (m_Comparison != null)
+            if (_comparison != null)
             {
-                m_List.Sort(m_Comparison);
+                _list.Sort(_comparison);
             }
         }
         #endregion // UnityEngine.Rendering

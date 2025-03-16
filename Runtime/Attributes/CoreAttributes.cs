@@ -11,9 +11,9 @@ namespace UnityExtensions.Attributes
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/CoreAttributes.cs
         #region UnityEngine.Rendering
         /// <summary>Display name used in UI.</summary>
-        public string name;
+        public string Name;
         /// <summary>Display order used in UI.</summary>
-        public int order;
+        public int Order;
         #endregion // UnityEngine.Rendering
     }
 

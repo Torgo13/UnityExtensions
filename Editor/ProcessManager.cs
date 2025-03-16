@@ -18,8 +18,8 @@ namespace UnityExtensions.Editor
 
         class ProcessImpl : IProcess
         {
-            Action<IProcess> m_PreStart;
-            Action<IProcess> m_PostStart;
+            readonly Action<IProcess> _preStart;
+            readonly Action<IProcess> _postStart;
 
             public ProcessStartInfo startInfo { get; private set; }
             public Process process { get; private set; }
@@ -28,8 +28,8 @@ namespace UnityExtensions.Editor
             public ProcessImpl(ProcessStartInfo startInfo, Action<IProcess> preStart, Action<IProcess> postStart)
             {
                 this.startInfo = startInfo;
-                m_PreStart = preStart;
-                m_PostStart = postStart;
+                _preStart = preStart;
+                _postStart = postStart;
             }
 
             public void Start()
@@ -38,13 +38,13 @@ namespace UnityExtensions.Editor
                 process.StartInfo = startInfo;
                 process.EnableRaisingEvents = true;
 
-                if (m_PreStart != null)
-                    m_PreStart(this);
+                if (_preStart != null)
+                    _preStart(this);
 
                 process.Start();
 
-                if (m_PostStart != null)
-                    m_PostStart(this);
+                if (_postStart != null)
+                    _postStart(this);
             }
 
             public void Cancel()
@@ -54,39 +54,39 @@ namespace UnityExtensions.Editor
             }
         }
 
-        const int k_MaxProcesses = 16;
+        const int MaxProcesses = 16;
 
-        static ProcessManager s_Instance = new ProcessManager(k_MaxProcesses);
+        static readonly ProcessManager Instance = new ProcessManager(MaxProcesses);
 
-        int m_UpdateRefCount;
-        int m_MaxProcesses;
-        List<ProcessImpl> m_PendingProcesses = new List<ProcessImpl>();
-        List<ProcessImpl> m_RunningProcesses = new List<ProcessImpl>();
+        int _updateRefCount;
+        readonly int _maxProcesses;
+        readonly List<ProcessImpl> _pendingProcesses = new List<ProcessImpl>();
+        readonly List<ProcessImpl> _runningProcesses = new List<ProcessImpl>();
 
         public static IProcess Enqueue(ProcessStartInfo startInfo, Action<IProcess> preStart, Action<IProcess> postStart)
         {
-            return s_Instance.DoEnqueue(startInfo, preStart, postStart);
+            return Instance.DoEnqueue(startInfo, preStart, postStart);
         }
 
         public static void Cancel(IProcess process)
         {
-            s_Instance.DoCancel(process);
+            Instance.DoCancel(process);
         }
 
         public ProcessManager(int maxProcesses)
         {
-            m_MaxProcesses = maxProcesses;
+            _maxProcesses = maxProcesses;
         }
 
         IProcess DoEnqueue(ProcessStartInfo startInfo, Action<IProcess> preStart, Action<IProcess> postStart)
         {
             var impl = new ProcessImpl(startInfo, preStart, postStart);
-            m_PendingProcesses.Add(impl);
+            _pendingProcesses.Add(impl);
 
-            if (m_UpdateRefCount == 0)
+            if (_updateRefCount == 0)
                 EditorUpdateManager.ToUpdate += Update;
 
-            ++m_UpdateRefCount;
+            ++_updateRefCount;
 
             return impl;
         }
@@ -94,44 +94,44 @@ namespace UnityExtensions.Editor
         void DoCancel(IProcess process)
         {
             var processImpl = (ProcessImpl)process;
-            var pendingIndex = m_PendingProcesses.IndexOf(processImpl);
+            var pendingIndex = _pendingProcesses.IndexOf(processImpl);
             if (pendingIndex != -1)
             {
-                m_PendingProcesses.RemoveAt(pendingIndex);
+                _pendingProcesses.RemoveAt(pendingIndex);
                 return;
             }
 
-            var runningIndex = m_RunningProcesses.IndexOf(processImpl);
+            var runningIndex = _runningProcesses.IndexOf(processImpl);
             if (runningIndex != -1)
             {
-                m_RunningProcesses.RemoveAt(runningIndex);
+                _runningProcesses.RemoveAt(runningIndex);
                 processImpl.Cancel();
             }
         }
 
         void Update()
         {
-            for (var i = m_RunningProcesses.Count - 1; i >= 0; --i)
+            for (var i = _runningProcesses.Count - 1; i >= 0; --i)
             {
-                var proc = m_RunningProcesses[i];
+                var proc = _runningProcesses[i];
                 if (proc.process.HasExited)
                 {
-                    m_RunningProcesses.RemoveAt(i);
+                    _runningProcesses.RemoveAt(i);
 
-                    --m_UpdateRefCount;
-                    if (m_UpdateRefCount == 0)
+                    --_updateRefCount;
+                    if (_updateRefCount == 0)
                         EditorUpdateManager.ToUpdate -= Update;
                 }
             }
 
-            var processToRun = Mathf.Min(m_MaxProcesses, m_PendingProcesses.Count - m_RunningProcesses.Count);
+            var processToRun = Mathf.Min(_maxProcesses, _pendingProcesses.Count - _runningProcesses.Count);
             for (var i = 0; i < processToRun; i++)
             {
-                var proc = m_PendingProcesses[0];
-                m_PendingProcesses.RemoveAt(0);
+                var proc = _pendingProcesses[0];
+                _pendingProcesses.RemoveAt(0);
 
                 proc.Start();
-                m_RunningProcesses.Add(proc);
+                _runningProcesses.Add(proc);
             }
         }
         #endregion // UnityEditor.ShaderAnalysis.Internal

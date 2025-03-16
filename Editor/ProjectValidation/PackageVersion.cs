@@ -19,55 +19,55 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ProjectValidation/PackageVersion.cs
         #region Unity.XR.CoreUtils.Editor
-        const string k_Major = "major";
-        const string k_Minor = "minor";
-        const string k_Patch = "patch";
+        const string Major = "major";
+        const string Minor = "minor";
+        const string Patch = "patch";
         const string k_Prerelease = "prerelease";
         const string k_BuildMetaData = "buildmetadata";
 
         // From https://semver.org/ standard https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
         // ^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-        static readonly Regex k_Regex = new Regex($@"^(?<{k_Major}>0|[1-9]\d*)\.(?<{k_Minor}>0|[1-9]\d*)\." +
-            $@"(?<{k_Patch}>0|[1-9]\d*)(?:-(?<{k_Prerelease}>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" +
+        static readonly Regex Regex = new Regex($@"^(?<{Major}>0|[1-9]\d*)\.(?<{Minor}>0|[1-9]\d*)\." +
+            $@"(?<{Patch}>0|[1-9]\d*)(?:-(?<{k_Prerelease}>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" +
             $@"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<{k_BuildMetaData}>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$");
 
-        readonly string m_Version;
+        readonly string _version;
 
-        readonly ulong m_MajorVersion;
-        readonly ulong m_MinorVersion;
-        readonly ulong m_PatchVersion;
-        readonly string m_Prerelease;
-        readonly string m_BuildMetaData;
+        readonly ulong _majorVersion;
+        readonly ulong _minorVersion;
+        readonly ulong _patchVersion;
+        readonly string _prerelease;
+        readonly string _buildMetaData;
 
         /// <summary>
         /// Major version number.
         /// </summary>
-        public ulong MajorVersion => m_MajorVersion;
+        public ulong MajorVersion => _majorVersion;
 
         /// <summary>
         /// Minor version number.
         /// </summary>
-        public ulong MinorVersion => m_MinorVersion;
+        public ulong MinorVersion => _minorVersion;
 
         /// <summary>
         /// Patch version number.
         /// </summary>
-        public ulong PatchVersion => m_PatchVersion;
+        public ulong PatchVersion => _patchVersion;
 
         /// <summary>
         /// Reports whether the package is a prerelease.
         /// </summary>
-        public bool IsPrerelease => !string.IsNullOrEmpty(m_Prerelease);
+        public bool IsPrerelease => !string.IsNullOrEmpty(_prerelease);
 
         /// <summary>
         /// The prerelease version information.
         /// </summary>
-        public string Prerelease => m_Prerelease;
+        public string Prerelease => _prerelease;
 
         /// <summary>
         /// The build metadata version information.
         /// </summary>
-        public string BuildMetaData => m_BuildMetaData;
+        public string BuildMetaData => _buildMetaData;
 
         /// <summary>
         /// Creates a <see cref="PackageVersion"/> structure from a valid <paramref name="version"/> string.
@@ -78,35 +78,35 @@ namespace UnityExtensions.Editor
         {
             if (string.IsNullOrEmpty(version))
             {
-                m_MajorVersion = default;
-                m_MinorVersion = default;
-                m_PatchVersion = default;
-                m_Prerelease = default;
-                m_BuildMetaData = default;
-                m_Version = default;
+                _majorVersion = default;
+                _minorVersion = default;
+                _patchVersion = default;
+                _prerelease = default;
+                _buildMetaData = default;
+                _version = default;
                 return;
             }
 
-            m_MajorVersion = 0;
-            m_MinorVersion = 0;
-            m_PatchVersion = 0;
-            m_Prerelease = string.Empty;
-            m_BuildMetaData = string.Empty;
-            m_Version = version;
+            _majorVersion = 0;
+            _minorVersion = 0;
+            _patchVersion = 0;
+            _prerelease = string.Empty;
+            _buildMetaData = string.Empty;
+            _version = version;
 
-            var match = k_Regex.Match(version);
+            var match = Regex.Match(version);
             if (match.Success)
             {
                 var groups = match.Groups;
-                m_MajorVersion = ulong.Parse(groups[k_Major].Value);
-                m_MinorVersion = ulong.Parse(groups[k_Minor].Value);
-                m_PatchVersion = ulong.Parse(groups[k_Patch].Value);
+                _majorVersion = ulong.Parse(groups[Major].Value);
+                _minorVersion = ulong.Parse(groups[Minor].Value);
+                _patchVersion = ulong.Parse(groups[Patch].Value);
 
                 if (groups[k_Prerelease].Success)
-                    m_Prerelease = groups[k_Prerelease].Value;
+                    _prerelease = groups[k_Prerelease].Value;
 
                 if (groups[k_BuildMetaData].Success)
-                    m_BuildMetaData = groups[k_BuildMetaData].Value;
+                    _buildMetaData = groups[k_BuildMetaData].Value;
             }
             else
                 throw new FormatException($"Malformed package version string: {version}");
@@ -141,11 +141,11 @@ namespace UnityExtensions.Editor
         /// <inheritdoc cref="IEquatable{T}"/>
         public bool Equals(PackageVersion other)
         {
-            return m_MajorVersion == other.MajorVersion
-                && m_MinorVersion == other.MinorVersion
-                && m_PatchVersion == other.PatchVersion
-                && m_Prerelease == other.Prerelease
-                && m_BuildMetaData == other.BuildMetaData;
+            return _majorVersion == other.MajorVersion
+                && _minorVersion == other.MinorVersion
+                && _patchVersion == other.PatchVersion
+                && _prerelease == other.Prerelease
+                && _buildMetaData == other.BuildMetaData;
         }
 
         /// <inheritdoc cref="IEquatable{T}"/>
@@ -159,11 +159,11 @@ namespace UnityExtensions.Editor
         {
             unchecked
             {
-                var hashCode = (int)m_MajorVersion;
-                hashCode = (hashCode * 397) ^ (int)m_MinorVersion;
-                hashCode = (hashCode * 397) ^ (int)m_PatchVersion;
-                hashCode = (hashCode * 397) ^ m_Prerelease.GetHashCode();
-                hashCode = (hashCode * 397) ^ m_BuildMetaData.GetHashCode();
+                var hashCode = (int)_majorVersion;
+                hashCode = (hashCode * 397) ^ (int)_minorVersion;
+                hashCode = (hashCode * 397) ^ (int)_patchVersion;
+                hashCode = (hashCode * 397) ^ _prerelease.GetHashCode();
+                hashCode = (hashCode * 397) ^ _buildMetaData.GetHashCode();
                 return hashCode;
             }
         }
@@ -243,23 +243,23 @@ namespace UnityExtensions.Editor
         /// <inheritdoc cref="IComparable"/>
         public int CompareTo(PackageVersion other)
         {
-            var compare = m_MajorVersion.CompareTo(other.MajorVersion);
+            var compare = _majorVersion.CompareTo(other.MajorVersion);
             if (compare != 0)
                 return compare;
 
-            compare = m_MinorVersion.CompareTo(other.MinorVersion);
+            compare = _minorVersion.CompareTo(other.MinorVersion);
             if (compare != 0)
                 return compare;
 
-            compare = m_PatchVersion.CompareTo(other.PatchVersion);
+            compare = _patchVersion.CompareTo(other.PatchVersion);
             if (compare != 0)
                 return compare;
 
-            compare = PackageVersionUtility.EmptyOrNullSubVersionCompare(m_Prerelease, other.Prerelease);
+            compare = PackageVersionUtility.EmptyOrNullSubVersionCompare(_prerelease, other.Prerelease);
             if (compare != 0)
                 return compare;
 
-            compare = PackageVersionUtility.EmptyOrNullSubVersionCompare(m_BuildMetaData, other.BuildMetaData);
+            compare = PackageVersionUtility.EmptyOrNullSubVersionCompare(_buildMetaData, other.BuildMetaData);
 
             return compare;
         }
@@ -277,7 +277,7 @@ namespace UnityExtensions.Editor
         /// <returns></returns>
         public override string ToString()
         {
-            return m_Version;
+            return _version;
         }
         #endregion // Unity.XR.CoreUtils.Editor
     }

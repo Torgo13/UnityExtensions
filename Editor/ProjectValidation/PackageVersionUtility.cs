@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -11,9 +12,9 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ProjectValidation/PackageVersionUtility.cs
         #region Unity.XR.CoreUtils.Editor
-        const string k_PackageCacheName = "PackageCache";
-        static bool s_PackageLogLock;
-        static Dictionary<string, PackageVersion> s_PackageCache;
+        const string PackageCacheName = "PackageCache";
+        static bool _packageLogLock;
+        static Dictionary<string, PackageVersion> _packageCache;
 
         [UnityEditor.Callbacks.DidReloadScripts]
         static void OnReloadScripts()
@@ -26,19 +27,19 @@ namespace UnityExtensions.Editor
 
         static void OnLogMessage(string message, string stackTrace, LogType logType)
         {
-            if (logType == LogType.Error && message.Contains(k_PackageCacheName) && !s_PackageLogLock)
+            if (logType == LogType.Error && message.Contains(PackageCacheName) && !_packageLogLock)
             {
                 UpdatePackageVersions();
-                s_PackageLogLock = true;
+                _packageLogLock = true;
             }
         }
 
         static void UpdatePackageVersions()
         {
-            if (s_PackageCache == null)
-                s_PackageCache = new Dictionary<string, PackageVersion>();
+            if (_packageCache == null)
+                _packageCache = new Dictionary<string, PackageVersion>();
 
-            s_PackageCache.Clear();
+            _packageCache.Clear();
             var request = UnityEditor.PackageManager.Client.List(true, true);
             while (!request.IsCompleted)
             {
@@ -48,10 +49,10 @@ namespace UnityExtensions.Editor
             foreach (var package in request.Result)
             {
                 var version = new PackageVersion(package.version);
-                s_PackageCache.Add(package.name, version);
+                _packageCache.Add(package.name, version);
             }
 
-            s_PackageLogLock = false;
+            _packageLogLock = false;
         }
 
         /// <summary>
@@ -63,13 +64,13 @@ namespace UnityExtensions.Editor
         /// otherwise the <c>default</c> value is returned.</returns>
         public static PackageVersion GetPackageVersion(string packageName)
         {
-            if (s_PackageCache == null)
+            if (_packageCache == null)
             {
-                s_PackageCache = new Dictionary<string, PackageVersion>();
+                _packageCache = new Dictionary<string, PackageVersion>();
                 UpdatePackageVersions();
             }
 
-            return s_PackageCache.GetValueOrDefault(packageName);
+            return _packageCache.GetValueOrDefault(packageName);
         }
 
         /// <summary>
@@ -153,7 +154,7 @@ namespace UnityExtensions.Editor
                     if (string.IsNullOrEmpty(lhSub) && string.IsNullOrEmpty(rhSub))
                         return compare;
 
-                    compare = string.Compare(lhSub, rhSub);
+                    compare = string.Compare(lhSub, rhSub, StringComparison.CurrentCulture);
                     if (compare != 0)
                         return compare;
                 }

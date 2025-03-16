@@ -20,7 +20,7 @@ namespace UnityExtensions
         /// <param name="count">The number of elements to remove.</param>
         /// <param name="error">The exception raised by the implementation</param>
         /// <typeparam name="TValue">The value type stored on the list</typeparam>
-        /// <returns>True if succeed, false otherwise</returns>
+        /// <returns>True if it succeeded, false otherwise</returns>
         [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
         [MustUseReturnValue]
         public static bool TryRemoveElementsInRange<TValue>([DisallowNull] this IList<TValue> list, int index, int count, [NotNullWhen(false)] out Exception error)

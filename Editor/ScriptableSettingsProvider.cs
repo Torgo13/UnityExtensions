@@ -11,8 +11,8 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ScriptableSettingsProvider.cs
         #region Unity.XR.CoreUtils.Editor
-        T m_Target;
-        SerializedObject m_SerializedObject;
+        T _target;
+        SerializedObject _serializedObject;
 
         /// <summary>
         /// The ScriptableSettings being provided.
@@ -21,10 +21,10 @@ namespace UnityExtensions.Editor
         {
             get
             {
-                if (m_Target == null || m_SerializedObject == null)
+                if (_target == null || _serializedObject == null)
                     GetSerializedSettings();
 
-                return m_Target;
+                return _target;
             }
         }
 
@@ -35,10 +35,10 @@ namespace UnityExtensions.Editor
         {
             get
             {
-                if (m_SerializedObject == null)
-                    m_SerializedObject = GetSerializedSettings();
+                if (_serializedObject == null)
+                    _serializedObject = GetSerializedSettings();
 
-                return m_SerializedObject;
+                return _serializedObject;
             }
         }
 
@@ -75,12 +75,12 @@ namespace UnityExtensions.Editor
         {
             if (typeof(EditorScriptableSettings<T>).IsAssignableFrom(typeof(T)))
             {
-                m_Target = EditorScriptableSettings<T>.Instance;
-                return new SerializedObject(m_Target);
+                _target = EditorScriptableSettings<T>.Instance;
+                return new SerializedObject(_target);
             }
 
-            m_Target = ScriptableSettings<T>.Instance;
-            return new SerializedObject(m_Target);
+            _target = ScriptableSettings<T>.Instance;
+            return new SerializedObject(_target);
         }
         #endregion // Unity.XR.CoreUtils.Editor
     }

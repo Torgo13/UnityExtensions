@@ -1,4 +1,3 @@
-using System;
 using UnityEditor;
 
 namespace UnityExtensions.Editor
@@ -10,15 +9,15 @@ namespace UnityExtensions.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/EditorPrefBool.cs
         #region UnityEditor.Rendering
-        readonly string m_Key;
+        readonly string _key;
 
         /// <summary>
         /// Value of the boolean in editor preferences.
         /// </summary>
         public bool value
         {
-            get => EditorPrefs.GetBool(m_Key);
-            set => EditorPrefs.SetBool(m_Key, value);
+            get => EditorPrefs.GetBool(_key);
+            set => EditorPrefs.SetBool(_key, value);
         }
 
         /// <summary>
@@ -28,12 +27,12 @@ namespace UnityExtensions.Editor
         /// <param name="defaultValue">Default value of the preference.</param>
         public EditorPrefBool(string key, bool defaultValue = false)
         {
-            m_Key = key;
+            _key = key;
 
             //register key if not already there
-            if (!EditorPrefs.HasKey(m_Key))
+            if (!EditorPrefs.HasKey(_key))
             {
-                EditorPrefs.SetBool(m_Key, defaultValue);
+                EditorPrefs.SetBool(_key, defaultValue);
             }
         }
         #endregion // UnityEditor.Rendering

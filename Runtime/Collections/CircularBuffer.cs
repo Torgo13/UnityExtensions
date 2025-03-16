@@ -13,14 +13,14 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Runtime/Core/Utilities/CircularBuffer.cs
         #region Unity.LiveCapture
-        T[] m_Data;
-        int m_StartIndex = 0;
-        int m_EndIndex = 0;
+        T[] _data;
+        int _startIndex ;
+        int _endIndex;
 
         /// <summary>
         /// Gets the number of elements in the collection.
         /// </summary>
-        public int Count => (m_Data.Length + m_EndIndex - m_StartIndex) % m_Data.Length;
+        public int Count => (_data.Length + _endIndex - _startIndex) % _data.Length;
 
         /// <summary>
         /// The maximum number of elements which can be stored in the collection.
@@ -29,7 +29,7 @@ namespace UnityExtensions
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the capacity is not greater than zero.</exception>
         public int Capacity
         {
-            get => m_Data.Length - 1;
+            get => _data.Length - 1;
             set => SetCapacity(value);
         }
 
@@ -66,11 +66,11 @@ namespace UnityExtensions
             if (Count == Capacity)
             {
                 OnValueDiscarded(PeekFront());
-                IncrementIndex(ref m_StartIndex);
+                IncrementIndex(ref _startIndex);
             }
 
-            m_Data[m_EndIndex] = value;
-            IncrementIndex(ref m_EndIndex);
+            _data[_endIndex] = value;
+            IncrementIndex(ref _endIndex);
         }
 
         /// <summary>
@@ -85,11 +85,11 @@ namespace UnityExtensions
             if (Count == Capacity)
             {
                 OnValueDiscarded(PeekBack());
-                DecrementIndex(ref m_EndIndex);
+                DecrementIndex(ref _endIndex);
             }
 
-            DecrementIndex(ref m_StartIndex);
-            m_Data[m_StartIndex] = value;
+            DecrementIndex(ref _startIndex);
+            _data[_startIndex] = value;
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace UnityExtensions
         {
             PreconditionNotEmpty();
             var item = PeekFront();
-            IncrementIndex(ref m_StartIndex);
+            IncrementIndex(ref _startIndex);
             return item;
         }
 
@@ -154,7 +154,7 @@ namespace UnityExtensions
         {
             PreconditionNotEmpty();
             var item = PeekBack();
-            DecrementIndex(ref m_EndIndex);
+            DecrementIndex(ref _endIndex);
             return item;
         }
 
@@ -165,7 +165,7 @@ namespace UnityExtensions
         public ref readonly T PeekFront()
         {
             PreconditionNotEmpty();
-            return ref m_Data[m_StartIndex];
+            return ref _data[_startIndex];
         }
 
         /// <summary>
@@ -175,9 +175,9 @@ namespace UnityExtensions
         public ref readonly T PeekBack()
         {
             PreconditionNotEmpty();
-            var backIndex = m_EndIndex;
+            var backIndex = _endIndex;
             DecrementIndex(ref backIndex);
-            return ref m_Data[backIndex];
+            return ref _data[backIndex];
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace UnityExtensions
         public ref readonly T PeekIndex(int index)
         {
             PreconditionInBounds(index);
-            return ref m_Data[(m_StartIndex + index) % m_Data.Length];
+            return ref _data[(_startIndex + index) % _data.Length];
         }
 
         /// <summary>
@@ -201,8 +201,8 @@ namespace UnityExtensions
                 OnValueDiscarded(value);
             }
 
-            m_StartIndex = 0;
-            m_EndIndex = 0;
+            _startIndex = 0;
+            _endIndex = 0;
         }
 
         void SetCapacity(int capacity)
@@ -212,7 +212,7 @@ namespace UnityExtensions
                 throw new ArgumentOutOfRangeException(nameof(capacity), "Must be greater than zero.");
             }
 
-            if (m_Data != null && capacity == Capacity)
+            if (_data != null && capacity == Capacity)
             {
                 return;
             }
@@ -225,25 +225,25 @@ namespace UnityExtensions
             var newArray = new T[capacity + 1];
             var endIndex = 0;
 
-            if (m_Data != null)
+            if (_data != null)
             {
                 while (Count > capacity)
                 {
                     OnValueDiscarded(PopFront());
                 }
 
-                var index = m_StartIndex;
-                while (index != m_EndIndex)
+                var index = _startIndex;
+                while (index != _endIndex)
                 {
-                    newArray[endIndex] = m_Data[index];
+                    newArray[endIndex] = _data[index];
                     IncrementIndex(ref index);
                     ++endIndex;
                 }
             }
 
-            m_Data = newArray;
-            m_StartIndex = 0;
-            m_EndIndex = endIndex;
+            _data = newArray;
+            _startIndex = 0;
+            _endIndex = endIndex;
         }
 
         /// <inheritdoc />
@@ -256,17 +256,17 @@ namespace UnityExtensions
 
                 OnValueDiscarded(PeekIndex(index));
 
-                m_Data[(index + m_StartIndex) % m_Data.Length] = value;
+                _data[(index + _startIndex) % _data.Length] = value;
             }
         }
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
-            var index = m_StartIndex;
-            while (index != m_EndIndex)
+            var index = _startIndex;
+            while (index != _endIndex)
             {
-                yield return m_Data[index];
+                yield return _data[index];
                 IncrementIndex(ref index);
             }
         }
@@ -279,7 +279,7 @@ namespace UnityExtensions
 
         void PreconditionNotEmpty()
         {
-            if (m_EndIndex == m_StartIndex)
+            if (_endIndex == _startIndex)
             {
                 throw new InvalidOperationException("Buffer is empty");
             }
@@ -295,12 +295,12 @@ namespace UnityExtensions
 
         void IncrementIndex(ref int index)
         {
-            index = (index + 1) % m_Data.Length;
+            index = (index + 1) % _data.Length;
         }
 
         void DecrementIndex(ref int index)
         {
-            index = (m_Data.Length + index - 1) % m_Data.Length;
+            index = (_data.Length + index - 1) % _data.Length;
         }
 
         void OnValueDiscarded(in T value)

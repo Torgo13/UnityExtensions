@@ -107,8 +107,8 @@ namespace UnityExtensions.Editor
         //      - If we want to isolate and only work on 1 bit, we want to modify it, whatever the data was in other bits.
         //      - If the data on other bits was different per targets before writing on 1 bit, it should still be different per targets.
         //      - Internal method HasMultipleDifferentValuesBitwise and SetBitAtIndexForAllTargetsImmediate is only supported for 32bits formats.
-        //Todo: Ideally, if we move this BitArray to Unity, we can rewrite a little the HasMultipleDifferentValuesBitwise and SetBitAtIndexForAllTargetsImmediate to work on other format and thus we should not need this m_SerializedPropertyPerTargets anymore.
-        SerializedProperty[] m_SerializedPropertyPerTargets;
+        //Todo: Ideally, if we move this BitArray to Unity, we can rewrite a little the HasMultipleDifferentValuesBitwise and SetBitAtIndexForAllTargetsImmediate to work on other format and thus we should not need this _serializedObject anymore.
+        readonly SerializedProperty[] _serializedObject;
 
         /// <summary>Capacity of the bitarray</summary>
         public uint capacity { get; }
@@ -116,10 +116,10 @@ namespace UnityExtensions.Editor
         internal SerializedBitArrayAny(SerializedProperty serializedProperty, SerializedObject[] targetSerializedObjects, uint capacity)
         {
             this.capacity = capacity;
-            m_SerializedPropertyPerTargets = new SerializedProperty[targetSerializedObjects.Length];
+            _serializedObject = new SerializedProperty[targetSerializedObjects.Length];
             for (int i = 0; i < targetSerializedObjects.Length; i++)
             {
-                m_SerializedPropertyPerTargets[i] = targetSerializedObjects[i].FindProperty(serializedProperty.propertyPath);
+                _serializedObject[i] = targetSerializedObjects[i].FindProperty(serializedProperty.propertyPath);
             }
         }
 
@@ -127,10 +127,10 @@ namespace UnityExtensions.Editor
         internal SerializedBitArrayAny(SerializedProperty serializedProperty, uint capacity)
         {
             this.capacity = capacity;
-            m_SerializedPropertyPerTargets = new SerializedProperty[serializedProperty.serializedObject.targetObjects.Length];
+            _serializedObject = new SerializedProperty[serializedProperty.serializedObject.targetObjects.Length];
             for (int i = 0; i < serializedProperty.serializedObject.targetObjects.Length; i++)
             {
-                m_SerializedPropertyPerTargets[i] = new SerializedObject(serializedProperty.serializedObject.targetObjects[i]).FindProperty(serializedProperty.propertyPath);
+                _serializedObject[i] = new SerializedObject(serializedProperty.serializedObject.targetObjects[i]).FindProperty(serializedProperty.propertyPath);
             }
         }
 
@@ -138,10 +138,10 @@ namespace UnityExtensions.Editor
         ulong GetTargetValueUnverified(int targetIndex, int part)
             => part switch
             {
-                0 => Unbox(m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative(capacity <= 64 ? "data" : "data1").boxedValue),
-                1 => Unbox(m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data2")?.boxedValue ?? 0ul),
-                2 => Unbox(m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data3")?.boxedValue ?? 0ul),
-                3 => Unbox(m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data4")?.boxedValue ?? 0ul),
+                0 => Unbox(_serializedObject[targetIndex].FindPropertyRelative(capacity <= 64 ? "data" : "data1").boxedValue),
+                1 => Unbox(_serializedObject[targetIndex].FindPropertyRelative("data2")?.boxedValue ?? 0ul),
+                2 => Unbox(_serializedObject[targetIndex].FindPropertyRelative("data3")?.boxedValue ?? 0ul),
+                3 => Unbox(_serializedObject[targetIndex].FindPropertyRelative("data4")?.boxedValue ?? 0ul),
                 _ => 0ul
             };
 
@@ -149,10 +149,10 @@ namespace UnityExtensions.Editor
         {
             switch (part)
             {
-                case 0: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative(capacity <= 64 ? "data" : "data1").boxedValue = value; break;
-                case 1: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data2").boxedValue = value; break;
-                case 2: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data3").boxedValue = value; break;
-                case 3: m_SerializedPropertyPerTargets[targetIndex].FindPropertyRelative("data4").boxedValue = value; break;
+                case 0: _serializedObject[targetIndex].FindPropertyRelative(capacity <= 64 ? "data" : "data1").boxedValue = value; break;
+                case 1: _serializedObject[targetIndex].FindPropertyRelative("data2").boxedValue = value; break;
+                case 2: _serializedObject[targetIndex].FindPropertyRelative("data3").boxedValue = value; break;
+                case 3: _serializedObject[targetIndex].FindPropertyRelative("data4").boxedValue = value; break;
             }
         }
 
@@ -183,7 +183,7 @@ namespace UnityExtensions.Editor
         {
             ulong diff = 0ul;
             var firstValue = GetTargetValueUnverified(0, partIndex);
-            for (int i = 1; i < m_SerializedPropertyPerTargets.Length; ++i)
+            for (int i = 1; i < _serializedObject.Length; ++i)
                 diff |= firstValue ^ GetTargetValueUnverified(i, partIndex);
             return diff;
         }
@@ -223,7 +223,7 @@ namespace UnityExtensions.Editor
 
             int part = (int)bitIndex / 64;
             int indexInPart = (int)bitIndex % 64;
-            for (int i = 0; i < m_SerializedPropertyPerTargets.Length; ++i)
+            for (int i = 0; i < _serializedObject.Length; ++i)
             {
                 ulong targetValue = GetTargetValueUnverified(i, part);
                 if (value)
@@ -246,14 +246,14 @@ namespace UnityExtensions.Editor
         /// <summary>Sync the reflected value with target value change</summary>
         public void Update()
         {
-            foreach (var property in m_SerializedPropertyPerTargets)
+            foreach (var property in _serializedObject)
                 property.serializedObject.Update();
         }
 
         /// <summary>Apply the reflected value onto targets</summary>
         public void ApplyModifiedProperties()
         {
-            foreach (var property in m_SerializedPropertyPerTargets)
+            foreach (var property in _serializedObject)
                 property.serializedObject.ApplyModifiedProperties();
         }
         #endregion // UnityEditor.Rendering

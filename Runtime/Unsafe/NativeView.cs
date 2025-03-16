@@ -11,22 +11,22 @@ namespace UnityExtensions.Unsafe
     /// </summary>
     public unsafe struct NativeView
     {
-        public void* ptr;
-        public int count;
+        public void* Ptr;
+        public int Count;
     }
 
     public static class NativeViewExtensions
     {
         public static unsafe NativeView AsNativeView<T>(this NativeArray<T> array) where T : struct => new NativeView
         {
-            ptr = array.GetUnsafePtr(),
-            count = array.Length
+            Ptr = array.GetUnsafePtr(),
+            Count = array.Length
         };
 
         public static unsafe NativeView AsNativeView<T>(this NativeSlice<T> slice) where T : struct => new NativeView
         {
-            ptr = slice.GetUnsafePtr(),
-            count = slice.Length
+            Ptr = slice.GetUnsafePtr(),
+            Count = slice.Length
         };
     }
     #endregion // UnityEngine.XR.ARCore
