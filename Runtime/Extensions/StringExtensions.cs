@@ -87,6 +87,7 @@ namespace UnityExtensions
 
         static readonly char[] k_WordDelimiters = { ' ', '-', '_' };
 
+        /// <exception cref="ArgumentNullException"></exception>
         public static string ConvertCase(string text,
             char outputWordDelimiter,
             Func<char, char> startOfStringCaseHandler,

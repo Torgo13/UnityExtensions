@@ -15,8 +15,8 @@ namespace UnityExtensions
         /// </summary>
         /// <remarks>
         /// This function sets <see cref="MonoBehaviour.runInEditMode"/> to <see langword="true"/>, which, if the behaviour is
-        /// currently enabled, calls [OnDisable](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnDisable.html)
-        /// and then [OnEnable](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html).
+        /// currently enabled, calls <see href="https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnDisable.html">OnDisable</see>
+        /// and then <see href="https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html">OnEnable</see>.
         /// </remarks>
         /// <param name="behaviour">The behaviour</param>
         public static void StartRunInEditMode(this MonoBehaviour behaviour)
@@ -30,10 +30,10 @@ namespace UnityExtensions
         /// <remarks>
         /// If this <see cref="MonoBehaviour"/> is currently enabled, this function disables it,
         /// sets <see cref="MonoBehaviour.runInEditMode"/> to <see langword="false"/>, and the re-enables it.
-        /// [OnDisable](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnDisable.html) and
-        /// [OnEnable](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html) are called.
-        ///
-        /// If this <see cref="MonoBehaviour"/> is currently disabled, this function only sets  <see cref="MonoBehaviour.runInEditMode"/> to <see langword="false"/>.
+        /// <see href="https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnDisable.html">OnDisable</see> and
+        /// <see href="https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html">OnEnable</see> are called.
+        /// If this <see cref="MonoBehaviour"/> is currently disabled, this function only sets
+        /// <see cref="MonoBehaviour.runInEditMode"/> to <see langword="false"/>.
         /// </remarks>
         /// <param name="behaviour">The behaviour</param>
         public static void StopRunInEditMode(this MonoBehaviour behaviour)

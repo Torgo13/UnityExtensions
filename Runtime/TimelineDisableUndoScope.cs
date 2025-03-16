@@ -24,18 +24,18 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/TimelineDisableUndoScope.cs
         #region Unity.LiveCapture
-        const string s_AssemblyName = "Unity.Timeline.Editor";
-        const string s_TypeName = "UnityEditor.Timeline.UndoExtensions+DisableTimelineUndoScope";
-        static Type s_ScopeType;
+        const string AssemblyName = "Unity.Timeline.Editor";
+        const string TypeName = "UnityEditor.Timeline.UndoExtensions+DisableTimelineUndoScope";
+        static readonly Type ScopeType;
 
         static TimelineDisableUndoScope170()
         {
-            s_ScopeType = Type.GetType($"{s_TypeName}, {s_AssemblyName}");
+            ScopeType = Type.GetType($"{TypeName}, {AssemblyName}");
         }
 
-        static public IDisposable Create()
+        public static IDisposable Create()
         {
-            return Activator.CreateInstance(s_ScopeType) as IDisposable;
+            return Activator.CreateInstance(ScopeType) as IDisposable;
         }
         #endregion // Unity.LiveCapture
     }
@@ -44,18 +44,18 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/TimelineDisableUndoScope.cs
         #region Unity.LiveCapture
-        const string s_TypeStr = "UnityEngine.Timeline.TimelineUndo+DisableUndoGuard";
-        const string s_FieldStr = "enableUndo";
-        static FieldInfo s_EnableUndo = AppDomain.CurrentDomain.GetAssemblies()
+        const string TypeStr = "UnityEngine.Timeline.TimelineUndo+DisableUndoGuard";
+        const string FieldStr = "enableUndo";
+        static readonly FieldInfo EnableUndo = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
-            .FirstOrDefault(t => string.Equals(t.FullName, s_TypeStr))
-            ?.GetField(s_FieldStr, BindingFlags.NonPublic | BindingFlags.Static);
+            .FirstOrDefault(t => string.Equals(t.FullName, TypeStr))
+            ?.GetField(FieldStr, BindingFlags.NonPublic | BindingFlags.Static);
 
-        bool m_Disposed;
+        bool _disposed;
 
         static void SetUndoEnabled(bool value)
         {
-            s_EnableUndo.SetValue(null, value);
+            EnableUndo.SetValue(null, value);
         }
 
         public TimelineDisableUndoScopeLegacy()
@@ -65,14 +65,13 @@ namespace UnityExtensions
 
         public void Dispose()
         {
-            if (m_Disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(TimelineDisableUndoScopeLegacy));
             }
 
             SetUndoEnabled(true);
-
-            m_Disposed = true;
+            _disposed = true;
         }
         #endregion // Unity.LiveCapture
     }

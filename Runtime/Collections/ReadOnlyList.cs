@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace UnityExtensions.Collections
 {
@@ -18,21 +17,21 @@ namespace UnityExtensions.Collections
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/ReadOnlyList.cs
         #region Unity.XR.CoreUtils.Collections
-        static ReadOnlyList<T> s_EmptyList;
+        static ReadOnlyList<T> _emptyList;
 
-        readonly List<T> m_List;
+        readonly List<T> _list;
 
         /// <summary>
         /// The number of elements in the read-only list.
         /// </summary>
         /// <value>The number of elements.</value>
-        public int Count => m_List.Count;
+        public int Count => _list.Count;
 
         /// <summary>
         /// Returns the element at <paramref name="index"/>.
         /// </summary>
         /// <param name="index">The index.</param>
-        public T this[int index] => m_List[index];
+        public T this[int index] => _list[index];
 
         /// <summary>
         /// Constructs a new instance of this class that is a read-only wrapper around the specified list.
@@ -41,7 +40,7 @@ namespace UnityExtensions.Collections
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.</exception>
         public ReadOnlyList(List<T> list)
         {
-            m_List = list ?? throw new ArgumentNullException(nameof(list));
+            _list = list ?? throw new ArgumentNullException(nameof(list));
         }
 
         /// <summary>
@@ -53,17 +52,17 @@ namespace UnityExtensions.Collections
         /// </remarks>
         public static ReadOnlyList<T> Empty()
         {
-            if (s_EmptyList == null)
-                s_EmptyList = new ReadOnlyList<T>(new List<T>(0));
+            if (_emptyList == null)
+                _emptyList = new ReadOnlyList<T>(new List<T>(0));
 
-            return s_EmptyList;
+            return _emptyList;
         }
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public List<T>.Enumerator GetEnumerator() => m_List.GetEnumerator();
+        public List<T>.Enumerator GetEnumerator() => _list.GetEnumerator();
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
@@ -99,7 +98,7 @@ namespace UnityExtensions.Collections
         {
             if (other is null)
                 return false;
-            return ReferenceEquals(this, other) || Equals(m_List, other.m_List);
+            return ReferenceEquals(this, other) || Equals(_list, other._list);
         }
 
         /// <summary>
@@ -120,7 +119,7 @@ namespace UnityExtensions.Collections
         }
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(Unity.XR.CoreUtils.Collections.ReadOnlyList{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyList{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -134,7 +133,7 @@ namespace UnityExtensions.Collections
         }
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(Unity.XR.CoreUtils.Collections.ReadOnlyList{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyList{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -146,7 +145,7 @@ namespace UnityExtensions.Collections
         /// Get a hash code for this object.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode() => m_List != null ? m_List.GetHashCode() : 0;
+        public override int GetHashCode() => _list != null ? _list.GetHashCode() : 0;
 
         /// <summary>
         /// Returns a string that represents the current object.
@@ -157,7 +156,7 @@ namespace UnityExtensions.Collections
             using var _0 = StringBuilderPool.Get(out var sb);
             sb.Append('{');
             sb.AppendLine();
-            foreach (var item in m_List)
+            foreach (var item in _list)
             {
                 if (item == null)
                 {

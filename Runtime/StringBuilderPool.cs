@@ -11,12 +11,12 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Modules/UIElementsEditor/StringBuilderPool.cs
         #region UnityEditor.UIElements
-        private static readonly ObjectPool<StringBuilder> s_Pool = new(() => new StringBuilder(), null,
-            sb => sb.Clear());
+        private static readonly ObjectPool<StringBuilder> Pool =
+            new ObjectPool<StringBuilder>(() => new StringBuilder(), null, sb => sb.Clear());
 
-        public static StringBuilder Get() => s_Pool.Get();
-        public static PooledObject<StringBuilder> Get(out StringBuilder value) => s_Pool.Get(out value);
-        public static void Release(StringBuilder toRelease) => s_Pool.Release(toRelease);
+        public static StringBuilder Get() => Pool.Get();
+        public static PooledObject<StringBuilder> Get(out StringBuilder value) => Pool.Get(out value);
+        public static void Release(StringBuilder toRelease) => Pool.Release(toRelease);
         #endregion // UnityEditor.UIElements
     }
 }

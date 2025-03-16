@@ -33,7 +33,7 @@ namespace UnityExtensions
                 }
                 else
                 {
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
+#if DEBUG
                     if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
                     if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
                     if (list.Count - index < count) throw new ArgumentException("index and count do not denote a valid range of elements in the list");

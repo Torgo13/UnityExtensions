@@ -17,18 +17,18 @@ namespace UnityExtensions.Editor.Unsafe
     /// }
     /// Debug.Log($"Duration: {duration}")
     /// </code></example>
-    public unsafe struct TimedScope : IDisposable
+    public readonly unsafe struct TimedScope : IDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/Utilities/TimedScope.cs
         #region UnityEditor.Rendering
-        static readonly ThreadLocal<Stopwatch> s_StopWatch = new ThreadLocal<Stopwatch>(() => new Stopwatch());
+        static readonly ThreadLocal<Stopwatch> StopWatch = new ThreadLocal<Stopwatch>(() => new Stopwatch());
 
-        double* m_DurationMsPtr;
+        readonly double* _durationMsPtr;
 
         TimedScope(double* durationMsPtr)
         {
-            m_DurationMsPtr = durationMsPtr;
-            s_StopWatch.Value.Start();
+            _durationMsPtr = durationMsPtr;
+            StopWatch.Value.Start();
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace UnityExtensions.Editor.Unsafe
         /// </summary>
         void IDisposable.Dispose()
         {
-            s_StopWatch.Value.Stop();
-            *m_DurationMsPtr = s_StopWatch.Value.Elapsed.TotalMilliseconds;
-            s_StopWatch.Value.Reset();
+            StopWatch.Value.Stop();
+            *_durationMsPtr = StopWatch.Value.Elapsed.TotalMilliseconds;
+            StopWatch.Value.Reset();
         }
 
         /// <summary>

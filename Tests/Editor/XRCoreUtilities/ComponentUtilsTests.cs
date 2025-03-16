@@ -1,6 +1,5 @@
 using NUnit.Framework;
 using UnityEngine;
-using UnityObject = UnityEngine.Object;
 
 namespace UnityExtensions.Editor.Tests
 {

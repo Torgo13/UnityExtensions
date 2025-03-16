@@ -12,17 +12,17 @@ namespace UnityExtensions.Collections
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/HashSetList.cs
         #region Unity.XR.CoreUtils.Collections
-        readonly List<T> m_InternalList;
-        readonly HashSet<T> m_InternalHashSet;
+        readonly List<T> _internalList;
+        readonly HashSet<T> _internalHashSet;
 
-        // This value always matches m_InternalList.Count but we track it ourselves
+        // This value always matches _internalList.Count but we track it ourselves
         // as a performance optimization determined through profiling.
-        int m_Count;
+        int _count;
 
         /// <summary>
         /// Internal list count.
         /// </summary>
-        public int Count => m_Count;
+        public int Count => _count;
 
         /// <summary>
         /// Mandatory field. Always false.
@@ -33,7 +33,7 @@ namespace UnityExtensions.Collections
         /// Access internal list element from index.
         /// </summary>
         /// <param name="index">Index used to access internal list.</param>
-        public T this[int index] => m_InternalList[index];
+        public T this[int index] => _internalList[index];
 
         /// <summary>
         /// Allocates internal list and hashset.
@@ -41,8 +41,8 @@ namespace UnityExtensions.Collections
         /// <param name="capacity">Initial list capacity</param>
         public HashSetList(int capacity = 0)
         {
-            m_InternalList = new List<T>(capacity);
-            m_InternalHashSet = new HashSet<T>();
+            _internalList = new List<T>(capacity);
+            _internalHashSet = new HashSet<T>();
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace UnityExtensions.Collections
         /// <returns>Returns internal list enumerator.</returns>
         public List<T>.Enumerator GetEnumerator()
         {
-            return m_InternalList.GetEnumerator();
+            return _internalList.GetEnumerator();
         }
 
         /// <summary>
@@ -60,11 +60,13 @@ namespace UnityExtensions.Collections
         /// <returns>Returns internal list enumerator.</returns>
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return m_InternalList.GetEnumerator();
+            return _internalList.GetEnumerator();
         }
 
         /// <summary>Returns a standard enumerator that iterates through the collection.</summary>
-        /// <returns>An <see cref="IEnumerator"/> object that can be used to iterate through the collection.</returns>
+        /// <returns>
+        /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
+        /// </returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -76,10 +78,10 @@ namespace UnityExtensions.Collections
         /// <param name="item">Item of type <c>T</c> to add.</param>
         void ICollection<T>.Add(T item)
         {
-            if (m_InternalHashSet.Add(item))
+            if (_internalHashSet.Add(item))
             {
-                m_InternalList.Add(item);
-                m_Count++;
+                _internalList.Add(item);
+                _count++;
             }
         }
 
@@ -90,31 +92,32 @@ namespace UnityExtensions.Collections
         /// <returns>True if the item was added to both list and hashset.</returns>
         public bool Add(T item)
         {
-            bool wasAdded = m_InternalHashSet.Add(item);
+            bool wasAdded = _internalHashSet.Add(item);
             if (wasAdded)
             {
-                m_InternalList.Add(item);
-                m_Count++;
+                _internalList.Add(item);
+                _count++;
             }
 
             return wasAdded;
         }
 
         /// <summary>
-        /// Attempt to remove item to internal hashset. If it is still present in the hashset, remove it from the list.
+        /// Attempt to remove item to internal hashset. If it is still present in the hashset,
+        /// remove it from the list.
         /// </summary>
         /// <param name="item">Item to remove.</param>
         /// <returns>True if the item was removed from both list and hashset.</returns>
         public bool Remove(T item)
         {
-            if (m_Count == 0)
+            if (_count == 0)
                 return false;
 
-            bool wasRemoved = m_InternalHashSet.Remove(item);
+            bool wasRemoved = _internalHashSet.Remove(item);
             if (wasRemoved)
             {
-                m_InternalList.Remove(item);
-                m_Count--;
+                _internalList.Remove(item);
+                _count--;
             }
 
             return wasRemoved;
@@ -126,7 +129,7 @@ namespace UnityExtensions.Collections
         /// <param name="other">Enumerable to except with.</param>
         public void ExceptWith(IEnumerable<T> other)
         {
-            m_InternalHashSet.ExceptWith(other);
+            _internalHashSet.ExceptWith(other);
             RefreshList();
         }
 
@@ -136,7 +139,7 @@ namespace UnityExtensions.Collections
         /// <param name="other">Enumerable to intersect with.</param>
         public void IntersectWith(IEnumerable<T> other)
         {
-            m_InternalHashSet.IntersectWith(other);
+            _internalHashSet.IntersectWith(other);
             RefreshList();
         }
 
@@ -144,40 +147,44 @@ namespace UnityExtensions.Collections
         /// <c>IsProperSubsetOf</c> operation with hashset. Regenerates internal list from new hashset.
         /// </summary>
         /// <param name="other">Enumerable to <c>IsProperSubsetOf</c> with.</param>
-        /// <returns>Returns <see langword="true"/> if internal hashset is a proper subset of other, returns <see langword="false"/> otherwise.</returns>
+        /// <returns>Returns <see langword="true"/> if internal hashset is a proper subset of other,
+        /// returns <see langword="false"/> otherwise.</returns>
         public bool IsProperSubsetOf(IEnumerable<T> other)
         {
-            return m_InternalHashSet.IsProperSubsetOf(other);
+            return _internalHashSet.IsProperSubsetOf(other);
         }
 
         /// <summary>
         /// <c>IsProperSupersetOf</c> operation with hashset. Regenerates internal list from new hashset.
         /// </summary>
         /// <param name="other">Enumerable to <c>IsProperSupersetOf</c> with.</param>
-        /// <returns>Returns <see langword="true"/> if internal hashset is a proper superset of other, returns <see langword="false"/> otherwise.</returns>
+        /// <returns>Returns <see langword="true"/> if internal hashset is a proper superset of other,
+        /// returns <see langword="false"/> otherwise.</returns>
         public bool IsProperSupersetOf(IEnumerable<T> other)
         {
-            return m_InternalHashSet.IsProperSupersetOf(other);
+            return _internalHashSet.IsProperSupersetOf(other);
         }
 
         /// <summary>
         /// <c>IsSubsetOf</c> operation with hashset. Regenerates internal list from new hashset.
         /// </summary>
         /// <param name="other">Enumerable to <c>IsSubsetOf</c> with.</param>
-        /// <returns>Returns <see langword="true"/> if internal hashset is a subset of other, returns <see langword="false"/> otherwise.</returns>
+        /// <returns>Returns <see langword="true"/> if internal hashset is a subset of other,
+        /// returns <see langword="false"/> otherwise.</returns>
         public bool IsSubsetOf(IEnumerable<T> other)
         {
-            return m_InternalHashSet.IsSubsetOf(other);
+            return _internalHashSet.IsSubsetOf(other);
         }
 
         /// <summary>
         /// <c>IsSupersetOf</c> operation with hashset. Regenerates internal list from new hashset.
         /// </summary>
         /// <param name="other">Enumerable to <c>IsSupersetOf</c> with.</param>
-        /// <returns>Returns <see langword="true"/> if internal hashset is a superset of other, returns <see langword="false"/>.</returns>
+        /// <returns>Returns <see langword="true"/> if internal hashset is a superset of other,
+        /// returns <see langword="false"/>.</returns>
         public bool IsSupersetOf(IEnumerable<T> other)
         {
-            return m_InternalHashSet.IsSupersetOf(other);
+            return _internalHashSet.IsSupersetOf(other);
         }
 
         /// <summary>
@@ -187,17 +194,18 @@ namespace UnityExtensions.Collections
         /// <returns>Returns <see langword="true"/> if there is overlap, returns <see langword="false"/>.</returns>
         public bool Overlaps(IEnumerable<T> other)
         {
-            return m_InternalHashSet.Overlaps(other);
+            return _internalHashSet.Overlaps(other);
         }
 
         /// <summary>
         /// Check if set equals other <see cref="Overlaps"/> operation with hashset.
         /// </summary>
         /// <param name="other">Enumerable to <see cref="Overlaps"/> with.</param>
-        /// <returns>Returns <see langword="true"/> if hash iOverlaps operation is true, returns <see langword="false"/> otherwise.</returns>
+        /// <returns>Returns <see langword="true"/> if hash iOverlaps operation is true,
+        /// returns <see langword="false"/> otherwise.</returns>
         public bool SetEquals(IEnumerable<T> other)
         {
-            return m_InternalHashSet.SetEquals(other);
+            return _internalHashSet.SetEquals(other);
         }
 
         /// <summary>
@@ -206,7 +214,7 @@ namespace UnityExtensions.Collections
         /// <param name="other">Enumerable to <c>SymmetricExceptWith</c> with.</param>
         public void SymmetricExceptWith(IEnumerable<T> other)
         {
-            m_InternalHashSet.SymmetricExceptWith(other);
+            _internalHashSet.SymmetricExceptWith(other);
             RefreshList();
         }
 
@@ -216,7 +224,7 @@ namespace UnityExtensions.Collections
         /// <param name="other">Enumerable to union with.</param>
         public void UnionWith(IEnumerable<T> other)
         {
-            m_InternalHashSet.UnionWith(other);
+            _internalHashSet.UnionWith(other);
             RefreshList();
         }
 
@@ -225,18 +233,19 @@ namespace UnityExtensions.Collections
         /// </summary>
         public void Clear()
         {
-            m_InternalHashSet.Clear();
-            m_InternalList.Clear();
+            _internalHashSet.Clear();
+            _internalList.Clear();
         }
 
         /// <summary>
         /// Checks if internal hashset contains item.
         /// </summary>
         /// <param name="item">Item to check.</param>
-        /// <returns>Returns <see langword="true"/> if internal hashset contains item, returns <see langword="false"/> otherwise.</returns>
+        /// <returns>Returns <see langword="true"/> if internal hashset contains item,
+        /// returns <see langword="false"/> otherwise.</returns>
         public bool Contains(T item)
         {
-            return m_InternalHashSet.Contains(item);
+            return _internalHashSet.Contains(item);
         }
 
         /// <summary>
@@ -246,7 +255,7 @@ namespace UnityExtensions.Collections
         /// <param name="arrayIndex">Index to start from.</param>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            m_InternalList.CopyTo(array, arrayIndex);
+            _internalList.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -256,7 +265,7 @@ namespace UnityExtensions.Collections
         /// <param name="context"><c>GetObjectData</c> context.</param>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            m_InternalHashSet.GetObjectData(info, context);
+            _internalHashSet.GetObjectData(info, context);
             RefreshList();
         }
 
@@ -266,15 +275,15 @@ namespace UnityExtensions.Collections
         /// <param name="sender">Object to be deserialized as set.</param>
         public void OnDeserialization(object sender)
         {
-            m_InternalHashSet.OnDeserialization(sender);
+            _internalHashSet.OnDeserialization(sender);
             RefreshList();
         }
 
         void RefreshList()
         {
-            m_InternalList.Clear();
-            m_InternalList.AddRange(m_InternalHashSet);
-            m_Count = m_InternalList.Count;
+            _internalList.Clear();
+            _internalList.AddRange(_internalHashSet);
+            _count = _internalList.Count;
         }
 
         /// <summary>
@@ -283,7 +292,7 @@ namespace UnityExtensions.Collections
         /// <returns>Internal list structure.</returns>
         public IReadOnlyList<T> AsList()
         {
-            return m_InternalList;
+            return _internalList;
         }
         #endregion // Unity.XR.CoreUtils.Collections
     }

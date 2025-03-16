@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
-using UnityEngine;
 using UnityEngine.Jobs;
 
 namespace UnityExtensions
@@ -61,7 +58,7 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Resizes an array. If a null reference is passed, it will allocate the desired array.
+        /// Resizes an array.
         /// </summary>
         /// <typeparam name="T">The type of the array</typeparam>
         /// <param name="array">Target array to resize</param>

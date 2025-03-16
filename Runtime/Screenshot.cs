@@ -1,9 +1,6 @@
 using System;
 using System.IO;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace UnityExtensions
 {
@@ -14,9 +11,7 @@ namespace UnityExtensions
         public static Texture2D Take(Camera camera, float scale = 1f)
         {
             if (camera == null)
-            {
                 throw new ArgumentNullException(nameof(camera));
-            }
 
             scale = Mathf.Clamp01(scale);
 
@@ -29,7 +24,6 @@ namespace UnityExtensions
             camera.Render();
 
             var prevRenderTexture = RenderTexture.active;
-
             RenderTexture.active = camera.targetTexture;
 
             var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
@@ -46,22 +40,16 @@ namespace UnityExtensions
         public static string SaveAsPNG(Texture2D texture, string filename, string directory)
         {
             if (texture == null)
-            {
                 throw new ArgumentNullException(nameof(texture));
-            }
 
             var formatter = new FileNameFormatter();
-
             filename = formatter.Format(filename);
-
             var assetPath = $"{directory}/{filename}.png";
-
             Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
-            assetPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
+            assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
             var bytes = texture.EncodeToPNG();
-
             File.WriteAllBytes(assetPath, bytes);
 
             return assetPath;

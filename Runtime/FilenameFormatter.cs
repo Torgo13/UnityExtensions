@@ -9,12 +9,12 @@ namespace UnityExtensions
         #region Unity.LiveCapture
         public static FileNameFormatter Instance { get; } = new FileNameFormatter();
 
-        static readonly string s_InvalidFilenameChars = Regex.Escape("/?<>\\:*|\"");
-        static readonly string s_InvalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", s_InvalidFilenameChars);
+        static readonly string InvalidFilenameChars = Regex.Escape("/?<>\\:*|\"");
+        static readonly string InvalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", InvalidFilenameChars);
 
         public string Format(string name)
         {
-            return Regex.Replace(name, s_InvalidRegStr, "_",
+            return Regex.Replace(name, InvalidRegStr, "_",
                 RegexOptions.None, TimeSpan.FromSeconds(0.1));
         }
         #endregion // Unity.LiveCapture

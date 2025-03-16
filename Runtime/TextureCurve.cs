@@ -5,57 +5,58 @@ using UnityEngine.Experimental.Rendering;
 
 namespace UnityExtensions
 {
-    // Due to limitations in the builtin AnimationCurve we need this custom wrapper.
-    // Improvements:
-    //   - Dirty state handling so we know when a curve has changed or not
-    //   - Looping support (infinite curve)
-    //   - Zero-value curve
-    //   - Cheaper length property
-
     /// <summary>
     /// A wrapper around <c>AnimationCurve</c> to automatically bake it into a texture.
     /// </summary>
+    /// <remarks><list type="bullet">
+    /// <item>Dirty state handling so we know when a curve has changed or not.</item>
+    /// <item>Looping support (infinite curve).</item>
+    /// <item>Zero-value curve.</item>
+    /// <item>Cheaper length property.</item>
+    /// </list></remarks>
     [Serializable]
     public class TextureCurve : IDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/TextureCurve.cs
         #region UnityEngine.Rendering
-        const int k_Precision = 128; // Edit LutBuilder3D if you change this value
-        const float k_Step = 1f / k_Precision;
+        const int Precision = 128; // Edit LutBuilder3D if you change this value
+        const float Step = 1f / Precision;
 
         /// <summary>
         /// The number of keys in the curve.
         /// </summary>
         [field: SerializeField]
-        public int length { get; private set; } // Calling AnimationCurve.length is very slow, let's cache it
+        int length { get; set; } // Calling AnimationCurve.length is very slow, so it is cached
+
+        public int Length { get { if (_isCurveDirty) { length = curve.length; } return length; } set { length = value; } }
+        
+        [SerializeField]
+        bool loop;
 
         [SerializeField]
-        bool m_Loop;
+        float zeroValue;
 
         [SerializeField]
-        float m_ZeroValue;
-
-        [SerializeField]
-        float m_Range;
+        float range;
 
         /// <summary>
         /// Internal curve used to generate the Texture
         /// </summary>
         [SerializeField]
-        AnimationCurve m_Curve;
+        AnimationCurve curve;
 
-        AnimationCurve m_LoopingCurve;
-        Texture2D m_Texture;
+        AnimationCurve _loopingCurve;
+        Texture2D _texture;
 
-        bool m_IsCurveDirty;
-        bool m_IsTextureDirty;
+        bool _isCurveDirty;
+        bool _isTextureDirty;
 
         /// <summary>
         /// Retrieves the key at index.
         /// </summary>
         /// <param name="index">The index to look for.</param>
         /// <value>A key.</value>
-        public Keyframe this[int index] => m_Curve[index];
+        public Keyframe this[int index] => curve[index];
 
         /// <summary>
         /// Creates a new <see cref="TextureCurve"/> from an existing <c>AnimationCurve</c>.
@@ -76,10 +77,10 @@ namespace UnityExtensions
         /// <param name="bounds">The boundaries of the curve.</param>
         public TextureCurve(Keyframe[] keys, float zeroValue, bool loop, in Vector2 bounds)
         {
-            m_Curve = new AnimationCurve(keys);
-            m_ZeroValue = zeroValue;
-            m_Loop = loop;
-            m_Range = bounds.magnitude;
+            curve = new AnimationCurve(keys);
+            this.zeroValue = zeroValue;
+            this.loop = loop;
+            range = bounds.magnitude;
             length = keys.Length;
             SetDirty();
         }
@@ -97,9 +98,9 @@ namespace UnityExtensions
         /// </summary>
         public void Release()
         {
-            if (m_Texture != null)
-                CoreUtils.Destroy(m_Texture);
-            m_Texture = null;
+            if (_texture != null)
+                CoreUtils.Destroy(_texture);
+            _texture = null;
         }
 
         /// <summary>
@@ -109,8 +110,8 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetDirty()
         {
-            m_IsCurveDirty = true;
-            m_IsTextureDirty = true;
+            _isCurveDirty = true;
+            _isTextureDirty = true;
         }
 
         static GraphicsFormat GetTextureFormat()
@@ -131,29 +132,29 @@ namespace UnityExtensions
         /// <returns>A 128x1 texture.</returns>
         public Texture2D GetTexture()
         {
-            if (m_Texture == null)
+            if (_texture == null)
             {
-                m_Texture = new Texture2D(k_Precision, 1, GetTextureFormat(), TextureCreationFlags.None);
-                m_Texture.name = "CurveTexture";
-                m_Texture.hideFlags = HideFlags.HideAndDontSave;
-                m_Texture.filterMode = FilterMode.Bilinear;
-                m_Texture.wrapMode = TextureWrapMode.Clamp;
-                m_Texture.anisoLevel = 0;
-                m_IsTextureDirty = true;
+                _texture = new Texture2D(Precision, 1, GetTextureFormat(), TextureCreationFlags.None);
+                _texture.name = "CurveTexture";
+                _texture.hideFlags = HideFlags.HideAndDontSave;
+                _texture.filterMode = FilterMode.Bilinear;
+                _texture.wrapMode = TextureWrapMode.Clamp;
+                _texture.anisoLevel = 0;
+                _isTextureDirty = true;
             }
 
-            if (m_IsTextureDirty)
+            if (_isTextureDirty)
             {
-                var pixels = m_Texture.GetPixelData<Color>(mipLevel: 0);
+                var pixels = _texture.GetPixelData<Color>(mipLevel: 0);
 
                 for (int i = 0; i < pixels.Length; i++)
-                    pixels[i] = new Color(Evaluate(i * k_Step), pixels[i].g, pixels[i].b, pixels[i].a);
+                    pixels[i] = new Color(Evaluate(i * Step), pixels[i].g, pixels[i].b, pixels[i].a);
 
-                m_Texture.Apply(false, false);
-                m_IsTextureDirty = false;
+                _texture.Apply(false, false);
+                _isTextureDirty = false;
             }
 
-            return m_Texture;
+            return _texture;
         }
 
         /// <summary>
@@ -163,31 +164,31 @@ namespace UnityExtensions
         /// <returns>The value of the curve, at the point in time specified.</returns>
         public float Evaluate(float time)
         {
-            if (m_IsCurveDirty)
-                length = m_Curve.length;
+            if (_isCurveDirty)
+                length = curve.length;
 
             if (length == 0)
-                return m_ZeroValue;
+                return zeroValue;
 
-            if (!m_Loop || length == 1)
-                return m_Curve.Evaluate(time);
+            if (!loop || length == 1)
+                return curve.Evaluate(time);
 
-            if (m_IsCurveDirty)
+            if (_isCurveDirty)
             {
-                if (m_LoopingCurve == null)
-                    m_LoopingCurve = new AnimationCurve();
+                if (_loopingCurve == null)
+                    _loopingCurve = new AnimationCurve();
 
-                var prev = m_Curve[length - 1];
-                prev.time -= m_Range;
-                var next = m_Curve[0];
-                next.time += m_Range;
-                m_LoopingCurve.keys = m_Curve.keys; // GC pressure
-                m_LoopingCurve.AddKey(prev);
-                m_LoopingCurve.AddKey(next);
-                m_IsCurveDirty = false;
+                var prev = curve[length - 1];
+                prev.time -= range;
+                var next = curve[0];
+                next.time += range;
+                _loopingCurve.keys = curve.keys; // GC pressure
+                _loopingCurve.AddKey(prev);
+                _loopingCurve.AddKey(next);
+                _isCurveDirty = false;
             }
 
-            return m_LoopingCurve.Evaluate(time);
+            return _loopingCurve.Evaluate(time);
         }
 
         /// <summary>
@@ -199,7 +200,7 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int AddKey(float time, float value)
         {
-            int r = m_Curve.AddKey(time, value);
+            int r = curve.AddKey(time, value);
 
             if (r > -1)
                 SetDirty();
@@ -216,7 +217,7 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int MoveKey(int index, in Keyframe key)
         {
-            int r = m_Curve.MoveKey(index, key);
+            int r = curve.MoveKey(index, key);
             SetDirty();
             return r;
         }
@@ -228,7 +229,7 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveKey(int index)
         {
-            m_Curve.RemoveKey(index);
+            curve.RemoveKey(index);
             SetDirty();
         }
 
@@ -241,7 +242,7 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SmoothTangents(int index, float weight)
         {
-            m_Curve.SmoothTangents(index, weight);
+            curve.SmoothTangents(index, weight);
             SetDirty();
         }
         #endregion // UnityEngine.Rendering

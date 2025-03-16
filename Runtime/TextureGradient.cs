@@ -5,10 +5,8 @@ using UnityEngine.Experimental.Rendering;
 
 namespace UnityExtensions
 {
-    // Due to limitations in the builtin Gradient we need this custom wrapper.
-
     /// <summary>
-    /// A wrapper around <c>Gradient</c> to automatically bake it into a texture.
+    /// A wrapper around <see cref="Gradient"/> to automatically bake it into a texture.
     /// </summary>
     [Serializable]
     public class TextureGradient : IDisposable
@@ -25,20 +23,20 @@ namespace UnityExtensions
         /// Internal Gradient used to generate the Texture
         /// </summary>
         [SerializeField]
-        Gradient m_Gradient;
+        Gradient gradient;
 
-        Texture2D m_Texture = null;
+        Texture2D _texture;
 
-        int m_RequestedTextureSize = -1;
+        int _requestedTextureSize = -1;
 
-        bool m_IsTextureDirty;
-        bool m_Precise;
+        bool _isTextureDirty;
+        bool _precise;
 
         /// <summary>All color keys defined in the gradient.</summary>
-        public GradientColorKey[] colorKeys => m_Gradient?.colorKeys;
+        public GradientColorKey[] colorKeys => gradient?.colorKeys;
 
         /// <summary>All alpha keys defined in the gradient.</summary>
-        public GradientAlphaKey[] alphaKeys => m_Gradient?.alphaKeys;
+        public GradientAlphaKey[] alphaKeys => gradient?.alphaKeys;
 
         /// <summary>Controls how the gradient colors are interpolated.</summary>
         [SerializeField, HideInInspector]
@@ -57,8 +55,8 @@ namespace UnityExtensions
         {
             mode = baseCurve.mode;
             colorSpace = baseCurve.colorSpace;
-            m_Gradient.mode = baseCurve.mode;
-            m_Gradient.colorSpace = baseCurve.colorSpace;
+            gradient.mode = baseCurve.mode;
+            gradient.colorSpace = baseCurve.colorSpace;
         }
 
         /// <summary>
@@ -77,15 +75,15 @@ namespace UnityExtensions
             Rebuild(colorKeys, alphaKeys, mode, colorSpace, requestedTextureSize, precise);
         }
 
-        void Rebuild(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, GradientMode mode,
-            ColorSpace colorSpace, int requestedTextureSize, bool precise)
+        void Rebuild(GradientColorKey[] cKeys, GradientAlphaKey[] aKeys, GradientMode gradientMode,
+            ColorSpace cSpace, int requestedTextureSize, bool precise)
         {
-            m_Gradient = new Gradient();
-            m_Gradient.mode = mode;
-            m_Gradient.colorSpace = colorSpace;
-            m_Gradient.SetKeys(colorKeys, alphaKeys);
-            m_Precise = precise;
-            m_RequestedTextureSize = requestedTextureSize;
+            gradient = new Gradient();
+            gradient.mode = gradientMode;
+            gradient.colorSpace = cSpace;
+            gradient.SetKeys(cKeys, aKeys);
+            _precise = precise;
+            _requestedTextureSize = requestedTextureSize;
             if (requestedTextureSize > 0)
             {
                 textureSize = requestedTextureSize;
@@ -93,14 +91,14 @@ namespace UnityExtensions
             else
             {
                 float smallestDelta = 1.0f;
-                float[] times = new float[colorKeys.Length + alphaKeys.Length];
-                for (int i = 0; i < colorKeys.Length; ++i)
+                float[] times = new float[cKeys.Length + aKeys.Length];
+                for (int i = 0; i < cKeys.Length; ++i)
                 {
-                    times[i] = colorKeys[i].time;
+                    times[i] = cKeys[i].time;
                 }
-                for (int i = 0; i < alphaKeys.Length; ++i)
+                for (int i = 0; i < aKeys.Length; ++i)
                 {
-                    times[colorKeys.Length + i] = alphaKeys[i].time;
+                    times[cKeys.Length + i] = aKeys[i].time;
                 }
                 Array.Sort(times);
                 // Found the smallest increment between 2 keys
@@ -126,12 +124,12 @@ namespace UnityExtensions
                 // Round to the closest 4 * Nyquist-Shannon limits
                 // 4x for Fixed to capture sharp discontinuity
                 float scale;
-                if (precise || mode == GradientMode.Fixed)
+                if (precise || gradientMode == GradientMode.Fixed)
                     scale = 4.0f;
                 else
                     scale = 2.0f;
-                float sizef = scale * Mathf.Ceil(1.0f / smallestDelta + 1.0f);
-                textureSize = Mathf.RoundToInt(sizef);
+                float size = scale * Mathf.Ceil(1.0f / smallestDelta + 1.0f);
+                textureSize = Mathf.RoundToInt(size);
                 // Arbitrary max (1024)
                 textureSize = Math.Min(textureSize, 1024);
             }
@@ -152,9 +150,9 @@ namespace UnityExtensions
         /// </summary>
         public void Release()
         {
-            if (m_Texture != null)
-                CoreUtils.Destroy(m_Texture);
-            m_Texture = null;
+            if (_texture != null)
+                CoreUtils.Destroy(_texture);
+            _texture = null;
         }
 
         /// <summary>
@@ -164,7 +162,7 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetDirty()
         {
-            m_IsTextureDirty = true;
+            _isTextureDirty = true;
         }
 
         static GraphicsFormat GetTextureFormat()
@@ -180,36 +178,36 @@ namespace UnityExtensions
         {
             float step = 1.0f / (textureSize - 1);
 
-            if (m_Texture != null && m_Texture.width != textureSize)
+            if (_texture != null && _texture.width != textureSize)
             {
-                UnityEngine.Object.DestroyImmediate(m_Texture);
-                m_Texture = null;
+                UnityEngine.Object.DestroyImmediate(_texture);
+                _texture = null;
             }
 
-            if (m_Texture == null)
+            if (_texture == null)
             {
-                m_Texture = new Texture2D(textureSize, 1, GetTextureFormat(), TextureCreationFlags.None);
-                m_Texture.name = "GradientTexture";
-                m_Texture.hideFlags = HideFlags.HideAndDontSave;
-                m_Texture.filterMode = FilterMode.Bilinear;
-                m_Texture.wrapMode = TextureWrapMode.Clamp;
-                m_Texture.anisoLevel = 0;
-                m_IsTextureDirty = true;
+                _texture = new Texture2D(textureSize, 1, GetTextureFormat(), TextureCreationFlags.None);
+                _texture.name = "GradientTexture";
+                _texture.hideFlags = HideFlags.HideAndDontSave;
+                _texture.filterMode = FilterMode.Bilinear;
+                _texture.wrapMode = TextureWrapMode.Clamp;
+                _texture.anisoLevel = 0;
+                _isTextureDirty = true;
             }
 
-            if (m_IsTextureDirty)
+            if (_isTextureDirty)
             {
-                var pixels = m_Texture.GetPixelData<Color>(mipLevel: 0);
+                var pixels = _texture.GetPixelData<Color>(mipLevel: 0);
 
-                for (int i = 0; i < textureSize; i++)
+                for (int i = 0; i < pixels.Length; i++)
                     pixels[i] = Evaluate(i * step);
 
-                m_Texture.Apply(false, false);
-                m_IsTextureDirty = false;
-                m_Texture.IncrementUpdateCount();
+                _texture.Apply(false, false);
+                _isTextureDirty = false;
+                _texture.IncrementUpdateCount();
             }
 
-            return m_Texture;
+            return _texture;
         }
 
         /// <summary>
@@ -222,25 +220,25 @@ namespace UnityExtensions
             if (textureSize <= 0)
                 return Color.black;
 
-            return m_Gradient.Evaluate(time);
+            return gradient.Evaluate(time);
         }
 
 
         /// <summary>
         /// Setup Gradient with an array of color keys and alpha keys.
         /// </summary>
-        /// <param name="colorKeys">Color keys of the gradient (maximum 8 color keys).</param>
-        /// <param name="alphaKeys">Alpha keys of the gradient (maximum 8 alpha keys).</param>
-        /// <param name="mode">Indicates the color space that the gradient color keys are using.</param>
-        /// <param name="colorSpace">Controls how the gradient colors are interpolated.</param>
-        public void SetKeys(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys,
-            GradientMode mode, ColorSpace colorSpace)
+        /// <param name="cKeys">Color keys of the gradient (maximum 8 color keys).</param>
+        /// <param name="aKeys">Alpha keys of the gradient (maximum 8 alpha keys).</param>
+        /// <param name="gradientMode">Indicates the color space that the gradient color keys are using.</param>
+        /// <param name="cSpace">Controls how the gradient colors are interpolated.</param>
+        public void SetKeys(GradientColorKey[] cKeys, GradientAlphaKey[] aKeys,
+            GradientMode gradientMode, ColorSpace cSpace)
         {
-            m_Gradient.SetKeys(colorKeys, alphaKeys);
-            m_Gradient.mode = mode;
-            m_Gradient.colorSpace = colorSpace;
+            gradient.SetKeys(cKeys, aKeys);
+            gradient.mode = gradientMode;
+            gradient.colorSpace = cSpace;
             // Rebuild will make the TextureGradient Dirty.
-            Rebuild(colorKeys, alphaKeys, mode, colorSpace, m_RequestedTextureSize, m_Precise);
+            Rebuild(cKeys, aKeys, gradientMode, cSpace, _requestedTextureSize, _precise);
         }
         #endregion // UnityEngine.Rendering
     }

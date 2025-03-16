@@ -6,16 +6,14 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace UnityExtensions
 {
     public static class TextureUtilities
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/Utilities/HDTextureUtilities.cs
         #region UnityEngine.Rendering.HighDefinition
+        /// <exception cref="ArgumentException">Thrown if <paramref name="target"/> is not a
+        /// RenderTexture or a Cubemap.</exception>
         public static void WriteTextureToDisk(Texture target, string filePath)
         {
             var rt = target as RenderTexture;
@@ -30,7 +28,8 @@ namespace UnityExtensions
             }
             else if (cube != null)
             {
-                var t2D = new Texture2D(cube.width * 6, cube.height, GraphicsFormat.R16G16B16A16_SFloat, TextureCreationFlags.None);
+                var t2D = new Texture2D(cube.width * 6, cube.height, GraphicsFormat.R16G16B16A16_SFloat,
+                    TextureCreationFlags.None);
                 var cmd = new CommandBuffer { name = "CopyCubemapToTexture2D" };
                 for (int i = 0; i < 6; ++i)
                 {
@@ -53,14 +52,13 @@ namespace UnityExtensions
         {
 #if UNITY_EDITOR
             var rt = target as RenderTexture;
-
             if (rt == null)
                 return;
 
             CreateParentDirectoryIfMissing(filePath);
-            AssetDatabase.CreateAsset(RenderTextureToTexture(rt), filePath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            UnityEditor.AssetDatabase.CreateAsset(RenderTextureToTexture(rt), filePath);
+            UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.AssetDatabase.Refresh();
 #endif
         }
 
@@ -80,6 +78,8 @@ namespace UnityExtensions
             return (Texture2D)RenderTextureToTexture(source);
         }
 
+        /// <exception cref="ArgumentException">Thrown if <paramref name="source"/> is not a
+        /// Texture2D, Texture3D or Cubemap.</exception>
         private static Texture RenderTextureToTexture(RenderTexture source)
         {
             GraphicsFormat format = source.graphicsFormat;
@@ -125,7 +125,7 @@ namespace UnityExtensions
 
                     // Determine the number of bytes elements that need to be read based on the texture format.
                     int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format)
-                                            * (source.width * source.height * source.volumeDepth);
+                                            * source.width * source.height * source.volumeDepth;
 
                     // Staging memory for the readback.
                     var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.Persistent);

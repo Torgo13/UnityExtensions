@@ -6,7 +6,7 @@ namespace UnityExtensions.Collections
 {
     /// <summary>
     /// A dictionary class that can be serialized by Unity.
-    /// Inspired by the implementation in http://answers.unity3d.com/answers/809221/view.html
+    /// Inspired by the implementation in <see href="http://answers.unity3d.com/answers/809221/view.html"/>
     /// </summary>
     /// <typeparam name="TKey">The dictionary key.</typeparam>
     /// <typeparam name="TValue">The dictionary value.</typeparam>
@@ -24,21 +24,21 @@ namespace UnityExtensions.Collections
             /// <summary>
             /// The dictionary item key.
             /// </summary>
-            public TKey Key;
+            public TKey key;
 
             /// <summary>
             /// The dictionary item value.
             /// </summary>
-            public TValue Value;
+            public TValue value;
         }
 
         [SerializeField]
-        List<Item> m_Items = new List<Item>();
+        List<Item> items = new List<Item>();
 
         /// <summary>
         /// The serialized items in this dictionary.
         /// </summary>
-        public List<Item> SerializedItems => m_Items;
+        public List<Item> SerializedItems => items;
 
         /// <summary>
         /// Initializes a new instance of the dictionary.
@@ -58,9 +58,10 @@ namespace UnityExtensions.Collections
         /// </summary>
         public virtual void OnBeforeSerialize()
         {
-            m_Items.Clear();
+            items.Clear();
+            items.EnsureCapacity(Count);
             foreach (var pair in this)
-                m_Items.Add(new Item { Key = pair.Key, Value = pair.Value });
+                items.Add(new Item { key = pair.Key, value = pair.Value });
         }
 
         /// <summary>
@@ -70,15 +71,13 @@ namespace UnityExtensions.Collections
         public virtual void OnAfterDeserialize()
         {
             Clear();
-            foreach (var item in m_Items)
+            foreach (var item in items)
             {
-                if (ContainsKey(item.Key))
+                if (!TryAdd(item.key, item.value))
                 {
-                    Debug.LogWarning($"The key \"{item.Key}\" is duplicated in the {GetType().Name}.{nameof(SerializedItems)} and will be ignored.");
-                    continue;
+                    Debug.LogWarning($"The key \"{item.key}\" is duplicated in " +
+                                     $"{GetType().Name}.{nameof(SerializedItems)} and will be ignored.");
                 }
-
-                Add(item.Key, item.Value);
             }
         }
         #endregion // Unity.XR.CoreUtils.Collections

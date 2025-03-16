@@ -3,11 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityObject = UnityEngine.Object;
 
-#if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.SceneManagement;
-#endif
-
 namespace UnityExtensions
 {
     /// <summary>
@@ -15,15 +10,15 @@ namespace UnityExtensions
     /// </summary>
     /// <remarks>
     /// UndoBlock methods work in both Edit mode and Play mode. In Play mode undo-operations are disabled.
-    /// This class mirrors the normal functions you find in the <see cref="Undo"/> class and collapses them into one operation
-    /// when the block is complete.
+    /// This class mirrors the normal functions you find in the <see cref="UnityEditor.Undo"/> class
+    /// and collapses them into one operation when the block is complete.
     /// </remarks>
     /// <example>
     /// <para>Proper usage of this class is:</para>
     /// <code>
     /// using (var undoBlock = new UndoBlock("Desired Undo Message"))
     /// {
-    ///     undoBlock.yourCodeToUndo()
+    ///     undoBlock.yourCodeToUndo();
     /// }
     /// </code>
     /// </example>
@@ -31,13 +26,14 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/UndoBlock.cs
         #region Unity.XR.CoreUtils
-        int m_UndoGroup;
-        bool m_DisposedValue; // To detect redundant calls of Dispose
+
+        readonly int _undoGroup;
+        bool _disposedValue; // To detect redundant calls of Dispose
 
 #if UNITY_EDITOR
-        string m_UndoLabel;
-        bool m_Dirty;
-        bool m_TestMode;
+        readonly string _undoLabel;
+        bool _dirty;
+        readonly bool _testMode;
 #endif
 
         /// <summary>
@@ -48,19 +44,21 @@ namespace UnityExtensions
         public UndoBlock(string undoLabel, bool testMode = false)
         {
 #if UNITY_EDITOR
-            m_Dirty = false;
-            m_TestMode = testMode;
-            if (!Application.isPlaying && !m_TestMode)
+            _dirty = false;
+            _testMode = testMode;
+            if (!Application.isPlaying && !_testMode)
             {
-                Undo.IncrementCurrentGroup();
-                m_UndoGroup = Undo.GetCurrentGroup();
-                Undo.SetCurrentGroupName(undoLabel);
-                m_UndoLabel = undoLabel;
+                UnityEditor.Undo.IncrementCurrentGroup();
+                _undoGroup = UnityEditor.Undo.GetCurrentGroup();
+                UnityEditor.Undo.SetCurrentGroupName(undoLabel);
+                _undoLabel = undoLabel;
             }
             else
-                m_UndoGroup = -1;
+            {
+                _undoGroup = -1;
+            }
 #else
-            m_UndoGroup = -1;
+            _undoGroup = -1;
 #endif
         }
 
@@ -71,10 +69,10 @@ namespace UnityExtensions
         public void RegisterCreatedObject(UnityObject objectToUndo)
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying && !m_TestMode)
+            if (!_testMode && !Application.isPlaying)
             {
-                Undo.RegisterCreatedObjectUndo(objectToUndo, m_UndoLabel);
-                m_Dirty = true;
+                UnityEditor.Undo.RegisterCreatedObjectUndo(objectToUndo, _undoLabel);
+                _dirty = true;
             }
 #endif
         }
@@ -86,8 +84,8 @@ namespace UnityExtensions
         public void RecordObject(UnityObject objectToUndo)
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying && !m_TestMode)
-                Undo.RecordObject(objectToUndo, m_UndoLabel);
+            if (!_testMode && !Application.isPlaying)
+                UnityEditor.Undo.RecordObject(objectToUndo, _undoLabel);
 #endif
         }
 
@@ -99,8 +97,8 @@ namespace UnityExtensions
         public void SetTransformParent(Transform transform, Transform newParent)
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying && !m_TestMode)
-                Undo.SetTransformParent(transform, newParent, m_UndoLabel);
+            if (!_testMode && !Application.isPlaying)
+                UnityEditor.Undo.SetTransformParent(transform, newParent, _undoLabel);
             else
                 transform.parent = newParent;
 #else
@@ -117,10 +115,10 @@ namespace UnityExtensions
         public T AddComponent<T>(GameObject gameObject) where T : Component
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying && !m_TestMode)
+            if (!_testMode && !Application.isPlaying)
             {
-                m_Dirty = true;
-                return Undo.AddComponent<T>(gameObject);
+                _dirty = true;
+                return UnityEditor.Undo.AddComponent<T>(gameObject);
             }
 #endif
 
@@ -130,28 +128,29 @@ namespace UnityExtensions
         /// <summary>
         /// Dispose of this object.
         /// </summary>
-        /// <param name="disposing">Whether to cleanup this object's state.</param>
+        /// <param name="disposing">Whether to clean up this object's state.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!m_DisposedValue)
+            if (!_disposedValue)
             {
-                if (disposing && m_UndoGroup > -1)
+                if (disposing && _undoGroup > -1)
                 {
 #if UNITY_EDITOR
-                    if (!Application.isPlaying && !m_TestMode)
+                    if (!_testMode && !Application.isPlaying)
                     {
-                        Undo.CollapseUndoOperations(m_UndoGroup);
-                        if (m_Dirty)
+                        UnityEditor.Undo.CollapseUndoOperations(_undoGroup);
+                        if (_dirty)
                         {
-                            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                                SceneManager.GetActiveScene());
                         }
                     }
 
-                    m_Dirty = false;
+                    _dirty = false;
 #endif
                 }
 
-                m_DisposedValue = true;
+                _disposedValue = true;
             }
         }
 

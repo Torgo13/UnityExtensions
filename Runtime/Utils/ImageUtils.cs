@@ -1236,6 +1236,8 @@ namespace UnityExtensions
             return ComputeCentralMoments_Parallel(pixels, width, height, momentOrders, new[] { centroid, centroid, centroid });
         }
 
+        /// <exception cref="ArgumentException">Thrown if <paramref name="centroids"/> does not have a Count of 3.
+        /// </exception>
         static IList<double[]> ComputeCentralMoments(Color[] pixels, int width, int height, in IList<MomentOrder> momentOrders, in IList<Centroid> centroids)
         {
             if (centroids.Count != 3)
@@ -1279,6 +1281,8 @@ namespace UnityExtensions
             return allSums;
         }
 
+        /// <exception cref="ArgumentException">Thrown if <paramref name="centroids"/> does not have a Count of 3.
+        /// </exception>
         static IList<double[]> ComputeCentralMoments_Parallel(Color[] pixels, int width, int height, IList<MomentOrder> momentOrders, IList<Centroid> centroids)
         {
             if (centroids.Count != 3)

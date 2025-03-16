@@ -12,45 +12,45 @@ namespace UnityExtensions
         #region Unity.HLODSystem.Utils
         public JobQueue(int threadCount)
         {
-            m_workers = new Worker[threadCount];
+            _workers = new Worker[threadCount];
             for (int i = 0; i < threadCount; ++i)
             {
-                m_workers[i] = new Worker(this);
+                _workers[i] = new Worker(this);
             }
         }
         
         public void EnqueueMainThreadJob(Action job)
         {
-            lock (m_mainThreadJobs)
+            lock (_mainThreadJobs)
             {
-                m_mainThreadJobs.Enqueue(job);
+                _mainThreadJobs.Enqueue(job);
             }
         }
 
         public void EnqueueJob(Action job)
         {
-            lock (m_jobs)
+            lock (_jobs)
             {
-                m_jobs.Enqueue(job);
+                _jobs.Enqueue(job);
             }
         }
 
         private Action DequeueMainThreadJob()
         {
-            lock (m_mainThreadJobs)
+            lock (_mainThreadJobs)
             {
-                if (m_mainThreadJobs.Count == 0)
+                if (_mainThreadJobs.Count == 0)
                     return null;
-                return m_mainThreadJobs.Dequeue();
+                return _mainThreadJobs.Dequeue();
             }
         }
         private Action DequeueJob()
         {
-            lock (m_jobs)
+            lock (_jobs)
             {
-                if (m_jobs.Count == 0)
+                if (_jobs.Count == 0)
                     return null;
-                return m_jobs.Dequeue();
+                return _jobs.Dequeue();
             }
         }        
 
@@ -67,20 +67,20 @@ namespace UnityExtensions
                     mainThreadJob.Invoke();
                 }
 
-                if (m_jobs.Count > 0)
+                if (_jobs.Count > 0)
                 {
                     yield return null;
                     continue;
                 }
 
                 isFinish = true;
-                for (int i = 0; i < m_workers.Length; ++i)
+                for (int i = 0; i < _workers.Length; ++i)
                 {
-                    if ( m_workers[i].IsException())
+                    if (_workers[i].IsException())
                     {
                         throw new Exception("Exception from worker thread.");
                     }
-                    if (m_workers[i].IsWorking() == true)
+                    if (_workers[i].IsWorking() == true)
                     {
                         isFinish = false;
                     }
@@ -95,82 +95,82 @@ namespace UnityExtensions
 
         public void Dispose()
         {
-            for ( int i = 0; i < m_workers.Length; ++i )
+            for ( int i = 0; i < _workers.Length; ++i )
             {
-                m_workers[i].Stop();
+                _workers[i].Stop();
             }
-            m_workers = null;
+            _workers = null;
         }
 
-        private Worker[] m_workers;
+        private Worker[] _workers;
         
-        private Queue<Action> m_mainThreadJobs = new Queue<Action>();
-        private Queue<Action> m_jobs = new Queue<Action>();
+        private readonly Queue<Action> _mainThreadJobs = new Queue<Action>();
+        private readonly Queue<Action> _jobs = new Queue<Action>();
         
         #region worker
 
         class Worker
         {
-            private JobQueue m_queue;
+            private readonly JobQueue _queue;
             
-            private Thread m_thread;
+            private readonly Thread _thread;
             
-            private bool m_terminated;
-            private bool m_working;
-            private bool m_exception;
-
+            private bool _terminated;
+            private bool _working;
+            private bool _exception;
 
             public Worker(JobQueue queue)
             {
-                m_queue = queue;
-                m_thread = new Thread(Run);
-                m_thread.Start();
+                _queue = queue;
+                _thread = new Thread(Run);
+                _thread.Start();
                 
-                m_terminated = false;
-                m_working = false;
-                m_exception = false;
+                _terminated = false;
+                _working = false;
+                _exception = false;
             }
 
             public void Stop()
             {
-                m_terminated = true;
+                _terminated = true;
             }
 
             public bool IsException()
             {
-                return m_exception;
+                return _exception;
             }
+            
             public bool IsWorking()
             {
-                return m_working;
+                return _working;
             }
 
             private void Run()
             {
-                while (m_terminated == false)
+                while (_terminated == false)
                 {
                     try
                     {
-                        m_working = true;
-                        Action job = m_queue.DequeueJob();
+                        _working = true;
+                        Action job = _queue.DequeueJob();
                         if (job == null)
                         {
-                            m_working = false;
+                            _working = false;
                             Thread.Sleep(100);
                             continue;
                         }
 
                         job.Invoke();
-                        m_working = false;
+                        _working = false;
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Debug.LogException(e);
-                        m_exception = true;
+                        _exception = true;
                     }
                     finally
                     {
-                        m_working = false;
+                        _working = false;
                     }
                 }
             }

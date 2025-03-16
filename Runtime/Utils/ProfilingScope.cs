@@ -1,4 +1,4 @@
-// TProfilingSampler<TEnum>.samples should just be an array. Unfortunately, Enum cannot be converted to int without generating garbage.
+// TProfilingSampler<TEnum>.Samples should just be an array. Unfortunately, Enum cannot be converted to int without generating garbage.
 // This could be worked around by using Unsafe, but it's not available at the moment.
 // So in the meantime we use a Dictionary with a perf hit...
 #define USE_UNSAFE
@@ -22,9 +22,9 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Debugging/ProfilingScope.cs
         #region UnityEngine.Rendering
 #if USE_UNSAFE
-        internal static TProfilingSampler<TEnum>[] samples;
+        internal static readonly TProfilingSampler<TEnum>[] Samples;
 #else
-        internal static Dictionary<TEnum, TProfilingSampler<TEnum>> samples = new Dictionary<TEnum, TProfilingSampler<TEnum>>();
+        internal static readonly Dictionary<TEnum, TProfilingSampler<TEnum>> Samples = new Dictionary<TEnum, TProfilingSampler<TEnum>>();
 #endif
         static TProfilingSampler()
         {
@@ -32,7 +32,7 @@ namespace UnityExtensions
 #if USE_UNSAFE
             var enumValues = Enum.GetValues(typeof(TEnum));
             var values = UnsafeUtility.As<Array, int[]>(ref enumValues);
-            samples = new TProfilingSampler<TEnum>[values.Max() + 1];
+            Samples = new TProfilingSampler<TEnum>[values.Max() + 1];
 #else
             var values = Enum.GetValues(typeof(TEnum));
 #endif
@@ -41,9 +41,9 @@ namespace UnityExtensions
             {
                 var sample = new TProfilingSampler<TEnum>(names[i]);
 #if USE_UNSAFE
-                samples[values[i]] = sample;
+                Samples[values[i]] = sample;
 #else
-                samples.Add((TEnum)values.GetValue(i), sample);
+                Samples.Add((TEnum)values.GetValue(i), sample);
 #endif
             }
         }
@@ -70,14 +70,14 @@ namespace UnityExtensions
         /// <typeparam name="TEnum">Type of the enumeration.</typeparam>
         /// <param name="marker">Enumeration value.</param>
         /// <returns>The profiling sampler for the given enumeration value.</returns>
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
+#if DEBUG
         public static ProfilingSampler Get<TEnum>(TEnum marker)
             where TEnum : Enum
         {
 #if USE_UNSAFE
-            return TProfilingSampler<TEnum>.samples[Unsafe.As<TEnum, int>(ref marker)];
+            return TProfilingSampler<TEnum>.Samples[Unsafe.As<TEnum, int>(ref marker)];
 #else
-            TProfilingSampler<TEnum>.samples.TryGetValue(marker, out var sampler);
+            TProfilingSampler<TEnum>.Samples.TryGetValue(marker, out var sampler);
             return sampler;
 #endif
         }
@@ -108,10 +108,10 @@ namespace UnityExtensions
             this.name = name;
 
 #if UNITY_USE_RECORDER
-            m_Recorder = sampler.GetRecorder();
-            m_Recorder.enabled = false;
-            m_InlineRecorder = inlineSampler.GetRecorder();
-            m_InlineRecorder.enabled = false;
+            _recorder = sampler.GetRecorder();
+            _recorder.enabled = false;
+            _inlineRecorder = inlineSampler.GetRecorder();
+            _inlineRecorder.enabled = false;
 #endif
         }
 
@@ -146,7 +146,7 @@ namespace UnityExtensions
                 else
                     cmd.EndSample(name);
 #else
-                m_Cmd.EndSample(name);
+                _cmd.EndSample(name);
 #endif
             inlineSampler?.End();
         }
@@ -161,8 +161,8 @@ namespace UnityExtensions
         public string name { get; private set; }
 
 #if UNITY_USE_RECORDER
-        Recorder m_Recorder;
-        Recorder m_InlineRecorder;
+        readonly Recorder _recorder;
+        readonly Recorder _inlineRecorder;
 #endif
 
         /// <summary>
@@ -173,8 +173,8 @@ namespace UnityExtensions
             set
             {
 #if UNITY_USE_RECORDER
-                m_Recorder.enabled = value;
-                m_InlineRecorder.enabled = value;
+                _recorder.enabled = value;
+                _inlineRecorder.enabled = value;
 #endif
             }
         }
@@ -183,27 +183,27 @@ namespace UnityExtensions
         /// <summary>
         /// GPU Elapsed time in milliseconds.
         /// </summary>
-        public float gpuElapsedTime => m_Recorder.enabled ? m_Recorder.gpuElapsedNanoseconds / 1000000.0f : 0.0f;
+        public float gpuElapsedTime => _recorder.enabled ? _recorder.gpuElapsedNanoseconds / 1000000.0f : 0.0f;
         /// <summary>
         /// Number of times the Profiling Sampler has hit on the GPU
         /// </summary>
-        public int gpuSampleCount => m_Recorder.enabled ? m_Recorder.gpuSampleBlockCount : 0;
+        public int gpuSampleCount => _recorder.enabled ? _recorder.gpuSampleBlockCount : 0;
         /// <summary>
         /// CPU Elapsed time in milliseconds (Command Buffer execution).
         /// </summary>
-        public float cpuElapsedTime => m_Recorder.enabled ? m_Recorder.elapsedNanoseconds / 1000000.0f : 0.0f;
+        public float cpuElapsedTime => _recorder.enabled ? _recorder.elapsedNanoseconds / 1000000.0f : 0.0f;
         /// <summary>
         /// Number of times the Profiling Sampler has hit on the CPU in the command buffer.
         /// </summary>
-        public int cpuSampleCount => m_Recorder.enabled ? m_Recorder.sampleBlockCount : 0;
+        public int cpuSampleCount => _recorder.enabled ? _recorder.sampleBlockCount : 0;
         /// <summary>
         /// CPU Elapsed time in milliseconds (Direct execution).
         /// </summary>
-        public float inlineCpuElapsedTime => m_InlineRecorder.enabled ? m_InlineRecorder.elapsedNanoseconds / 1000000.0f : 0.0f;
+        public float inlineCpuElapsedTime => _inlineRecorder.enabled ? _inlineRecorder.elapsedNanoseconds / 1000000.0f : 0.0f;
         /// <summary>
         /// Number of times the Profiling Sampler has hit on the CPU.
         /// </summary>
-        public int inlineCpuSampleCount => m_InlineRecorder.enabled ? m_InlineRecorder.sampleBlockCount : 0;
+        public int inlineCpuSampleCount => _inlineRecorder.enabled ? _inlineRecorder.sampleBlockCount : 0;
 #else
         /// <summary>
         /// GPU Elapsed time in milliseconds.
@@ -235,7 +235,7 @@ namespace UnityExtensions
         #endregion // UnityEngine.Rendering
     }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
+#if DEBUG
     /// <summary>
     /// Scoped Profiling markers
     /// </summary>
@@ -244,9 +244,9 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Debugging/ProfilingScope.cs
         #region UnityEngine.Rendering
-        CommandBuffer       m_Cmd;
-        bool                m_Disposed;
-        ProfilingSampler    m_Sampler;
+        readonly CommandBuffer _cmd;
+        bool _disposed;
+        readonly ProfilingSampler _sampler;
 
         /// <summary>
         /// Profiling Scope constructor
@@ -254,10 +254,10 @@ namespace UnityExtensions
         /// <param name="sampler">Profiling Sampler to be used for this scope.</param>
         public ProfilingScope(ProfilingSampler sampler)
         {
-            m_Cmd = null;
-            m_Disposed = false;
-            m_Sampler = sampler;
-            m_Sampler?.Begin(m_Cmd);
+            _cmd = null;
+            _disposed = false;
+            _sampler = sampler;
+            _sampler?.Begin(_cmd);
         }
 
         /// <summary>
@@ -274,10 +274,10 @@ namespace UnityExtensions
             // is their "parent".
             // Resulting in following pattern:
             // exec(cmd.start, scope.start, cmd.end) and exec(cmd.start, scope.end, cmd.end)
-            m_Cmd = cmd;
-            m_Disposed = false;
-            m_Sampler = sampler;
-            m_Sampler?.Begin(m_Cmd);
+            _cmd = cmd;
+            _disposed = false;
+            _sampler = sampler;
+            _sampler?.Begin(_cmd);
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace UnityExtensions
         // Protected implementation of Dispose pattern.
         void Dispose(bool disposing)
         {
-            if (m_Disposed)
+            if (_disposed)
                 return;
 
             // As this is a struct, it could have been initialized using an empty constructor so we
@@ -299,10 +299,10 @@ namespace UnityExtensions
             // this but will generate garbage on every frame (and this struct is used quite a lot).
             if (disposing)
             {
-                m_Sampler?.End(m_Cmd);
+                _sampler?.End(_cmd);
             }
 
-            m_Disposed = true;
+            _disposed = true;
         }
         #endregion // UnityEngine.Rendering
     }

@@ -25,7 +25,7 @@ namespace UnityExtensions
         public DynamicString(string s) : base(s.Length, true)
         {
             for (int i = 0; i < s.Length; ++i)
-                m_Array[i] = s[i];
+                Array[i] = s[i];
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace UnityExtensions
             int offset = size;
             Reserve(size + s.Length, true);
             for (int i = 0; i < s.Length; ++i)
-                m_Array[offset+i] = s[i];
+                Array[offset+i] = s[i];
             size += s.Length;
             BumpVersion();
         }
@@ -60,7 +60,7 @@ namespace UnityExtensions
         /// <returns>A new string with the same contents at the dynamic string.</returns>
         public override string ToString()
         {
-            return new string(m_Array, 0, size);
+            return new string(Array, 0, size);
         }
         #endregion // UnityEngine.Rendering
     }

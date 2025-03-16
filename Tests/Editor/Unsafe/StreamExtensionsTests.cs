@@ -1,7 +1,6 @@
 using NUnit.Framework;
-using Unity.Collections;
-using System;
 using System.IO;
+using Unity.Collections;
 
 namespace UnityExtensions.Unsafe.Tests
 {

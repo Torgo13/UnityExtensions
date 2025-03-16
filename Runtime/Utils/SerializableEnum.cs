@@ -11,14 +11,17 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/SerializableEnum.cs
         #region UnityEngine.Rendering
-        [SerializeField] private string m_EnumValueAsString;
-        [SerializeField] private string m_EnumTypeAsString;
+        [SerializeField] private string enumValueAsString;
+        [SerializeField] private string enumTypeAsString;
 
         /// <summary> Value as enum </summary>
         public Enum value
         {
-            get => !string.IsNullOrEmpty(m_EnumTypeAsString) && Enum.TryParse(Type.GetType(m_EnumTypeAsString), m_EnumValueAsString, out object result) ? (Enum)result : default;
-            set => m_EnumValueAsString = value.ToString();
+            get => !string.IsNullOrEmpty(enumTypeAsString)
+                   && Enum.TryParse(Type.GetType(enumTypeAsString), enumValueAsString, out object result)
+                ? (Enum)result
+                : default;
+            set => enumValueAsString = value.ToString();
         }
 
         /// <summary>
@@ -27,8 +30,8 @@ namespace UnityExtensions
         /// <param name="enumType">The underlying type of the enum</param>
         public SerializableEnum(Type enumType)
         {
-            m_EnumTypeAsString = enumType.AssemblyQualifiedName;
-            m_EnumValueAsString = Enum.GetNames(enumType)[0];
+            enumTypeAsString = enumType.AssemblyQualifiedName;
+            enumValueAsString = Enum.GetNames(enumType)[0];
         }
         #endregion // UnityEngine.Rendering
     }

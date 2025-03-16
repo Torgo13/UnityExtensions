@@ -16,25 +16,23 @@ namespace UnityExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/SerializableGuid.cs
         #region Unity.XR.CoreUtils
-        static readonly SerializableGuid k_Empty = new SerializableGuid(0, 0);
-
-        [SerializeField]
-        [HideInInspector]
-        ulong m_GuidLow;
-
-        [SerializeField]
-        [HideInInspector]
-        ulong m_GuidHigh;
-
         /// <summary>
         /// Represents <c>System.Guid.Empty</c>, a GUID whose value is all zeros.
         /// </summary>
-        public static SerializableGuid Empty => k_Empty;
+        public static readonly SerializableGuid Empty = new SerializableGuid(0, 0);
+
+        [SerializeField]
+        [HideInInspector]
+        ulong guidLow;
+
+        [SerializeField]
+        [HideInInspector]
+        ulong guidHigh;
 
         /// <summary>
         /// Reconstructs the <c>Guid</c> from the serialized data.
         /// </summary>
-        public readonly Guid Guid => GuidUtil.Compose(m_GuidLow, m_GuidHigh);
+        public readonly Guid Guid => GuidUtil.Compose(guidLow, guidHigh);
 
         /// <summary>
         /// Constructs a <see cref="SerializableGuid"/> from two 64-bit <c>ulong</c> values.
@@ -43,8 +41,8 @@ namespace UnityExtensions
         /// <param name="guidHigh">The high 8 bytes of the <c>Guid</c>.</param>
         public SerializableGuid(ulong guidLow, ulong guidHigh)
         {
-            m_GuidLow = guidLow;
-            m_GuidHigh = guidHigh;
+            this.guidLow = guidLow;
+            this.guidHigh = guidHigh;
         }
 
         /// <summary>
@@ -55,8 +53,8 @@ namespace UnityExtensions
         {
             unchecked
             {
-                var hash = m_GuidLow.GetHashCode();
-                return hash * 486187739 + m_GuidHigh.GetHashCode();
+                var hash = guidLow.GetHashCode();
+                return hash * 486187739 + guidHigh.GetHashCode();
             }
         }
 
@@ -67,10 +65,8 @@ namespace UnityExtensions
         /// <returns>True if <paramref name="obj"/> is a SerializableGuid with the same field values.</returns>
         public readonly override bool Equals(object obj)
         {
-            if (!(obj is SerializableGuid serializableGuid))
-                return false;
-
-            return Equals(serializableGuid);
+            return obj is SerializableGuid serializableGuid
+                && Equals(serializableGuid);
         }
 
         /// <summary>
@@ -107,8 +103,8 @@ namespace UnityExtensions
         /// <returns>True if this SerializableGuid has the same field values as the other one.</returns>
         public readonly bool Equals(SerializableGuid other)
         {
-            return m_GuidLow == other.m_GuidLow &&
-                m_GuidHigh == other.m_GuidHigh;
+            return guidLow == other.guidLow &&
+                guidHigh == other.guidHigh;
         }
 
         /// <summary>

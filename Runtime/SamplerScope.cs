@@ -8,17 +8,17 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/SamplerScope.cs
         #region Unity.LiveCapture
-        readonly CustomSampler m_Sampler;
+        readonly CustomSampler _sampler;
 
         public CustomSamplerScope(CustomSampler sampler)
         {
-            m_Sampler = sampler;
-            m_Sampler.Begin();
+            _sampler = sampler;
+            _sampler.Begin();
         }
 
         public void Dispose()
         {
-            m_Sampler.End();
+            _sampler.End();
         }
         #endregion // Unity.LiveCapture
     }

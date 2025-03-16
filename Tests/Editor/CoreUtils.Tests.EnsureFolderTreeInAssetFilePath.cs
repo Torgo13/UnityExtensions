@@ -2,7 +2,6 @@
 using System.IO;
 using NUnit.Framework;
 using UnityEditor;
-using UnityEngine.Rendering;
 
 namespace UnityExtensions.Editor.Tests
 {

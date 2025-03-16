@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace UnityExtensions.Collections
 {
@@ -12,36 +11,37 @@ namespace UnityExtensions.Collections
     /// <remarks>
     /// It is preferable to use this collection in API designs instead of `IReadOnlyCollection` because
     /// <see cref="GetEnumerator"/> returns a value-type enumerator and does not perform any heap allocations.
-    ///
     /// This collection is not thread-safe.
     /// </remarks>
     /// <typeparam name="T">The element type.</typeparam>
-    public struct ReadOnlyListSpan<T> : IReadOnlyList<T>, IEquatable<ReadOnlyListSpan<T>>
+    public readonly struct ReadOnlyListSpan<T> : IReadOnlyList<T>, IEquatable<ReadOnlyListSpan<T>>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/ReadOnlyListSpan.cs
         #region Unity.XR.CoreUtils.Collections
-        static ReadOnlyListSpan<T> s_EmptyList = new();
-        Enumerator m_Enumerator;
+        static readonly ReadOnlyListSpan<T> EmptyList = new ReadOnlyListSpan<T>();
+        readonly Enumerator _enumerator;
 
         /// <summary>
         /// The number of elements in the read-only list.
         /// </summary>
         /// <value>The number of elements.</value>
-        public int Count => m_Enumerator.end - m_Enumerator.start;
+        public int Count => _enumerator.end - _enumerator.start;
 
         /// <summary>
         /// Returns the element at <paramref name="index"/>.
         /// </summary>
         /// <param name="index">The index.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is <see langword="null"/>.
+        /// </exception>
         public T this[int index]
         {
             get
             {
-                index += m_Enumerator.start;
-                if (index < m_Enumerator.start || index >= m_Enumerator.end)
+                index += _enumerator.start;
+                if (index < _enumerator.start || index >= _enumerator.end)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                return m_Enumerator.list[index];
+                return _enumerator.List[index];
             }
         }
 
@@ -49,13 +49,14 @@ namespace UnityExtensions.Collections
         /// Constructs a new instance of this class that is a read-only wrapper around the specified list.
         /// </summary>
         /// <param name="list">The list to wrap.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.
+        /// </exception>
         public ReadOnlyListSpan(IReadOnlyList<T> list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            m_Enumerator = new Enumerator(list);
+            _enumerator = new Enumerator(list);
         }
 
         /// <summary>
@@ -64,7 +65,8 @@ namespace UnityExtensions.Collections
         /// <param name="list">The list to wrap.</param>
         /// <param name="start">The zero-based index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException"> Thrown if
         /// start or length are outside the bounds of the list.</exception>
         public ReadOnlyListSpan(IReadOnlyList<T> list, int start, int length)
@@ -78,7 +80,7 @@ namespace UnityExtensions.Collections
             if (start + length > list.Count)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            m_Enumerator = new Enumerator(list, start, start + length);
+            _enumerator = new Enumerator(list, start, start + length);
         }
 
         /// <summary>
@@ -91,27 +93,27 @@ namespace UnityExtensions.Collections
         /// start or length are outside the bounds of the current ReadOnlyListSpan.</exception>
         public ReadOnlyListSpan<T> Slice(int start, int length)
         {
-            var newStart = m_Enumerator.start + start;
-            if (newStart < m_Enumerator.start)
+            var newStart = _enumerator.start + start;
+            if (newStart < _enumerator.start)
                 throw new ArgumentOutOfRangeException(nameof(start));
 
-            if (newStart + length > m_Enumerator.end)
+            if (newStart + length > _enumerator.end)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            return new ReadOnlyListSpan<T>(m_Enumerator.list, m_Enumerator.start + start, length);
+            return new ReadOnlyListSpan<T>(_enumerator.List, _enumerator.start + start, length);
         }
 
         /// <summary>
         /// Returns an empty read-only list with the specified type argument.
         /// </summary>
         /// <returns>The empty read-only list.</returns>
-        public static ReadOnlyListSpan<T> Empty() => s_EmptyList;
+        public static ReadOnlyListSpan<T> Empty() => EmptyList;
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public Enumerator GetEnumerator() => m_Enumerator;
+        public Enumerator GetEnumerator() => _enumerator;
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
@@ -145,9 +147,9 @@ namespace UnityExtensions.Collections
         /// </remarks>
         public bool Equals(ReadOnlyListSpan<T> other)
         {
-            return ReferenceEquals(m_Enumerator.list, other.m_Enumerator.list)
-                && m_Enumerator.start == other.m_Enumerator.start
-                && m_Enumerator.end == other.m_Enumerator.end;
+            return ReferenceEquals(_enumerator.List, other._enumerator.List)
+                && _enumerator.start == other._enumerator.start
+                && _enumerator.end == other._enumerator.end;
         }
 
         /// <summary>
@@ -159,7 +161,7 @@ namespace UnityExtensions.Collections
             => obj is ReadOnlyListSpan<T> other && Equals(other);
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(Unity.XR.CoreUtils.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -168,7 +170,7 @@ namespace UnityExtensions.Collections
         public static bool operator ==(ReadOnlyListSpan<T> lhs, ReadOnlyListSpan<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(Unity.XR.CoreUtils.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -181,7 +183,7 @@ namespace UnityExtensions.Collections
         /// </summary>
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
-            => HashCode.Combine(m_Enumerator.list, m_Enumerator.start, m_Enumerator.end);
+            => HashCode.Combine(_enumerator.List, _enumerator.start, _enumerator.end);
 
         /// <summary>
         /// Returns a string that represents the current object.
@@ -192,16 +194,16 @@ namespace UnityExtensions.Collections
             using var _0 = StringBuilderPool.Get(out var sb);
             sb.Append('{');
             sb.AppendLine();
-            for (var i = m_Enumerator.start; i < m_Enumerator.end; i++)
+            for (var i = _enumerator.start; i < _enumerator.end; i++)
             {
-                var item = m_Enumerator.list[i];
+                var item = _enumerator.List[i];
                 if (item == null)
                 {
                     sb.AppendLine("  null,");
                 }
                 else
                 {
-                    sb.Append(' ').Append(' ').Append(m_Enumerator.list[i]).Append(',').AppendLine();
+                    sb.Append(' ').Append(' ').Append(_enumerator.List[i]).Append(',').AppendLine();
                 }
             }
             sb.Append('}');
@@ -232,16 +234,16 @@ namespace UnityExtensions.Collections
             {
                 get
                 {
-                    if (m_CurrentIndex < start || m_CurrentIndex >= end)
-                        throw new ArgumentOutOfRangeException(nameof(m_CurrentIndex));
+                    if (_currentIndex < start || _currentIndex >= end)
+                        throw new ArgumentOutOfRangeException(nameof(_currentIndex));
 
-                    return list[m_CurrentIndex];
+                    return List[_currentIndex];
                 }
             }
 
             object IEnumerator.Current => Current;
-            internal IReadOnlyList<T> list;
-            int m_CurrentIndex;
+            internal readonly IReadOnlyList<T> List;
+            int _currentIndex;
 
             internal Enumerator(IReadOnlyList<T> list) : this(list, 0, list.Count) { }
 
@@ -254,26 +256,27 @@ namespace UnityExtensions.Collections
             /// <param name="end">The desired zero-based index at which to end the slice.</param>
             internal Enumerator(IReadOnlyList<T> list, int start, int end)
             {
-                this.list = list;
+                List = list;
                 this.start = start;
                 this.end = end;
-                m_CurrentIndex = this.start - 1;
+                _currentIndex = this.start - 1;
             }
 
             /// <summary>
             /// Advances the enumerator to the next element of the collection.
             /// </summary>
-            /// <returns><see langword="true"/> if the next position is within the bounds of the list. Otherwise, <see langword="false"/>.</returns>
+            /// <returns><see langword="true"/> if the next position is within the bounds of the list.
+            /// Otherwise, <see langword="false"/>.</returns>
             public bool MoveNext()
             {
-                m_CurrentIndex += 1;
-                return m_CurrentIndex < end;
+                _currentIndex += 1;
+                return _currentIndex < end;
             }
 
             /// <summary>
             /// Sets the enumerator to its initial position, which is before the first element in the collection.
             /// </summary>
-            public void Reset() => m_CurrentIndex = start - 1;
+            public void Reset() => _currentIndex = start - 1;
 
             void IDisposable.Dispose() { }
         }

@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityExtensions.GUI
+namespace UnityExtensions
 {
     /// <summary>
     /// Helpers for handling screen DPI in GUI.

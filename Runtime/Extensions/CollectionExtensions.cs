@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -48,7 +47,8 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Runtime/Export/Collections/CollectionExtensions.cs
         #region Unity.Collections
         /// <summary>
-        /// Add an element to the correct position in presorted List. These methods remove the need to call Sort() on the List.
+        /// Add an element to the correct position in presorted List.
+        /// These methods remove the need to call Sort() on the List.
         /// </summary>
         /// <param name="list">Presorted List</param>
         /// <param name="item">Element to add</param>
@@ -110,7 +110,8 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Returns the first element of collection sorted by comparer. This method reduce a need to call Sort() and FirstOrDefault() on the List.
+        /// Returns the first element of collection sorted by comparer.
+        /// This method removes the need to call Sort() and FirstOrDefault() on the List.
         /// </summary>
         /// <param name="collection">Collection to inspect</param>
         /// <param name="comparer">Comparator if Comparer&lt;T&gt;. Default is not suite</param>
@@ -162,7 +163,8 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Check if element is in collection. This method replace Linq implementation to reduce GC allocations.
+        /// Check if element is in collection.
+        /// This method replaces the Linq implementation to reduce GC allocations.
         /// </summary>
         /// <param name="collection">Collection to inspect</param>
         /// <param name="element">Element to find</param>
@@ -184,7 +186,7 @@ namespace UnityExtensions
         }
         #endregion // Unity.Collections
 
-        /*
+#if !NETSTANDARD2_1
         //https://github.com/dotnet/runtime/blob/7eb07dde40933cace91d57aae0a3e569fd042def/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/CollectionExtensions.cs
         #region System.Collections.Generic
         public static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key) =>
@@ -296,6 +298,6 @@ namespace UnityExtensions
                 destination[i] = list[i];
         }
         #endregion // System.Collections.Generic
-        */
+#endif
     }
 }

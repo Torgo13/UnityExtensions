@@ -134,10 +134,14 @@ namespace UnityExtensions
         /// <summary>
         /// Initializes the curve.
         /// </summary>
-        /// <param name="toeStrength">The strength of the transition between the curve's toe and the curve's mid-section. A value of 0 results in no transition and a value of 1 results in a very hard transition.</param>
-        /// <param name="toeLength">The length of the curve's toe. Higher values result in longer toes and therefore contain more of the dynamic range.</param>
-        /// <param name="shoulderStrength">The strength of the transition between the curve's midsection and the curve's shoulder. A value of 0 results in no transition and a value of 1 results in a very hard transition.</param>
-        /// <param name="shoulderLength">The amount of f-stops to add to the dynamic range of the curve. This is how much of the highlights that the curve takes into account.</param>
+        /// <param name="toeStrength">The strength of the transition between the curve's toe and the curve's mid-section.
+        /// A value of 0 results in no transition and a value of 1 results in a very hard transition.</param>
+        /// <param name="toeLength">The length of the curve's toe. Higher values result in longer toes and therefore
+        /// contain more of the dynamic range.</param>
+        /// <param name="shoulderStrength">The strength of the transition between the curve's midsection and the curve's
+        /// shoulder. A value of 0 results in no transition and a value of 1 results in a very hard transition.</param>
+        /// <param name="shoulderLength">The amount of f-stops to add to the dynamic range of the curve.
+        /// This is how much of the highlights that the curve takes into account.</param>
         /// <param name="shoulderAngle">How much overshoot to add to the curve's shoulder.</param>
         /// <param name="gamma">A gamma correction to the entire curve.</param>
         public void Init(float toeStrength, float toeLength, float shoulderStrength, float shoulderLength, float shoulderAngle, float gamma)
@@ -219,7 +223,7 @@ namespace UnityExtensions
                 // which we can rewrite as
                 // y = exp(g*ln(m) + g*ln(x+b/m))
                 //
-                // and our evaluation function is (skipping the if parts):
+                // and our evaluation function is (skipping the if-parts):
                 /*
                     float x0 = (x - offsetX) * scaleX;
                     y0 = exp(m_lnA + m_B*log(x0));
@@ -297,19 +301,25 @@ namespace UnityExtensions
             }
         }
 
-        // Find a function of the form:
-        //   f(x) = e^(lnA + Bln(x))
-        // where
-        //   f(0)   = 0; not really a constraint
-        //   f(x0)  = y0
-        //   f'(x0) = m
+        /// <summary>
+        /// Find a function of the form:
+        /// <code>f(x) = e^(lnA + Bln(x))</code>
+        /// where:
+        /// <code>
+        /// f(0)   = 0; not really a constraint
+        /// f(x0)  = y0
+        /// f'(x0) = m
+        /// </code>
+        /// </summary>
         void SolveAB(out float lnA, out float B, float x0, float y0, float m)
         {
             B = (m * x0) / y0;
             lnA = Log(y0) - B * Log(x0);
         }
 
-        // Convert to y=mx+b
+        /// <summary>
+        /// Convert to <code>y=mx+b</code>
+        /// </summary>
         void AsSlopeIntercept(out float m, out float b, float x0, float x1, float y0, float y1)
         {
             float dy = (y1 - y0);
@@ -323,8 +333,10 @@ namespace UnityExtensions
             b = y0 - x0 * m;
         }
 
-        // f(x) = (mx+b)^g
-        // f'(x) = gm(mx+b)^(g-1)
+        /// <summary><code>
+        /// f(x) = (mx+b)^g
+        /// f'(x) = gm(mx+b)^(g-1)
+        /// </code></summary>
         float EvalDerivativeLinearGamma(float m, float b, float g, float x)
         {
             return g * m * Pow(m * x + b, g - 1f);

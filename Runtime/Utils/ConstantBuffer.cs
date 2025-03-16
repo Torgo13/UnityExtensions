@@ -12,7 +12,7 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ConstantBuffer.cs
         #region UnityEngine.Rendering
-        static List<ConstantBufferBase> m_RegisteredConstantBuffers = new List<ConstantBufferBase>();
+        static readonly List<ConstantBufferBase> RegisteredConstantBuffers = new List<ConstantBufferBase>();
 
         /// <summary>
         /// Update the GPU data of the constant buffer and bind it globally via a command buffer.
@@ -20,7 +20,7 @@ namespace UnityExtensions
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void PushGlobal<CBType>(CommandBuffer cmd, in CBType data, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -34,7 +34,7 @@ namespace UnityExtensions
         /// </summary>
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="data">Input data of the constant buffer.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void PushGlobal<CBType>(in CBType data, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -50,7 +50,7 @@ namespace UnityExtensions
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Push<CBType>(CommandBuffer cmd, in CBType data, ComputeShader cs, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -65,7 +65,7 @@ namespace UnityExtensions
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="data">Input data of the constant buffer.</param>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Push<CBType>(in CBType data, ComputeShader cs, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -81,7 +81,7 @@ namespace UnityExtensions
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
         /// <param name="mat">Material to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Push<CBType>(CommandBuffer cmd, in CBType data, Material mat, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -96,7 +96,7 @@ namespace UnityExtensions
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="data">Input data of the constant buffer.</param>
         /// <param name="mat">Material to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Push<CBType>(in CBType data, Material mat, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -135,7 +135,7 @@ namespace UnityExtensions
         /// </summary>
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void SetGlobal<CBType>(CommandBuffer cmd, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -147,7 +147,7 @@ namespace UnityExtensions
         /// Bind the constant buffer globally.
         /// </summary>
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void SetGlobal<CBType>(int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -161,7 +161,7 @@ namespace UnityExtensions
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Set<CBType>(CommandBuffer cmd, ComputeShader cs, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -174,7 +174,7 @@ namespace UnityExtensions
         /// </summary>
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Set<CBType>(ComputeShader cs, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -187,7 +187,7 @@ namespace UnityExtensions
         /// </summary>
         /// <typeparam name="CBType">The type of structure representing the constant buffer data.</typeparam>
         /// <param name="mat">Material to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public static void Set<CBType>(Material mat, int shaderId) where CBType : struct
         {
             var cb = ConstantBufferSingleton<CBType>.instance;
@@ -201,15 +201,15 @@ namespace UnityExtensions
         /// </summary>
         public static void ReleaseAll()
         {
-            foreach (var cb in m_RegisteredConstantBuffers)
+            foreach (var cb in RegisteredConstantBuffers)
                 cb.Release();
 
-            m_RegisteredConstantBuffers.Clear();
+            RegisteredConstantBuffers.Clear();
         }
 
         internal static void Register(ConstantBufferBase cb)
         {
-            m_RegisteredConstantBuffers.Add(cb);
+            RegisteredConstantBuffers.Add(cb);
         }
     }
 
@@ -232,19 +232,18 @@ namespace UnityExtensions
     public class ConstantBuffer<CBType> : ConstantBufferBase where CBType : struct
     {
         // Used to track all global bindings used by this CB type.
-        HashSet<int> m_GlobalBindings = new HashSet<int>();
+        readonly HashSet<int> _globalBindings = new HashSet<int>();
         // Array is required by the ComputeBuffer SetData API
-        CBType[] m_Data = new CBType[1];
+        readonly CBType[] _data = new CBType[1];
 
-
-        ComputeBuffer m_GPUConstantBuffer = null;
+        readonly ComputeBuffer _gpuConstantBuffer;
 
         /// <summary>
         /// Constant Buffer constructor.
         /// </summary>
         public ConstantBuffer()
         {
-            m_GPUConstantBuffer = new ComputeBuffer(1, UnsafeUtility.SizeOf<CBType>(), ComputeBufferType.Constant);
+            _gpuConstantBuffer = new ComputeBuffer(1, UnsafeUtility.SizeOf<CBType>(), ComputeBufferType.Constant);
         }
 
         /// <summary>
@@ -254,11 +253,11 @@ namespace UnityExtensions
         /// <param name="data">Input data of the constant buffer.</param>
         public void UpdateData(CommandBuffer cmd, in CBType data)
         {
-            m_Data[0] = data;
+            _data[0] = data;
 #if UNITY_2021_1_OR_NEWER
-            cmd.SetBufferData(m_GPUConstantBuffer, m_Data);
+            cmd.SetBufferData(_gpuConstantBuffer, _data);
 #else
-            cmd.SetComputeBufferData(m_GPUConstantBuffer, m_Data);
+            cmd.SetComputeBufferData(_gpuConstantBuffer, _data);
 #endif
         }
 
@@ -268,29 +267,29 @@ namespace UnityExtensions
         /// <param name="data">Input data of the constant buffer.</param>
         public void UpdateData(in CBType data)
         {
-            m_Data[0] = data;
-            m_GPUConstantBuffer.SetData(m_Data);
+            _data[0] = data;
+            _gpuConstantBuffer.SetData(_data);
         }
 
         /// <summary>
         /// Bind the constant buffer globally via a command buffer.
         /// </summary>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void SetGlobal(CommandBuffer cmd, int shaderId)
         {
-            m_GlobalBindings.Add(shaderId);
-            cmd.SetGlobalConstantBuffer(m_GPUConstantBuffer, shaderId, 0, m_GPUConstantBuffer.stride);
+            _globalBindings.Add(shaderId);
+            cmd.SetGlobalConstantBuffer(_gpuConstantBuffer, shaderId, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
         /// Bind the constant buffer globally.
         /// </summary>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void SetGlobal(int shaderId)
         {
-            m_GlobalBindings.Add(shaderId);
-            Shader.SetGlobalConstantBuffer(shaderId, m_GPUConstantBuffer, 0, m_GPUConstantBuffer.stride);
+            _globalBindings.Add(shaderId);
+            Shader.SetGlobalConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
@@ -298,43 +297,43 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void Set(CommandBuffer cmd, ComputeShader cs, int shaderId)
         {
-            cmd.SetComputeConstantBufferParam(cs, shaderId, m_GPUConstantBuffer, 0, m_GPUConstantBuffer.stride);
+            cmd.SetComputeConstantBufferParam(cs, shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
         /// Bind the constant buffer to a compute shader.
         /// </summary>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void Set(ComputeShader cs, int shaderId)
         {
-            cs.SetConstantBuffer(shaderId, m_GPUConstantBuffer, 0, m_GPUConstantBuffer.stride);
+            cs.SetConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
         /// Bind the constant buffer to a material.
         /// </summary>
         /// <param name="mat">Material to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void Set(Material mat, int shaderId)
         {
             // This isn't done via command buffer because as long as the buffer itself is not destroyed,
             // the binding stays valid. Only the commit of data needs to go through the command buffer.
             // We do it here anyway for now to simplify user API.
-            mat.SetConstantBuffer(shaderId, m_GPUConstantBuffer, 0, m_GPUConstantBuffer.stride);
+            mat.SetConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
         /// Bind the constant buffer to a material property block.
         /// </summary>
         /// <param name="mpb">Material property block to which the constant buffer should be bound.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void Set(MaterialPropertyBlock mpb, int shaderId)
         {
-            mpb.SetConstantBuffer(shaderId, m_GPUConstantBuffer, 0, m_GPUConstantBuffer.stride);
+            mpb.SetConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
 
         /// <summary>
@@ -342,7 +341,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void PushGlobal(CommandBuffer cmd, in CBType data, int shaderId)
         {
             UpdateData(cmd, data);
@@ -353,7 +352,7 @@ namespace UnityExtensions
         /// Update the GPU data of the constant buffer and bind it globally.
         /// </summary>
         /// <param name="data">Input data of the constant buffer.</param>
-        /// <param name="shaderId">Shader porperty id to bind the constant buffer to.</param>
+        /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
         public void PushGlobal(in CBType data, int shaderId)
         {
             UpdateData(data);
@@ -368,38 +367,38 @@ namespace UnityExtensions
             // Depending on the device, globally bound buffers can leave stale "valid" shader ids pointing to a destroyed buffer.
             // In DX11 it does not cause issues but on Vulkan this will result in skipped drawcalls (even if the buffer is not actually accessed in the shader).
             // To avoid this kind of issues, it's good practice to "unbind" all globally bound buffers upon destruction.
-            foreach (int shaderId in m_GlobalBindings)
+            foreach (int shaderId in _globalBindings)
                 Shader.SetGlobalConstantBuffer(shaderId, (ComputeBuffer)null, 0, 0);
-            m_GlobalBindings.Clear();
+            _globalBindings.Clear();
 
-            CoreUtils.SafeRelease(m_GPUConstantBuffer);
+            CoreUtils.SafeRelease(_gpuConstantBuffer);
         }
     }
 
     class ConstantBufferSingleton<CBType> : ConstantBuffer<CBType> where CBType : struct
     {
-        static ConstantBufferSingleton<CBType> s_Instance = null;
+        static ConstantBufferSingleton<CBType> _instance;
         internal static ConstantBufferSingleton<CBType> instance
         {
             get
             {
-                if (s_Instance == null)
+                if (_instance == null)
                 {
-                    s_Instance = new ConstantBufferSingleton<CBType>();
-                    ConstantBuffer.Register(s_Instance);
+                    _instance = new ConstantBufferSingleton<CBType>();
+                    ConstantBuffer.Register(_instance);
                 }
-                return s_Instance;
+                return _instance;
             }
             set
             {
-                s_Instance = value;
+                _instance = value;
             }
         }
 
         public override void Release()
         {
             base.Release();
-            s_Instance = null;
+            _instance = null;
         }
         #endregion // UnityEngine.Rendering
     }
