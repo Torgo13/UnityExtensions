@@ -10,7 +10,7 @@ namespace UnityExtensions.Unsafe.Tests
         {
             int radius = 16;
             Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-            var sprite = ColorExtensions.CreateCircleSprite(radius, color);
+            var sprite = SpriteUtilities.CreateCircleSprite(radius, color);
 
             // Verify the sprite's texture has the correct dimensions
             var texture = sprite.texture;
@@ -38,7 +38,7 @@ namespace UnityExtensions.Unsafe.Tests
         {
             int radius = 0;
             Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-            var sprite = ColorExtensions.CreateCircleSprite(radius, color);
+            var sprite = SpriteUtilities.CreateCircleSprite(radius, color);
 
             // Verify the sprite's texture has the correct dimensions
             var texture = sprite.texture;

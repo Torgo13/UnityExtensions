@@ -5,7 +5,7 @@ using static Unity.Mathematics.math;
 
 namespace UnityExtensions.Unsafe
 {
-    public static class ColorExtensions
+    public static class SpriteUtilities
     {
         //https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/InputSystem/Utilities/SpriteUtilities.cs
         #region UnityEngine.InputSystem.Utilities
