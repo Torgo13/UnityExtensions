@@ -16,8 +16,13 @@ namespace UnityExtensions
         
         RenderTexture[] _renderTextures;
 
-        [Range(0.25f, 1.0f)]
-        [SerializeField] float resolutionScale = 1.0f;
+        // Dynamic resolution on Vulkan only supports increments of 0.05 between 0.25 and 1.0
+        //[Range(0.25f, 1.0f)]
+        //[SerializeField] float resolutionScale = 1.0f;
+        float resolutionScale => integerScale / 20f;
+
+        [Range(5, 20)]
+        [SerializeField] int integerScale = 20;
         
         Transform _cameraTransform;
         Transform CameraTransform
@@ -42,7 +47,7 @@ namespace UnityExtensions
         // The index of the current camera in cameras
         int _index;
 
-        // How many frames the current camera has been rendering for. Between 0 and 6
+        // How many frames the current camera has been rendering for. Between 0 and BlendFrames
         int _frameCount;
         
         // Snapshot of Time.renderedFrameCount the last time ResetFrameCount() was called
@@ -51,6 +56,7 @@ namespace UnityExtensions
         // Number of camera in cameras
         const int ProbeCount = 3;
         const int Resolution = 1024;
+        const int BlendFrames = 6;
 
         void Awake()
         {
@@ -62,10 +68,11 @@ namespace UnityExtensions
             
             RenderSettings.skybox = _skyboxMaterial;
             
-            RenderTextureDescriptor desc = new RenderTextureDescriptor(Resolution, Resolution, RenderTextureFormat.DefaultHDR, 0, 1)
+            RenderTextureDescriptor desc = new RenderTextureDescriptor(Resolution, Resolution, RenderTextureFormat.DefaultHDR, 0)
             {
                 dimension = TextureDimension.Cube,
-                useDynamicScale = true,
+                useDynamicScale = false, // Avoid issue when calling ScalableBufferManager.ResizeBuffers() 
+                autoGenerateMips = true,
             };
             
             _renderTextures = new RenderTexture[ProbeCount];
@@ -74,7 +81,6 @@ namespace UnityExtensions
                 _renderTextures[i] = new RenderTexture(desc);
             }
             
-            //Init();
             RenderProbe();
         }
 
@@ -102,10 +108,10 @@ namespace UnityExtensions
             reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << _frameCount);
 
             // Blend between the previous and current camera render textures
-            float blend = _frameCount / 6f;
+            float blend = _frameCount / (float)BlendFrames;
             RenderSettings.skybox.SetFloat(Blend, blend);
 
-            _isRendering = _frameCount < 6;
+            _isRendering = _frameCount < BlendFrames;
             bool wasUpdated = !_isRendering;
             if (_isRendering)
                 return wasUpdated;
@@ -116,6 +122,8 @@ namespace UnityExtensions
             RenderSettings.skybox.SetTexture(TexA, _renderTextures[PreviousIndex()]);
             RenderSettings.skybox.SetTexture(TexB, _renderTextures[_index]);
             RenderSettings.skybox.SetFloat(Blend, 0f);
+            
+            RenderSettings.customReflectionTexture = _renderTextures[_index];
 
             _index = NextIndex();
 
@@ -135,8 +143,7 @@ namespace UnityExtensions
             // Do not make the reflection camera a child of the main camera, or it may move during time slicing
             reflectionCamera.transform.position = CameraTransform.position;
 
-            // Store the renderID of the reflection probe being rendered
-            //_renderId = probe.RenderProbe();
+            // Render the first cubemap face
             reflectionCamera.RenderToCubemap(_renderTextures[_index], 1);
             _isRendering = true;
             ResetFrameCount();

@@ -1,14 +1,12 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
-Shader "Skybox/CubemapBlend"
+Shader "Skybox/Cubemap"
 {
     Properties
     {
         _Tint("Tint Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [Gamma] _Exposure("Exposure", Range(0, 8)) = 1.0
         _Rotation("Rotation", Range(0, 360)) = 0
-        [NoScaleOffset] _TexA("CubemapA (HDR)", Cube) = "grey" {}
-        [NoScaleOffset] _TexB("CubemapB (HDR)", Cube) = "grey" {}
-        _Blend("Blend", Range(0, 1)) = 0.0
+        [NoScaleOffset] _Tex("Cubemap (HDR)", Cube) = "grey" {}
     }
 
     SubShader
@@ -26,15 +24,13 @@ Shader "Skybox/CubemapBlend"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Macros.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            TEXTURECUBE(_TexA);
-            TEXTURECUBE(_TexB);
-            SAMPLER(sampler_TexA);
+            TEXTURECUBE(_Tex);
+            SAMPLER(sampler_Tex);
             
             CBUFFER_START(UnityPerMaterial)
             half4 _Tint;
             half _Exposure;
             float _Rotation;
-            float _Blend;
             CBUFFER_END
 
             float3 RotateAroundYInDegrees(float3 vertex, float degrees)
@@ -72,13 +68,7 @@ Shader "Skybox/CubemapBlend"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 tex_a = SAMPLE_TEXTURECUBE_LOD(_TexA, sampler_TexA, IN.texcoord, 0);
-                half4 tex_b = SAMPLE_TEXTURECUBE_LOD(_TexB, sampler_TexA, IN.texcoord, 0);
-
-                half3 c = tex_a.rgb;
-                half3 c_b = tex_b.rgb;
-
-                c = lerp(c, c_b, _Blend);
+                half3 c = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, IN.texcoord, 0).rgb;
                 c = c * _Tint.rgb;
                 c *= _Exposure;
 
@@ -102,14 +92,11 @@ Shader "Skybox/CubemapBlend"
 
             #include "UnityCG.cginc"
 
-            samplerCUBE _TexA;
-            samplerCUBE _TexB;
-            half4 _TexA_HDR;
-            half4 _TexB_HDR;
+            samplerCUBE _Tex;
+            half4 _Tex_HDR;
             half4 _Tint;
             half _Exposure;
             float _Rotation;
-            float _Blend;
 
             float3 RotateAroundYInDegrees(float3 vertex, float degrees)
             {
@@ -146,13 +133,8 @@ Shader "Skybox/CubemapBlend"
 
             half4 frag(v2f i) : SV_Target
             {
-                half4 tex_a = texCUBE(_TexA, i.texcoord);
-                half4 tex_b = texCUBE(_TexB, i.texcoord);
-
-                half3 c = DecodeHDR(tex_a, _TexA_HDR);
-                half3 c_b = DecodeHDR(tex_b, _TexB_HDR);
-
-                c = lerp(c, c_b, _Blend);
+                half4 tex = texCUBE(_Tex, i.texcoord);
+                half3 c = DecodeHDR(tex, _Tex_HDR);
                 c = c * _Tint.rgb * unity_ColorSpaceDouble.rgb;
                 c *= _Exposure;
 
