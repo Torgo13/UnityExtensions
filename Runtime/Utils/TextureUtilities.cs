@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using Unity.Collections;
 using UnityEngine;
@@ -13,22 +14,28 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/Utilities/HDTextureUtilities.cs
         #region UnityEngine.Rendering.HighDefinition
         /// <exception cref="ArgumentException">Thrown if <paramref name="target"/> is not a
-        /// RenderTexture or a Cubemap.</exception>
+        /// Texture2D, a RenderTexture or a Cubemap.</exception>
         public static void WriteTextureToDisk(Texture target, string filePath)
         {
             var rt = target as RenderTexture;
-            var cube = target as Cubemap;
             if (rt != null)
             {
-                var t2D = RenderTextureToTexture(rt) as Texture2D;
+                target = RenderTextureToTexture(rt);
+            }
+
+            var t2D = target as Texture2D;
+            if (t2D != null)
+            {
                 var bytes = t2D.EncodeToEXR(Texture2D.EXRFlags.CompressZIP);
                 CreateParentDirectoryIfMissing(filePath);
                 File.WriteAllBytes(filePath, bytes);
                 return;
             }
-            else if (cube != null)
+
+            var cube = target as Cubemap;
+            if (cube != null)
             {
-                var t2D = new Texture2D(cube.width * 6, cube.height, GraphicsFormat.R16G16B16A16_SFloat,
+                t2D = new Texture2D(cube.width * 6, cube.height, GraphicsFormat.R16G16B16A16_SFloat,
                     TextureCreationFlags.None);
                 var cmd = new CommandBuffer { name = "CopyCubemapToTexture2D" };
                 for (int i = 0; i < 6; ++i)
@@ -38,16 +45,19 @@ namespace UnityExtensions
                         t2D, 0, 0, cube.width * i, 0
                     );
                 }
+
                 Graphics.ExecuteCommandBuffer(cmd);
                 var bytes = t2D.EncodeToEXR(Texture2D.EXRFlags.CompressZIP);
                 CreateParentDirectoryIfMissing(filePath);
                 File.WriteAllBytes(filePath, bytes);
                 return;
             }
+
             throw new ArgumentException();
         }
 
         // Write to disk via the Unity Asset Pipeline rather than File.WriteAllBytes.
+        [Conditional("UNITY_EDITOR")]
         public static void WriteTextureToAsset(Texture target, string filePath)
         {
 #if UNITY_EDITOR
@@ -63,13 +73,13 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Export a render texture to a texture2D/3D.
+        /// Export a render texture to a texture2D.
         /// <list type="bullet">
         /// <item>Cubemap will be exported in a Texture2D of size (size * 6, size) and with a layout +X,-X,+Y,-Y,+Z,-Z</item>
         /// <item>Texture2D will be copied to a Texture2D</item>
         /// </list>
         /// </summary>
-        /// <param name="source"></param>
+        /// <param name="source">RenderTexture with a TextureDimension of either Tex2D or Cube.</param>
         /// <returns>The copied texture.</returns>
         public static Texture2D CopyRenderTextureToTexture2D(RenderTexture source)
         {
@@ -101,9 +111,10 @@ namespace UnityExtensions
                     var t2D = new Texture2D(resolution * 6, resolution, format, TextureCreationFlags.None);
                     var a = RenderTexture.active;
                     RenderTexture.active = result;
-                    t2D.ReadPixels(new Rect(0, 0, 6 * resolution, resolution), 0, 0, false);
+                    t2D.ReadPixels(new Rect(0, 0, 6 * resolution, resolution), 0, 0, recalculateMipMaps: false);
                     RenderTexture.active = a;
                     RenderTexture.ReleaseTemporary(result);
+                    cmd.Dispose();
 
                     return t2D;
                 }

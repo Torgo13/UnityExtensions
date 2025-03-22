@@ -49,9 +49,11 @@ namespace UnityExtensions
         }
         
         /// <summary>
-        /// Deserializes an object from an array at a specified index.  Supported types are ASCIIString, UnicodeString, UInt16, UInt32, Int32, Hash128, JsonObject
+        /// Deserializes an object from an array at a specified index.
+        /// Supported types are ASCIIString, UnicodeString, UInt16, UInt32, Int32, Hash128, JsonObject
         /// </summary>
-        /// <param name="keyData">The array of bytes for the object. The first byte is the ObjectType. The rest depends on the type.</param>
+        /// <param name="keyData">The array of bytes for the object.
+        /// The first byte is the ObjectType. The rest depends on the type.</param>
         /// <param name="dataIndex">The index of the first byte of the data.</param>
         /// <returns>The deserialized object.</returns>
         public static object ReadObjectFromByteArray(byte[] keyData, int dataIndex)

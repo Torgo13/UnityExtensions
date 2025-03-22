@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -10,7 +9,13 @@ namespace UnityExtensions
         public static AnimationClip LoadAnimationClipFromFbx(string fbxName, string clipName)
         {
             var clips = Resources.LoadAll<AnimationClip>(fbxName);
-            return clips.FirstOrDefault(clip => clip.name == clipName);
+            foreach (var clip in clips)
+            {
+                if (clip.name == clipName)
+                    return clip;
+            }
+            
+            return null;
         }
 
         public static GameObject CreateEffector(string name, Vector3 position, Quaternion rotation)

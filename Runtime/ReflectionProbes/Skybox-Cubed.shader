@@ -3,10 +3,10 @@ Shader "Skybox/Cubemap"
 {
     Properties
     {
-        _Tint("Tint Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        [MainColor] _Tint("Tint Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [Gamma] _Exposure("Exposure", Range(0, 8)) = 1.0
         _Rotation("Rotation", Range(0, 360)) = 0
-        [NoScaleOffset] _Tex("Cubemap (HDR)", Cube) = "grey" {}
+        [NoScaleOffset] [MainTexture] _Tex("Cubemap (HDR)", Cube) = "grey" {}
     }
 
     SubShader
@@ -69,7 +69,7 @@ Shader "Skybox/Cubemap"
             half4 frag(Varyings IN) : SV_Target
             {
                 half3 c = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, IN.texcoord, 0).rgb;
-                c = c * _Tint.rgb;
+                c *= _Tint.rgb;
                 c *= _Exposure;
 
                 return half4(c, 1.0);

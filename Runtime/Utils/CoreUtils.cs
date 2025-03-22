@@ -98,10 +98,11 @@ namespace UnityExtensions
                 if (_magentaCubeTextureArray == null)
                 {
                     _magentaCubeTextureArray = new CubemapArray(1, 1, GraphicsFormat.R32G32B32A32_SFloat, TextureCreationFlags.None);
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
                     for (int i = 0; i < 6; ++i)
                     {
-                        Color[] colors = { Color.magenta };
-                        _magentaCubeTextureArray.SetPixels(colors, (CubemapFace)i, 0);
+                        colors[0] = Color.magenta;
+                        _magentaCubeTextureArray.SetPixelData(colors, mipLevel: 0, (CubemapFace)i, element: 0);
                     }
                     _magentaCubeTextureArray.Apply();
                 }
@@ -176,9 +177,10 @@ namespace UnityExtensions
             {
                 if (_blackVolumeTexture == null)
                 {
-                    Color[] colors = { Color.black };
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
+                    colors[0] = Color.black;
                     _blackVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
-                    _blackVolumeTexture.SetPixels(colors, 0);
+                    _blackVolumeTexture.SetPixelData(colors, mipLevel: 0);
                     _blackVolumeTexture.Apply();
                 }
 
@@ -197,9 +199,10 @@ namespace UnityExtensions
             {
                 if (_whiteVolumeTexture == null)
                 {
-                    Color[] colors = { Color.white };
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
+                    colors[0] = Color.white;
                     _whiteVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
-                    _whiteVolumeTexture.SetPixels(colors, 0);
+                    _whiteVolumeTexture.SetPixelData(colors, mipLevel: 0);
                     _whiteVolumeTexture.Apply();
                 }
 

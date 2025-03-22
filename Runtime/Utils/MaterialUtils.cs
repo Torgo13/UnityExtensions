@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityObject = UnityEngine.Object;
 
 #if INCLUDE_UGUI
@@ -39,7 +40,6 @@ namespace UnityExtensions
         /// <remarks>
         /// To use this function, your project must contain the
         /// [Unity UI package (com.unity.ugui)](https://docs.unity3d.com/Manual/com.unity.ugui.html).
-        ///
         /// > [!WARNING]
         /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on this material object when done.
         /// </remarks>
@@ -58,7 +58,8 @@ namespace UnityExtensions
         /// </summary>
         /// <remarks>
         /// > [!WARNING]
-        /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on each cloned material object in the array when done.
+        /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on each cloned material object
+        /// in the array when done.
         /// </remarks>
         /// <seealso cref="Renderer.materials"/>
         /// <param name="renderer">Renderer assigned the materials to clone and replace.</param>
@@ -76,17 +77,24 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Converts an RGB or RGBA formatted hex string to a <see cref="Color"/> object.
+        /// Converts an RGB or RGBA formatted hex string to a <see cref="Color32"/> object.
         /// </summary>
         /// <param name="hex">The formatted string, with an optional "0x" or "#" prefix.</param>
         /// <returns>The color value represented by the formatted string.</returns>
-        public static Color HexToColor(string hex)
+        public static Color32 HexToColor(string hex)
         {
-            hex = hex.Replace("0x", "").Replace("#", "");
-            var r = byte.Parse(hex.AsSpan(0, 2), NumberStyles.HexNumber);
-            var g = byte.Parse(hex.AsSpan(2, 2), NumberStyles.HexNumber);
-            var b = byte.Parse(hex.AsSpan(4, 2), NumberStyles.HexNumber);
-            var a = hex.Length == 8 ? byte.Parse(hex.AsSpan(4, 2), NumberStyles.HexNumber) : (byte)255;
+            int startIndex = 0;
+            if (hex.StartsWith('#'))
+                startIndex = 1;
+            else if (hex.StartsWith("0x", StringComparison.Ordinal))
+                startIndex = 2;
+            
+            var r = byte.Parse(hex.AsSpan(startIndex, 2), NumberStyles.HexNumber);
+            var g = byte.Parse(hex.AsSpan(startIndex + 2, 2), NumberStyles.HexNumber);
+            var b = byte.Parse(hex.AsSpan(startIndex + 4, 2), NumberStyles.HexNumber);
+            var a = hex.Length == startIndex + 8
+                ? byte.Parse(hex.AsSpan(startIndex + 6, 2), NumberStyles.HexNumber)
+                : (byte)255;
 
             return new Color32(r, g, b, a);
         }
@@ -113,12 +121,11 @@ namespace UnityExtensions
         /// <param name="material">The material to add.</param>
         public static void AddMaterial(this Renderer renderer, Material material)
         {
-            var materials = renderer.sharedMaterials;
-            var length = materials.Length;
-            var newMaterials = new Material[length + 1];
-            Array.Copy(materials, newMaterials, length);
-            newMaterials[length] = material;
-            renderer.sharedMaterials = newMaterials;
+            var materials = ListPool<Material>.Get();
+            renderer.GetSharedMaterials(materials);
+            materials.Add(material);
+            renderer.SetSharedMaterials(materials);
+            ListPool<Material>.Release(materials);
         }
         #endregion // Unity.XR.CoreUtils
     }

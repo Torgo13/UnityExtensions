@@ -33,7 +33,6 @@ namespace UnityExtensions
             }
 
             return (T) _items[typeId].Storage;
-
         }
 
         /// <summary>
@@ -89,7 +88,6 @@ namespace UnityExtensions
                 return (T) _items[typeId].Storage;
             }
 
-
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
             return CreateAndGetData<T>(typeId, lineNumber, memberName, filePath);
 #else
@@ -128,6 +126,7 @@ namespace UnityExtensions
                 {
                     items[i] = _items[i];
                 }
+
                 _items = items;
             }
 

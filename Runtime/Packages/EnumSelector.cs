@@ -62,7 +62,7 @@ namespace BoatAttack.UI
         {
             if (loop)
             {
-                return (int) Mathf.Repeat(index, options.Length);
+                return (int)Mathf.Repeat(index, options.Length);
             }
 
             return Mathf.Clamp(index, 0, options.Length);

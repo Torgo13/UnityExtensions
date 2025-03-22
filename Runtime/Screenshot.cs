@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -18,7 +19,7 @@ namespace UnityExtensions
             var width = Mathf.Max(1, Mathf.RoundToInt(camera.pixelWidth * scale));
             var height = Mathf.Max(1, Mathf.RoundToInt(camera.pixelHeight * scale));
             var prevCameraRenderTexture = camera.targetTexture;
-            var renderTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32);
+            var renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
 
             camera.targetTexture = renderTexture;
             camera.Render();
@@ -33,6 +34,7 @@ namespace UnityExtensions
 
             camera.targetTexture = prevCameraRenderTexture;
             RenderTexture.active = prevRenderTexture;
+            RenderTexture.ReleaseTemporary(renderTexture);
 
             return texture;
         }
@@ -55,5 +57,23 @@ namespace UnityExtensions
             return assetPath;
         }
         #endregion // Unity.LiveCapture
+
+        public static async Task<string> SaveAsPNGAsync(Texture2D texture, string filename, string directory)
+        {
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+
+            var formatter = new FileNameFormatter();
+            filename = formatter.Format(filename);
+            var assetPath = $"{directory}/{filename}.png";
+            Directory.CreateDirectory(directory);
+#if UNITY_EDITOR
+            assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
+#endif
+            var bytes = texture.EncodeToPNG();
+            await File.WriteAllBytesAsync(assetPath, bytes);
+
+            return assetPath;
+        }
     }
 }

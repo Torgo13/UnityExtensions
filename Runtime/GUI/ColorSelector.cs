@@ -62,7 +62,7 @@ namespace BoatAttack.UI
         {
             if (loop)
             {
-                return (int) Mathf.Repeat(index, ColorPalette.Length);
+                return (int)Mathf.Repeat(index, ColorPalette.Length);
             }
 
             return Mathf.Clamp(index, 0, ColorPalette.Length);

@@ -779,7 +779,7 @@ namespace UnityExtensions
                 var bottomEdge = hullEdgeDirections[bottomIndex];
 
                 // find the angles between our caliper lines and the polygon edges, by doing
-                // ` arccosine(caliperEdge � hullEdge) ` for each pair of caliper edge & polygon edge
+                // ` arccosine(caliperEdge * hullEdge) ` for each pair of caliper edge & polygon edge
                 var leftAngle = Math.Acos(caliperLeft.x * leftEdge.x + caliperLeft.z * leftEdge.z);
                 var rightAngle = Math.Acos(caliperRight.x * rightEdge.x + caliperRight.z * rightEdge.z);
                 var topAngle = Math.Acos(caliperTop.x * topEdge.x + caliperTop.z * topEdge.z);

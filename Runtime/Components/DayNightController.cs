@@ -47,6 +47,8 @@ namespace UnityExtensions
 
         // vars
         private float _prevTime; // previous time
+
+        Transform sunTransform;
         
         static readonly int Rotation = Shader.PropertyToID("_Rotation");
         static readonly int Tint = Shader.PropertyToID("_Tint");
@@ -71,6 +73,7 @@ namespace UnityExtensions
                         && l.type == LightType.Directional)
                     {
                         sun = l;
+                        sunTransform = sun.transform;
                         break;
                     }
                 }
@@ -99,7 +102,6 @@ namespace UnityExtensions
         void UpdateSun()
         {
             var rotation = CalculateSunPosition(NormalizedDateTime(time), 56.0, 9.0);
-            var sunTransform = sun.transform;
             sunTransform.rotation = rotation;
             sunTransform.Rotate(new Vector3(0f, northHeading, 0f), Space.World);
             sun.color = sunColour.Evaluate(Mathf.Clamp01(Vector3.Dot(sunTransform.forward, Vector3.down)));

@@ -118,7 +118,7 @@ namespace UnityExtensions
             // Grow array if needed
             if (index >= Array.Length)
             {
-                var newArray = new T[Math.Max(Array.Length * 2,1)];
+                var newArray = new T[Math.Max(Array.Length * 2, 1)];
                 System.Array.Copy(Array, newArray, Array.Length);
                 Array = newArray;
             }

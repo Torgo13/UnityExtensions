@@ -384,7 +384,8 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/Utility/ReflectionUtils.cs#L8
         #region UnityEngine.Rendering.HighDefinition
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="instance"/> is null.</exception>
-        public static void ForEachFieldOfType<T>(this object instance, Action<T> callback, BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
+        public static void ForEachFieldOfType<T>(this object instance, Action<T> callback,
+            BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
         {
             if (instance == null)
                 throw new ArgumentNullException(nameof(instance));
