@@ -14,8 +14,9 @@ namespace UnityExtensions
         static readonly int TexA = Shader.PropertyToID("_TexA");
         static readonly int TexB = Shader.PropertyToID("_TexB");
         static readonly int Blend = Shader.PropertyToID("_Blend");
-#else
 #endif // BLEND_SHADER
+        
+        static readonly int MipLevel = Shader.PropertyToID("_MipLevel");
         
         [SerializeField] Shader skyboxShader;
         Material _skyboxMaterial;
@@ -79,7 +80,7 @@ namespace UnityExtensions
 #if BLEND_SHADER
                 skyboxShader = Shader.Find("Skybox/CubemapBlend");
 #else
-                skyboxShader = Shader.Find("Skybox/CubemapSimple");
+                skyboxShader = Shader.Find("Skybox/GlossyReflection");
 #endif // BLEND_SHADER
 
             if (skyboxShader != null)
@@ -100,8 +101,6 @@ namespace UnityExtensions
                 RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0, RenderTextureReadWrite.Linear)
             {
                 dimension = TextureDimension.Cube,
-                //memoryless = RenderTextureMemoryless.Color | RenderTextureMemoryless.Depth | RenderTextureMemoryless.MSAA,
-                useDynamicScale = false, // Avoid issue when calling ScalableBufferManager.ResizeBuffers()
                 autoGenerateMips = false,
             };
             
@@ -118,7 +117,6 @@ namespace UnityExtensions
                 RenderTextureFormat.DefaultHDR, depthBufferBits: 0)
             {
                 dimension = TextureDimension.Cube,
-                memoryless = RenderTextureMemoryless.None,
                 useMipMap = true,
                 autoGenerateMips = true,
             };
@@ -129,7 +127,6 @@ namespace UnityExtensions
             // Take a full capture before applying it to the skybox
             reflectionCamera.RenderToCubemap(_blendedTexture);
 
-            _skyboxMaterial.mainTexture = _blendedTexture;
             RenderSettings.customReflectionTexture = _blendedTexture;
 #endif // BLEND_SHADER
 
@@ -140,6 +137,8 @@ namespace UnityExtensions
         {
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
+            
+            _skyboxMaterial.SetFloat(MipLevel, 1f / ScalableBufferManager.widthScaleFactor);
 
             TickRealtimeProbes();
         }
