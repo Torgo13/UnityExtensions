@@ -1,12 +1,12 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
-Shader "Skybox/Cubemap"
+Shader "Skybox/CubemapSimple"
 {
     Properties
     {
         [MainColor] _Tint("Tint Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [Gamma] _Exposure("Exposure", Range(0, 8)) = 1.0
         _Rotation("Rotation", Range(0, 360)) = 0
-        [NoScaleOffset] [MainTexture] _Tex("Cubemap (HDR)", Cube) = "grey" {}
+        [MainTexture] [NoScaleOffset] _Tex("Cubemap (HDR)", Cube) = "grey" {}
     }
 
     SubShader

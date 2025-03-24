@@ -2,6 +2,7 @@
 // #define BLEND_SHADER
 
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace UnityExtensions
@@ -14,7 +15,6 @@ namespace UnityExtensions
         static readonly int TexB = Shader.PropertyToID("_TexB");
         static readonly int Blend = Shader.PropertyToID("_Blend");
 #else
-        static readonly int Tex = Shader.PropertyToID("_Tex");
 #endif // BLEND_SHADER
         
         [SerializeField] Shader skyboxShader;
@@ -22,6 +22,8 @@ namespace UnityExtensions
 
         [SerializeField] Camera reflectionCamera;
         Transform _reflectionCameraTransform;
+        
+        Transform _mainCameraTransform;
 
         /// <summary>
         /// Array of three RenderTextures for reflectionCamera to render CubeMaps into.
@@ -54,24 +56,6 @@ namespace UnityExtensions
         [SerializeField] int integerScale = 20;
         */
 
-        Transform _cameraTransform;
-        Transform CameraTransform
-        {
-            get
-            {
-                if (_cameraTransform == null)
-                {
-                    var mainCamera = Camera.main;
-                    if (mainCamera != null)
-                    {
-                        _cameraTransform = mainCamera.transform;
-                    }
-                }
-
-                return _cameraTransform;
-            }
-        }
-
         /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
         int _index;
 
@@ -95,7 +79,7 @@ namespace UnityExtensions
 #if BLEND_SHADER
                 skyboxShader = Shader.Find("Skybox/CubemapBlend");
 #else
-                skyboxShader = Shader.Find("Skybox/Cubemap");
+                skyboxShader = Shader.Find("Skybox/CubemapSimple");
 #endif // BLEND_SHADER
 
             if (skyboxShader != null)
@@ -110,13 +94,15 @@ namespace UnityExtensions
                 reflectionCamera = GetComponentInChildren<Camera>();
 
             _reflectionCameraTransform = reflectionCamera.transform;
+            UpdateReflectionCameraPosition();
 
             RenderTextureDescriptor desc = new RenderTextureDescriptor(Resolution, Resolution,
-                RenderTextureFormat.DefaultHDR, depthBufferBits: 0)
+                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0, RenderTextureReadWrite.Linear)
             {
                 dimension = TextureDimension.Cube,
-                useDynamicScale = false, // Avoid issue when calling ScalableBufferManager.ResizeBuffers() 
-                autoGenerateMips = true,
+                //memoryless = RenderTextureMemoryless.Color | RenderTextureMemoryless.Depth | RenderTextureMemoryless.MSAA,
+                useDynamicScale = false, // Avoid issue when calling ScalableBufferManager.ResizeBuffers()
+                autoGenerateMips = false,
             };
             
             _renderTextures = new RenderTexture[ProbeCount];
@@ -128,9 +114,23 @@ namespace UnityExtensions
 
 #if BLEND_SHADER
 #else
+            desc = new RenderTextureDescriptor(Resolution, Resolution,
+                RenderTextureFormat.DefaultHDR, depthBufferBits: 0)
+            {
+                dimension = TextureDimension.Cube,
+                memoryless = RenderTextureMemoryless.None,
+                useMipMap = true,
+                autoGenerateMips = true,
+            };
+            
             _blendedTexture = new RenderTexture(desc);
             _blendedTexture.hideFlags = HideFlags.HideAndDontSave;
-            _skyboxMaterial.SetTexture(Tex, _blendedTexture);
+
+            // Take a full capture before applying it to the skybox
+            reflectionCamera.RenderToCubemap(_blendedTexture);
+
+            _skyboxMaterial.mainTexture = _blendedTexture;
+            RenderSettings.customReflectionTexture = _blendedTexture;
 #endif // BLEND_SHADER
 
             RenderNextCubemap();
@@ -176,7 +176,7 @@ namespace UnityExtensions
         public bool TickRealtimeProbes()
         {
             // Calculate how many frames have been rendered since RenderNextCubemap() was last called
-            var frameCount = Time.frameCount - _renderedFrameCount;
+            int frameCount = Time.frameCount - _renderedFrameCount;
 
             // Render a single cubemap face
             reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
@@ -203,13 +203,11 @@ namespace UnityExtensions
             _skyboxMaterial.SetTexture(TexA, _renderTextures[PreviousIndex()]);
             _skyboxMaterial.SetTexture(TexB, _renderTextures[_index]);
             _skyboxMaterial.SetFloat(Blend, 0f);
-#endif // BLEND_SHADER
-
+            
             // Update reflection texture
-#if BLEND_SHADER
             RenderSettings.customReflectionTexture = _renderTextures[_index];
 #else
-            RenderSettings.customReflectionTexture = _blendedTexture;
+            UpdateAmbient();
 #endif // BLEND_SHADER
 
             _index = NextIndex();
@@ -220,13 +218,36 @@ namespace UnityExtensions
 
         void RenderNextCubemap()
         {
-            // Move the reflection camera to the position of the main camera
-            // Do not make the reflection camera a child of the main camera, or it may move during time slicing
-            _reflectionCameraTransform.position = CameraTransform.position;
+            UpdateReflectionCameraPosition();
 
             // Render the first cubemap face
             reflectionCamera.RenderToCubemap(_renderTextures[_index], 1);
             ResetFrameCount();
+        }
+
+        /// <summary>
+        /// Move the reflection camera to the position of the main camera.
+        /// </summary>
+        /// <remarks>
+        /// Do not make the reflection camera a child of the main camera, or it may move during time slicing.
+        /// </remarks>
+        void UpdateReflectionCameraPosition()
+        {
+            bool foundMainCamera = _mainCameraTransform != null;
+            if (!foundMainCamera)
+            {
+                var mainCamera = Camera.main;
+                if (mainCamera != null)
+                {
+                    _mainCameraTransform = mainCamera.transform;
+                    foundMainCamera = true;
+                }
+            }
+                
+            if (foundMainCamera)
+            {
+                _reflectionCameraTransform.position = _mainCameraTransform.position;
+            }
         }
 
         /// <summary>
@@ -254,5 +275,57 @@ namespace UnityExtensions
         {
             return (_index + ProbeCount - 1) % ProbeCount;
         }
+
+        #region Ambient
+        
+#if BLEND_SHADER
+#else
+        /// <summary>
+        /// Sample the highest mipmap level of each cubemap face.
+        /// Apply the colours to RenderSettings.
+        /// </summary>
+        void UpdateAmbient()
+        {
+            AsyncGPUReadback.Request(_blendedTexture, mipIndex: _blendedTexture.mipmapCount - 1,
+                x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
+                GraphicsFormat.R8G8B8A8_UNorm, GPUReadbackRequest);
+        }
+#endif // BLEND_SHADER
+
+        /// <summary>
+        /// Callback after AsyncGPUReadback has completed.
+        /// </summary>
+        void GPUReadbackRequest(AsyncGPUReadbackRequest request)
+        {
+            if (request.hasError || !request.done)
+                return;
+            
+            const int positiveX = (int)CubemapFace.PositiveX;
+            const int negativeX = (int)CubemapFace.NegativeX;
+            const int positiveY = (int)CubemapFace.PositiveY;
+            const int negativeY = (int)CubemapFace.NegativeY;
+            const int positiveZ = (int)CubemapFace.PositiveZ;
+            const int negativeZ = (int)CubemapFace.NegativeZ;
+            
+            Color32 equator0 = request.GetData<Color32>(positiveX)[0];
+            Color32 equator1 = request.GetData<Color32>(negativeX)[0];
+            Color32 equator2 = request.GetData<Color32>(positiveZ)[0];
+            Color32 equator3 = request.GetData<Color32>(negativeZ)[0];
+
+            // Get the average of the four colours at the horizon
+            // Use a Vector4 to avoid colours being clamped to 1
+            Vector4 equator = new Vector4(0, 0, 0, 1);
+            for (int i = 0; i < 3; i++)
+            {
+                equator[i] = equator0[i] + equator1[i] + equator2[i] + equator3[i];
+                equator[i] /= 4 * byte.MaxValue;
+            }
+            
+            RenderSettings.ambientSkyColor = request.GetData<Color32>(positiveY)[0];
+            RenderSettings.ambientGroundColor = request.GetData<Color32>(negativeY)[0];
+            RenderSettings.ambientEquatorColor = equator;
+        }
+        
+        #endregion // Ambient
     }
 }
