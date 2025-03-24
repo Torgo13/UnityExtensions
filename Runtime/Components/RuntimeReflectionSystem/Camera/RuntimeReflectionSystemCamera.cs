@@ -43,6 +43,8 @@ namespace UnityExtensions
         /// </summary>
         RenderTexture _blendedTexture;
 #endif // BLEND_SHADER
+        
+        AsyncGPUReadbackRequest _readbackRequest;
 
         public bool resolutionScaleOverride;
 
@@ -58,7 +60,7 @@ namespace UnityExtensions
         */
 
         /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
-        int _index;
+        int _index = -1;
 
         /// <summary>Snapshot of Time.frameCount the last time ResetFrameCount() was called.</summary>
         int _renderedFrameCount;
@@ -95,7 +97,7 @@ namespace UnityExtensions
                 reflectionCamera = GetComponentInChildren<Camera>();
 
             _reflectionCameraTransform = reflectionCamera.transform;
-            UpdateReflectionCameraPosition();
+            PrepareNextCubemap();
 
             RenderTextureDescriptor desc = new RenderTextureDescriptor(Resolution, Resolution,
                 RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0, RenderTextureReadWrite.Linear)
@@ -123,18 +125,21 @@ namespace UnityExtensions
             
             _blendedTexture = new RenderTexture(desc);
             _blendedTexture.hideFlags = HideFlags.HideAndDontSave;
-
+            
             // Take a full capture before applying it to the skybox
             reflectionCamera.RenderToCubemap(_blendedTexture);
 
+            // Sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
+            // or GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
             RenderSettings.customReflectionTexture = _blendedTexture;
 #endif // BLEND_SHADER
-
-            RenderNextCubemap();
         }
 
         void LateUpdate()
         {
+            if (_readbackRequest.done && !_readbackRequest.hasError)
+                GPUReadbackRequest();
+            
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
             
@@ -174,8 +179,34 @@ namespace UnityExtensions
         /// <returns>True if the camera finished rendering all six faces and RenderSettings has been updated.</returns>
         public bool TickRealtimeProbes()
         {
-            // Calculate how many frames have been rendered since RenderNextCubemap() was last called
+            bool updated = false;
+            
+            // Calculate how many frames have been rendered since PrepareNextCubemap() was last called
             int frameCount = Time.frameCount - _renderedFrameCount;
+            
+            // Return if the current cubemap still has more faces to render
+            bool finishedRendering = frameCount >= BlendFrames;
+            if (finishedRendering)
+            {
+                //ReflectionProbe.UpdateCachedState();
+                //return base.TickRealtimeProbes();
+
+#if BLEND_SHADER
+                _skyboxMaterial.SetTexture(TexA, _renderTextures[PreviousIndex()]);
+                _skyboxMaterial.SetTexture(TexB, _renderTextures[_index]);
+                _skyboxMaterial.SetFloat(Blend, 0f);
+                
+                // Update reflection texture
+                RenderSettings.customReflectionTexture = _renderTextures[_index];
+#else
+                UpdateAmbient();
+#endif // BLEND_SHADER
+
+                PrepareNextCubemap();
+
+                frameCount = 0;
+                updated = true;
+            }
 
             // Render a single cubemap face
             reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
@@ -186,42 +217,19 @@ namespace UnityExtensions
             _skyboxMaterial.SetFloat(Blend, blend);
 #else
             // With three RenderTextures, NextIndex() is equivalent to the index before PreviousIndex()
+            // Requires six draw calls
             ReflectionProbe.BlendCubemap(_renderTextures[NextIndex()], _renderTextures[PreviousIndex()],
                 blend, _blendedTexture);
 #endif // BLEND_SHADER
-
-            // Return if the current cubemap still has more faces to render
-            bool isRendering = frameCount < BlendFrames;
-            if (isRendering)
-                return false;
-
-            //ReflectionProbe.UpdateCachedState();
-            //return base.TickRealtimeProbes();
-
-#if BLEND_SHADER
-            _skyboxMaterial.SetTexture(TexA, _renderTextures[PreviousIndex()]);
-            _skyboxMaterial.SetTexture(TexB, _renderTextures[_index]);
-            _skyboxMaterial.SetFloat(Blend, 0f);
             
-            // Update reflection texture
-            RenderSettings.customReflectionTexture = _renderTextures[_index];
-#else
-            UpdateAmbient();
-#endif // BLEND_SHADER
-
-            _index = NextIndex();
-            RenderNextCubemap();
-
-            return true;
+            return updated;
         }
 
-        void RenderNextCubemap()
+        void PrepareNextCubemap()
         {
             UpdateReflectionCameraPosition();
-
-            // Render the first cubemap face
-            reflectionCamera.RenderToCubemap(_renderTextures[_index], 1);
             ResetFrameCount();
+            _index = NextIndex();
         }
 
         /// <summary>
@@ -285,20 +293,16 @@ namespace UnityExtensions
         /// </summary>
         void UpdateAmbient()
         {
-            AsyncGPUReadback.Request(_blendedTexture, mipIndex: _blendedTexture.mipmapCount - 1,
-                x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
-                GraphicsFormat.R8G8B8A8_UNorm, GPUReadbackRequest);
+            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture, mipIndex: _blendedTexture.mipmapCount - 1,
+                x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6, GraphicsFormat.R8G8B8A8_UNorm);
         }
 #endif // BLEND_SHADER
 
         /// <summary>
         /// Callback after AsyncGPUReadback has completed.
         /// </summary>
-        void GPUReadbackRequest(AsyncGPUReadbackRequest request)
+        void GPUReadbackRequest()
         {
-            if (request.hasError || !request.done)
-                return;
-            
             const int positiveX = (int)CubemapFace.PositiveX;
             const int negativeX = (int)CubemapFace.NegativeX;
             const int positiveY = (int)CubemapFace.PositiveY;
@@ -306,10 +310,10 @@ namespace UnityExtensions
             const int positiveZ = (int)CubemapFace.PositiveZ;
             const int negativeZ = (int)CubemapFace.NegativeZ;
             
-            Color32 equator0 = request.GetData<Color32>(positiveX)[0];
-            Color32 equator1 = request.GetData<Color32>(negativeX)[0];
-            Color32 equator2 = request.GetData<Color32>(positiveZ)[0];
-            Color32 equator3 = request.GetData<Color32>(negativeZ)[0];
+            Color32 equator0 = _readbackRequest.GetData<Color32>(layer: positiveX)[0];
+            Color32 equator1 = _readbackRequest.GetData<Color32>(layer: negativeX)[0];
+            Color32 equator2 = _readbackRequest.GetData<Color32>(layer: positiveZ)[0];
+            Color32 equator3 = _readbackRequest.GetData<Color32>(layer: negativeZ)[0];
 
             // Get the average of the four colours at the horizon
             // Use a Vector4 to avoid colours being clamped to 1
@@ -320,8 +324,8 @@ namespace UnityExtensions
                 equator[i] /= 4 * byte.MaxValue;
             }
             
-            RenderSettings.ambientSkyColor = request.GetData<Color32>(positiveY)[0];
-            RenderSettings.ambientGroundColor = request.GetData<Color32>(negativeY)[0];
+            RenderSettings.ambientSkyColor = _readbackRequest.GetData<Color32>(layer: positiveY)[0];
+            RenderSettings.ambientGroundColor = _readbackRequest.GetData<Color32>(layer: negativeY)[0];
             RenderSettings.ambientEquatorColor = equator;
         }
         
