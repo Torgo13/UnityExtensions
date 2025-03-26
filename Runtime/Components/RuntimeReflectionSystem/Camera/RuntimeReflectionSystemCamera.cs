@@ -27,7 +27,7 @@ namespace UnityExtensions
         Transform _mainCameraTransform;
 
         /// <summary>
-        /// Array of three RenderTextures for reflectionCamera to render CubeMaps into.
+        /// Array of three RenderTextures for reflectionCamera to render cubemaps into.
         /// </summary>
         /// <remarks>
         /// While one RenderTexture is being rendered to over six frames, the previous
@@ -45,6 +45,11 @@ namespace UnityExtensions
 #endif // BLEND_SHADER
         
         AsyncGPUReadbackRequest _readbackRequest;
+        
+        /// <summary>
+        /// Store the average colour of each cubemap face.
+        /// </summary>
+        public readonly Color32[] _ambientColours = new Color32[6];
 
         public bool resolutionScaleOverride;
 
@@ -303,29 +308,32 @@ namespace UnityExtensions
         /// </summary>
         void GPUReadbackRequest()
         {
+            // Cache the indices of the CubemapFace enum to avoid boxing
             const int positiveX = (int)CubemapFace.PositiveX;
             const int negativeX = (int)CubemapFace.NegativeX;
             const int positiveY = (int)CubemapFace.PositiveY;
             const int negativeY = (int)CubemapFace.NegativeY;
             const int positiveZ = (int)CubemapFace.PositiveZ;
             const int negativeZ = (int)CubemapFace.NegativeZ;
-            
-            Color32 equator0 = _readbackRequest.GetData<Color32>(layer: positiveX)[0];
-            Color32 equator1 = _readbackRequest.GetData<Color32>(layer: negativeX)[0];
-            Color32 equator2 = _readbackRequest.GetData<Color32>(layer: positiveZ)[0];
-            Color32 equator3 = _readbackRequest.GetData<Color32>(layer: negativeZ)[0];
 
+            for (int i = 0; i < _ambientColours.Length; i++)
+            {
+                _ambientColours[i] = _readbackRequest.GetData<Color32>(layer: i)[0];
+            }
+            
             // Get the average of the four colours at the horizon
             // Use a Vector4 to avoid colours being clamped to 1
             Vector4 equator = new Vector4(0, 0, 0, 1);
             for (int i = 0; i < 3; i++)
             {
-                equator[i] = equator0[i] + equator1[i] + equator2[i] + equator3[i];
+                equator[i] = _ambientColours[positiveX][i] + _ambientColours[negativeX][i]
+                    + _ambientColours[positiveZ][i] + _ambientColours[negativeZ][i];
+                
                 equator[i] /= 4 * byte.MaxValue;
             }
             
-            RenderSettings.ambientSkyColor = _readbackRequest.GetData<Color32>(layer: positiveY)[0];
-            RenderSettings.ambientGroundColor = _readbackRequest.GetData<Color32>(layer: negativeY)[0];
+            RenderSettings.ambientSkyColor = _ambientColours[positiveY];
+            RenderSettings.ambientGroundColor = _ambientColours[negativeY];
             RenderSettings.ambientEquatorColor = equator;
         }
         
