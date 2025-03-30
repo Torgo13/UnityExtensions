@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -106,12 +108,13 @@ namespace UnityExtensions
             if (Application.isPlaying)
                 return;
 
-            var monoBehaviours = gameObject.GetComponents<MonoBehaviour>();
+            using var _0 = ListPool<MonoBehaviour>.Get(out var monoBehaviours);
+            gameObject.GetComponents(monoBehaviours);
             foreach (var mb in monoBehaviours)
             {
                 if (mb)
                 {
-                    if(enabled)
+                    if (enabled)
                         mb.StartRunInEditMode();
                     else
                         mb.StopRunInEditMode();
@@ -125,5 +128,50 @@ namespace UnityExtensions
 #endif
         }
         #endregion // Unity.XR.CoreUtils
+        
+        /// <summary>
+        /// Get the direct children GameObjects of this GameObject.
+        /// </summary>
+        /// <param name="go">The parent GameObject that we will want to get the child GameObjects on.</param>
+        /// <param name="childGameObjects">The direct children of a GameObject.</param>
+        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects)
+        {
+            var goTransform = go.transform;
+            var childCount = goTransform.childCount;
+            if (childCount == 0)
+                return;
+
+            childGameObjects.EnsureCapacity(childCount);
+            for (var i = 0; i < childCount; i++)
+            {
+                childGameObjects.Add(goTransform.GetChild(i).gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Gets a descendant GameObject with a specific name
+        /// </summary>
+        /// <param name="go">The parent object that is searched for a named child.</param>
+        /// <param name="name">Name of child to be found.</param>
+        /// <param name="found">True if a descendant GameObject with the specified name was found.</param>
+        /// <returns>The returned child GameObject or null if no child is found.</returns>
+        public static GameObject GetNamedChild(this GameObject go, string name, out bool found)
+        {
+            found = false;
+            using var _0 = ListPool<Transform>.Get(out var transforms);
+            go.GetComponentsInChildren(transforms);
+            GameObject foundObject = null;
+            for (var i = 0; i < transforms.Count; i++)
+            {
+                if (transforms[i].name == name)
+                {
+                    found = true;
+                    foundObject = transforms[i].gameObject;
+                    break;
+                }
+            }
+
+            return foundObject;
+        }
     }
 }

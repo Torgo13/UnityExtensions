@@ -13,7 +13,7 @@ namespace UnityExtensions
 {
     /// <summary>
     /// Utility methods for creating GameObjects.
-    /// Allows systems to subscribe to <see cref="GameObjectInstantiated"/>.
+    /// Allows systems to subscribe to <see cref="OnGameObjectInstantiated"/>.
     /// </summary>
     public static class GameObjectUtils
     {
@@ -23,36 +23,36 @@ namespace UnityExtensions
         /// Called when a GameObject has been instantiated through the <see cref="GameObjectUtils"/> versions of
         /// `Instantiate`.
         /// </summary>
-        public static event Action<GameObject> GameObjectInstantiated;
+        public static event Action<GameObject> OnGameObjectInstantiated;
 
         /// <summary>
         /// Creates a new GameObject and returns it.
-        /// This method also calls <see cref="GameObjectInstantiated"/>.
+        /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <returns>The new GameObject.</returns>
         public static GameObject Create()
         {
             var gameObject = new GameObject();
-            GameObjectInstantiated?.Invoke(gameObject);
+            OnGameObjectInstantiated?.Invoke(gameObject);
             return gameObject;
         }
 
         /// <summary>
         /// Creates a new GameObject and returns it.
-        /// This method also calls <see cref="GameObjectInstantiated"/>.
+        /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <param name="name">The name to be given to the new GameObject.</param>
         /// <returns>The new GameObject.</returns>
         public static GameObject Create(string name)
         {
             var gameObject = new GameObject(name);
-            GameObjectInstantiated?.Invoke(gameObject);
+            OnGameObjectInstantiated?.Invoke(gameObject);
             return gameObject;
         }
 
         /// <summary>
         /// Clones the GameObject, <paramref name="original"/>, and returns the clone.
-        /// This method also calls <see cref="GameObjectInstantiated"/>.
+        /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <seealso cref="UnityObject.Instantiate(UnityObject, Transform, bool)"/>
         /// <param name="original">An existing GameObject that you want to make a copy of.</param>
@@ -64,15 +64,15 @@ namespace UnityExtensions
         public static GameObject Instantiate(GameObject original, Transform parent = null, bool worldPositionStays = true)
         {
             var gameObject = UnityObject.Instantiate(original, parent, worldPositionStays);
-            if (gameObject != null && GameObjectInstantiated != null)
-                GameObjectInstantiated(gameObject);
+            if (gameObject != null && OnGameObjectInstantiated != null)
+                OnGameObjectInstantiated(gameObject);
 
             return gameObject;
         }
 
         /// <summary>
         /// Clones the GameObject, <paramref name="original"/>, and returns the clone.
-        /// This method also calls <see cref="GameObjectInstantiated"/>.
+        /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <seealso cref="UnityObject.Instantiate(UnityObject, Vector3, Quaternion)"/>
         /// <param name="original">An existing GameObject that you want to make a copy of.</param>
@@ -86,7 +86,7 @@ namespace UnityExtensions
 
         /// <summary>
         /// Clones the GameObject, <paramref name="original"/>, and returns the clone.
-        /// This method also calls <see cref="GameObjectInstantiated"/>.
+        /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <seealso cref="UnityObject.Instantiate(UnityObject, Vector3, Quaternion, Transform)"/>
         /// <param name="original">An existing GameObject that you want to make a copy of</param>
@@ -97,8 +97,8 @@ namespace UnityExtensions
         public static GameObject Instantiate(GameObject original, Transform parent, Vector3 position, Quaternion rotation)
         {
             var gameObject = UnityObject.Instantiate(original, position, rotation, parent);
-            if (gameObject != null && GameObjectInstantiated != null)
-                GameObjectInstantiated(gameObject);
+            if (gameObject != null && OnGameObjectInstantiated != null)
+                OnGameObjectInstantiated(gameObject);
 
             return gameObject;
         }
@@ -235,8 +235,7 @@ namespace UnityExtensions
                 var matchingObjects = GameObject.FindGameObjectsWithTag(tag);
                 foreach (var possibleMatch in matchingObjects)
                 {
-                    foundObject = possibleMatch.GetComponent<T>();
-                    if (foundObject != null)
+                    if (possibleMatch.TryGetComponent(out foundObject))
                     {
                         break;
                     }

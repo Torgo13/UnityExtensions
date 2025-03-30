@@ -18,9 +18,10 @@ namespace UnityExtensions
         /// <param name="high">The upper 8 bytes of the guid.</param>
         public static void Decompose(this Guid guid, out ulong low, out ulong high)
         {
-            var bytes = guid.ToByteArray();
-            low = BitConverter.ToUInt64(bytes, 0);
-            high = BitConverter.ToUInt64(bytes, 8);
+            Span<byte> bytes = stackalloc byte[16];
+            guid.TryWriteBytes(bytes);
+            low = BitConverter.ToUInt64(bytes.Slice(0, 8));
+            high = BitConverter.ToUInt64(bytes.Slice(8, 8));
         }
         #endregion // Unity.XR.CoreUtils
     }

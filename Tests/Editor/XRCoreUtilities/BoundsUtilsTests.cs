@@ -56,7 +56,7 @@ namespace UnityExtensions.Editor.Tests
         {
             foreach (var o in m_ToCleanupAfterEach)
             {
-                UnityObjectUtils.Destroy(o);
+                UnityObjectExtensions.Destroy(o);
             }
         }
     }

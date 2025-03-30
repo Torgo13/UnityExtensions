@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -159,7 +160,19 @@ namespace UnityExtensions
             if (serializeElement == null)
                 throw new ArgumentNullException(nameof(serializeElement), $"Argument {nameof(serializeElement)} must not be null.");
 
-            return "[" + string.Join(",", collection.Select(t => t == null ? "null" : serializeElement.Invoke(t))) + "]";
+            using var _0 = StringBuilderPool.Get(out var sb);
+            sb.Append('[');
+            foreach (var t in collection)
+            {
+                sb.Append(t == null ? "null" : serializeElement(t));
+                sb.Append(',');
+            }
+
+            // Remove last comma
+            sb.Remove(sb.Length - 1, 1);
+            
+            sb.Append(']');
+            return sb.ToString();
         }
 
         /// <summary>
@@ -185,7 +198,7 @@ namespace UnityExtensions
             return false;
         }
         #endregion // Unity.Collections
-
+        
 #if !NETSTANDARD2_1
         //https://github.com/dotnet/runtime/blob/7eb07dde40933cace91d57aae0a3e569fd042def/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/CollectionExtensions.cs
         #region System.Collections.Generic

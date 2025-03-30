@@ -65,6 +65,20 @@ namespace UnityExtensions.Unsafe.Tests
         }
         
         [Test]
+        public unsafe void GetPointer_ShouldReturnNullForEmptyArray()
+        {
+            var emptyArray = new NativeArray<int>(0, Allocator.Temp);
+            Assert.IsTrue(null == emptyArray.GetPointer());
+        }
+
+        [Test]
+        public unsafe void GetPointer_ShouldReturnValidPointerForNonEmptyArray()
+        {
+            var array = new NativeArray<int>(10, Allocator.Temp);
+            Assert.IsTrue(null != array.GetPointer());
+        }
+        
+        [Test]
         [Category("Utilities")]
         public void Utilities_CanEraseInNativeArrayWithCapacity()
         {

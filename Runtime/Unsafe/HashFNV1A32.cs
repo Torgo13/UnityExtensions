@@ -146,8 +146,12 @@ namespace UnityExtensions.Unsafe
         }
 
         //used for testing
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
         internal static int GetTotalCacheCount() => _methodHashCodeToSkipTargetHashMap.Count;
-
+#else
+        internal static int GetTotalCacheCount() => _methodHashCodeToSkipTargetHashMap.Count();
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
+            
         internal static void ClearCache() => _methodHashCodeToSkipTargetHashMap.Clear();
         #endregion // UnityEngine.Rendering
     }

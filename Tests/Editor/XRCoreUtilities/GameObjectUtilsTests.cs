@@ -6,6 +6,8 @@ namespace UnityExtensions.Editor.Tests
 {
     class GameObjectUtilsTests
     {
+        //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Tests/Editor/XRCoreUtilities/GameObjectUtilsTests.cs
+        #region Unity.XR.CoreUtils.Editor.Tests
         const int k_ChildCount = 2;
         static HideFlags[] s_HideFlagsValues = EnumValues<HideFlags>.Values;
 
@@ -74,6 +76,7 @@ namespace UnityExtensions.Editor.Tests
                 CompareHideFlagsRecursively(obj1Transform.GetChild(i).gameObject, obj2Transform.GetChild(i).gameObject);
             }
         }
+        #endregion // Unity.XR.CoreUtils.Editor.Tests
 
         private GameObject testGameObject;
         private GameObject childGameObject;

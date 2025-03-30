@@ -41,5 +41,17 @@ namespace UnityExtensions
             return value;
         }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/HashSetExtensions.cs
+        #region Unity.FilmInternalUtilities
+        public static void Loop<T>(this HashSet<T> collection, System.Action<T> eachAction)
+        {
+            using var enumerator = collection.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                eachAction(enumerator.Current);
+            }
+        }
+        #endregion // Unity.FilmInternalUtilities
     }
 }

@@ -17,7 +17,7 @@ namespace UnityExtensions.Editor.Tests
         {
             Assert.IsFalse(Application.isPlaying);
             var go = new GameObject();
-            UnityObjectUtils.Destroy(go);
+            UnityObjectExtensions.Destroy(go);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
         }
@@ -27,7 +27,7 @@ namespace UnityExtensions.Editor.Tests
         {
             var go = new GameObject();
             var list = new List<GameObject> { go };
-            UnityObjectUtils.Destroy(go);
+            UnityObjectExtensions.Destroy(go);
             UnityObjectUtils.RemoveDestroyedObjects(list);
             Assert.Zero(list.Count);
         }
@@ -37,7 +37,7 @@ namespace UnityExtensions.Editor.Tests
         {
             var go = new GameObject();
             var dictionary = new Dictionary<GameObject, object> { { go, null } };
-            UnityObjectUtils.Destroy(go);
+            UnityObjectExtensions.Destroy(go);
             UnityObjectUtils.RemoveDestroyedKeys(dictionary);
             Assert.Zero(dictionary.Count);
         }
@@ -47,14 +47,14 @@ namespace UnityExtensions.Editor.Tests
         public IEnumerator RemoveDestroyedObjectsWithUndoTest()
         {
             var go = new GameObject();
-            UnityObjectUtils.Destroy(go, withUndo: true);
+            UnityObjectExtensions.Destroy(go, withUndo: true);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
 
             Undo.PerformUndo();
             Assert.IsTrue(go != null);
 
-            UnityObjectUtils.Destroy(go);
+            UnityObjectExtensions.Destroy(go);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
         }
@@ -64,15 +64,15 @@ namespace UnityExtensions.Editor.Tests
         {
             var go = new GameObject();
             var camera = go.AddComponent<Camera>();
-            Assert.IsAssignableFrom<Camera>(UnityObjectUtils.ConvertUnityObjectToType<Camera>(go));
-            Assert.IsAssignableFrom<Camera>(UnityObjectUtils.ConvertUnityObjectToType<Camera>(camera));
+            Assert.IsAssignableFrom<Camera>(UnityObjectExtensions.ConvertUnityObjectToType<Camera>(go));
+            Assert.IsAssignableFrom<Camera>(UnityObjectExtensions.ConvertUnityObjectToType<Camera>(camera));
 
             var light = go.AddComponent<Light>();
-            Assert.IsAssignableFrom<Light>(UnityObjectUtils.ConvertUnityObjectToType<Light>(go));
-            Assert.IsAssignableFrom<Light>(UnityObjectUtils.ConvertUnityObjectToType<Light>(light));
-            Assert.IsAssignableFrom<Light>(UnityObjectUtils.ConvertUnityObjectToType<Light>(camera));
+            Assert.IsAssignableFrom<Light>(UnityObjectExtensions.ConvertUnityObjectToType<Light>(go));
+            Assert.IsAssignableFrom<Light>(UnityObjectExtensions.ConvertUnityObjectToType<Light>(light));
+            Assert.IsAssignableFrom<Light>(UnityObjectExtensions.ConvertUnityObjectToType<Light>(camera));
 
-            UnityObjectUtils.Destroy(go);
+            UnityObjectExtensions.Destroy(go);
         }
     }
 }

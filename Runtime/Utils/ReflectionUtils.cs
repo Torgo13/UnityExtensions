@@ -20,9 +20,9 @@ namespace UnityExtensions
         static List<Type[]> _typesPerAssembly;
         static List<Dictionary<string, Type>> _assemblyTypeMaps;
 
-        static Assembly[] GetCachedAssemblies() { return _assemblies ??= AppDomain.CurrentDomain.GetAssemblies(); }
+        public static Assembly[] GetCachedAssemblies() { return _assemblies ??= AppDomain.CurrentDomain.GetAssemblies(); }
 
-        static List<Type[]> GetCachedTypesPerAssembly()
+        public static List<Type[]> GetCachedTypesPerAssembly()
         {
             if (_typesPerAssembly == null)
             {
@@ -44,7 +44,7 @@ namespace UnityExtensions
             return _typesPerAssembly;
         }
 
-        static List<Dictionary<string, Type>> GetCachedAssemblyTypeMaps()
+        public static List<Dictionary<string, Type>> GetCachedAssemblyTypeMaps()
         {
             if (_assemblyTypeMaps == null)
             {

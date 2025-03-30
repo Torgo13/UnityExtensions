@@ -75,7 +75,7 @@ namespace UnityExtensions
             where TEnum : Enum
         {
 #if USE_UNSAFE
-            return TProfilingSampler<TEnum>.Samples[Unsafe.As<TEnum, int>(ref marker)];
+            return TProfilingSampler<TEnum>.Samples[Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum, int>(ref marker)];
 #else
             TProfilingSampler<TEnum>.Samples.TryGetValue(marker, out var sampler);
             return sampler;

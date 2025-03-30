@@ -754,6 +754,7 @@ namespace UnityExtensions
             return color;
         }
 
+        // Range: 0 -> 195_075 : 3*(255^2)
         public static int ColorSquareDistance(Color32 colorA, Color32 colorB)
         {
             var valueA = new Vector3Int(colorA.r, colorA.g, colorA.b);
@@ -761,11 +762,13 @@ namespace UnityExtensions
             return (valueB - valueA).sqrMagnitude;
         }
 
+        // Range: 0 -> 441.672_955_9 : sqrt(3*(255^2))
         public static float ColorDistance(Color32 colorA, Color32 colorB)
         {
             return Mathf.Sqrt(ColorSquareDistance(colorA, colorB));
         }
 
+        // Range: 0 -> 3
         public static float ColorSquareDistance(Color colorA, Color colorB)
         {
             var valueA = new Vector3(colorA.r, colorA.g, colorA.b);
@@ -773,6 +776,7 @@ namespace UnityExtensions
             return (valueB - valueA).sqrMagnitude;
         }
 
+        // Range: 0 -> 1.732 : sqrt(3)
         public static float ColorDistance(Color colorA, Color colorB)
         {
             return Mathf.Sqrt(ColorSquareDistance(colorA, colorB));

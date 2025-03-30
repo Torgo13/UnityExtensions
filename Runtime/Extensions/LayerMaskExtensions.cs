@@ -41,5 +41,10 @@ namespace UnityExtensions
             return ((uint)(int)mask & (1 << layer)) > 0;
         }
         #endregion // Unity.XR.CoreUtils
+        
+        public static bool Contains(this LayerMask mask, GameObject gameObject)
+        {
+            return mask.Contains(gameObject.layer);
+        }
     }
 }

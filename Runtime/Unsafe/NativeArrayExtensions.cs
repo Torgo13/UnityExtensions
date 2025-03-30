@@ -90,6 +90,19 @@ namespace UnityExtensions.Unsafe
 
     public static class NativeArrayExtensions
     {
+        //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
+        #region UnityEngine.Formats.Alembic.Importer
+        public static unsafe void* GetPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return array.Length == 0 ? null : array.GetUnsafePtr();
+        }
+        #endregion // UnityEngine.Formats.Alembic.Importer
+        
+        public static unsafe void* GetReadOnlyPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return array.Length == 0 ? null : array.GetUnsafeReadOnlyPtr();
+        }
+        
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         /// <summary>

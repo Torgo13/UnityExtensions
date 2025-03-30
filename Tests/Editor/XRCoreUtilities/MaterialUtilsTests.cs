@@ -38,7 +38,7 @@ namespace UnityExtensions.Editor.Tests
         {
             m_Clone = MaterialUtils.GetMaterialClone(m_Renderer);
             Assert.AreEqual(m_Renderer.sharedMaterial, m_Clone);
-            UnityObjectUtils.Destroy(m_Clone);
+            UnityObjectExtensions.Destroy(m_Clone);
         }
 
 #if INCLUDE_UGUI
@@ -47,7 +47,7 @@ namespace UnityExtensions.Editor.Tests
         {
             m_Clone = MaterialUtils.GetMaterialClone(m_Graphic);
             Assert.AreEqual(m_Graphic.material, m_Clone);
-            UnityObjectUtils.Destroy(m_Clone);
+            UnityObjectExtensions.Destroy(m_Clone);
         }
 #endif
 

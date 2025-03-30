@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.Assertions;
@@ -127,10 +128,7 @@ namespace UnityExtensions
         {
             while (true)
             {
-                foreach (var field in type.GetFields(bindingAttr))
-                {
-                    fields.Add(field);
-                }
+                fields.AddRange(type.GetFields(bindingAttr));
 
                 var baseType = type.BaseType;
                 if (baseType != null)
@@ -155,10 +153,7 @@ namespace UnityExtensions
         {
             while (true)
             {
-                foreach (var property in type.GetProperties(bindingAttr))
-                {
-                    fields.Add(property);
-                }
+                fields.AddRange(type.GetProperties(bindingAttr));
 
                 var baseType = type.BaseType;
                 if (baseType != null)
@@ -188,7 +183,7 @@ namespace UnityExtensions
                     throw new ArgumentException($"Type {type} in interfaceTypes is not an interface!");
             }
 
-            List<FieldInfo> tempFields = ListPool<FieldInfo>.Get();
+            using var _0 = ListPool<FieldInfo>.Get(out var tempFields);
             foreach (var type in classes)
             {
                 if (!type.IsClass)
@@ -209,8 +204,6 @@ namespace UnityExtensions
                     }
                 }
             }
-
-            ListPool<FieldInfo>.Release(tempFields);
         }
 
         /// <summary>
@@ -371,18 +364,24 @@ namespace UnityExtensions
             if (!type.IsGenericType)
                 return name;
 
-            // Trim off `1
-            name = name!.Split('`')[0];
-
             var arguments = type.GetGenericArguments();
             var length = arguments.Length;
-            var stringArguments = new string[length];
+
+            var stringArguments = ArrayPool<string>.Shared.Rent(length);
             for (var i = 0; i < length; i++)
             {
                 stringArguments[i] = arguments[i].GetFullNameWithGenericArguments();
             }
 
-            return $"{name}<{string.Join(", ", stringArguments)}>";
+            using var _0 = StringBuilderPool.Get(out var sb);
+            name = sb.Append(name!.Split('`')[0]) // Trim off `1
+                .Append('<')
+                .AppendJoin(", ", stringArguments)
+                .Append('>')
+                .ToString();
+
+            ArrayPool<string>.Shared.Return(stringArguments);
+            return name;
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace UnityExtensions
         /// that boundary is considered to be within the <paramref name="outerBounds"/>.</remarks>
         /// <param name="outerBounds">The outer bounds which may contain the inner bounds.</param>
         /// <param name="innerBounds">The inner bounds that may or may not fit within outerBounds.</param>
-        /// <returns>True if outerBounds completely encloses innerBounds.</returns>
+        /// <returns><see langword="true"/> if outerBounds completely encloses innerBounds.</returns>
         public static bool ContainsCompletely(this Bounds outerBounds, Bounds innerBounds)
         {
             var outerBoundsMax = outerBounds.max;
@@ -27,5 +27,23 @@ namespace UnityExtensions
                 && outerBoundsMin.x <= innerBoundsMin.x && outerBoundsMin.y <= innerBoundsMin.y && outerBoundsMin.z <= innerBoundsMin.z;
         }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/Unity-Technologies/com.unity.demoteam.hair/blob/75a7f446209896bc1bce0da2682cfdbdf30ce447/Runtime/Utility/Extensions.cs
+        #region Unity.DemoTeam.Hair
+        public static Bounds WithPadding(this Bounds bounds, float padding)
+        {
+            return new Bounds(bounds.center, bounds.size + new Vector3(2.0f * padding, 2.0f * padding, 2.0f * padding));
+        }
+
+        public static Bounds WithScale(this Bounds bounds, float scale)
+        {
+            return new Bounds(bounds.center, bounds.size * scale);
+        }
+
+        public static Bounds ToCube(this Bounds bounds)
+        {
+            return new Bounds(bounds.center, bounds.size.Abs().MaxComponent() * Vector3.one);
+        }
+        #endregion // Unity.DemoTeam.Hair
     }
 }

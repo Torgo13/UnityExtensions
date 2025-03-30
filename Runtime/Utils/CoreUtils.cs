@@ -234,34 +234,32 @@ namespace UnityExtensions
         static string GetTextureAutoName(int width, int height, string format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
         {
-            using (StringBuilderPool.Get(out var sb))
+            using var _0 = StringBuilderPool.Get(out var sb);
+            sb.Append(string.IsNullOrEmpty(name) ? "Texture" : name);
+            sb.Append('_');
+
+            if (dim != TextureDimension.None)
             {
-                sb.Append(string.IsNullOrEmpty(name) ? "Texture" : name);
+                sb.Append(dim);
                 sb.Append('_');
-
-                if (dim != TextureDimension.None)
-                {
-                    sb.Append(dim);
-                    sb.Append('_');
-                }
-            
-                sb.Append(width);
-                sb.Append('x');
-                sb.Append(height);
-                if (depth != 0)
-                {
-                    sb.Append('x');
-                    sb.Append(depth);
-                }
-            
-                if (mips)
-                    sb.Append("_Mips");
-            
-                sb.Append('_');
-                sb.Append(format);
-
-                return sb.ToString();
             }
+        
+            sb.Append(width);
+            sb.Append('x');
+            sb.Append(height);
+            if (depth != 0)
+            {
+                sb.Append('x');
+                sb.Append(depth);
+            }
+        
+            if (mips)
+                sb.Append("_Mips");
+        
+            sb.Append('_');
+            sb.Append(format);
+
+            return sb.ToString();
         }
 
         /// <summary>

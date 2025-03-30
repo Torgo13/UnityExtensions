@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Text;
+using UnityEngine.Pool;
 
 namespace UnityExtensions.Tests
 {

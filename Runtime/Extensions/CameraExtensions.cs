@@ -26,6 +26,14 @@ namespace UnityExtensions
                 OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
             return Mathf.Atan(verticalHalfFieldOfViewTangent) * 2 * Mathf.Rad2Deg;
         }
+        
+        /// <inheritdoc cref="GetVerticalFieldOfView"/>
+        public static double GetVerticalFieldOfViewRad(this Camera camera, double aspectNeutralFieldOfView)
+        {
+            var verticalHalfFieldOfViewTangent = System.Math.Tan(aspectNeutralFieldOfView * 0.5) *
+                OneOverSqrt2 / System.Math.Sqrt(camera.aspect);
+            return System.Math.Atan(verticalHalfFieldOfViewTangent) * 2.0;
+        }
 
         /// <summary>
         /// Calculates the horizontal field of view of the <see cref="Camera"/>.
@@ -36,6 +44,13 @@ namespace UnityExtensions
         {
             var halfFieldOfView = camera.fieldOfView * 0.5f;
             return Mathf.Rad2Deg * Mathf.Atan(Mathf.Tan(halfFieldOfView * Mathf.Deg2Rad) * camera.aspect);
+        }
+        
+        /// <inheritdoc cref="GetHorizontalFieldOfView"/>
+        public static double GetHorizontalFieldOfViewRad(this Camera camera)
+        {
+            var halfFieldOfView = camera.fieldOfView * 0.5 * Mathf.Deg2Rad;
+            return System.Math.Atan(System.Math.Tan(halfFieldOfView) * camera.aspect);
         }
 
         /// <summary>
@@ -49,5 +64,10 @@ namespace UnityExtensions
             return size * OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
         }
         #endregion // Unity.XR.CoreUtils
+        
+        public static double HorizontalToVerticalFOVRad(double horizontalFOV, double aspect)
+        {
+            return 2.0 * System.Math.Atan(System.Math.Tan(horizontalFOV * 0.5) / aspect);
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace UnityExtensions
     /// </summary>
     /// <typeparam name="T">The type of component for which to be searched.</typeparam>
     public static class ComponentUtils<T>
+        where T : Component
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/ComponentUtils.cs
         #region Unity.XR.CoreUtils
@@ -46,6 +47,46 @@ namespace UnityExtensions
             return foundComponent;
         }
         #endregion // Unity.XR.CoreUtils
+
+        /// <summary>
+        /// Gets a single component of type T using the non-allocating GetComponents API.
+        /// </summary>
+        /// <param name="gameObject">The GameObject from which to get the component.</param>
+        /// <param name="foundComponent">Gets a single component of type T using the non-allocating GetComponents API.</param>
+        /// <returns><see langword="true"/> if one exists.</returns>
+        public static bool TryGetComponent(GameObject gameObject, out T foundComponent)
+        {
+            foundComponent = null;
+            using var _0 = ListPool<T>.Get(out var retrievalList);
+            gameObject.GetComponents(retrievalList);
+            if (retrievalList.Count > 0)
+            {
+                foundComponent = retrievalList[0];
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Gets a single component of type T using the non-allocating GetComponentsInChildren API.
+        /// </summary>
+        /// <param name="gameObject">The GameObject from which to get the component.</param>
+        /// <param name="foundComponent">Gets a single component of type T using the non-allocating GetComponentsInChildren API.</param>
+        /// <returns><see langword="true"/> if one exists.</returns>
+        public static bool TryGetComponentInChildren(GameObject gameObject, out T foundComponent)
+        {
+            foundComponent = null;
+            using var _0 = ListPool<T>.Get(out var retrievalList);
+            gameObject.GetComponentsInChildren(retrievalList);
+            if (retrievalList.Count > 0)
+            {
+                foundComponent = retrievalList[0];
+                return true;
+            }
+
+            return false;
+        }
     }
 
     /// <summary>

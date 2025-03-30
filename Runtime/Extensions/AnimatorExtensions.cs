@@ -27,24 +27,22 @@ namespace UnityExtensions
                 || transform.root != animator.transform.root)
                 return false;
 
-            using (ListPool<string>.Get(out var names))
+            using var _0 = ListPool<string>.Get(out var names);
+            var root = animator.transform;
+
+            while (transform != null && transform != root)
             {
-                var root = animator.transform;
-
-                while (transform != null && transform != root)
-                {
-                    names.Add(transform.name);
-                    transform = transform.parent;
-                }
-
-                if (transform == root)
-                {
-                    path = string.Join('/', names.Reverse<string>());
-                    return true;
-                }
-
-                return false;
+                names.Add(transform.name);
+                transform = transform.parent;
             }
+
+            if (transform == root)
+            {
+                path = string.Join('/', names.Reverse<string>());
+                return true;
+            }
+
+            return false;
         }
         #endregion // Unity.LiveCapture
     }

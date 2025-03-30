@@ -20,7 +20,7 @@ namespace UnityExtensions.Unsafe.Tests
             // Act
             using (TimedScope.FromPtr(durationPtr))
             {
-                Thread.Sleep(100); // Simulate work
+                Thread.Sleep(150); // Simulate work
             }
 
             // Assert
@@ -40,7 +40,7 @@ namespace UnityExtensions.Unsafe.Tests
             // Act
             using (TimedScope.FromRef(ref duration))
             {
-                Thread.Sleep(100); // Simulate work
+                Thread.Sleep(150); // Simulate work
             }
 
             // Assert

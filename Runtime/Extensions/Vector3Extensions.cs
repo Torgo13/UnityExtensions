@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -104,5 +105,153 @@ namespace UnityExtensions
             return new Vector3(x, y, z);
         }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/needle-mirror/com.unity.cinemachine/blob/85e81c94d0839e65c46a6fe0cd638bd1c6cd48af/Runtime/Core/UnityVectorExtensions.cs
+        #region Unity.Cinemachine
+        /// <summary>A useful Epsilon</summary>
+        const float Epsilon = 0.0001f;
+
+        /// <summary>Much more stable for small angles than Unity's native implementation</summary>
+        /// <param name="v1">The first vector</param>
+        /// <param name="v2">The second vector</param>
+        /// <returns>Angle between the vectors, in degrees</returns>
+        public static float Angle(this Vector3 v1, Vector3 v2)
+        {
+#if false // Maybe this version is better?  to test....
+            float a = v1.magnitude;
+            v1 *= v2.magnitude;
+            v2 *= a;
+            return Mathf.Atan2((v1 - v2).magnitude, (v1 + v2).magnitude) * Mathf.Rad2Deg * 2;
+#else
+            v1.Normalize();
+            v2.Normalize();
+            return Mathf.Atan2((v1 - v2).magnitude, (v1 + v2).magnitude) * Mathf.Rad2Deg * 2;
+#endif
+        }
+
+        /// <summary>Much more stable for small angles than Unity's native implementation</summary>
+        /// <param name="v1">The first vector</param>
+        /// <param name="v2">The second vector</param>
+        /// <param name="up">Definition of up (used to determine the sign)</param>
+        /// <returns>Signed angle between the vectors, in degrees</returns>
+        public static float SignedAngle(this Vector3 v1, Vector3 v2, Vector3 up)
+        {
+            float angle = Angle(v1, v2);
+            if (Mathf.Sign(Vector3.Dot(up, Vector3.Cross(v1, v2))) < 0)
+                return -angle;
+
+            return angle;
+        }
+
+        /// <summary>Much more stable for small angles than Unity's native implementation</summary>
+        /// <param name="v1">The first vector</param>
+        /// <param name="v2">The second vector</param>
+        /// <param name="up">Definition of up (used to determine the sign)</param>
+        /// <returns>Rotation between the vectors</returns>
+        public static Quaternion SafeFromToRotation(this Vector3 v1, Vector3 v2, Vector3 up)
+        {
+            var p1 = v1.ProjectOntoPlane(up);
+            var p2 = v2.ProjectOntoPlane(up);
+
+            if (p1.sqrMagnitude < Epsilon || p2.sqrMagnitude < Epsilon)
+            {
+                var axis = Vector3.Cross(v1, v2);
+                if (axis.AlmostZero())
+                    axis = up; // in case they are pointing in opposite directions
+
+                return Quaternion.AngleAxis(Angle(v1, v2), axis);
+            }
+
+            var pitchChange = Vector3.Angle(v2, up) - Vector3.Angle(v1, up);
+            return Quaternion.AngleAxis(SignedAngle(p1, p2, up), up)
+                * Quaternion.AngleAxis(pitchChange, Vector3.Cross(up, v1).normalized);
+        }
+
+        /// <summary>This is a slerp that mimics a camera operator's movement in that
+        /// it chooses a path that avoids the lower hemisphere, as defined by
+        /// the up param</summary>
+        /// <param name="vA">First direction</param>
+        /// <param name="vB">Second direction</param>
+        /// <param name="t">Interpolation amoun t</param>
+        /// <param name="up">Defines the up direction</param>
+        /// <returns>Interpolated vector</returns>
+        public static Vector3 SlerpWithReferenceUp(
+            this Vector3 vA, Vector3 vB, float t, Vector3 up)
+        {
+            float dA = vA.magnitude;
+            float dB = vB.magnitude;
+            if (dA < Epsilon || dB < Epsilon)
+                return Vector3.Lerp(vA, vB, t);
+
+            Vector3 dirA = vA / dA;
+            Vector3 dirB = vB / dB;
+            Quaternion qA = Quaternion.LookRotation(dirA, up);
+            Quaternion qB = Quaternion.LookRotation(dirB, up);
+            Quaternion q = QuaternionExtensions.SlerpWithReferenceUp(qA, qB, t, up);
+            Vector3 dir = q * Vector3.forward;
+            return dir * Mathf.Lerp(dA, dB, t);
+        }
+
+        /// <summary>
+        /// Checks if the Vector3 contains NaN for x or y.
+        /// </summary>
+        /// <param name="v">Vector3 to check for NaN</param>
+        /// <returns>True, if any components of the vector are NaN</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNaN(this Vector3 v)
+        {
+            return float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
+        }
+
+        /// <summary>
+        /// Get the closest point on a line segment.
+        /// </summary>
+        /// <param name="p">A point in space</param>
+        /// <param name="s0">Start of line segment</param>
+        /// <param name="s1">End of line segment</param>
+        /// <returns>The interpolation parameter representing the point on the segment, with 0==s0, and 1==s1</returns>
+        public static float ClosestPointOnSegment(this Vector3 p, Vector3 s0, Vector3 s1)
+        {
+            Vector3 s = s1 - s0;
+            float len2 = Vector3.SqrMagnitude(s);
+            if (len2 < Epsilon)
+                return 0; // degenrate segment
+
+            return Mathf.Clamp01(Vector3.Dot(p - s0, s) / len2);
+        }
+
+        /// <summary>
+        /// Returns a non-normalized projection of the supplied vector onto a plane
+        /// as described by its normal
+        /// </summary>
+        /// <param name="vector">The vector to project</param>
+        /// <param name="planeNormal">The normal that defines the plane.  Must have a length of 1.</param>
+        /// <returns>The component of the vector that lies in the plane</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ProjectOntoPlane(this Vector3 vector, Vector3 planeNormal)
+        {
+            return vector - Vector3.Dot(vector, planeNormal) * planeNormal;
+        }
+
+        /// <summary>
+        /// Checks whether the vector components are the same value.
+        /// </summary>
+        /// <param name="v">Vector to check</param>
+        /// <returns>True, if the vector elements are the same. False, otherwise.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsUniform(this Vector3 v)
+        {
+            return System.Math.Abs(v.x - v.y) < Epsilon && System.Math.Abs(v.x - v.z) < Epsilon;
+        }
+
+        /// <summary>Is the vector within Epsilon of zero length?</summary>
+        /// <param name="v">The vector to check</param>
+        /// <returns>True if the square magnitude of the vector is within Epsilon of zero</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool AlmostZero(this Vector3 v)
+        {
+            return v.sqrMagnitude < (Epsilon * Epsilon);
+        }
+        #endregion // Unity.Cinemachine
     }
 }

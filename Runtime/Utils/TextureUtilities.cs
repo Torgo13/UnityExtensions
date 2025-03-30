@@ -167,6 +167,8 @@ namespace UnityExtensions
         public static void CreateParentDirectoryIfMissing(string path)
         {
             var fileInfo = new FileInfo(path);
+            Assert.IsNotNull(fileInfo.Directory);
+            
             if (!fileInfo.Directory.Exists)
                 fileInfo.Directory.Create();
         }

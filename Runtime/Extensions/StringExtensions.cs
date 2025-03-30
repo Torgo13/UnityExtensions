@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -10,6 +12,37 @@ namespace UnityExtensions
     /// </summary>
     public static class StringExtensions
     {
+        //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Modules/UIBuilder/Editor/Utilities/StringExtensions/StringExtensions.cs
+        #region Unity.UI.Builder
+        public static string RemoveExtraWhitespace(this string str)
+        {
+            using var _0 = StringBuilderPool.Get(out var builder);
+            var strSpan = str.AsSpan().Trim();
+
+            var space = false;
+
+            for (var i = 0; i < strSpan.Length; ++i)
+            {
+                var c = strSpan[i];
+                if (c == ' ')
+                {
+                    if (space)
+                        continue;
+
+                    space = true;
+                    builder.Append(' ');
+                }
+                else
+                {
+                    space = false;
+                    builder.Append(c);
+                }
+            }
+
+            return builder.ToString();
+        }
+        #endregion // Unity.UI.Builder
+        
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/StringExtensions.cs
         #region Unity.XR.CoreUtils
         /// <summary>
@@ -25,7 +58,10 @@ namespace UnityExtensions
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
 
-            return $"{char.ToUpper(str[0])}{str.Substring(1)}";
+            using var _0 = StringBuilderPool.Get(out var sb);
+            sb.Append(char.ToUpper(str[0]));
+            sb.Append(str.AsSpan(1, str.Length - 1));
+            return sb.ToString();
         }
 
         /// <summary>
@@ -247,22 +283,58 @@ namespace UnityExtensions
         /// <summary>Runtime alternative to UnityEditor.ObjectNames.NicifyVariableName. Only prefix 'm_' is not skipped.</summary>
         public static string CamelToPascalCaseWithSpace(this string text, bool preserveAcronyms = true)
         {
-            if (string.IsNullOrWhiteSpace(text))
+            if (string.IsNullOrEmpty(text))
                 return string.Empty;
+
             using var _0 = StringBuilderPool.Get(out var newText);
             newText.Append(char.ToUpper(text[0]));
+
             for (int i = 1; i < text.Length; i++)
             {
                 if (char.IsUpper(text[i]))
-                    if ((text[i - 1] != ' ' && !char.IsUpper(text[i - 1])) ||
-                        (preserveAcronyms && char.IsUpper(text[i - 1]) &&
-                         i < text.Length - 1 && !char.IsUpper(text[i + 1])))
+                {
+                    if ((text[i - 1] != ' ' && char.IsLetter(text[i - 1]) && !char.IsUpper(text[i - 1]))
+                        || (preserveAcronyms && char.IsUpper(text[i - 1])
+                                             && i < text.Length - 1 && !char.IsUpper(text[i + 1])))
+                    {
                         newText.Append(' ');
-                newText.Append(text[i]);
+                    }
+                }
+
+                char previous = text[i - 1];
+                newText.Append(previous == ' ' || !char.IsLetterOrDigit(previous) ? char.ToUpper(text[i]) : text[i]);
             }
+
             return newText.ToString();
         }
         #endregion // UnityEngine.Rendering.HighDefinition
+        
+        /// <summary>Runtime alternative to UnityEditor.ObjectNames.NicifyVariableName. Only prefix 'm_' is not skipped.</summary>
+        public static string CamelToSentenceCaseWithSpace(this string text, bool preserveAcronyms = true)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            using var _0 = StringBuilderPool.Get(out var newText);
+            newText.Append(char.ToUpper(text[0]));
+
+            for (int i = 1; i < text.Length; i++)
+            {
+                if (char.IsUpper(text[i]))
+                {
+                    if ((text[i - 1] != ' ' && !char.IsUpper(text[i - 1]))
+                        || (preserveAcronyms && char.IsUpper(text[i - 1])
+                                             && i < text.Length - 1 && !char.IsUpper(text[i + 1])))
+                    {
+                        newText.Append(' ');
+                    }
+                }
+
+                newText.Append(text[i]);
+            }
+
+            return newText.ToString();
+        }
 
         //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.core/Editor/StringExtensions.cs
         #region UnityEditor.Rendering
@@ -338,5 +410,460 @@ namespace UnityExtensions
             }
         }
         #endregion // UnityEditor.ShaderGraph
+        
+        //https://docs.unity3d.com/2022.3/Documentation/Manual/UnderstandingPerformanceStringsAndText.html
+        #region Unity Documentation
+        #region StartsWithOrdinal
+        public static bool StartsWithOrdinal(this string a, string b)
+        {
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            if (b.Length == 1)
+                return a.StartsWithOrdinal(b[0]);
+
+            int aLen = a.Length;
+            int bLen = b.Length;
+
+            int ap = 0;
+            int bp = 0;
+
+            while (ap < aLen && bp < bLen && a[ap] == b[bp])
+            {
+                ap++;
+                bp++;
+            }
+
+            return bp == bLen;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWithOrdinal(this string a, char b)
+        {
+            return a[0] == b;
+        }
+
+        public static bool StartsWithOrdinal(this string a, string b, bool ignoreCase)
+        {
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            if (b.Length == 1)
+                return a.StartsWithOrdinal(b[0], ignoreCase);
+
+            int aLen = a.Length;
+            int bLen = b.Length;
+
+            int ap = 0;
+            int bp = 0;
+
+            if (ignoreCase == false)
+            {
+                while (ap < aLen && bp < bLen && a[ap] == b[bp])
+                {
+                    ap++;
+                    bp++;
+                }
+            }
+            else
+            {
+                while (ap < aLen && bp < bLen && char.ToLower(a[ap]) == char.ToLower(b[bp]))
+                {
+                    ap++;
+                    bp++;
+                }
+            }
+
+            return bp == bLen;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool StartsWithOrdinal(this string a, char b, bool ignoreCase)
+        {
+            if (ignoreCase)
+                return char.ToLower(a[0]) == char.ToLower(b);
+
+            return a[0] == b;
+        }
+        #endregion // StartsWithOrdinal
+        #region EndsWithOrdinal
+        public static bool EndsWithOrdinal(this string a, string b)
+        {
+            if (b == null)
+                throw new ArgumentNullException(nameof(b));
+
+            if (b.Length == 1)
+                return a.EndsWithOrdinal(b[0]);
+
+            int ap = a.Length - 1;
+            int bp = b.Length - 1;
+
+            while (ap >= 0 && bp >= 0 && a[ap] == b[bp])
+            {
+                ap--;
+                bp--;
+            }
+
+            return bp < 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWithOrdinal(this string a, char b)
+        {
+            return a[^1] == b;
+        }
+
+        public static bool EndsWithOrdinal(this string a, string b, bool ignoreCase)
+        {
+            if (b.Length == 1)
+                return a.EndsWithOrdinal(b[0], ignoreCase);
+
+            int ap = a.Length - 1;
+            int bp = b.Length - 1;
+
+            if (ignoreCase == false)
+            {
+                while (ap >= 0 && bp >= 0 && a[ap] == b[bp])
+                {
+                    ap--;
+                    bp--;
+                }
+            }
+            else
+            {
+                while (ap >= 0 && bp >= 0 && char.ToLower(a[ap]) == char.ToLower(b[bp]))
+                {
+                    ap--;
+                    bp--;
+                }
+            }
+
+            return bp < 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool EndsWithOrdinal(this string a, char b, bool ignoreCase)
+        {
+            if (ignoreCase)
+                return char.ToLower(a[^1]) == char.ToLower(b);
+
+            return a[^1] == b;
+        }
+        #endregion // EndsWithOrdinal
+        #endregion // Unity Documentation
+        
+        #region ContainsOrdinal
+        public static bool ContainsOrdinal(this string str, string value)
+        {
+            if (value.Length == 1)
+                return str.ContainsOrdinal(value[0]);
+
+            return str.IndexOfOrdinal(value) >= 0;
+        }
+
+        public static bool ContainsOrdinal(this string str, char value)
+        {
+            foreach (char c in str)
+            {
+                if (c == value)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool ContainsOrdinal(this string str, string value, bool ignoreCase)
+        {
+            if (value.Length == 1)
+                return str.ContainsOrdinal(value[0], ignoreCase);
+
+            return str.IndexOfOrdinal(value, ignoreCase) >= 0;
+        }
+
+        public static bool ContainsOrdinal(this string str, char value, bool ignoreCase)
+        {
+            if (ignoreCase == false)
+            {
+                foreach (char c in str)
+                {
+                    if (c == value)
+                        return true;
+                }
+            }
+            else
+            {
+                value = char.ToLower(value);
+
+                foreach (char c in str)
+                {
+                    if (char.ToLower(c) == value)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+        #endregion // ContainsOrdinal
+        #region IndexOfOrdinal
+        public static int IndexOfOrdinal(this string str, string value)
+        {
+            if (value == string.Empty)
+                return 0;
+
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (value.Length == 1)
+                return str.IndexOfOrdinal(value[0]);
+
+            int num3;
+            int length = value.Length;
+            int num2 = str.Length - length;
+
+            for (int i = 0; i <= num2; i++)
+            {
+                if (str[i] == value[0])
+                {
+                    num3 = 1;
+                    while ((num3 < length) && (str[i + num3] == value[num3]))
+                    {
+                        num3++;
+                    }
+
+                    if (num3 == length)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, string value, int startIndex)
+        {
+            return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex);
+        }
+
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, int count)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (str.Length != 0 && (startIndex < 0 || startIndex >= str.Length))
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+
+            if (count < 0 || startIndex + count > str.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            if (value == string.Empty)
+                return startIndex;
+
+            if (value.Length == 1)
+                return str.IndexOfOrdinal(value[0]);
+
+            int num3;
+            int length = value.Length;
+            int num2 = startIndex + count - length;
+
+            for (int i = startIndex; i <= num2; i++)
+            {
+                if (str[i] == value[0])
+                {
+                    num3 = 1;
+                    while ((num3 < length) && (str[i + num3] == value[num3]))
+                    {
+                        num3++;
+                    }
+
+                    if (num3 == length)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, string value, bool ignoreCase)
+        {
+            if (value.Length == 1)
+                return str.IndexOfOrdinal(value[0], ignoreCase);
+
+            int num3;
+            int length = value.Length;
+            int num2 = str.Length - length;
+
+            if (ignoreCase == false)
+            {
+                for (int i = 0; i <= num2; i++)
+                {
+                    if (str[i] == value[0])
+                    {
+                        num3 = 1;
+                        while ((num3 < length) && (str[i + num3] == value[num3]))
+                        {
+                            num3++;
+                        }
+
+                        if (num3 == length)
+                        {
+                            return i;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j <= num2; j++)
+                {
+                    if (char.ToLower(str[j]) == char.ToLower(value[0]))
+                    {
+                        num3 = 1;
+                        while ((num3 < length) && (char.ToLower(str[j + num3]) == char.ToLower(value[num3])))
+                        {
+                            num3++;
+                        }
+
+                        if (num3 == length)
+                        {
+                            return j;
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, bool ignoreCase)
+        {
+            return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex, ignoreCase);
+        }
+
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, int count, bool ignoreCase)
+        {
+            if (value == string.Empty)
+                return startIndex;
+
+            if (value.Length == 1)
+                return str.IndexOfOrdinal(value[0], ignoreCase);
+
+            int num3;
+            int length = value.Length;
+            int num2 = startIndex + count - length;
+
+            if (ignoreCase == false)
+            {
+                for (int i = startIndex; i <= num2; i++)
+                {
+                    if (str[i] == value[0])
+                    {
+                        num3 = 1;
+                        while ((num3 < length) && (str[i + num3] == value[num3]))
+                        {
+                            num3++;
+                        }
+
+                        if (num3 == length)
+                        {
+                            return i;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int j = startIndex; j <= num2; j++)
+                {
+                    if (char.ToLower(str[j]) == char.ToLower(value[0]))
+                    {
+                        num3 = 1;
+                        while ((num3 < length) && (char.ToLower(str[j + num3]) == char.ToLower(value[num3])))
+                        {
+                            num3++;
+                        }
+
+                        if (num3 == length)
+                        {
+                            return j;
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, char value)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == value)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, char value, int startIndex)
+        {
+            return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex);
+        }
+
+        public static int IndexOfOrdinal(this string str, char value, int startIndex, int count)
+        {
+            if (str.Length != 0 && (startIndex < 0 || startIndex >= str.Length))
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+
+            if (count < 0 || startIndex + count > str.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            for (int i = startIndex; i < startIndex + count; i++)
+            {
+                if (str[i] == value)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public static int IndexOfOrdinal(this string str, char value, bool ignoreCase)
+        {
+            if (ignoreCase == false)
+            {
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (str[i] == value)
+                        return i;
+                }
+            }
+            else
+            {
+                value = char.ToLower(value);
+
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (char.ToLower(str[i]) == value)
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+        #endregion // IndexOfOrdinal
+        
+        /// <summary>
+        /// Remove all occurrences of char c.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string RemoveChar(this string str, char c)
+        {
+            return str.Replace(c.ToString(), string.Empty, System.StringComparison.Ordinal);
+        }
     }
 }

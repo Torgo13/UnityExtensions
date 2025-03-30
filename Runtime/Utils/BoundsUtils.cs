@@ -98,8 +98,8 @@ namespace UnityExtensions
         public static Bounds GetBounds(Transform transform)
         {
             List<Renderer> renderers = ListPool<Renderer>.Get();
-            transform.GetComponentsInChildren(renderers);
             
+            transform.GetComponentsInChildren(renderers);
             var b = GetBounds(renderers);
             
             ListPool<Renderer>.Release(renderers);
@@ -107,7 +107,7 @@ namespace UnityExtensions
             // As a fallback when there are no bounds, collect all transform positions
             if (b.size == Vector3.zero)
             {
-                List<Transform> transforms = ListPool<Transform>.Get();
+                using var _0 = ListPool<Transform>.Get(out var transforms);
                 transform.GetComponentsInChildren(transforms);
 
                 if (transforms.Count > 0)
@@ -117,8 +117,6 @@ namespace UnityExtensions
                 {
                     b.Encapsulate(t.position);
                 }
-
-                ListPool<Transform>.Release(transforms);
             }
 
             return b;
@@ -191,14 +189,19 @@ namespace UnityExtensions
                 var point = points[i];
                 if (point.x < minPoint.x)
                     minPoint.x = point.x;
+                
                 if (point.y < minPoint.y)
                     minPoint.y = point.y;
+                
                 if (point.z < minPoint.z)
                     minPoint.z = point.z;
+                
                 if (point.x > maxPoint.x)
                     maxPoint.x = point.x;
+                
                 if (point.y > maxPoint.y)
                     maxPoint.y = point.y;
+                
                 if (point.z > maxPoint.z)
                     maxPoint.z = point.z;
             }
@@ -285,23 +288,21 @@ namespace UnityExtensions
         #region Unity.HLODSystem.SpaceManager
         public static bool CalculateBounds(GameObject obj, Transform transform, out Bounds result)
         {
-            using (ListPool<MeshRenderer>.Get(out var renderers))
+            using var _0 = ListPool<MeshRenderer>.Get(out var renderers);
+            obj.GetComponentsInChildren(renderers);
+            if (renderers.Count == 0)
             {
-                obj.GetComponentsInChildren(renderers);
-                if (renderers.Count == 0)
-                {
-                    result = default;
-                    return false;
-                }
-
-                result = CalcLocalBounds(renderers[0], transform);
-                for (int i = 1; i < renderers.Count; ++i)
-                {
-                    result.Encapsulate(CalcLocalBounds(renderers[i], transform));
-                }
-
-                return true;
+                result = default;
+                return false;
             }
+
+            result = CalcLocalBounds(renderers[0], transform);
+            for (int i = 1; i < renderers.Count; ++i)
+            {
+                result.Encapsulate(CalcLocalBounds(renderers[i], transform));
+            }
+
+            return true;
         }
         #endregion // #region Unity.HLODSystem.SpaceManager
     }

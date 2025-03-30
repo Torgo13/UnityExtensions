@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -77,6 +78,27 @@ namespace UnityExtensions
         }
 
         /// <summary>
+        /// Clones and replaces all materials assigned to a <see cref="Renderer"/>
+        /// </summary>
+        /// <remarks>
+        /// > [!WARNING]
+        /// > You must call <see cref="UnityObjectExtensions.Destroy(Object, bool)"/> on each cloned material object in the array when done.
+        /// </remarks>
+        /// <seealso cref="Renderer.materials"/>
+        /// <param name="sharedMaterials">Cloned materials.</param>
+        /// <param name="renderer">Renderer assigned the materials to clone and replace.</param>
+        public static void CloneMaterials(List<Material> sharedMaterials, Renderer renderer)
+        {
+            renderer.GetSharedMaterials(sharedMaterials);
+            for (var i = 0; i < sharedMaterials.Count; i++)
+            {
+                sharedMaterials[i] = UnityObject.Instantiate(sharedMaterials[i]);
+            }
+
+            renderer.SetSharedMaterials(sharedMaterials);
+        }
+
+        /// <summary>
         /// Converts an RGB or RGBA formatted hex string to a <see cref="Color32"/> object.
         /// </summary>
         /// <param name="hex">The formatted string, with an optional "0x" or "#" prefix.</param>
@@ -113,20 +135,27 @@ namespace UnityExtensions
             hsv.x = Mathf.Repeat(hsv.x + shift, 1f);
             return Color.HSVToRGB(hsv.x, hsv.y, hsv.z);
         }
-
-        /// <summary>
-        /// Adds a material to this renderer's array of shared materials.
-        /// </summary>
-        /// <param name="renderer">The renderer on which to add the material.</param>
-        /// <param name="material">The material to add.</param>
-        public static void AddMaterial(this Renderer renderer, Material material)
-        {
-            var materials = ListPool<Material>.Get();
-            renderer.GetSharedMaterials(materials);
-            materials.Add(material);
-            renderer.SetSharedMaterials(materials);
-            ListPool<Material>.Release(materials);
-        }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/Unity-Technologies/com.unity.probuilder/blob/d09b723d5d286217529e9f34a507015046b2a8a2/Runtime/Core/MaterialUtility.cs
+        #region UnityEngine.ProBuilder
+        public static int GetMaterialCount(Renderer renderer)
+        {
+            using var _0 = ListPool<Material>.Get(out var materials);
+            renderer.GetSharedMaterials(materials);
+            return materials.Count;
+        }
+
+        public static Material GetSharedMaterial(Renderer renderer, int index)
+        {
+            using var _0 = ListPool<Material>.Get(out var materials);
+            renderer.GetSharedMaterials(materials);
+            var count = materials.Count;
+            if (count < 1)
+                return null;
+
+            return materials[Mathf.Clamp(index, 0, count - 1)];
+        }
+        #endregion // UnityEngine.ProBuilder
     }
 }

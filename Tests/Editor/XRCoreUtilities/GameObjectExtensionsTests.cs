@@ -5,6 +5,8 @@ namespace UnityExtensions.Editor.Tests
 {
     class GameObjectExtensionsTests
     {
+        //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Tests/Editor/XRCoreUtilities/GameObjectExtensionsTests.cs
+        #region MyRegion
         GameObject m_RootObject;
         readonly GameObject[] m_RootChildren = new GameObject[3];
         readonly GameObject[] m_NestedChildren = new GameObject[3];
@@ -107,5 +109,6 @@ namespace UnityExtensions.Editor.Tests
             AssertLayerEqual(10);
             AssertHideFlagsEqual(HideFlags.NotEditable | HideFlags.HideAndDontSave);
         }
+        #endregion // Unity.XR.CoreUtils.Editor.Tests
     }
 }

@@ -12,8 +12,20 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> GetByteSpanFromList<T>(List<T> list) where T : struct
         {
-            return MemoryMarshal.AsBytes(NoAllocHelpers.ExtractArrayFromList(list).AsSpan(0, list.Count));
+            return MemoryMarshal.AsBytes(list.AsSpan());
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this List<T> list)
+        {
+            return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(0, list.Count);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list)
+        {
+            return list.AsSpan();
+        }
     }
 }

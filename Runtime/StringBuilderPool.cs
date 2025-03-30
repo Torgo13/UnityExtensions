@@ -5,7 +5,7 @@
 using System.Text;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace UnityEngine.Pool
 {
     public static class StringBuilderPool
     {
