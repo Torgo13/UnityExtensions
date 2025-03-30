@@ -123,5 +123,41 @@ namespace UnityExtensions.Editor.Tests
                 public const Single PositiveInfinity = 1F / 0F;
              */
         }
+        
+        #region URP Sample
+
+        [Test]
+        public void Test_Vector3Extensions_PerlinNoise3D01()
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                Vector3 uv = Vector3Extensions.RandomRange(-32f, 32f); // Vector3Utils.MinValue and Vector3Utils.MaxValue can go out of range when using Perlin noise
+                Vector3 perlinNoise3D01 = Vector3Extensions.PerlinNoise3D01Safe(uv, Random.Range(-1, 16), Random.Range(-1f, 16f));
+                Assert.GreaterOrEqual(perlinNoise3D01.x, 0f);
+                Assert.GreaterOrEqual(perlinNoise3D01.y, 0f);
+                Assert.GreaterOrEqual(perlinNoise3D01.z, 0f);
+                Assert.LessOrEqual(perlinNoise3D01.x, 1f);
+                Assert.LessOrEqual(perlinNoise3D01.y, 1f);
+                Assert.LessOrEqual(perlinNoise3D01.z, 1f);
+            }
+        }
+
+        [Test]
+        public void Test_Vector3Extensions_PerlinNoise3D()
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                Vector3 uv = Vector3Extensions.RandomRange(-32f, 32f);
+                Vector3 perlinNoise3D01 = Vector3Extensions.PerlinNoise3DSafe(uv, Random.Range(-1, 16), Random.Range(-1f, 16f), Random.Range(-i, (float)i), Random.Range(-i, (float)i));
+                Assert.GreaterOrEqual(perlinNoise3D01.x, -i);
+                Assert.GreaterOrEqual(perlinNoise3D01.y, -i);
+                Assert.GreaterOrEqual(perlinNoise3D01.z, -i);
+                Assert.LessOrEqual(perlinNoise3D01.x, i);
+                Assert.LessOrEqual(perlinNoise3D01.y, i);
+                Assert.LessOrEqual(perlinNoise3D01.z, i);
+            }
+        }
+
+        #endregion // URP Sample
     }
 }

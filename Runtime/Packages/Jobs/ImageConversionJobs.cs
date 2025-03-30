@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace TW0CATSGAMES.Extensions.Burst
+namespace UnityExtensions
 {
     //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
     #region UnityEngine.XR.ARCore

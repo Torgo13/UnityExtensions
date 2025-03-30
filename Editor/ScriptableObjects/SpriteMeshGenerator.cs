@@ -14,20 +14,20 @@ namespace UnityExtensions.Editor
             if (sprites == null || sprites.Length <= 0)
                 return;
 
-            var curHash = "";
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
             foreach (var sprite in sprites)
             {
                 if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(sprite, out var guid, out long _))
                 {
-                    curHash += guid;
+                    sb.Append(guid);
                 }
             }
 
-            if (hash == curHash)
+            if (sb.Equals(hash))
                 return;
             
             GenerateAndSaveMesh();
-            hash = curHash;
+            hash = sb.ToString();
         }
 
         internal void GenerateAndSaveMesh()

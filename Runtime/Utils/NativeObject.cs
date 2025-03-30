@@ -1,6 +1,6 @@
 using System;
 
-namespace TW0CATSGAMES.Extensions.Burst
+namespace UnityExtensions
 {
     public static class NativeObject
     {

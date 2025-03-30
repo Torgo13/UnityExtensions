@@ -226,17 +226,17 @@ namespace UnityExtensions.Editor
             // Readback the render texture
             RenderTexture previousActive = RenderTexture.active;
             RenderTexture.active = combinedRT;
-            combined.ReadPixels(new Rect(0, 0, xMin, yMin), 0, 0, false);
+            combined.ReadPixels(new Rect(0, 0, xMin, yMin), 0, 0, recalculateMipMaps: false);
             combined.Apply();
             RenderTexture.active = previousActive;
 
             byte[] bytes = Array.Empty<byte>();
 
-            if (savePath.EndsWith("png"))
+            if (savePath.EndsWith("png", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToPNG();
-            else if (savePath.EndsWith("exr"))
+            else if (savePath.EndsWith("exr", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToEXR();
-            else if (savePath.EndsWith("jpg"))
+            else if (savePath.EndsWith("jpg", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToJPG();
 
             string systemPath = Path.Combine(Application.dataPath.Remove(Application.dataPath.Length - 6), savePath);
@@ -250,7 +250,7 @@ namespace UnityExtensions.Editor
             combinedImporter.sRGBTexture = false;
             combinedImporter.SaveAndReimport();
 
-            if (savePath.EndsWith("exr"))
+            if (savePath.EndsWith("exr", System.StringComparison.OrdinalIgnoreCase))
             {
                 // The options for the platform string are: "Standalone", "iPhone", "Android", "WebGL", "Windows Store Apps", "PSP2", "PS4", "XboxOne", "Nintendo 3DS", "WiiU", "tvOS".
                 combinedImporter.SetPlatformTextureSettings(new TextureImporterPlatformSettings { name = "Standalone", format = TextureImporterFormat.DXT5, overridden = true });

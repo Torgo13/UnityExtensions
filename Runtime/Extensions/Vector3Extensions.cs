@@ -253,5 +253,86 @@ namespace UnityExtensions
             return v.sqrMagnitude < (Epsilon * Epsilon);
         }
         #endregion // Unity.Cinemachine
+        
+        #region URP Sample
+
+        /// <summary>
+        /// 3D Perlin noise with each component being approximately between 0 and 1.
+        /// </summary>
+        /// <param name="uv">Input coordinates.</param>
+        /// <param name="Octaves"></param>
+        /// <param name="freq"></param>
+        /// <returns>3D Perlin noise.</returns>
+        public static Vector3 PerlinNoise3D01(this Vector3 uv, int Octaves = 1, float freq = 1f)
+        {
+            Vector3 output = Vector3.zero;
+
+            for (int i = 0; i < Octaves; i++)
+            {
+                output.x += Mathf.PerlinNoise1D(uv.x * freq * (i + 1));
+                output.y += Mathf.PerlinNoise1D(uv.y * freq * (i + 1));
+                output.z += Mathf.PerlinNoise1D(uv.z * freq * (i + 1));
+            }
+
+            return output / Octaves;
+        }
+
+        public static Vector3 PerlinNoise3D01Safe(this Vector3 uv, int Octaves = 1, float freq = 1f)
+        {
+            if (Octaves < 1)
+                Octaves = 1;
+
+            if (freq < 0f)
+                freq = 1f;
+
+            Vector3 output = uv.PerlinNoise3D01(Octaves, freq);
+            return new Vector3(Mathf.Clamp01(output.x), Mathf.Clamp01(output.y), Mathf.Clamp01(output.z));
+        }
+
+        /// <summary>
+        /// 3D Perlin noise scaled to a custom range.
+        /// </summary>
+        /// <param name="uv">Input coordinates.</param>
+        /// <param name="Octaves"></param>
+        /// <param name="freq"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns>3D Perlin noise.</returns>
+        public static Vector3 PerlinNoise3D(this Vector3 uv, int Octaves = 1, float freq = 1f, float min = -1f, float max = 1f)
+        {
+            Vector3 output = uv.PerlinNoise3D01(Octaves, freq);
+            return (output * (max - min)) + Vector3.one * min;
+        }
+
+        public static Vector3 PerlinNoise3DSafe(this Vector3 uv, int Octaves = 1, float freq = 1f, float min = -1f, float max = 1f)
+        {
+            if (min > max)
+                (min, max) = (max, min);
+
+            Vector3 output = uv.PerlinNoise3D01Safe(Octaves, freq);
+            return (output * (max - min)) + Vector3.one * min;
+        }
+
+        #endregion // URP Sample
+        
+        public static readonly Vector3 MinValue = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        public static readonly Vector3 MaxValue = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+
+        public static Vector3 RandomRange(float min, float max)
+        {
+            return new Vector3(
+                Random.Range(min, max),
+                Random.Range(min, max),
+                Random.Range(min, max));
+        }
+
+        public static Vector3 RandomRangeSafe(float min, float max)
+        {
+            if (min > max)
+                (min, max) = (max, min);
+
+            return RandomRange(min, max);
+        }
     }
 }

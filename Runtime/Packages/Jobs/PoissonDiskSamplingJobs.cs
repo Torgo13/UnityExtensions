@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace TW0CATSGAMES.Extensions.Burst
+namespace UnityExtensions
 {
     /// <summary>
     /// Utility for generating lists of poisson disk sampled points
