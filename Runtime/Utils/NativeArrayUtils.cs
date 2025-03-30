@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 
 namespace UnityExtensions
@@ -33,5 +34,56 @@ namespace UnityExtensions
             }
         }
         #endregion // Unity.XR.CoreUtils
+        
+        //https://github.com/needle-mirror/com.unity.xr.arfoundation/blob/8ced5e7002ad2e622a7968f0007ab0bf7298c137/Runtime/ARSubsystems/NativeCopyUtility.cs
+        #region UnityEngine.XR.ARSubsystems
+        /// <summary>
+        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// The lengths of both collections must match.
+        /// </summary>
+        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
+        /// <param name="source">The <c>IReadOnlyList</c> that provides the data</param>
+        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
+        /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
+        public static void CopyFromReadOnlyList<T>(IReadOnlyList<T> source, NativeArray<T> destination)
+            where T : struct
+        {
+            if (source.Count != destination.Length)
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+
+            for (var i = 0; i < source.Count; i++)
+            {
+                destination[i] = source[i];
+            }
+        }
+
+        /// <summary>
+        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// The lengths of both collections must match.
+        /// </summary>
+        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
+        /// <param name="source">The <c>IReadOnlyCollection</c> that provides the data</param>
+        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
+        /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
+        /// <remarks> Prefer IReadOnlyList over IReadOnlyCollection for copy performance where possible.</remarks>
+        /// <seealso cref="CopyFromReadOnlyList{T}"/>
+        public static void CopyFromReadOnlyCollection<T>(IReadOnlyCollection<T> source, NativeArray<T> destination)
+            where T : struct
+        {
+            if (source.Count != destination.Length)
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+
+            var index = 0;
+            foreach (var item in source)
+            {
+                destination[index] = item;
+                index++;
+            }
+        }
+        #endregion // UnityEngine.XR.ARSubsystems
     }
 }

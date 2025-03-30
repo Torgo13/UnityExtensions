@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Unity.Collections;
 using UnityEngine.Pool;
 
 namespace UnityExtensions
@@ -112,6 +113,25 @@ namespace UnityExtensions
         }
         #endregion // Unity.XR.CoreUtils
 
+        //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/StringExtensions.cs
+        #region UnityEngine.XR.ARCore
+        /// <exception cref="System.ArgumentNullException">@string</exception>
+        public static NativeArray<byte> ToBytes(this string @string, Encoding encoding = null, Allocator allocator = Allocator.Temp)
+        {
+            if (@string == null)
+                throw new ArgumentNullException(nameof(@string));
+
+            if (encoding == null)
+                encoding = Encoding.Default;
+
+            var byteCount = encoding.GetByteCount(@string);
+            var bytes = new NativeArray<byte>(byteCount + 1, allocator);
+            _ = encoding.GetBytes(@string, bytes.AsSpan());
+
+            return bytes;
+        }
+        #endregion // UnityEngine.XR.ARCore
+        
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Editor/GraphElements/Utils/StringUtilsExtensions.cs
         #region UnityEditor.GraphToolsFoundation.Overdrive
         private const char NoDelimiter = '\0'; //invalid character

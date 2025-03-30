@@ -6,6 +6,25 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
+    // Example: https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/TerrainHLODCreator.cs#L294
+    /// <remarks><code>
+    /// private JobQueue m_queue;
+    /// private WorkingObject CreateBakedTerrain(string name, Bounds bounds, Heightmap heightmap, int distance, bool isLeaf)
+    /// {
+    ///     WorkingObject wo = new WorkingObject(Allocator.Persistent);
+    ///     m_queue.EnqueueJob(() =>
+    ///     {
+    ///         WorkingMesh mesh = CreateBakedGeometry(name, heightmap, bounds, distance);
+    ///         wo.SetMesh(mesh);
+    ///     });
+    ///     m_queue.EnqueueJob(() =>
+    ///     {
+    ///         WorkingMaterial material = CreateBakedMaterial(name, bounds, isLeaf);
+    ///         wo.Materials.Add(material);
+    ///     });
+    ///     return wo;
+    /// }
+    /// </code></remarks>
     public class JobQueue : IDisposable
     {
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/Utils/JobQueue.cs

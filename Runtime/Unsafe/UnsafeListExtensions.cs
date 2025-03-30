@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
 using Unity.Collections;
@@ -22,6 +23,13 @@ namespace UnityExtensions.Unsafe
             where T : unmanaged =>
             list.AsNativeArray().GetSubArray(start, length);
         #endregion // CullingExtensions
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(ref this UnsafeList<T> list, List<T> managedList)
+            where T : unmanaged
+        {
+            list.AddRange(NoAllocHelpers.ExtractArrayFromList(managedList), managedList.Count);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRange<T>(ref this UnsafeList<T> list, T[] array) where T : unmanaged

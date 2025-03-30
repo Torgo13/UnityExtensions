@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Unity.Collections;
 using UnityEngine.Pool;
 
 namespace UnityExtensions
@@ -198,6 +199,35 @@ namespace UnityExtensions
             return false;
         }
         #endregion // Unity.Collections
+        
+        //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
+
+        #region UnityEngine.Formats.Alembic.Importer
+        public static void DisposeIfPossible<T>(this ref NativeArray<T> array) where T : struct
+        {
+            if (array.IsCreated)
+            {
+                array.Dispose();
+            }
+        }
+
+        public static NativeArray<T> ResizeIfNeeded<T>(this ref NativeArray<T> array, int newLength, Allocator a = Allocator.Persistent) where T : struct
+        {
+            if (array.Length != newLength)
+            {
+                array.DisposeIfPossible();
+                array = new NativeArray<T>(newLength, a);
+            }
+
+            // The array is either created and of the right size, or not created, and we are asking to resize to 0
+            if (!array.IsCreated)
+            {
+                array = new NativeArray<T>(0, a);
+            }
+
+            return array;
+        }
+        #endregion // UnityEngine.Formats.Alembic.Importer
         
 #if !NETSTANDARD2_1
         //https://github.com/dotnet/runtime/blob/7eb07dde40933cace91d57aae0a3e569fd042def/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/CollectionExtensions.cs

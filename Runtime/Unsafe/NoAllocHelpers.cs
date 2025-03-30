@@ -12,16 +12,16 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace UnityExtensions.Unsafe
 {
     /// <summary>
-    /// Some helpers to handle List&lt;T&gt; in C# api (used for no-alloc apis where user provides the list to be filled):
-    /// on il2cpp/mono we can "resize" List&lt;T&gt; (up to Capacity, sure, but this is/should-be handled higher level)
-    /// also we can easily "convert" List&lt;T&gt; to System.Array
+    /// <para>Some helpers to handle <see cref="List{T}"/> in C# API (used for no-alloc APIs where user provides the list to be filled).</para>
+    /// <para>On il2cpp/mono we can "resize" <see cref="List{T}"/> (up to <see cref="List{T}.Capacity"/>, sure, but this is/should-be handled higher level).</para>
+    /// <para>Also, we can easily "convert" <see cref="List{T}"/> to <see cref="System.Array"/>.</para>
     /// </summary>
     /// <remarks>
-    /// NB .NET backend is treated as second-class citizen going through ToArray call
+    /// NB .NET backend is treated as second-class citizen going through <see cref="List{T}.ToArray()"/> call.
     /// </remarks>
     public static class NoAllocHelpers
     {
-        //https://github.com/Unity-Technologies/UnityCsReference/blob/master/Runtime/Export/Scripting/NoAllocHelpers.bindings.cs
+        //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Scripting/NoAllocHelpers.bindings.cs
         #region UnityEngine
         public static void EnsureListElemCount<T>(List<T> list, int count)
         {
