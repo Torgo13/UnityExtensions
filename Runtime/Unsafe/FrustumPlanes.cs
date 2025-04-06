@@ -1,12 +1,13 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Packages
+namespace UnityExtensions.Unsafe
 {
     /// <summary>
     /// Represents frustum planes.
@@ -191,9 +192,7 @@ namespace UnityExtensions.Packages
             }
         }
 
-        // TODO Move to UnityExtensions.Unsafe
-        /*
-        public static UnsafeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
+        internal static UnsafeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
         {
             int cullingPlaneCount = cullingPlanes.Length;
             int packetCount = (cullingPlaneCount + 3) >> 2;
@@ -204,7 +203,6 @@ namespace UnityExtensions.Packages
 
             return planes;
         }
-        */
 
         internal static NativeArray<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, Allocator allocator)
         {

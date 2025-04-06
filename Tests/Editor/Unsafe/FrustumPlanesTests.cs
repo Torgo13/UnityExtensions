@@ -3,12 +3,11 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityExtensions.Packages.Tests
+namespace UnityExtensions.Unsafe.Tests
 {
     //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics.Tests/FrustumPlanesTests.cs
     public class FrustumPlanesTests
     {
-        /*
         static readonly Plane[] Planes =
         {
             new Plane(new Vector3(1.0f, 0.0f, 0.0f), -1.0f),
@@ -48,7 +47,7 @@ namespace UnityExtensions.Packages.Tests
 
         static NativeArray<Plane> CreatePlanes(int n)
         {
-            var result = new NativeArray<Plane>(n, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var result = new NativeArray<Plane>(n, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             for (int i = 0; i < n; ++i)
             {
                 result[i] = Planes[i];
@@ -71,11 +70,11 @@ namespace UnityExtensions.Packages.Tests
         public void MultiPlaneTest(int planeCount)
         {
             using (var par = CreatePlanes(planeCount))
-            using (var soap = FrustumPlanes.BuildSOAPlanePackets(par, Allocator.Temp))
+            using (var soap = FrustumPlanes.BuildSOAPlanePackets(par, Allocator.TempJob))
             {
                 foreach (var box in boxes)
                 {
-                    Assert.AreEqual(ReferenceTest(par, box), FrustumPlanes.Intersect2(soap.AsNativeArray(), box.Center, box.Extents));
+                    Assert.AreEqual(ReferenceTest(par, box), FrustumPlanes.Intersect2(soap, box.Center, box.Extents));
                 }
             }
         }
@@ -83,7 +82,7 @@ namespace UnityExtensions.Packages.Tests
         private FrustumPlanes.IntersectResult ReferenceTest(NativeArray<Plane> par, AABB box)
         {
             FrustumPlanes.IntersectResult result;
-            var temp = new NativeArray<float4>(par.Length, Allocator.Temp);
+            var temp = new NativeArray<float4>(par.Length, Allocator.TempJob);
 
             for (int i = 0; i < par.Length; ++i)
             {
@@ -95,7 +94,6 @@ namespace UnityExtensions.Packages.Tests
             temp.Dispose();
             return result;
         }
-        */
 
         [Test]
         [TestCase(0f)]
@@ -116,7 +114,7 @@ namespace UnityExtensions.Packages.Tests
 
             Plane[] sourcePlanes = new Plane[6];
 
-            using (var planes = new NativeArray<float4>(6, Allocator.Temp))
+            using (var planes = new NativeArray<float4>(6, Allocator.TempJob))
             {
                 FrustumPlanes.FromCamera(camera, planes, sourcePlanes);
 

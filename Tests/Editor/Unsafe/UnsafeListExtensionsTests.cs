@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -59,6 +60,26 @@ namespace UnityExtensions.Unsafe.Tests
             for (int i = 0; i < array.Length; i++)
             {
                 Assert.AreEqual(array[i], unsafeList[i + 5]);
+            }
+
+            unsafeList.Dispose();
+        }
+
+        [Test]
+        public void AddRange_FromList_ShouldAddElementsToUnsafeList()
+        {
+            var allocator = Allocator.Temp;
+            var unsafeList = new UnsafeList<int>(5, allocator);
+            for (int i = 0; i < 5; i++)
+                unsafeList.Add(i);
+            List<int> list = new() { 6, 7, 8 };
+
+            unsafeList.AddRange(list);
+
+            Assert.AreEqual(8, unsafeList.Length);
+            for (int i = 0; i < list.Count; i++)
+            {
+                Assert.AreEqual(list[i], unsafeList[i + 5]);
             }
 
             unsafeList.Dispose();
