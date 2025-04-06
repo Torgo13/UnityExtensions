@@ -192,7 +192,7 @@ namespace UnityExtensions
         public static int FindAllDescendants(this Transform t, List<Transform> descendants)
         {
             int childCount = 0;
-            using var _0 = UnityEngine.Pool.ListPool<Transform>.Get(out var childEnumerator);
+            var childEnumerator = ListPool<Transform>.Get();
 
             int numChildren = t.childCount;
             for (int i = 0; i < numChildren; ++i)
@@ -205,13 +205,14 @@ namespace UnityExtensions
                 descendants.AddRange(childEnumerator);
             }
 
+            ListPool<Transform>.Release(childEnumerator);
             return childCount;
         }
 
         public static int FindAllActiveDescendants(this Transform t, List<Transform> activeDescendants)
         {
             int activeChildCount = 0;
-            using var _0 = UnityEngine.Pool.ListPool<Transform>.Get(out var childEnumerator);
+            var childEnumerator = ListPool<Transform>.Get();
 
             int numChildren = t.childCount;
             for (int i = 0; i < numChildren; ++i)
@@ -235,22 +236,27 @@ namespace UnityExtensions
                 }
             }
 
+            ListPool<Transform>.Release(childEnumerator);
             return activeChildCount;
         }
         #endregion // Unity.FilmInternalUtilities
         
         public static int GetChildCount(this Transform t)
         {
-            using var _0 = ListPool<Transform>.Get(out var children);
-            t.FindAllDescendants(children);
-            return children.Count;
+            using (ListPool<Transform>.Get(out var children))
+            {
+                t.FindAllDescendants(children);
+                return children.Count;
+            }
         }
 
         public static int GetActiveChildCount(this Transform t)
         {
-            using var _0 = ListPool<Transform>.Get(out var children);
-            t.FindAllActiveDescendants(children);
-            return children.Count;
+            using (ListPool<Transform>.Get(out var children))
+            {
+                t.FindAllActiveDescendants(children);
+                return children.Count;
+            }
         }
         
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Exporter/Utils.cs

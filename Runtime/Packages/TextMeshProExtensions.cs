@@ -1,14 +1,15 @@
 using System;
 using TMPro;
+using UnityEngine.Pool;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions
+namespace UnityExtensions.Packages
 {
     public static class TextMeshProExtensions
     {
         public static void SetText(this TMP_Text text, ReadOnlySpan<char> arg0)
         {
-            using (UnityEngine.Pool.StringBuilderPool.Get(out var sb))
+            using (StringBuilderPool.Get(out var sb))
             {
                 text.SetText(sb.Append(arg0));
             }
@@ -16,7 +17,7 @@ namespace UnityExtensions
 
         public static void SetText(this TMP_Text text, Span<char> arg0)
         {
-            using (UnityEngine.Pool.StringBuilderPool.Get(out var sb))
+            using (StringBuilderPool.Get(out var sb))
             {
                 text.SetText(sb.Append(arg0));
             }

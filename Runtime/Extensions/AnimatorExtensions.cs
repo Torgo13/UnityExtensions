@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Pool;
 
 namespace UnityExtensions
 {
@@ -27,7 +27,7 @@ namespace UnityExtensions
                 || transform.root != animator.transform.root)
                 return false;
 
-            using var _0 = ListPool<string>.Get(out var names);
+            var names = new List<string>();
             var root = animator.transform;
 
             while (transform != null && transform != root)

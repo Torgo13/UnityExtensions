@@ -28,6 +28,8 @@ namespace UnityExtensions.Unsafe
         public static void AddRange<T>(ref this UnsafeList<T> list, List<T> managedList)
             where T : unmanaged
         {
+            Assert.IsNotNull(managedList);
+
             list.AddRange(NoAllocHelpers.ExtractArrayFromList(managedList), managedList.Count);
         }
 
@@ -35,7 +37,7 @@ namespace UnityExtensions.Unsafe
         public static unsafe void AddRange<T>(ref this UnsafeList<T> list, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
-            
+
             fixed (T* p = array)
             {
                 list.AddRange(p, array.Length);

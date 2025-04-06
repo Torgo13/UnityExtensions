@@ -2,9 +2,8 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using FrustumPlanes = UnityExtensions.Unsafe.FrustumPlanes;
 
-namespace UnityExtensions.Tests
+namespace UnityExtensions.Packages.Tests
 {
     //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics.Tests/FrustumPlanesTests.cs
     public class FrustumPlanesTests

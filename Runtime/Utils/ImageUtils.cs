@@ -829,10 +829,10 @@ namespace UnityExtensions
 
         public static float DeltaECIE(float[] lab1, float[] lab2)
         {
-            using var _0 = ListPool<float>.Get(out var diffs);
-            diffs.Add(lab1[0] - lab2[0]);
-            diffs.Add(lab1[0] - lab2[0]);
-            diffs.Add(lab1[0] - lab2[0]);
+            var diffs = new NativeArray<float>(3, Allocator.Temp);
+            diffs[0] = lab1[0] - lab2[0];
+            diffs[1] = lab1[0] - lab2[0];
+            diffs[2] = lab1[0] - lab2[0];
             return Mathf.Sqrt((diffs[0] * diffs[0]) + (diffs[1] * diffs[1]) + (diffs[2] * diffs[2]));
         }
 
@@ -963,6 +963,8 @@ namespace UnityExtensions
             
             using var _2 = ListPool<ColorCluster>.Get(out var bestClusters);
             bestClusters.AddRange(rgbClusters.GetBestClusters(5));
+
+            bestOrderedColors.EnsureRoom(5);
             for (var i = bestOrderedColors.Count; i < 5; ++i)
             {
                 bestOrderedColors.Add(new KeyValuePair<uint, long>(0, 0));
@@ -1025,7 +1027,8 @@ namespace UnityExtensions
             
             using var _2 = ListPool<ColorCluster>.Get(out var bestClusters);
             bestClusters.AddRange(rgbClusters.GetBestClusters(5));
-            
+
+            bestOrderedColors.EnsureRoom(5);
             for (var i = bestOrderedColors.Count; i < 5; ++i)
             {
                 bestOrderedColors.Add(new KeyValuePair<uint, long>(0, 0));

@@ -54,14 +54,13 @@ namespace UnityExtensions
                 {
                     try
                     {
-                        Dictionary<string, Type> typeMap = DictionaryPool<string, Type>.Get();
+                        var typeMap = new Dictionary<string, Type>(types.Length);
                         foreach (var type in types)
                         {
                             typeMap[type.FullName!] = type;
                         }
 
                         _assemblyTypeMaps.Add(typeMap);
-                        DictionaryPool<string, Type>.Release(typeMap);
                     }
                     catch (ReflectionTypeLoadException)
                     {

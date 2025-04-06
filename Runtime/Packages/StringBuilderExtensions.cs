@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using UnityEngine;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityExtensions;
 
@@ -50,6 +47,7 @@ namespace System.Text
         {
             if (sb == null)
                 throw new ArgumentNullException(nameof(sb));
+
             var sbLength = sb.Length;
             for (int i = 0; i < sb.Length;)
             {
@@ -58,8 +56,7 @@ namespace System.Text
                 else
                     i++;
             }
-            if (sb.Length > sbLength)
-                throw new Exception();
+
             return sb;
         }
         
@@ -82,7 +79,7 @@ namespace System.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static StringBuilder EnsureRoom(this StringBuilder stringBuilder, int room)
         {
-            stringBuilder.EnsureCapacity(stringBuilder.Length + room);
+            _ = stringBuilder.EnsureCapacity(stringBuilder.Length + room);
             return stringBuilder;
         }
         

@@ -332,9 +332,10 @@ namespace UnityExtensions
             var declaringType = type.DeclaringType;
             if (declaringType != null && !type.IsGenericParameter)
             {
-                List<string> typeNames = ListPool<string>.Get();
-                var name = type.GetNameWithFullGenericArguments();
+                string name = type.GetNameWithFullGenericArguments();
+                var typeNames = new List<string>();
                 typeNames.Add(name);
+
                 while (true)
                 {
                     var parentDeclaringType = declaringType.DeclaringType;
@@ -344,13 +345,13 @@ namespace UnityExtensions
                         typeNames.Insert(0, name);
                         break;
                     }
+
                     name = declaringType.GetNameWithFullGenericArguments();
                     typeNames.Insert(0, name);
                     declaringType = parentDeclaringType;
                 }
 
-                var result = string.Join(".", typeNames.ToArray());
-                ListPool<string>.Release(typeNames);
+                var result = string.Join('.', typeNames);
                 return result;
             }
 

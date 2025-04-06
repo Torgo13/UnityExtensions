@@ -7,7 +7,7 @@ using UnityEngine.Profiling;
 using UnityEngine.TestTools.Utils;
 using Unity.Mathematics;
 
-namespace UnityExtensions.Tests
+namespace UnityExtensions.Packages.Tests
 {
     class MathematicsExtensionsTests
     {

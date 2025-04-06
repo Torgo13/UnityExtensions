@@ -35,8 +35,8 @@ namespace UnityExtensions.Tests
 
             // Assert
             Assert.NotNull(texture, "The returned texture should not be null.");
-            Assert.AreEqual(camera.pixelWidth * scale, texture.width, "Texture width should match the scaled camera width.");
-            Assert.AreEqual(camera.pixelHeight * scale, texture.height, "Texture height should match the scaled camera height.");
+            Assert.AreEqual((int)(camera.pixelWidth * scale), texture.width, "Texture width should match the scaled camera width.");
+            Assert.AreEqual((int)(camera.pixelHeight * scale), texture.height, "Texture height should match the scaled camera height.");
 
             UnityEngine.Object.DestroyImmediate(camera.gameObject);
         }

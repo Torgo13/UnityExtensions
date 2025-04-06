@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace UnityExtensions.Packages
 {
     /// <summary>
     /// Provides methods that help you to work with LOD groups.
@@ -142,9 +142,9 @@ namespace UnityExtensions
         public static float GetWorldSpaceScale(Transform t)
         {
             var scale = t.lossyScale;
-            float largestAxis = Mathf.Abs(scale.x);
-            largestAxis = Mathf.Max(largestAxis, Mathf.Abs(scale.y));
-            largestAxis = Mathf.Max(largestAxis, Mathf.Abs(scale.z));
+            float largestAxis = math.abs(scale.x);
+            largestAxis = math.max(largestAxis, math.abs(scale.y));
+            largestAxis = math.max(largestAxis, math.abs(scale.z));
             return largestAxis;
         }
 

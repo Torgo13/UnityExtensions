@@ -1,39 +1,60 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions
+namespace UnityExtensions.Packages
 {
     [StructLayout(LayoutKind.Explicit)]
-    public struct PackedFloat
+    public struct Union16
     {
-        [FieldOffset(0)] public int Int0;
+        [FieldOffset(0)] public UnityExtensions.Union16 Union16_0;
 
-        [FieldOffset(0)] public uint UInt0;
+        [FieldOffset(0)] public half Half_0;
+    }
+    
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union32
+    {
+        [FieldOffset(0)] public UnityExtensions.Union32 Union32_0;
 
-        [FieldOffset(0)] public float Float0;
+        [FieldOffset(0)] public half2 Half2_0;
 
-        [FieldOffset(0)] public short Short0;
-        [FieldOffset(2)] public short Short1;
 
-        [FieldOffset(0)] public ushort UShort0;
-        [FieldOffset(2)] public ushort UShort1;
+        [FieldOffset(0)] public half Half_0;
+        [FieldOffset(2)] public half Half_1;
+    }
 
-        [FieldOffset(0)] public half Half0;
-        [FieldOffset(2)] public half Half1;
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union128
+    {
+        [FieldOffset(0)] public UnityExtensions.Union128 Union128_0;
 
-        [FieldOffset(0)] public byte Byte0;
-        [FieldOffset(1)] public byte Byte1;
-        [FieldOffset(2)] public byte Byte2;
-        [FieldOffset(3)] public byte Byte3;
+        [FieldOffset(0)] public float4 Float4_0;
+
+        [FieldOffset(0)] public int4 Int4_0;
+
+
+        [FieldOffset(0)] public float3 Float3_0;
+
+        [FieldOffset(0)] public int3 Int3_0;
+
+
+        [FieldOffset(0)] public float2 Float2_0;
+        [FieldOffset(8)] public float2 Float2_1;
+
+        [FieldOffset(0)] public int2 Int2_0;
+        [FieldOffset(8)] public int2 Int2_1;
     }
     
     public static class MathematicsExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/GPUDriven/GPUDrivenRenderingUtils.cs
         #region UnityEngine.Rendering.Tests
-        public static uint4 UnpackUintTo4x8Bit(uint val)
+        public static uint4 UnpackUintTo4x8Bit(this uint val)
         {
             return new uint4(val & 0xFF, (val >> 8) & 0xFF, (val >> 16) & 0xFF, (val >> 24) & 0xFF);
         }
@@ -42,12 +63,12 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/megacity-metro/blob/13069724080c2aacc89b735206a7af1c9df81b51/Assets/Scripts/Utils/Misc/MathUtilities.cs
         #region Utils.Misc
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float GetSharpnessInterpolant(float sharpness, float dt)
+        public static float GetSharpnessInterpolant(this float sharpness, float dt)
         {
             return saturate(1f - exp(-sharpness * dt));
         }
 
-        public static float GetDampingInterpolant(float damping, float dt)
+        public static float GetDampingInterpolant(this float damping, float dt)
         {
             if (damping != 0f)
             {
@@ -58,17 +79,17 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AngleRadiansToDotRatio(float angleRadians)
+        public static float AngleRadiansToDotRatio(this float angleRadians)
         {
             return cos(angleRadians);
         }
 
-        public static float GetConeRadiusAtLength(float length, float coneAngleRadians)
+        public static float GetConeRadiusAtLength(this float length, float coneAngleRadians)
         {
             return tan(coneAngleRadians) * length;
         }
 
-        public static float3 SmoothFollow(float3 currentSelf, float3 prevTarget, float3 newTarget, float dt, float sharpness)
+        public static float3 SmoothFollow(this float3 currentSelf, float3 prevTarget, float3 newTarget, float dt, float sharpness)
         {
             float scaledDeltaTime = sharpness * dt;
             if (scaledDeltaTime != 0f)
@@ -184,7 +205,7 @@ namespace UnityExtensions
         /// <param name="input">Input vector</param>
         /// <param name="output">Normalized output vector</param>
         /// <returns>Length/magnitude of input vector</returns>
-        public static float Normalize(float2 input, out float2 output)
+        public static float Normalize(this float2 input, out float2 output)
         {
             var len = length(input);
             output = input / len;
@@ -310,13 +331,13 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/InputSystem/blob/36a93fe84a95a380be438412258a5305fcdfc740/Packages/com.unity.inputsystem/InputSystem/Utilities/NumberHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(double a, double b)
+        public static bool Approximately(this double a, double b)
         {
             return abs(b - a) < max(1E-06 * max(abs(a), abs(b)), double.Epsilon * 8);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float IntToNormalizedFloat(int value, int minValue, int maxValue)
+        public static float IntToNormalizedFloat(this int value, int minValue, int maxValue)
         {
             if (value <= minValue)
                 return 0.0f;
@@ -330,7 +351,7 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int NormalizedFloatToInt(float value, int intMinValue, int intMaxValue)
+        public static int NormalizedFloatToInt(this float value, int intMinValue, int intMaxValue)
         {
             if (value <= 0.0f)
                 return intMinValue;
@@ -394,13 +415,13 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/ECSGalaxySample/blob/84f9bec931de73f76731f230d126e0d348b6065c/Assets/Scripts/Utilities/MathUtilities.cs
         #region MathUtilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 ProjectOnPlane(float3 vector, float3 onPlaneNormal)
+        public static float3 ProjectOnPlane(this float3 vector, float3 onPlaneNormal)
         {
             return vector - projectsafe(vector, onPlaneNormal);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 ClampToMaxLength(float3 vector, float maxLength)
+        public static float3 ClampToMaxLength(this float3 vector, float maxLength)
         {
             float sqrMag = lengthsq(vector);
             if (sqrMag > maxLength * maxLength)
@@ -427,7 +448,7 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float Clamp(float val, float2 bounds)
+        public static float Clamp(this float val, float2 bounds)
         {
             return clamp(val, bounds.x, bounds.y);
         }
@@ -452,7 +473,7 @@ namespace UnityExtensions
             return distanceSqToSphereCenter <= sphereRadius * sphereRadius;
         }
 
-        public static void GenerateEquidistantPointsOnSphere(ref Unity.Collections.NativeList<float3> points, int newPointsCount, float radius,
+        public static void GenerateEquidistantPointsOnSphere(ref NativeList<float3> points, int newPointsCount, float radius,
             int repelIterations = 50)
         {
             int initialPointsCount = points.Length;
@@ -460,59 +481,108 @@ namespace UnityExtensions
 
             // First pass: generate points around the sphere in a semiregular distribution
             float goldenRatio = 1 + (sqrt(5f) / 4f);
-            float angleIncrement = PI * 2f * goldenRatio;
-            for (int i = initialPointsCount; i < totalPointsCount; i++)
+            float angleIncrement = PI2 * goldenRatio;
+
+            points.Capacity = totalPointsCount;
+
+            var addPoints = new AddPointsJob
             {
-                float distance = i / (float)totalPointsCount;
+                initialPointsCount = initialPointsCount,
+                totalPointsCount = totalPointsCount,
+                angleIncrement = angleIncrement,
+                radius = radius,
+                points = points.AsParallelWriter(),
+            };
+
+            var AddPointsHandle = addPoints.Schedule(totalPointsCount - initialPointsCount, dependency: default);
+
+            // Second pass: make points repel each other
+            if (totalPointsCount > 1)
+            {
+                var job = new GenerateEquidistantPointsOnSphereJob
+                {
+                    points = points,
+                    radius = radius,
+                };
+
+                var jobHandle = job.Schedule(repelIterations, AddPointsHandle);
+                jobHandle.Complete();
+                return;
+            }
+
+            AddPointsHandle.Complete();
+        }
+        #endregion // MathUtilities
+
+        [BurstCompile]
+        public struct AddPointsJob : IJobFor
+        {
+            [ReadOnly] public int initialPointsCount;
+            [ReadOnly] public float totalPointsCount;
+            [ReadOnly] public float angleIncrement;
+            [ReadOnly] public float radius;
+            [WriteOnly] public NativeList<float3>.ParallelWriter points;
+
+            public void Execute(int i)
+            {
+                i += initialPointsCount;
+
+                float distance = i / totalPointsCount;
                 float incline = acos(1f - (2f * distance));
                 float azimuth = angleIncrement * i;
 
+                sincos(incline, out var sinIncline, out var cosIncline);
+                sincos(azimuth, out var sinAzimuth, out var cosAzimuth);
+
                 float3 point = new float3
                 {
-                    x = sin(incline) * cos(azimuth) * radius,
-                    y = sin(incline) * sin(azimuth) * radius,
-                    z = cos(incline) * radius,
+                    x = sinIncline * cosAzimuth * radius,
+                    y = sinIncline * sinAzimuth * radius,
+                    z = cosIncline * radius,
                 };
 
-                points.Add(point);
+                points.AddNoResize(point);
             }
+        }
 
-            // Second pass: make points repel each other
-            if (points.Length > 1)
+        [BurstCompile]
+        public struct GenerateEquidistantPointsOnSphereJob : IJobFor
+        {
+            public NativeList<float3> points;
+            [ReadOnly] public float radius;
+
+            public void Execute(int r)
             {
                 const float repelAngleIncrements = PI * 0.01f;
-                for (int r = 0; r < repelIterations; r++)
+
+                for (int a = 0; a < points.Length; a++)
                 {
-                    for (int a = 0; a < points.Length; a++)
+                    float3 dir = normalizesafe(points[a]);
+                    float closestPointRemappedDot = 0f;
+                    float3 closestPointRotationAxis = default;
+
+                    for (int b = 0; b < points.Length; b++)
                     {
-                        float3 dir = normalizesafe(points[a]);
-                        float closestPointRemappedDot = 0f;
-                        float3 closestPointRotationAxis = default;
-
-                        for (int b = 0; b < points.Length; b++)
+                        if (b != a)
                         {
-                            if (b != a)
+                            float3 otherDir = normalizesafe(points[b]);
+
+                            float dot = math.dot(dir, otherDir);
+                            float remappedDot = remap(-1f, 1f, 0f, 1f, dot);
+
+                            if (remappedDot > closestPointRemappedDot)
                             {
-                                float3 otherDir = normalizesafe(points[b]);
-
-                                float dot = math.dot(dir, otherDir);
-                                float remappedDot = remap(-1f, 1f, 0f, 1f, dot);
-
-                                if (remappedDot > closestPointRemappedDot)
-                                {
-                                    closestPointRemappedDot = remappedDot;
-                                    closestPointRotationAxis = -normalizesafe(cross(dir, otherDir));
-                                }
+                                closestPointRemappedDot = remappedDot;
+                                closestPointRotationAxis = -normalizesafe(cross(dir, otherDir));
                             }
                         }
-
-                        quaternion repelRotation = Unity.Mathematics.quaternion.AxisAngle(closestPointRotationAxis, repelAngleIncrements);
-                        dir = rotate(repelRotation, dir);
-                        points[a] = dir * radius;
                     }
+
+                    quaternion repelRotation = Unity.Mathematics.quaternion.AxisAngle(closestPointRotationAxis, repelAngleIncrements);
+                    dir = rotate(repelRotation, dir);
+                    points[a] = dir * radius;
                 }
             }
         }
-        #endregion // MathUtilities
     }
 }

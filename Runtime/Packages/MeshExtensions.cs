@@ -1,47 +1,49 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.Pool;
 using static Unity.Mathematics.math;
+using IndexFormat = UnityEngine.Rendering.IndexFormat;
 
-namespace UnityExtensions
+namespace UnityExtensions.Packages
 {
     public static class MeshExtensions
     {
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/master/Runtime/Core/MeshUtility.cs
-        #region com.unity.probuilder
-
+        #region UnityEngine.ProBuilder
         /// <summary>
         /// Generates tangents and applies them on the specified mesh.
         /// </summary>
-        /// <param name="mesh">The <see cref="UnityEngine.Mesh"/> mesh target.</param>
+        /// <param name="mesh">The <see cref="Mesh"/> mesh target.</param>
         public static void GenerateTangent(Mesh mesh)
         {
             if (mesh == null)
-                throw new System.ArgumentNullException(nameof(mesh));
+                throw new ArgumentNullException(nameof(mesh));
 
             // http://answers.unity3d.com/questions/7789/calculating-tangents-vector4.html
 
             // speed up math by copying the mesh arrays
-            //int[] triangles = mesh.triangles;
-            using var _0 = UnityEngine.Pool.ListPool<int>.Get(out var triangles);
+            using var _0 = ListPool<int>.Get(out var triangles);
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
                 mesh.GetTriangles(triangles, i); // TODO Check if this appends to the List or clears it
             }
 
-            using var _1 = UnityEngine.Pool.ListPool<Vector3>.Get(out var vertices);
+            using var _1 = ListPool<Vector3>.Get(out var vertices);
             mesh.GetVertices(vertices);
 
-            //Vector2[] uv = mesh.uv;
-            using var _2 = UnityEngine.Pool.ListPool<Vector2>.Get(out var uv);
+            using var _2 = ListPool<Vector2>.Get(out var uv);
             for (int i = 0; i < 8; i++)
             {
                 mesh.GetUVs(i, uv);
             }
 
-            using var _3 = UnityEngine.Pool.ListPool<Vector3>.Get(out var normals);
+            using var _3 = ListPool<Vector3>.Get(out var normals);
             mesh.GetNormals(normals);
 
             //variable definitions
@@ -113,7 +115,7 @@ namespace UnityExtensions
         /// Returns a new mesh containing all attributes and values copied from the specified source mesh.
         /// </summary>
         /// <param name="source">The mesh to copy from.</param>
-        /// <returns>A new <see cref="UnityEngine.Mesh"/> object with the same values as the source mesh.</returns>
+        /// <returns>A new <see cref="Mesh"/> object with the same values as the source mesh.</returns>
         public static Mesh DeepCopy(Mesh source)
         {
             Mesh m = new Mesh();
@@ -126,19 +128,19 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="source">The mesh from which to copy attribute values.</param>
         /// <param name="destination">The destination mesh to copy attribute values to.</param>
-        /// <exception cref="System.ArgumentNullException">Throws if source or destination is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if source or destination is null.</exception>
         public static void CopyTo(Mesh source, Mesh destination)
         {
             if (source == null)
-                throw new System.ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(source));
 
             if (destination == null)
-                throw new System.ArgumentNullException(nameof(destination));
+                throw new ArgumentNullException(nameof(destination));
 
             destination.Clear();
             destination.name = source.name;
 
-            using (UnityEngine.Pool.ListPool<Vector3>.Get(out var v))
+            using (ListPool<Vector3>.Get(out var v))
             {
                 source.GetVertices(v);
                 destination.SetVertices(v);
@@ -149,7 +151,7 @@ namespace UnityExtensions
                 destination.SetNormals(v);
             }
 
-            using (UnityEngine.Pool.ListPool<int>.Get(out var t))
+            using (ListPool<int>.Get(out var t))
             {
                 int subMeshCount = source.subMeshCount;
                 destination.subMeshCount = subMeshCount;
@@ -162,7 +164,7 @@ namespace UnityExtensions
                 }
             }
 
-            using (UnityEngine.Pool.ListPool<Vector2>.Get(out var u))
+            using (ListPool<Vector2>.Get(out var u))
             {
                 for (int i = 0; i < 8; i++)
                 {
@@ -173,13 +175,13 @@ namespace UnityExtensions
                 }
             }
 
-            using (UnityEngine.Pool.ListPool<Vector4>.Get(out var tan))
+            using (ListPool<Vector4>.Get(out var tan))
             {
                 source.GetTangents(tan);
                 destination.SetTangents(tan);
             }
 
-            using (UnityEngine.Pool.ListPool<Color32>.Get(out var c))
+            using (ListPool<Color32>.Get(out var c))
             {
                 source.GetColors(c);
                 destination.SetColors(c);
@@ -193,13 +195,13 @@ namespace UnityExtensions
         /// <param name="gameObject">The GameObject with the MeshFilter and (optional) MeshRenderer to search for mesh attributes.</param>
         /// <param name="attributeGetter">The function used to extract mesh attribute.</param>
         /// <returns>A List of the mesh attribute values from the Additional Vertex Streams mesh if it exists and contains the attribute, or the MeshFilter.sharedMesh attribute values.</returns>
-        public static T GetMeshChannel<T>(GameObject gameObject, System.Func<Mesh, T> attributeGetter) where T : System.Collections.IList
+        public static T GetMeshChannel<T>(GameObject gameObject, Func<Mesh, T> attributeGetter) where T : IList
         {
             if (gameObject == null)
-                throw new System.ArgumentNullException(nameof(gameObject));
+                throw new ArgumentNullException(nameof(gameObject));
 
             if (attributeGetter == null)
-                throw new System.ArgumentNullException(nameof(attributeGetter));
+                throw new ArgumentNullException(nameof(attributeGetter));
 
             Mesh mesh = gameObject.TryGetComponent<MeshFilter>(out var mf) ? mf.sharedMesh : null;
             T res = default(T);
@@ -224,7 +226,7 @@ namespace UnityExtensions
             return res != null && res.Count == vertexCount ? res : default(T);
         }
 
-        static void PrintAttribute<T>(System.Text.StringBuilder sb, string title, List<T> attrib, string fmt)
+        static void PrintAttribute<T>(StringBuilder sb, string title, List<T> attrib, string fmt)
         {
             if (attrib == null)
             {
@@ -238,7 +240,7 @@ namespace UnityExtensions
                 return;
             }
 
-            //using var _0 = UnityEngine.Pool.ListPool<T>.Get(out var list);
+            //using var _0 = ListPool<T>.Get(out var list);
             //list.AddRange(attrib);
 
             sb.Append("  - ");
@@ -272,28 +274,23 @@ namespace UnityExtensions
         public static string Print(Mesh mesh)
         {
             if (mesh == null)
-                throw new System.ArgumentNullException(nameof(mesh));
+                throw new ArgumentNullException(nameof(mesh));
 
-            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            using var _0 = StringBuilderPool.Get(out var sb);
 
-            //Vector3[] positions = mesh.vertices;
-            using var _1 = UnityEngine.Pool.ListPool<Vector3>.Get(out var positions);
+            using var _1 = ListPool<Vector3>.Get(out var positions);
             mesh.GetVertices(positions);
-            //Vector3[] normals = mesh.normals;
-            using var _2 = UnityEngine.Pool.ListPool<Vector3>.Get(out var normals);
+            using var _2 = ListPool<Vector3>.Get(out var normals);
             mesh.GetNormals(normals);
-            //Color[] colors = mesh.colors;
-            using var _3 = UnityEngine.Pool.ListPool<Color>.Get(out var colors);
+            using var _3 = ListPool<Color>.Get(out var colors);
             mesh.GetColors(colors);
-            //Vector4[] tangents = mesh.tangents;
-            using var _4 = UnityEngine.Pool.ListPool<Vector4>.Get(out var tangents);
+            using var _4 = ListPool<Vector4>.Get(out var tangents);
             mesh.GetTangents(tangents);
-            using var _5 = UnityEngine.Pool.ListPool<Vector4>.Get(out var uv0);
-            //Vector2[] uv2 = mesh.uv2;
-            using var _6 = UnityEngine.Pool.ListPool<Vector2>.Get(out var uv2);
+            using var _5 = ListPool<Vector4>.Get(out var uv0);
+            using var _6 = ListPool<Vector2>.Get(out var uv2);
             mesh.GetUVs(1, uv2);
-            using var _7 = UnityEngine.Pool.ListPool<Vector4>.Get(out var uv3);
-            using var _8 = UnityEngine.Pool.ListPool<Vector4>.Get(out var uv4);
+            using var _7 = ListPool<Vector4>.Get(out var uv3);
+            using var _8 = ListPool<Vector4>.Get(out var uv4);
 
             mesh.GetUVs(0, uv0);
             mesh.GetUVs(2, uv3);
@@ -428,22 +425,15 @@ namespace UnityExtensions
 
             return sum;
         }
-
-        #endregion // com.unity.probuilder
+        #endregion // UnityEngine.ProBuilder
 
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/master/Runtime/Core/MeshHandles.cs
-        #region com.unity.probuilder
-
-        static readonly Vector2 k_Billboard0 = new Vector2(-1f, -1f);
-        static readonly Vector2 k_Billboard1 = new Vector2(-1f, 1f);
-        static readonly Vector2 k_Billboard2 = new Vector2(1f, -1f);
-        static readonly Vector2 k_Billboard3 = new Vector2(1f, 1f);
-
+        #region UnityEngine.ProBuilder
         public static void CreatePointMesh(List<Vector3> positions, List<int> indexes, Mesh target)
         {
             int vertexCount = positions.Count;
             target.Clear();
-            target.indexFormat = vertexCount > ushort.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
+            target.indexFormat = vertexCount > ushort.MaxValue ? IndexFormat.UInt32 : IndexFormat.UInt16;
             target.name = "ProBuilder::PointMesh";
             target.SetVertices(positions);
             target.subMeshCount = 1;
@@ -456,34 +446,39 @@ namespace UnityExtensions
             var pointCount = positions.Count;
             var vertexCount = pointCount * 4;
 
-            var s_Vector2List = new NativeArray<Vector2>(pointCount * 4, Allocator.Temp);
-            var s_Vector3List = new NativeArray<Vector3>(pointCount * 4, Allocator.Temp);
-            var s_IndexList = new NativeArray<int>(pointCount * 4, Allocator.Temp);
+            Vector2 billboard0 = new Vector2(-1f, -1f);
+            Vector2 billboard1 = new Vector2(-1f, 1f);
+            Vector2 billboard2 = new Vector2(1f, -1f);
+            Vector2 billboard3 = new Vector2(1f, 1f);
+
+            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
+            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
+            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp);
 
             for (int i = 0; i < pointCount; i++)
             {
-                s_Vector3List[i * 4 + 0] = positions[i];
-                s_Vector3List[i * 4 + 1] = positions[i];
-                s_Vector3List[i * 4 + 2] = positions[i];
-                s_Vector3List[i * 4 + 3] = positions[i];
+                vector3List[i * 4 + 0] = positions[i];
+                vector3List[i * 4 + 1] = positions[i];
+                vector3List[i * 4 + 2] = positions[i];
+                vector3List[i * 4 + 3] = positions[i];
 
-                s_Vector2List[i * 4 + 0] = k_Billboard0;
-                s_Vector2List[i * 4 + 1] = k_Billboard1;
-                s_Vector2List[i * 4 + 2] = k_Billboard2;
-                s_Vector2List[i * 4 + 3] = k_Billboard3;
+                vector2List[i * 4 + 0] = billboard0;
+                vector2List[i * 4 + 1] = billboard1;
+                vector2List[i * 4 + 2] = billboard2;
+                vector2List[i * 4 + 3] = billboard3;
 
-                s_IndexList[i * 4 + 0] = i * 4 + 0;
-                s_IndexList[i * 4 + 1] = i * 4 + 1;
-                s_IndexList[i * 4 + 2] = i * 4 + 3;
-                s_IndexList[i * 4 + 3] = i * 4 + 2;
+                indexList[i * 4 + 0] = i * 4 + 0;
+                indexList[i * 4 + 1] = i * 4 + 1;
+                indexList[i * 4 + 2] = i * 4 + 3;
+                indexList[i * 4 + 3] = i * 4 + 2;
             }
 
             target.Clear();
-            target.indexFormat = vertexCount > ushort.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
-            target.SetVertices(s_Vector3List);
-            target.SetUVs(0, s_Vector2List);
+            target.indexFormat = vertexCount > ushort.MaxValue ? IndexFormat.UInt32 : IndexFormat.UInt16;
+            target.SetVertices(vector3List);
+            target.SetUVs(0, vector2List);
             target.subMeshCount = 1;
-            target.SetIndices(s_IndexList, MeshTopology.Quads, 0);
+            target.SetIndices(indexList, MeshTopology.Quads, 0);
         }
 
         public static void CreatePointBillboardMesh(List<Vector3> positions, List<int> indexes, Mesh target)
@@ -491,48 +486,52 @@ namespace UnityExtensions
             var pointCount = indexes.Count;
             var vertexCount = pointCount * 4;
 
-            var s_Vector2List = new NativeArray<Vector2>(pointCount * 4, Allocator.Temp);
-            var s_Vector3List = new NativeArray<Vector3>(pointCount * 4, Allocator.Temp);
-            var s_IndexList = new NativeArray<int>(pointCount * 4, Allocator.Temp);
+            Vector2 billboard0 = new Vector2(-1f, -1f);
+            Vector2 billboard1 = new Vector2(-1f, 1f);
+            Vector2 billboard2 = new Vector2(1f, -1f);
+            Vector2 billboard3 = new Vector2(1f, 1f);
+
+            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
+            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
+            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp);
 
             for (int i = 0; i < pointCount; i++)
             {
                 var index = indexes[i];
 
-                s_Vector3List[i * 4 + 0] = positions[index];
-                s_Vector3List[i * 4 + 1] = positions[index];
-                s_Vector3List[i * 4 + 2] = positions[index];
-                s_Vector3List[i * 4 + 3] = positions[index];
+                vector3List[i * 4 + 0] = positions[index];
+                vector3List[i * 4 + 1] = positions[index];
+                vector3List[i * 4 + 2] = positions[index];
+                vector3List[i * 4 + 3] = positions[index];
 
-                s_Vector2List[i * 4 + 0] = k_Billboard0;
-                s_Vector2List[i * 4 + 1] = k_Billboard1;
-                s_Vector2List[i * 4 + 2] = k_Billboard2;
-                s_Vector2List[i * 4 + 3] = k_Billboard3;
+                vector2List[i * 4 + 0] = billboard0;
+                vector2List[i * 4 + 1] = billboard1;
+                vector2List[i * 4 + 2] = billboard2;
+                vector2List[i * 4 + 3] = billboard3;
 
-                s_IndexList[i * 4 + 0] = i * 4 + 0;
-                s_IndexList[i * 4 + 1] = i * 4 + 1;
-                s_IndexList[i * 4 + 2] = i * 4 + 3;
-                s_IndexList[i * 4 + 3] = i * 4 + 2;
+                indexList[i * 4 + 0] = i * 4 + 0;
+                indexList[i * 4 + 1] = i * 4 + 1;
+                indexList[i * 4 + 2] = i * 4 + 3;
+                indexList[i * 4 + 3] = i * 4 + 2;
             }
 
             target.Clear();
-            target.indexFormat = vertexCount > ushort.MaxValue ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
-            target.SetVertices(s_Vector3List);
-            target.SetUVs(0, s_Vector2List);
+            target.indexFormat = vertexCount > ushort.MaxValue ? IndexFormat.UInt32 : IndexFormat.UInt16;
+            target.SetVertices(vector3List);
+            target.SetUVs(0, vector2List);
             target.subMeshCount = 1;
-            target.SetIndices(s_IndexList, MeshTopology.Quads, 0);
+            target.SetIndices(indexList, MeshTopology.Quads, 0);
         }
-
-        #endregion // com.unity.probuilder
+        #endregion // UnityEngine.ProBuilder
 
         //https://github.com/needle-mirror/com.unity.physics/blob/master/Unity.Physics/Base/Utilities/MeshUtilities.cs
-        #region com.unity.physics
-
-        public static void AppendMeshPropertiesToNativeBuffers(UnityEngine.Mesh.MeshData meshData,
-            bool trianglesNeeded, out NativeArray<float3> vertices, out NativeArray<int3> triangles)
+        #region Unity.Physics
+        public static void AppendMeshPropertiesToNativeBuffers(Mesh.MeshData meshData,
+            bool trianglesNeeded, out NativeArray<float3> vertices, out NativeArray<int3> triangles,
+            Allocator allocator = Allocator.Temp)
         {
-            vertices = new NativeArray<float3>(meshData.vertexCount, Allocator.Temp);
-            var verticesV3 = vertices.Reinterpret<UnityEngine.Vector3>();
+            vertices = new NativeArray<float3>(meshData.vertexCount, allocator);
+            var verticesV3 = vertices.Reinterpret<Vector3>();
             meshData.GetVertices(verticesV3);
 
             if (!trianglesNeeded)
@@ -547,7 +546,7 @@ namespace UnityExtensions
                     var indices16 = meshData.GetIndexData<ushort>();
                     var numTriangles = indices16.Length / 3;
 
-                    triangles = new NativeArray<int3>(numTriangles, Allocator.Temp);
+                    triangles = new NativeArray<int3>(numTriangles, allocator);
 
                     int trianglesIndex = 0;
                     for (var sm = 0; sm < meshData.subMeshCount; ++sm)
@@ -567,7 +566,7 @@ namespace UnityExtensions
                     var indices32 = meshData.GetIndexData<uint>();
                     numTriangles = indices32.Length / 3;
 
-                    triangles = new NativeArray<int3>(numTriangles, Allocator.Temp);
+                    triangles = new NativeArray<int3>(numTriangles, allocator);
 
                     trianglesIndex = 0;
                     for (var sm = 0; sm < meshData.subMeshCount; ++sm)
@@ -588,41 +587,38 @@ namespace UnityExtensions
                     break;
             }
         }
-
-        #endregion // com.unity.physics
+        #endregion // Unity.Physics
 
         #region NativeList
-
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetVertices(this Mesh mesh, NativeList<Vector3> inVertices)
         {
             mesh.SetVertices(inVertices.AsArray());
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetUVs<T>(this Mesh mesh, int channel, NativeList<T> uvs) where T : unmanaged
         {
             mesh.SetUVs(channel, uvs.AsArray());
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetNormals(this Mesh mesh, NativeList<Vector3> inNormals)
         {
             mesh.SetNormals(inNormals.AsArray());
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetColors(this Mesh mesh, NativeList<Color> inColors)
         {
             mesh.SetColors(inColors.AsArray());
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetColors(this Mesh mesh, NativeList<Color32> inColors)
         {
             mesh.SetColors(inColors.AsArray());
         }
-
         #endregion // NativeList
     }
 }

@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace BoatAttack.UI
+namespace UnityExtensions.Packages
 {
     //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/UI/EnumSelector.cs
     #region BoatAttack.UI

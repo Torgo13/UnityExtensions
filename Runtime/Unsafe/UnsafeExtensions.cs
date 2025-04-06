@@ -10,140 +10,24 @@ using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
+using UnityEngine.Pool;
 
 namespace UnityExtensions.Unsafe
 {
     public static class UnsafeExtensions
     {
-        //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
-        #region Unity.Collections.LowLevel.Unsafe
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> GetByteSpanFromArray(System.Array array, int elementSize)
-        {
-            if (array == null || array.Length == 0)
-                return new Span<byte>();
-
-            Assert.AreEqual(UnsafeUtility.SizeOf(array.GetType().GetElementType()), elementSize);
-
-            var bArray = UnsafeUtility.As<System.Array, byte[]>(ref array);
-            return new Span<byte>(UnsafeUtility.AddressOf(ref bArray[0]), array.Length * elementSize);
-        }
-        #endregion // Unity.Collections.LowLevel.Unsafe
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAt<T>(this T[] array, int index) where T : struct
         {
             return ref UnsafeUtility.ArrayElementAsRef<T>(UnsafeUtility.AddressOf(ref array[0]), index);
         }
 
-        #region ToArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
+        public static ref T UnsafeElementAt<T>(this List<T> list, int index) where T : struct
         {
-            Assert.IsFalse(
-                list.Count < array.Length,
-                $"Cannot copy List {nameof(list)} of size {list.Count} into array {nameof(array)} of size {array.Length}.");
-
-            UnsafeUtility.MemCpy(
-                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
-                UnsafeUtility.PinGCArrayAndGetDataAddress(NoAllocHelpers.ExtractArrayFromList(list), out var listGCHandle),
-                list.Count * UnsafeUtility.SizeOf<T>());
-
-            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
-            UnsafeUtility.ReleaseGCObject(listGCHandle);
-        }
-        #endregion // ToArray
-
-        #region ToList
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, List<T> list) where T : struct
-        {
-            NoAllocHelpers.ResetListContents(list, array);
+            return ref NoAllocHelpers.ExtractArrayFromList(list).UnsafeElementAt(index);
         }
 
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this NativeArray<T> nativeArray, List<T> list) where T : struct
-        {
-            NoAllocHelpers.ResetListContents(list, nativeArray);
-        }
-
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
-        {
-            NoAllocHelpers.ResetListContents(list, nativeList);
-        }
-        #endregion // ToList
-
-        #region ToNativeArray
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
-        {
-            Assert.IsFalse(
-                array.Length < nativeArray.Length,
-                $"Cannot copy array {nameof(array)} of size {array.Length} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
-
-            NativeArray<T>.Copy(array, nativeArray, array.Length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
-        {
-            Assert.IsFalse(
-                list.Count < nativeArray.Length,
-                $"Cannot copy List {nameof(list)} of size {list.Count} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
-
-            NativeArray<T>.Copy(NoAllocHelpers.ExtractArrayFromList(list), nativeArray, list.Count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
-        {
-            Assert.IsFalse(
-                nativeList.Length < nativeArray.Length,
-                $"Cannot copy NativeList {nameof(nativeList)} of size {nativeList.Length} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
-
-            nativeArray.CopyFrom(nativeList.AsArray());
-        }
-        #endregion // ToNativeArray
-
-        #region ToNativeList
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
-        {
-            nativeList.AddRange(array);
-        }
-
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
-        {
-            nativeList.AddRange(list);
-        }
-
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyTo<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
-        {
-            nativeList.CopyFrom(nativeArray);
-        }
-        #endregion // ToNativeList
-        
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         public static bool IsBlittableValueType(Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
@@ -156,7 +40,7 @@ namespace UnityExtensions.Unsafe
             if (t.IsPrimitive)
                 return $"{name} is not blittable ({t})\n";
 
-            using var sb = UnityEngine.Pool.StringBuilderPool.Get(out var ret);
+            using var sb = StringBuilderPool.Get(out var ret);
             foreach (FieldInfo f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 if (!IsBlittableValueType(f.FieldType))
@@ -214,121 +98,179 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this List<T> list, int index) where T : struct
-        {
-            return ref NoAllocHelpers.ExtractArrayFromList(list).UnsafeElementAt(index);
-        }
-
         #region ToArray
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToArray<T>(this NativeArray<T> nativeArray, ref T[] array) where T : struct
+        public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                nativeArray.Length < array.Length,
-                $"Cannot copy NativeArray {nameof(nativeArray)} of size {nativeArray.Length} into array {nameof(array)} of size {array.Length}.");
+            Assert.IsNotNull(list);
+            Assert.IsNotNull(array);
+            Assert.IsTrue(
+                array.Length >= list.Count,
+                $"Cannot copy {nameof(list)} of size {list.Count} into {nameof(array)} of size {array.Length}.");
 
-            NativeArray<T>.Copy(nativeArray, array, nativeArray.Length);
+            UnsafeUtility.MemCpy(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
+                UnsafeUtility.PinGCArrayAndGetDataAddress(NoAllocHelpers.ExtractArrayFromList(list), out var listGCHandle),
+                list.Count * UnsafeUtility.SizeOf<T>());
+
+            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
+            UnsafeUtility.ReleaseGCObject(listGCHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToArray<T>(this NativeList<T> nativeList, ref T[] array) where T : unmanaged
+        public static unsafe void CopyTo<T>(this NativeArray<T> nativeArray, T[] array) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                nativeList.Length < array.Length,
-                $"Cannot copy NativeList {nameof(nativeList)} of size {nativeList.Length} into array {nameof(array)} of size {array.Length}.");
+            Assert.IsTrue(nativeArray.IsCreated);
+            Assert.IsNotNull(array);
+            Assert.IsTrue(
+                array.Length >= nativeArray.Length,
+                $"Cannot copy {nameof(nativeArray)} of size {nativeArray.Length} into {nameof(array)} of size {array.Length}.");
 
-            NativeArray<T>.Copy(nativeList.AsArray(), array, nativeList.Length);
+            UnsafeUtility.MemCpy(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
+                nativeArray.GetUnsafePtr(),
+                nativeArray.Length * UnsafeUtility.SizeOf<T>());
+
+            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void CopyTo<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsNotNull(array);
+            Assert.IsTrue(
+                array.Length >= nativeList.Length,
+                $"Cannot copy {nameof(nativeList)} of size {nativeList.Length} into {nameof(array)} of size {array.Length}.");
+
+            UnsafeUtility.MemCpy(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
+                nativeList.GetUnsafePtr(),
+                nativeList.Length * UnsafeUtility.SizeOf<T>());
+
+            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
         }
         #endregion // ToArray
 
         #region ToList
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this T[] array, ref List<T> list) where T : struct
+        public static void CopyTo<T>(this T[] array, List<T> list) where T : struct
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsNotNull(array);
+            Assert.IsNotNull(list);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            list.EnsureCapacity(array.Length);
             NoAllocHelpers.ResetListContents(list, array);
         }
 
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this NativeArray<T> nativeArray, ref List<T> list) where T : struct
+        public static void CopyTo<T>(this NativeArray<T> nativeArray, List<T> list) where T : struct
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsTrue(nativeArray.IsCreated);
+            Assert.IsNotNull(list);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            list.EnsureCapacity(nativeArray.Length);
             NoAllocHelpers.ResetListContents(list, nativeArray);
         }
 
-        /// <remarks>
-        /// Clear the List and set the Capacity before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToList<T>(this NativeList<T> nativeList, ref List<T> list) where T : unmanaged
+        public static void CopyTo<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsNotNull(list);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            list.EnsureCapacity(nativeList.Length);
             NoAllocHelpers.ResetListContents(list, nativeList);
         }
         #endregion // ToList
 
         #region ToNativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
+        public static void CopyTo<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                array.Length <= nativeArray.Length,
-                $"Cannot copy array {nameof(array)} of size {array.Length} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsNotNull(array);
+            Assert.IsTrue(nativeArray.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            Assert.IsTrue(
+                nativeArray.Length >= array.Length,
+                $"Cannot copy {nameof(array)} of size {array.Length} into {nameof(nativeArray)} of size {nativeArray.Length}.");
 
             NativeArray<T>.Copy(array, nativeArray, array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
+        public static void CopyTo<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                list.Count <= nativeArray.Length,
-                $"Cannot copy List {nameof(list)} of size {list.Count} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsNotNull(list);
+            Assert.IsTrue(nativeArray.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            Assert.IsTrue(
+                nativeArray.Length >= list.Count,
+                $"Cannot copy {nameof(list)} of size {list.Count} into {nameof(nativeArray)} of size {nativeArray.Length}.");
 
             NativeArray<T>.Copy(NoAllocHelpers.ExtractArrayFromList(list), nativeArray, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeArray<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
+        public static void CopyTo<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                nativeList.Length <= nativeArray.Length,
-                $"Cannot copy NativeList {nameof(nativeList)} of size {nativeList.Length} into NativeArray {nameof(nativeArray)} of size {nativeArray.Length}.");
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(nativeArray.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            Assert.IsTrue(
+                nativeArray.Length >= nativeList.Length,
+                $"Cannot copy {nameof(nativeList)} of size {nativeList.Length} into {nameof(nativeArray)} of size {nativeArray.Length}.");
 
             nativeArray.CopyFrom(nativeList.AsArray());
         }
         #endregion // ToNativeArray
 
         #region ToNativeList
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsNotNull(array);
+            Assert.IsTrue(nativeList.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            nativeList.Clear();
             nativeList.AddRange(array);
         }
 
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsNotNull(list);
+            Assert.IsTrue(nativeList.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            nativeList.Clear();
             nativeList.AddRange(list);
         }
 
-        /// <remarks>
-        /// Clear the NativeList before calling this function.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CopyToNativeList<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
+        public static void CopyTo<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
         {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            Assert.IsTrue(nativeArray.IsCreated);
+            Assert.IsTrue(nativeList.IsCreated);
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
+            nativeList.Clear();
             nativeList.CopyFrom(nativeArray);
         }
         #endregion // ToNativeList

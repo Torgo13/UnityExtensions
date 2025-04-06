@@ -76,58 +76,96 @@ namespace UnityExtensions
         }
     }
     #endregion // Unity.Netcode
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union16
+    {
+        [FieldOffset(0)] public short Short_0;
+
+        [FieldOffset(0)] public ushort UShort_0;
+
+        [FieldOffset(0)] public char Char_0;
+
+
+        [FieldOffset(0)] public byte Byte_0;
+        [FieldOffset(1)] public byte Byte_1;
+    }
     
     [StructLayout(LayoutKind.Explicit)]
-    public struct PackedInt
+    public struct Union32
     {
-        [FieldOffset(0)] public int Int0;
+        [FieldOffset(0)] public float Float_0;
+        
+        [FieldOffset(0)] public int Int_0;
 
-        [FieldOffset(0)] public uint UInt0;
+        [FieldOffset(0)] public uint UInt_0;
+        
+        [FieldOffset(0)] public Color32 Color32_0;
+        
 
-        [FieldOffset(0)] public short Short0;
-        [FieldOffset(2)] public short Short1;
+        [FieldOffset(0)] public Union16 Union16_0;
+        [FieldOffset(2)] public Union16 Union16_1;
 
-        [FieldOffset(0)] public ushort UShort0;
-        [FieldOffset(2)] public ushort UShort1;
+        [FieldOffset(0)] public short Short_0;
+        [FieldOffset(2)] public short Short_1;
 
-        [FieldOffset(0)] public byte Byte0;
-        [FieldOffset(1)] public byte Byte1;
-        [FieldOffset(2)] public byte Byte2;
-        [FieldOffset(3)] public byte Byte3;
+        [FieldOffset(0)] public ushort UShort_0;
+        [FieldOffset(2)] public ushort UShort_1;
+
+        [FieldOffset(0)] public char Char_0;
+        [FieldOffset(2)] public char Char_1;
+
+
+        [FieldOffset(0)] public byte Byte_0;
+        [FieldOffset(1)] public byte Byte_1;
+        [FieldOffset(2)] public byte Byte_2;
+        [FieldOffset(3)] public byte Byte_3;
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    public struct PackedShort
+    public struct Union128
     {
-        [FieldOffset(0)] public short Short0;
+        [FieldOffset(0)] public Vector4 Vector4_0;
+        
+        [FieldOffset(0)] public Color Color_0;
 
-        [FieldOffset(0)] public ushort UShort0;
+        [FieldOffset(0)] public Vector3 Vector3_0;
 
-        [FieldOffset(0)] public byte Byte0;
-        [FieldOffset(1)] public byte Byte1;
-    }
+        [FieldOffset(0)] public Vector3Int Vector3Int_0;
+        
 
-    [StructLayout(LayoutKind.Explicit)]
-    public struct PackedVector4
-    {
-        [FieldOffset(0)] public Vector4 Vector40;
+        [FieldOffset(0)] public Vector2 Vector2_0;
+        [FieldOffset(8)] public Vector2 Vector2_1;
 
-        [FieldOffset(0)] public Vector3 Vector30;
+        [FieldOffset(0)] public double Double_0;
+        [FieldOffset(8)] public double Double_1;
 
-        [FieldOffset(0)] public Vector3Int Vector3Int0;
+        [FieldOffset(0)] public long Long_0;
+        [FieldOffset(8)] public long Long_1;
 
-        [FieldOffset(0)] public Vector2 Vector20;
-        [FieldOffset(8)] public Vector2 Vector21;
+        [FieldOffset(0)] public ulong ULong_0;
+        [FieldOffset(8)] public ulong ULong_1;
+        
 
-        [FieldOffset(0)] public int Int0;
-        [FieldOffset(4)] public int Int1;
-        [FieldOffset(8)] public int Int2;
-        [FieldOffset(12)] public int Int3;
+        [FieldOffset(0)] public Union32 Union32_0;
+        [FieldOffset(4)] public Union32 Union32_1;
+        [FieldOffset(8)] public Union32 Union32_2;
+        [FieldOffset(12)] public Union32 Union32_3;
 
-        [FieldOffset(0)] public float Float0;
-        [FieldOffset(4)] public float Float1;
-        [FieldOffset(8)] public float Float2;
-        [FieldOffset(12)] public float Float3;
+        [FieldOffset(0)] public float Float_0;
+        [FieldOffset(4)] public float Float_1;
+        [FieldOffset(8)] public float Float_2;
+        [FieldOffset(12)] public float Float_3;
+
+        [FieldOffset(0)] public int Int_0;
+        [FieldOffset(4)] public int Int_1;
+        [FieldOffset(8)] public int Int_2;
+        [FieldOffset(12)] public int Int_3;
+
+        [FieldOffset(0)] public uint UInt_0;
+        [FieldOffset(4)] public uint UInt_1;
+        [FieldOffset(8)] public uint UInt_2;
+        [FieldOffset(12)] public uint UInt_3;
     }
     
     public static class MathematicsExtensions

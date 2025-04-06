@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 
-namespace UnityExtensions
+namespace UnityExtensions.Packages
 {
     /// <summary>
-    /// ContextContainer is a Dictionary like storage where the key is a generic parameter and the value is of the same type.
+    /// ContextContainer is a Dictionary-like storage where the key is a generic parameter and the value is of the same type.
     /// </summary>
     public class ContextContainer : IDisposable
     {

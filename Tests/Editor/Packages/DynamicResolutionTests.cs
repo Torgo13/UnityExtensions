@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace UnityExtensions.Tests
+namespace UnityExtensions.Packages.Tests
 {
     public class DynamicResolutionTests
     {

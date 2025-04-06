@@ -102,8 +102,7 @@ namespace UnityExtensions.Editor
 
             EditorUtility.ClearProgressBar();
 
-            using var _0 = UnityEngine.Pool.ListPool<string>.Get(out var list);
-            list.AddRange(usedAssets.Keys);
+            var list = new List<string>(usedAssets.Keys);
             foreach (var usedAssetPath in list)
             {
                 if (!usedAssets[usedAssetPath])

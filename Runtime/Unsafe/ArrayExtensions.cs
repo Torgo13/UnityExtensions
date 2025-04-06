@@ -37,6 +37,7 @@ namespace UnityExtensions.Unsafe
             where T : unmanaged
         {
             Assert.IsTrue(startIndex >= 0);
+            Assert.IsTrue(startIndex + length < array.Length);
 
             unsafe
             {

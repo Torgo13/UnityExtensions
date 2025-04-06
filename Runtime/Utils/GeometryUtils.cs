@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -755,19 +756,19 @@ namespace UnityExtensions
             }
 
             // compute & store the direction of every edge in the hull
-            List<Vector3> hullEdgeDirections = ListPool<Vector3>.Get();
+            var hullEdgeDirections = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
             var lastVertexIndex = vertexCount - 1;
             for (var i = 0; i < lastVertexIndex; i++)
             {
                 var edgeDirection = convexHull[i + 1] - convexHull[i];
                 edgeDirection.Normalize();
-                hullEdgeDirections.Add(edgeDirection);
+                hullEdgeDirections[i] = edgeDirection;
             }
 
             // by doing the last vertex on its own, we can skip checking indices while iterating above
             var lastEdgeDirection = convexHull[0] - convexHull[lastVertexIndex];
             lastEdgeDirection.Normalize();
-            hullEdgeDirections.Add(lastEdgeDirection);
+            hullEdgeDirections[lastVertexIndex] = lastEdgeDirection;
 
             var bestOrientedBoundingBoxArea = double.MaxValue;
             // for every vertex in the hull, try aligning a caliper edge with an edge the vertex lies on
@@ -850,8 +851,6 @@ namespace UnityExtensions
                     boundingBox[3] = upperLeft;
                 }
             }
-
-            ListPool<Vector3>.Release(hullEdgeDirections);
 
             // compute the size of the 2d bounds
             var topLeft = boundingBox[0];

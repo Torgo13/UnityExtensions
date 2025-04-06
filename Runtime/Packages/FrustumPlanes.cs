@@ -1,17 +1,20 @@
+using System.Runtime.CompilerServices;
+using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Unsafe
+namespace UnityExtensions.Packages
 {
-    //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/FrustumPlanes.cs
     /// <summary>
     /// Represents frustum planes.
     /// </summary>
     public struct FrustumPlanes
     {
+        //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/FrustumPlanes.cs
+        #region Unity.Rendering
         /// <summary>
         /// Options for an intersection result.
         /// </summary>
@@ -87,19 +90,47 @@ namespace UnityExtensions.Unsafe
         public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
         {
             var inCount = 0;
-            for (int i = 0; i < cullingPlanes.Length; i++)
+            var intersectResultRef = new NativeReference<bool>(Allocator.TempJob);
+
+            var intersectJob = new IntersectJob
+            {
+                cullingPlanes = cullingPlanes,
+                m = m,
+                extent = extent,
+                IntersectResultOut = intersectResultRef,
+            };
+
+            intersectJob.Run(cullingPlanes.Length);
+
+            var intersectResult = intersectResultRef.Value;
+            intersectResultRef.Dispose();
+
+            if (intersectResult)
+                return IntersectResult.Out;
+
+            return (inCount == cullingPlanes.Length) ? IntersectResult.In : IntersectResult.Partial;
+        }
+
+        [BurstCompile]
+        struct IntersectJob : IJobFor
+        {
+            [ReadOnly] public NativeArray<float4> cullingPlanes;
+            [ReadOnly] public float3 m;
+            [ReadOnly] public float3 extent;
+            public int inCount;
+            [WriteOnly] public NativeReference<bool> IntersectResultOut;
+
+            public void Execute(int i)
             {
                 float3 normal = cullingPlanes[i].xyz;
                 float dist = dot(normal, m) + cullingPlanes[i].w;
                 float radius = dot(extent, abs(normal));
                 if (dist + radius <= 0)
-                    return IntersectResult.Out;
+                    IntersectResultOut.Value = true;
 
                 if (dist > radius)
                     inCount++;
             }
-
-            return (inCount == cullingPlanes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
 
         /// <summary>
@@ -160,6 +191,7 @@ namespace UnityExtensions.Unsafe
             }
         }
 
+        // TODO Move to UnityExtensions.Unsafe
         /*
         public static UnsafeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
         {
@@ -259,7 +291,7 @@ namespace UnityExtensions.Unsafe
             return outCount > 0 ? IntersectResult.Out : IntersectResult.In;
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(256)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float4 dot4(float4 xs, float4 ys, float4 zs, float4 mx, float4 my, float4 mz)
         {
             return xs * mx + ys * my + zs * mz;
@@ -292,5 +324,6 @@ namespace UnityExtensions.Unsafe
 
             return (inCount == planes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
+        #endregion // Unity.Rendering
     }
 }
