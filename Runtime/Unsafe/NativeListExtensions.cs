@@ -8,6 +8,37 @@ namespace UnityExtensions.Unsafe
 {
     public static class NativeListExtensions
     {
+        //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
+        #region UnityEngine.Formats.Alembic.Importer
+        public static unsafe void* GetPointer<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return nativeList.Length == 0 ? null : nativeList.GetUnsafePtr();
+        }
+        #endregion // UnityEngine.Formats.Alembic.Importer
+
+        public static unsafe void* GetReadOnlyPointer<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return nativeList.Length == 0 ? null : nativeList.GetUnsafeReadOnlyPtr();
+        }
+
+        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
+        #region UnityEngine.Rendering.Universal
+        /// <summary>
+        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafeReadOnlyPtr(), index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafePtr(), index);
+        }
+        #endregion // UnityEngine.Rendering.Universal
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
         {

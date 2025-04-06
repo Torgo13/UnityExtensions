@@ -28,9 +28,9 @@ namespace UnityExtensions
         /// <typeparam name="T">The type of the array</typeparam>
         /// <param name="array">Target array to resize</param>
         /// <param name="capacity">New size of native array to resize</param>
-        public static void ResizeArray<T>(this ref NativeArray<T> array, int capacity) where T : struct
+        public static void ResizeArray<T>(this ref NativeArray<T> array, int capacity, Allocator allocator = Allocator.Temp) where T : struct
         {
-            var newArray = new NativeArray<T>(capacity, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            var newArray = new NativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
             if (array.IsCreated)
             {
                 NativeArray<T>.Copy(array, newArray, array.Length);

@@ -2,6 +2,7 @@
     "name": "UnityExtensions.Editor.Packages.Tests",
     "rootNamespace": "",
     "references": [
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
         "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:16b707dc5319ad24facbdf7282f85fdc",
         "GUID:0acc523941302664db1f4e527237feb3",

@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
-    public static class Vector2Utils
+    /// <summary>
+    /// Extension methods for the <see cref="Vector2"/> type.
+    /// </summary>
+    public static class Vector2Extensions
     {
         //https://github.com/needle-mirror/com.unity.cinemachine/blob/85e81c94d0839e65c46a6fe0cd638bd1c6cd48af/Runtime/Core/UnityVectorExtensions.cs
         #region Unity.Cinemachine
@@ -25,7 +28,7 @@ namespace UnityExtensions
         ///     4 = lines are colinear, segments touch (at one or at multiple points)
         /// </returns>
         public static int FindIntersection(
-            in Vector2 p1, in Vector2 p2, in Vector2 q1, in Vector2 q2,
+            this in Vector2 p1, in Vector2 p2, in Vector2 q1, in Vector2 q2,
             out Vector2 intersection)
         {
             var p = p2 - p1;
@@ -89,13 +92,7 @@ namespace UnityExtensions
             return 1;   // segments don't touch but lines intersect
         }
         #endregion // Unity.Cinemachine
-    }
-    
-    /// <summary>
-    /// Extension methods for the <see cref="Vector2"/> type.
-    /// </summary>
-    public static class Vector2Extensions
-    {
+
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/Vector2Extensions.cs
         #region Unity.XR.CoreUtils
         /// <summary>

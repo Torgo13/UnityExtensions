@@ -226,7 +226,8 @@ namespace UnityExtensions.Packages
         
         //https://github.com/Unity-Technologies/com.unity.demoteam.hair/blob/75a7f446209896bc1bce0da2682cfdbdf30ce447/Runtime/Utility/AffineUtility.cs
         #region Unity.DemoTeam.Hair
-        public static float3x3 AffineInterpolateUpper3x3(this float3x3 A, float4 q, float t)
+        public static void AffineInterpolateUpper3x3(ref this float3x3 A, float4 q, float t,
+            out float3x3 affineInterpolateUpper3x3)
         {
             static float3x3 lerp(float3x3 a, float3x3 b, float t) => float3x3(
                 math.lerp(a.c0, b.c0, t),
@@ -245,40 +246,42 @@ namespace UnityExtensions.Packages
 
             float3x3 Q_t = float3x3(slerp(Unity.Mathematics.quaternion.identity, q, t));
             float3x3 R_t = lerp(I, R, t);
-            float3x3 A_t = math.mul(Q_t, R_t);
-
-            return A_t;
+            affineInterpolateUpper3x3 = math.mul(Q_t, R_t); // A_t
         }
 
-        public static float3x4 AffineInterpolate3x4(this float3x4 M, float4 q, float t)
+        public static void AffineInterpolate3x4(ref this float3x4 M, float4 q, float t,
+            out float3x4 affineInterpolate3x4)
         {
             // M = | A T |
 
-            float3x3 A_t = AffineInterpolateUpper3x3(float3x3(M.c0, M.c1, M.c2), q, t);
+            var A = float3x3(M.c0, M.c1, M.c2);
+            AffineInterpolateUpper3x3(ref A, q, t, out float3x3 A_t);
             float3 T_t = M.c3 * t;
 
-            return float3x4(
+            affineInterpolate3x4 = float3x4(
                 A_t.c0.x, A_t.c1.x, A_t.c2.x, T_t.x,
                 A_t.c0.y, A_t.c1.y, A_t.c2.y, T_t.y,
                 A_t.c0.z, A_t.c1.z, A_t.c2.z, T_t.z);
         }
 
-        public static float4x4 AffineInterpolate4x4(this float4x4 M, float4 q, float t)
+        public static void AffineInterpolate4x4(ref this float4x4 M, float4 q, float t,
+            out float4x4 affineInterpolate4x4)
         {
             // M = | A T |
             //     | 0 1 |
 
-            float3x3 A_t = AffineInterpolateUpper3x3((float3x3)M, q, t);
+            var M_3x3 = (float3x3)M;
+            AffineInterpolateUpper3x3(ref M_3x3, q, t, out float3x3 A_t);
             float3 T_t = M.c3.xyz * t;
 
-            return float4x4(
+            affineInterpolate4x4 = float4x4(
                 A_t.c0.x, A_t.c1.x, A_t.c2.x, T_t.x,
                 A_t.c0.y, A_t.c1.y, A_t.c2.y, T_t.y,
                 A_t.c0.z, A_t.c1.z, A_t.c2.z, T_t.z,
                 0.0f, 0.0f, 0.0f, 1.0f);
         }
 
-        public static float3x3 AffineInverseUpper3x3(this float3x3 A)
+        public static void AffineInverseUpper3x3(ref this float3x3 A, out float3x3 affineInverseUpper3x3)
         {
             float3 c0 = A.c0;
             float3 c1 = A.c1;
@@ -288,25 +291,26 @@ namespace UnityExtensions.Packages
             float3 cp1x2 = cross(c1, c2);
             float3 cp2x0 = cross(c2, c0);
 
-            return float3x3(cp1x2, cp2x0, cp0x1) / dot(c0, cp1x2);
+            affineInverseUpper3x3 = float3x3(cp1x2, cp2x0, cp0x1) / dot(c0, cp1x2);
         }
 
-        public static float4x4 AffineInverse4x4(this float4x4 M)
+        public static void AffineInverse4x4(ref this float4x4 M, out float4x4 affineInverse4x4)
         {
             // | A T |
             // | 0 1 |
 
-            float3x3 A_inv = AffineInverseUpper3x3((float3x3)M);
+            var M_3x3 = (float3x3)M;
+            AffineInverseUpper3x3(ref M_3x3, out float3x3 A_inv);
             float3 T_inv = -math.mul(A_inv, M.c3.xyz);
 
-            return float4x4(
+            affineInverse4x4 = float4x4(
                 A_inv.c0.x, A_inv.c1.x, A_inv.c2.x, T_inv.x,
                 A_inv.c0.y, A_inv.c1.y, A_inv.c2.y, T_inv.y,
                 A_inv.c0.z, A_inv.c1.z, A_inv.c2.z, T_inv.z,
                 0.0f, 0.0f, 0.0f, 1.0f);
         }
 
-        public static float3x4 AffineMul3x4(this float3x4 Ma, float3x4 Mb)
+        public static void AffineMul3x4(ref this float3x4 Ma, ref float3x4 Mb, out float3x4 affineMul3x4)
         {
             // Ma x Mb  =  | A Ta |  x  | B Tb |
             //             | 0 1  |     | 0 1  |
@@ -321,19 +325,46 @@ namespace UnityExtensions.Packages
             float3 ATb = math.mul(A, Mb.c3);
             float3 Ta = Ma.c3;
 
-            return float3x4(
+            affineMul3x4 = float3x4(
                 AB.c0.x, AB.c1.x, AB.c2.x, ATb.x + Ta.x,
                 AB.c0.y, AB.c1.y, AB.c2.y, ATb.y + Ta.y,
                 AB.c0.z, AB.c1.z, AB.c2.z, ATb.z + Ta.z);
         }
+
+        public static void AffineMul4x4(ref this float4x4 a, ref float4x4 b, out float4x4 affineMul4x4)
+        {
+            affineMul4x4 = float4x4(
+                a.c0 * b.c0.x + a.c1 * b.c0.y + a.c2 * b.c0.z + a.c3 * b.c0.w,
+                a.c0 * b.c1.x + a.c1 * b.c1.y + a.c2 * b.c1.z + a.c3 * b.c1.w,
+                a.c0 * b.c2.x + a.c1 * b.c2.y + a.c2 * b.c2.z + a.c3 * b.c2.w,
+                a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
+        }
         #endregion // Unity.DemoTeam.Hair
-        
+
         //https://github.com/Unity-Technologies/InputSystem/blob/36a93fe84a95a380be438412258a5305fcdfc740/Packages/com.unity.inputsystem/InputSystem/Utilities/NumberHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Approximately(this double a, double b)
         {
             return abs(b - a) < max(1E-06 * max(abs(a), abs(b)), double.Epsilon * 8);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Approximately(this float a, float b)
+        {
+            return abs(b - a) < max(1E-06 * max(abs(a), abs(b)), double.Epsilon * 8);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Approximately(this float3 a, float3 b)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                if (!a[i].Approximately(b[i]))
+                    return false;
+            }
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -365,47 +396,26 @@ namespace UnityExtensions.Packages
         
         //https://github.com/Unity-Technologies/sentis-samples/blob/526fbb4e2e6767afe347cd3393becd0e3e64ae2b/BlazeDetectionSample/Face/Assets/Scripts/BlazeUtils.cs
         #region BlazeUtils
-        // matrix utility
-        public static float2x3 mul(this float2x3 a, float2x3 b)
-        {
-            return new float2x3(
-                a[0][0] * b[0][0] + a[1][0] * b[0][1],
-                a[0][0] * b[1][0] + a[1][0] * b[1][1],
-                a[0][0] * b[2][0] + a[1][0] * b[2][1] + a[2][0],
-                a[0][1] * b[0][0] + a[1][1] * b[0][1],
-                a[0][1] * b[1][0] + a[1][1] * b[1][1],
-                a[0][1] * b[2][0] + a[1][1] * b[2][1] + a[2][1]
-            );
-        }
-
-        public static float2 mul(this float2x3 a, float2 b)
-        {
-            return new float2(
-                a[0][0] * b.x + a[1][0] * b.y + a[2][0],
-                a[0][1] * b.x + a[1][1] * b.y + a[2][1]
-            );
-        }
-
-        public static float2x3 RotationMatrix(this float theta)
+        public static void RotationMatrix(this float theta, out float2x3 rotationMatrix)
         {
             sincos(theta, out var sinTheta, out var cosTheta);
-            return new float2x3(
+            rotationMatrix = new float2x3(
                 cosTheta, -sinTheta, 0,
                 sinTheta, cosTheta, 0
             );
         }
 
-        public static float2x3 TranslationMatrix(this float2 delta)
+        public static void TranslationMatrix(this float2 delta, out float2x3 translationMatrix)
         {
-            return new float2x3(
+            translationMatrix = new float2x3(
                 1, 0, delta.x,
                 0, 1, delta.y
             );
         }
 
-        public static float2x3 ScaleMatrix(this float2 scale)
+        public static void ScaleMatrix(this float2 scale, out float2x3 scaleMatrix)
         {
-            return new float2x3(
+            scaleMatrix = new float2x3(
                 scale.x, 0, 0,
                 0, scale.y, 0
             );

@@ -30,7 +30,20 @@ namespace UnityExtensions.Unsafe.Tests
                 ref int element = ref array.UnsafeElementAt(0);
             });
         }
-        
+        [Test]
+        public void UnsafeElementAt_List_ShouldReturnCorrectReference()
+        {
+            List <int> list = new() { 1, 2, 3, 4, 5 };
+            int index = 2;
+
+            ref int element = ref list.UnsafeElementAt(index);
+
+            Assert.AreEqual(list[index], element);
+
+            element = 10;
+            Assert.AreEqual(10, list[index]);
+        }
+
         [Test]
         public void CopyToList_FromArray_ShouldCopyElementsToList()
         {

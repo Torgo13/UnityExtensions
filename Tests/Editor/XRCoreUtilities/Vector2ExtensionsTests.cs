@@ -5,6 +5,81 @@ namespace UnityExtensions.Editor.Tests
 {
     class Vector2ExtensionsTests
     {
+        //https://github.com/needle-mirror/com.unity.cinemachine/blob/85e81c94d0839e65c46a6fe0cd638bd1c6cd48af/Runtime/Core/UnityVectorExtensions.cs
+        #region Unity.Cinemachine
+        [Test]
+        public void FindIntersection_NoIntersection_ReturnsZero()
+        {
+            Vector2 p1 = new Vector2(0, 0);
+            Vector2 p2 = new Vector2(1, 0);
+            Vector2 q1 = new Vector2(0, 1);
+            Vector2 q2 = new Vector2(1, 1);
+
+            int result = Vector2Extensions.FindIntersection(p1, p2, q1, q2, out Vector2 intersection);
+
+            Assert.AreEqual(0, result, "Expected no intersection between parallel lines");
+            Assert.AreEqual(Vector2.positiveInfinity, intersection, "Intersection point should be Vector2.positiveInfinity when there is no intersection");
+        }
+
+        [Test]
+        public void FindIntersection_LinesIntersect_ReturnsOne()
+        {
+            Vector2 p1 = new Vector2(0, 0);
+            Vector2 p2 = new Vector2(-1, -1);
+            Vector2 q1 = new Vector2(0, 1);
+            Vector2 q2 = new Vector2(1, 0);
+
+            int result = Vector2Extensions.FindIntersection(p1, p2, q1, q2, out Vector2 intersection);
+
+            Assert.AreEqual(1, result, "Expected the lines to intersect but not the segments");
+            var expected = new Vector2(0.5f, 0.5f);
+            Assert.AreEqual(expected, intersection, "Intersection point calculation is incorrect");
+        }
+
+        [Test]
+        public void FindIntersection_SegmentsIntersect_ReturnsTwo()
+        {
+            Vector2 p1 = new Vector2(0, 0);
+            Vector2 p2 = new Vector2(2, 2);
+            Vector2 q1 = new Vector2(0, 2);
+            Vector2 q2 = new Vector2(2, 0);
+
+            int result = Vector2Extensions.FindIntersection(p1, p2, q1, q2, out Vector2 intersection);
+
+            Assert.AreEqual(2, result, "Expected the segments to intersect");
+            var expected = new Vector2(1, 1);
+            Assert.AreEqual(expected, intersection, "Intersection point calculation is incorrect");
+        }
+
+        [Test]
+        public void FindIntersection_CollinearSegmentsDontTouch_ReturnsThree()
+        {
+            Vector2 p1 = new Vector2(0, 0);
+            Vector2 p2 = new Vector2(1, 1);
+            Vector2 q1 = new Vector2(2, 2);
+            Vector2 q2 = new Vector2(3, 3);
+
+            int result = Vector2Extensions.FindIntersection(p1, p2, q1, q2, out Vector2 intersection);
+
+            Assert.AreEqual(3, result, "Expected collinear segments that don't touch to return 3");
+            Assert.AreEqual(Vector2.positiveInfinity, intersection, "Intersection point should be Vector2.positiveInfinity for non-touching collinear segments");
+        }
+
+        [Test]
+        public void FindIntersection_CollinearSegmentsOverlap_ReturnsFour()
+        {
+            Vector2 p1 = new Vector2(0, 0);
+            Vector2 p2 = new Vector2(3, 3);
+            Vector2 q1 = new Vector2(1, 1);
+            Vector2 q2 = new Vector2(2, 2);
+
+            int result = Vector2Extensions.FindIntersection(p1, p2, q1, q2, out Vector2 intersection);
+
+            Assert.AreEqual(4, result, "Expected overlapping collinear segments to return 4");
+            Assert.AreEqual(Vector2.positiveInfinity, intersection, "Intersection point should be Vector2.positiveInfinity for overlapping collinear segments");
+        }
+        #endregion // Unity.Cinemachine
+
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Tests/Editor/XRCoreUtilities/Vector2ExtensionsTests.cs
         #region Unity.XR.CoreUtils.Editor.Tests
         [Test]
