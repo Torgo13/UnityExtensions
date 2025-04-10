@@ -1,8 +1,9 @@
+using System;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityExtensions;
 
-namespace System.Text
+namespace UnityExtensions.Packages
 {
     public static class StringBuilderExtensions
     {
