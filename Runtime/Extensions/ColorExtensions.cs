@@ -81,7 +81,6 @@ namespace UnityExtensions
 			return a.r == b.r && a.g == b.g && a.b == b.b;
 		}
 
-
         public static Color32 Multiply (this Color32 c1, Color32 c2)
         {
             byte r = (byte)((c1.r / 255f) * (c2.r / 255f) * 255);
@@ -91,7 +90,6 @@ namespace UnityExtensions
 
             return new Color32(r, g, b, a);
         }
-
 
         public static Color32 Tint (this Color32 c1, Color32 c2)
         {
@@ -141,5 +139,41 @@ namespace UnityExtensions
             return new Color(c1.r, c1.g, c1.b, a);
         }
         #endregion // TMPro
+        
+        public static string GetColorHex(this Color32 color)
+        {
+            System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            
+            color.r.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.g.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.b.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.a.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            
+            return sb.ToString();
+        }
+
+        public static string GetColorTextCode(this Color32 color)
+        {
+            System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            sb.Append("<color=#");
+            
+            color.r.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.g.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.b.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            color.a.ConvertToHex(buffer, padZeroes: true);
+            sb.Append(buffer);
+            
+            sb.Append('>');
+            return sb.ToString();
+        }
     }
 }

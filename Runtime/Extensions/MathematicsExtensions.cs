@@ -201,5 +201,42 @@ namespace UnityExtensions
         {
             return Matrix4x4.TRS(Vector3.zero, q, Vector3.one);
         }
+        
+        public static void ConvertToHex(this uint number, System.Span<char> buffer, bool padZeroes = false)
+        {
+            const string hexChars = "0123456789ABCDEF";
+            int index = buffer.Length - 1;
+
+            InitialiseBuffer(buffer, padZeroes);
+
+            do
+            {
+                buffer[index--] = hexChars[(int)(number & 0xF)];
+                number >>= 4;
+            } while (number != 0 && index >= 0);
+        }
+        
+        public static void ConvertToHex(this byte number, System.Span<char> buffer, bool padZeroes = false)
+        {
+            const string hexChars = "0123456789ABCDEF";
+            int index = buffer.Length - 1;
+            
+            InitialiseBuffer(buffer, padZeroes);
+
+            do
+            {
+                buffer[index--] = hexChars[number & 0xF];
+                number >>= 4;
+            } while (number != 0 && index >= 0);
+        }
+        
+        static void InitialiseBuffer(System.Span<char> buffer, bool padZeroes = false)
+        {
+            char c = padZeroes ? '0' : '\0';
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = c;
+            }
+        }
     }
 }

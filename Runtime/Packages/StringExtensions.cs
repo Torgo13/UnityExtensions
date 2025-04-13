@@ -9,15 +9,47 @@ namespace UnityExtensions.Packages
         {
             using (StringBuilderPool.Get(out var sb))
             {
-                sb.Append(str);
-
-                foreach (char c in removeChars)
+                foreach (char c in str)
                 {
-                    sb.Remove(c);
+                    if (!removeChars.Contains(c))
+                    {
+                        sb.Append(c);
+                    }
                 }
 
                 return sb.ToString();
             }
+        }
+        
+        public static string RemoveEmptyLines(this string text, bool trimEnd = false)
+        {
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            bool isPreviousLineEmpty = true;
+            foreach (char c in text)
+            {
+                if (c == '\n' || c == '\r')
+                {
+                    var sbLength = sb.Length;
+                    if (sbLength > 0 && sb[sbLength - 1] != '\n')
+                    {
+                        sb.Append(c);
+                    }
+
+                    isPreviousLineEmpty = true;
+                }
+                else if (!char.IsWhiteSpace(c) || !isPreviousLineEmpty)
+                {
+                    sb.Append(c);
+                    isPreviousLineEmpty = false;
+                }
+            }
+
+            if (trimEnd)
+            {
+                System.Text.StringBuilderExtensions.TrimEnd(sb);
+            }
+
+            return sb.ToString();
         }
     }
 }
