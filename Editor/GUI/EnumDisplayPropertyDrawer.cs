@@ -5,7 +5,7 @@ using UnityExtensions.Attributes;
 namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(EnumDisplayAttribute))]
-    sealed class EnumDisplayPropertyDrawer : PropertyDrawer
+    internal sealed class EnumDisplayPropertyDrawer : PropertyDrawer
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/GUI/EnumDisplayPropertyDrawer.cs
         #region Unity.XR.CoreUtils.Editor

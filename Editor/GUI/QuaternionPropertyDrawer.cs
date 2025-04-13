@@ -4,7 +4,7 @@ using UnityEditor;
 namespace UnityExtensions.Editor
 {
     [CustomPropertyDrawer(typeof(Quaternion))]
-    class QuaternionPropertyDrawer : PropertyDrawer
+    internal class QuaternionPropertyDrawer : PropertyDrawer
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/QuaternionPropertyDrawer.cs
         #region UnityEditor.Rendering

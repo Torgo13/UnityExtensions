@@ -8,7 +8,7 @@ using UnityExtensions.Attributes;
 namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(FlagsPropertyAttribute))]
-    sealed class FlagsPropertyDrawer : PropertyDrawer
+    internal sealed class FlagsPropertyDrawer : PropertyDrawer
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/GUI/FlagsPropertyDrawer.cs
         #region Unity.XR.CoreUtils.Editor

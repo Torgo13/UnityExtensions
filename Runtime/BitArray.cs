@@ -429,6 +429,11 @@ namespace UnityExtensions
         /// <returns>Hashcode of the bit array.</returns>
         public override int GetHashCode() => 1768953197 + data.GetHashCode();
         #endregion // UnityEngine.Rendering
+
+        public override string ToString()
+        {
+            return humanizedVersion;
+        }
     }
 
     /// <summary>

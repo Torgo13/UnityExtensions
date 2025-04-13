@@ -10,7 +10,7 @@ namespace UnityExtensions.Editor
     /// Ensures that all scriptable settings have backing data that can be inspected and edited at compile-time.
     /// </summary>
     [InitializeOnLoad]
-    static class ScriptableSettingsInitializer
+    internal static class ScriptableSettingsInitializer
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ScriptableSettingsInitializer.cs
         #region Unity.XR.CoreUtils.Editor

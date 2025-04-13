@@ -36,20 +36,19 @@ namespace UnityExtensions.Packages
         #endregion // UnityEditor.ShaderGraph
         
         /// <summary>
-        /// Removes all occurrences of specified characters from <see cref="System.Text.StringBuilder"/>.
+        /// Removes all occurrences of specified characters from <see cref="StringBuilder"/>.
         /// </summary>
-        /// <param name="sb">A <see cref="System.Text.StringBuilder"/> to remove from.</param>
+        /// <param name="sb">A <see cref="StringBuilder"/> to remove from.</param>
         /// <param name="removeChar">A Unicode character to remove.</param>
         /// <returns>
-        /// Returns <see cref="System.Text.StringBuilder"/> without specified Unicode characters.
+        /// Returns <see cref="StringBuilder"/> without specified Unicode characters.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="sb"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="sb"/> is null.</exception>
         public static StringBuilder Remove(this StringBuilder sb, char removeChar)
         {
             if (sb == null)
                 throw new ArgumentNullException(nameof(sb));
 
-            var sbLength = sb.Length;
             for (int i = 0; i < sb.Length;)
             {
                 if (removeChar == sb[i])
@@ -64,9 +63,29 @@ namespace UnityExtensions.Packages
         /// <summary>
         /// Discard StringComparison to keep compatibility with string.Replace
         /// </summary>
-        public static StringBuilder Replace(this StringBuilder stringBuilder, string oldValue, string newValue, StringComparison comparisonType)
+        public static StringBuilder Replace(this StringBuilder stringBuilder, string oldValue, string newValue,
+            StringComparison comparisonType)
         {
             return stringBuilder.Replace(oldValue, newValue);
+        }
+        
+        public static StringBuilder Replace(this StringBuilder stringBuilder, string oldValue, int newValue,
+            bool ignoreCase = false)
+        {
+            int oldValueLength = oldValue?.Length ?? 0;
+            if (oldValueLength == 0)
+                return stringBuilder;
+            
+            int index = stringBuilder.IndexOf(oldValue, ignoreCase);
+            while (index != -1)
+            {
+                stringBuilder.Remove(index, oldValueLength);
+                stringBuilder.Insert(index, newValue);
+                
+                index = stringBuilder.IndexOf(oldValue, ignoreCase);
+            }
+
+            return stringBuilder;
         }
 
         public static StringBuilder Append(this StringBuilder stringBuilder, string value, int startIndex)

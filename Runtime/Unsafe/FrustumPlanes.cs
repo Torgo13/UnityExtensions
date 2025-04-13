@@ -91,6 +91,7 @@ namespace UnityExtensions.Unsafe
         public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
         {
             var inCount = 0;
+            var inCountRef = new NativeReference<int>(Allocator.TempJob);
             var intersectResultRef = new NativeReference<bool>(Allocator.TempJob);
 
             var intersectJob = new IntersectJob
@@ -98,10 +99,14 @@ namespace UnityExtensions.Unsafe
                 cullingPlanes = cullingPlanes,
                 m = m,
                 extent = extent,
+                inCount = inCountRef,
                 IntersectResultOut = intersectResultRef,
             };
 
             intersectJob.Run(cullingPlanes.Length);
+
+            inCount = inCountRef.Value;
+            inCountRef.Dispose();
 
             var intersectResult = intersectResultRef.Value;
             intersectResultRef.Dispose();
@@ -118,7 +123,7 @@ namespace UnityExtensions.Unsafe
             [ReadOnly] public NativeArray<float4> cullingPlanes;
             [ReadOnly] public float3 m;
             [ReadOnly] public float3 extent;
-            public int inCount;
+            public NativeReference<int> inCount;
             [WriteOnly] public NativeReference<bool> IntersectResultOut;
 
             public void Execute(int i)
@@ -130,7 +135,7 @@ namespace UnityExtensions.Unsafe
                     IntersectResultOut.Value = true;
 
                 if (dist > radius)
-                    inCount++;
+                    inCount.Value++;
             }
         }
 

@@ -5,7 +5,7 @@ using UnityExtensions.Attributes;
 namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
-    class ReadOnlyPropertyDrawer : PropertyDrawer
+    internal class ReadOnlyPropertyDrawer : PropertyDrawer
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/GUI/ReadOnlyPropertyDrawer.cs
         #region Unity.XR.CoreUtils.Editor

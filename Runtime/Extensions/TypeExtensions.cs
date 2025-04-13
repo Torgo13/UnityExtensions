@@ -362,6 +362,9 @@ namespace UnityExtensions
         {
             var name = type.FullName;
 
+            if (string.IsNullOrEmpty(name))
+                return string.Empty;
+
             if (!type.IsGenericType)
                 return name;
 
@@ -375,7 +378,7 @@ namespace UnityExtensions
             }
 
             using var _0 = StringBuilderPool.Get(out var sb);
-            name = sb.Append(name!.Split('`')[0]) // Trim off `1
+            name = sb.Append(name.Split('`')[0]) // Trim off `1
                 .Append('<')
                 .AppendJoin(", ", stringArguments)
                 .Append('>')

@@ -23,7 +23,7 @@ namespace UnityExtensions
         /// </summary>
         /// <remarks>
         /// > [!WARNING]
-        /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on this material object when done.
+        /// > You must call <see cref="UnityObjectExtensions.Destroy(UnityObject, bool)"/> on this material object when done.
         /// </remarks>
         /// <seealso cref="Renderer.material"/>
         /// <param name="renderer">The renderer assigned the material to clone.</param>
@@ -42,7 +42,7 @@ namespace UnityExtensions
         /// To use this function, your project must contain the
         /// [Unity UI package (com.unity.ugui)](https://docs.unity3d.com/Manual/com.unity.ugui.html).
         /// > [!WARNING]
-        /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on this material object when done.
+        /// > You must call <see cref="UnityObjectExtensions.Destroy(UnityObject, bool)"/> on this material object when done.
         /// </remarks>
         /// <seealso cref="Graphic.material"/>
         /// <param name="graphic">The Graphic object assigned the material to clone.</param>
@@ -59,7 +59,7 @@ namespace UnityExtensions
         /// </summary>
         /// <remarks>
         /// > [!WARNING]
-        /// > You must call <see cref="UnityObjectUtils.Destroy(UnityObject, bool)"/> on each cloned material object
+        /// > You must call <see cref="UnityObjectExtensions.Destroy(UnityObject, bool)"/> on each cloned material object
         /// in the array when done.
         /// </remarks>
         /// <seealso cref="Renderer.materials"/>
@@ -82,7 +82,7 @@ namespace UnityExtensions
         /// </summary>
         /// <remarks>
         /// > [!WARNING]
-        /// > You must call <see cref="UnityObjectExtensions.Destroy(Object, bool)"/> on each cloned material object in the array when done.
+        /// > You must call <see cref="UnityObjectExtensions.Destroy(UnityObject, bool)"/> on each cloned material object in the array when done.
         /// </remarks>
         /// <seealso cref="Renderer.materials"/>
         /// <param name="sharedMaterials">Cloned materials.</param>

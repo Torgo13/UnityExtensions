@@ -28,15 +28,15 @@ namespace UnityExtensions.Tests
             var camera = new GameObject("TestCamera").AddComponent<Camera>();
             //camera.pixelWidth = 1920;
             //camera.pixelHeight = 1080;
-            float scale = 0.5f;
+            const float scale = 0.5f;
 
             // Act
             var texture = Screenshot.Take(camera, scale);
 
             // Assert
             Assert.NotNull(texture, "The returned texture should not be null.");
-            Assert.AreEqual((int)(camera.pixelWidth * scale), texture.width, "Texture width should match the scaled camera width.");
-            Assert.AreEqual((int)(camera.pixelHeight * scale), texture.height, "Texture height should match the scaled camera height.");
+            Assert.AreEqual(Mathf.RoundToInt(camera.pixelWidth * scale), texture.width, "Texture width should match the scaled camera width.");
+            Assert.AreEqual(Mathf.RoundToInt(camera.pixelHeight * scale), texture.height, "Texture height should match the scaled camera height.");
 
             UnityEngine.Object.DestroyImmediate(camera.gameObject);
         }

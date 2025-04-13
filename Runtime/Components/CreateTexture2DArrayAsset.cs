@@ -20,10 +20,6 @@ namespace UnityExtensions
             if (!Validate(textures))
                 return;
             
-            TextureCreationFlags flags = mipmaps
-                ? TextureCreationFlags.MipChain
-                : TextureCreationFlags.None;
-            
             Texture2DArray array = new Texture2DArray(textures[0].width, textures[0].height, textures.Length,
                 textures[0].format, mipmaps);
             
@@ -39,10 +35,6 @@ namespace UnityExtensions
         {
             if (!Validate(cubeMaps))
                 return;
-            
-            TextureCreationFlags flags = mipmaps
-                ? TextureCreationFlags.MipChain
-                : TextureCreationFlags.None;
 
             CubemapArray array = new CubemapArray(cubeMaps[0].width, cubeMaps.Length,
                 cubeMaps[0].format, mipmaps);
