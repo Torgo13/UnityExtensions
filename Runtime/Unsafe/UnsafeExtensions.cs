@@ -186,7 +186,7 @@ namespace UnityExtensions.Unsafe
 #endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             list.EnsureCapacity(nativeList.Length);
-            NoAllocHelpers.ResetListContents(list, nativeList);
+            NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
         #endregion // ToList
 

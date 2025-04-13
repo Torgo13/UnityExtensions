@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityExtensions.Unsafe;
 
-namespace UnityExtensions.Editor.Unsafe.Tests
+namespace UnityExtensions.Editor.Tests
 {
     public class NoAllocHelpersTests
     {

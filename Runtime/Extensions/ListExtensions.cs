@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace UnityExtensions
@@ -125,5 +126,10 @@ namespace UnityExtensions
         #region Unity.Entities.CodeGen
         public static void Add<T>(this List<T> list, IEnumerable<T> elementsToAdd) => list.AddRange(elementsToAdd);
         #endregion // Unity.Entities.CodeGen
+
+        public static Span<T> AsSpan<T>(this List<T> list)
+        {
+            return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(start: 0, length: list.Count);
+        }
     }
 }

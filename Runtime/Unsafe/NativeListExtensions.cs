@@ -66,13 +66,13 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return new Span<T>(nativeList.GetUnsafePtr(), nativeList.Length * sizeof(T));
+            return new Span<T>(nativeList.GetUnsafePtr(), nativeList.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return new ReadOnlySpan<T>(nativeList.GetUnsafeReadOnlyPtr(), nativeList.Length * sizeof(T));
+            return new ReadOnlySpan<T>(nativeList.GetUnsafeReadOnlyPtr(), nativeList.Length);
         }
     }
 }

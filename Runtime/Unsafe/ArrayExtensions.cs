@@ -22,7 +22,7 @@ namespace UnityExtensions.Unsafe
             return new Span<byte>(UnsafeUtility.AddressOf(ref bArray[0]), array.Length * elementSize);
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
-        
+
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
         #region UnityEngine.Rendering
         /// <summary>
