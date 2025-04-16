@@ -5,6 +5,14 @@ namespace UnityExtensions.Tests
 {
     public class MathematicsExtensionsTests
     {
+        [Test]
+        public void Union_SizeOf()
+        {
+            Assert.AreEqual(2, System.Runtime.InteropServices.Marshal.SizeOf<Union16>());
+            Assert.AreEqual(4, System.Runtime.InteropServices.Marshal.SizeOf<Union32>());
+            Assert.AreEqual(16, System.Runtime.InteropServices.Marshal.SizeOf<Union128>());
+        }
+
         /// <summary>
         /// Accuracy: Validates correct conversion for standard hex representation
         /// </summary>

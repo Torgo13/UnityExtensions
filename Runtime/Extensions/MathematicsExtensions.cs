@@ -89,6 +89,9 @@ namespace UnityExtensions
 
         [FieldOffset(0)] public byte Byte_0;
         [FieldOffset(1)] public byte Byte_1;
+
+        [FieldOffset(0)] public sbyte SByte_0;
+        [FieldOffset(1)] public sbyte SByte_1;
     }
     
     [StructLayout(LayoutKind.Explicit)]
@@ -99,7 +102,9 @@ namespace UnityExtensions
         [FieldOffset(0)] public int Int_0;
 
         [FieldOffset(0)] public uint UInt_0;
-        
+
+        [FieldOffset(0)] public bool Bool_0;
+
         [FieldOffset(0)] public Color32 Color32_0;
         
 
@@ -120,14 +125,22 @@ namespace UnityExtensions
         [FieldOffset(1)] public byte Byte_1;
         [FieldOffset(2)] public byte Byte_2;
         [FieldOffset(3)] public byte Byte_3;
+
+        [FieldOffset(0)] public sbyte SByte_0;
+        [FieldOffset(1)] public sbyte SByte_1;
+        [FieldOffset(2)] public sbyte SByte_2;
+        [FieldOffset(3)] public sbyte SByte_3;
     }
 
     [StructLayout(LayoutKind.Explicit)]
     public struct Union128
     {
         [FieldOffset(0)] public Vector4 Vector4_0;
-        
+
+        [FieldOffset(0)] public Quaternion Quaternion_0;
+
         [FieldOffset(0)] public Color Color_0;
+
 
         [FieldOffset(0)] public Vector3 Vector3_0;
 
@@ -151,7 +164,7 @@ namespace UnityExtensions
         [FieldOffset(4)] public Union32 Union32_1;
         [FieldOffset(8)] public Union32 Union32_2;
         [FieldOffset(12)] public Union32 Union32_3;
-
+        
         [FieldOffset(0)] public float Float_0;
         [FieldOffset(4)] public float Float_1;
         [FieldOffset(8)] public float Float_2;

@@ -13,6 +13,15 @@ namespace UnityExtensions.Packages.Tests
 {
     class MathematicsExtensionsTests
     {
+        [Test]
+        public void Union_SizeOf()
+        {
+            Assert.AreEqual(2, System.Runtime.InteropServices.Marshal.SizeOf<Union16>());
+            Assert.AreEqual(4, System.Runtime.InteropServices.Marshal.SizeOf<Union32>());
+            Assert.AreEqual(8, System.Runtime.InteropServices.Marshal.SizeOf<Union64>());
+            Assert.AreEqual(16, System.Runtime.InteropServices.Marshal.SizeOf<Union128>());
+        }
+
         static Vector3EqualityComparer s_Vector3Comparer;
         static QuaternionEqualityComparer s_QuaternionComparer;
 
@@ -629,6 +638,16 @@ namespace UnityExtensions.Packages.Tests
             MathematicsExtensions.GenerateEquidistantPointsOnSphere(ref points, newPointsCount, radius);
 
             Assert.AreEqual(initialCount + newPointsCount, points.Length, "Point generation count is incorrect");
+
+            // Does not search every pair of points
+            var distance = Vector3.Distance(points[0], points[1]);
+            Assert.AreNotEqual(Vector3.zero, distance, "Points should not be in the same position");
+
+            for (int i = 2; i < initialCount; i++)
+            {
+                Assert.AreEqual(distance, Vector3.Distance(points[i], points[i - 1]), "Points are not equidistant");
+            }
+
             points.Dispose();
         }
         #endregion // MathUtilities
