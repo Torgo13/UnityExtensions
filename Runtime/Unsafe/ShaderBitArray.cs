@@ -97,7 +97,7 @@ namespace UnityExtensions.Unsafe
             {
                 const int maxCapacity = 4096;
                 Assert.IsTrue(bitCapacity < maxCapacity, $"Bit string is too long. It was truncated to {maxCapacity} elements.");
-                int len = Mathf.Min(bitCapacity, maxCapacity);
+                int len = System.Math.Min(bitCapacity, maxCapacity);
                 byte* buf = stackalloc byte[len];
                 for (int i = 0; i < len; i++)
                 {

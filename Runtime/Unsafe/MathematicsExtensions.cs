@@ -6,7 +6,6 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/InputSystem/Utilities/NumberHelpers.cs
         #region InputSystem
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int AlignToMultipleOf(this int number, int alignment)
         {
@@ -35,6 +34,30 @@ namespace UnityExtensions.Unsafe
                 return number;
 
             return number + alignment - remainder;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float IntToNormalizedFloat(this int value, int minValue, int maxValue)
+        {
+            if (value <= minValue)
+                return 0.0f;
+            if (value >= maxValue)
+                return 1.0f;
+
+            // using double here because int.MaxValue is not representable in floats
+            // as int.MaxValue = 2147483647 will become 2147483648.0 when casted to a float
+            return (float)(((double)value - minValue) / ((double)maxValue - minValue));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int NormalizedFloatToInt(this float value, int intMinValue, int intMaxValue)
+        {
+            if (value <= 0.0f)
+                return intMinValue;
+            if (value >= 1.0f)
+                return intMaxValue;
+
+            return (int)(value * ((double)intMaxValue - intMinValue) + intMinValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,7 +94,6 @@ namespace UnityExtensions.Unsafe
             var normFloat = UIntToNormalizedFloat(value, 0, inMaxValue);
             return NormalizedFloatToUInt(normFloat, 0, outMaxValue);
         }
-
         #endregion // InputSystem
     }
 }

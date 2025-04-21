@@ -134,6 +134,11 @@ namespace UnityExtensions.Unsafe
             return newSlice;
         }
 
+        public static ArraySlice<T> ConvertExistingDataToArraySlice(IntPtr dataPointer, int stride, int length)
+        {
+            return ConvertExistingDataToArraySlice((void*)dataPointer, stride, length);
+        }
+
         public T this[int index]
         {
             get
@@ -160,6 +165,11 @@ namespace UnityExtensions.Unsafe
             AtomicSafetyHandle.CheckReadAndThrow(_safety);
 #endif
             return _buffer;
+        }
+
+        private IntPtr GetUnsafeReadOnlyIntPtr()
+        {
+            return (IntPtr)GetUnsafeReadOnlyPtr();
         }
 
         private void CopyTo(T[] array)

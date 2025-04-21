@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -9,6 +10,27 @@ namespace UnityExtensions.Unsafe
 {
     public static class StreamExtensions
     {
+        //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/StreamExtensions.cs
+        #region Unity.LiveCapture.VideoStreaming.Client.Utils
+        public static async Task ReadExactAsync(this Stream stream, byte[] buffer, int offset, int count)
+        {
+            if (count == 0)
+                return;
+
+            do
+            {
+                int read = await stream.ReadAsync(buffer, offset, count);
+
+                if (read == 0)
+                    throw new EndOfStreamException();
+
+                count -= read;
+                offset += read;
+            }
+            while (count != 0);
+        }
+        #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
+
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/Packages/com.unity.live-capture/Networking/Utilities/Extensions/StreamExtensions.cs
         #region Unity.LiveCapture.Networking
         [ThreadStatic]
@@ -93,7 +115,7 @@ namespace UnityExtensions.Unsafe
             return s_Encoding.GetString(s_TempBuffer, 0, strLen);
         }
 
-        static void Read(Stream stream, int count)
+        internal static void Read(this Stream stream, int count)
         {
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count), count, "Must be non negative.");
@@ -118,7 +140,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void EnsureBufferCapacity(int capacity)
+        internal static void EnsureBufferCapacity(int capacity)
         {
             if (s_TempBuffer == null || s_TempBuffer.Length < capacity)
                 s_TempBuffer = new byte[capacity];
@@ -152,14 +174,5 @@ namespace UnityExtensions.Unsafe
             return true;
         }
         #endregion // Unity.LiveCapture.Networking
-
-        //https://github.com/needle-mirror/com.unity.cloud.gltfast/blob/master/Runtime/Scripts/Export/StreamExtension.cs
-        #region GLTFast.Export
-        public static unsafe void Write(this Stream stream, NativeArray<byte> array)
-        {
-            var span = new ReadOnlySpan<byte>(array.GetUnsafeReadOnlyPtr(), array.Length);
-            stream.Write(span);
-        }
-        #endregion // GLTFast.Export
     }
 }

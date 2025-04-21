@@ -10,16 +10,28 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        public static unsafe void* GetPointer<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static unsafe void* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
             return nativeList.Length == 0 ? null : nativeList.GetUnsafePtr();
         }
-        #endregion // UnityEngine.Formats.Alembic.Importer
 
-        public static unsafe void* GetReadOnlyPointer<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static unsafe void* GetReadOnlyPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
             return nativeList.Length == 0 ? null : nativeList.GetUnsafeReadOnlyPtr();
         }
+
+        #region IntPtr
+        public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return (IntPtr)nativeList.GetUnsafePtr();
+        }
+
+        public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return (IntPtr)nativeList.GetReadOnlyPtr();
+        }
+        #endregion // IntPtr
+        #endregion // UnityEngine.Formats.Alembic.Importer
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal

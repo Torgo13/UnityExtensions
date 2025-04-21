@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -6,6 +7,8 @@ namespace UnityExtensions.Unsafe.Tests
 {
     class MemoryExtensionsTests
     {
+        //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Assets/Tests/InputSystem/Utilities/MemoryHelperTests.cs
+        #region UnityEngine.InputSystem.Utilities
         [Test]
         [Category("Utilities")]
         public unsafe void Utilities_CanSetBitsInBuffer()
@@ -15,57 +18,57 @@ namespace UnityExtensions.Unsafe.Tests
                 var arrayPtr = (byte*)array.GetUnsafePtr();
 
                 // Set bit #0.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 0, 1, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 0, 1, true);
 
                 Assert.That(arrayPtr[0], Is.EqualTo(1));
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Reset bit #0.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 0, 1, false);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 0, 1, false);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Set bit #4.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 4, 1, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 4, 1, true);
 
                 Assert.That(arrayPtr[0], Is.EqualTo(1 << 4));
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Reset bit #4.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 4, 1, false);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 4, 1, false);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Set bits #1-#5.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 1, 5, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 1, 5, true);
 
                 Assert.That(arrayPtr[0], Is.EqualTo(0x3E));
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Unset bits #1-#5.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 1, 5, false);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 1, 5, false);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.Zero);
 
                 // Set bits #4-#10.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 4, 7, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 4, 7, true);
 
                 Assert.That(arrayPtr[0], Is.EqualTo(0xF0));
                 Assert.That(arrayPtr[1], Is.EqualTo(0x07));
                 Assert.That(arrayPtr[2], Is.Zero);
 
                 // Unset bits #4-#10.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 4, 7, false);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 4, 7, false);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.Zero);
                 Assert.That(arrayPtr[2], Is.Zero);
 
                 // Set bits #9-#28.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 9, 20, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 9, 20, true);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.EqualTo(0xFE));
@@ -74,7 +77,7 @@ namespace UnityExtensions.Unsafe.Tests
                 Assert.That(arrayPtr[4], Is.Zero);
 
                 // Unset bits #4-#10.
-                MemoryHelpers.SetBitsInBuffer(arrayPtr, 0, 9, 20, false);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)arrayPtr, 0, 9, 20, false);
 
                 Assert.That(arrayPtr[0], Is.Zero);
                 Assert.That(arrayPtr[1], Is.Zero);
@@ -94,24 +97,24 @@ namespace UnityExtensions.Unsafe.Tests
                 var array1Ptr = (byte*)array1.GetUnsafePtr();
                 var array2Ptr = (byte*)array2.GetUnsafePtr();
 
-                MemoryHelpers.SetBitsInBuffer(array1Ptr, 0, 2, 1, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)array1Ptr, 0, 2, 1, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 2, 1), Is.False);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 2, 1), Is.False);
 
                 MemoryHelpers.SetBitsInBuffer(array2Ptr, 0, 2, 1, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 2, 1), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 2, 1), Is.True);
 
-                UnsafeUtility.MemClear(array1Ptr, 6);
-                UnsafeUtility.MemClear(array2Ptr, 6);
+                UnsafeExtensions.MemClear((IntPtr)array1Ptr, 6);
+                UnsafeExtensions.MemClear((IntPtr)array2Ptr, 6);
 
-                MemoryHelpers.SetBitsInBuffer(array1Ptr, 0, 5, 24, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)array1Ptr, 0, 5, 24, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 5, 24), Is.False);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 5, 24), Is.False);
 
                 MemoryHelpers.SetBitsInBuffer(array2Ptr, 0, 5, 24, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 5, 24), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 5, 24), Is.True);
             }
         }
 
@@ -128,35 +131,35 @@ namespace UnityExtensions.Unsafe.Tests
                 var maskPtr = (byte*)mask.GetUnsafePtr();
 
                 // Set bit #2 in array1.
-                MemoryHelpers.SetBitsInBuffer(array1Ptr, 0, 2, 1, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)array1Ptr, 0, 2, 1, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 2, 1, maskPtr), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 2, 1, (IntPtr)maskPtr), Is.True);
 
                 // Set bit #2 in mask.
                 MemoryHelpers.SetBitsInBuffer(maskPtr, 0, 2, 1, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 2, 1, maskPtr), Is.False);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 2, 1, (IntPtr)maskPtr), Is.False);
 
-                UnsafeUtility.MemClear(array1Ptr, 8);
-                UnsafeUtility.MemClear(array2Ptr, 8);
-                UnsafeUtility.MemClear(maskPtr, 8);
+                UnsafeExtensions.MemClear((IntPtr)array1Ptr, 8);
+                UnsafeExtensions.MemClear((IntPtr)array2Ptr, 8);
+                UnsafeExtensions.MemClear((IntPtr)maskPtr, 8);
 
                 // Set 24 bits in array1 starting at bit #5.
-                MemoryHelpers.SetBitsInBuffer(array1Ptr, 0, 5, 24, true);
+                MemoryHelpers.SetBitsInBuffer((IntPtr)array1Ptr, 0, 5, 24, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 5, 24, maskPtr), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 5, 24, (IntPtr)maskPtr), Is.True);
 
                 // Set 20 bits in mask starting at bit #5.
                 MemoryHelpers.SetBitsInBuffer(maskPtr, 0, 5, 20, true);
                 // Set 24 bits in array2 starting at bit #5.
                 MemoryHelpers.SetBitsInBuffer(array2Ptr, 0, 5, 24, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 5, 24, maskPtr), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 5, 24, (IntPtr)maskPtr), Is.True);
 
                 // Set 21 bits in mask starting at bit #7.
                 MemoryHelpers.SetBitsInBuffer(maskPtr, 0, 7, 21, true);
 
-                Assert.That(MemoryHelpers.MemCmpBitRegion(array1Ptr, array2Ptr, 5, 24, maskPtr), Is.True);
+                Assert.That(MemoryHelpers.MemCmpBitRegion((IntPtr)array1Ptr, (IntPtr)array2Ptr, 5, 24, (IntPtr)maskPtr), Is.True);
             }
         }
 
@@ -185,7 +188,7 @@ namespace UnityExtensions.Unsafe.Tests
             {
                 var memPtr = (byte*)mem.GetUnsafePtr();
 
-                MemoryHelpers.MemSet(memPtr, 6, 123);
+                MemoryHelpers.MemSet((IntPtr)memPtr, 6, 123);
 
                 Assert.That(memPtr[0], Is.EqualTo(123));
                 Assert.That(memPtr[1], Is.EqualTo(123));
@@ -229,7 +232,7 @@ namespace UnityExtensions.Unsafe.Tests
                 maskPtr[4] = 0xC0;
                 maskPtr[5] = 0x11;
 
-                MemoryHelpers.MemCpyMasked(toPtr, fromPtr, 6, maskPtr);
+                MemoryHelpers.MemCpyMasked((IntPtr)toPtr, (IntPtr)fromPtr, 6, (IntPtr)maskPtr);
 
                 Assert.That(toPtr[0], Is.EqualTo(0x0F));
                 Assert.That(toPtr[1], Is.EqualTo(0x00));
@@ -257,7 +260,7 @@ namespace UnityExtensions.Unsafe.Tests
                 fromPtr[4] = 0x88;
                 fromPtr[5] = 0xC1;
 
-                MemoryHelpers.MemCpyBitRegion(toPtr, fromPtr, 18, 4);
+                MemoryHelpers.MemCpyBitRegion((IntPtr)toPtr, (IntPtr)fromPtr, 18, 4);
 
                 Assert.That(toPtr[0], Is.Zero);
                 Assert.That(toPtr[1], Is.Zero);
@@ -266,9 +269,9 @@ namespace UnityExtensions.Unsafe.Tests
                 Assert.That(toPtr[4], Is.Zero);
                 Assert.That(toPtr[5], Is.Zero);
 
-                UnsafeUtility.MemClear(toPtr, 6);
+                UnsafeExtensions.MemClear((IntPtr)toPtr, 6);
 
-                MemoryHelpers.MemCpyBitRegion(toPtr, fromPtr, 28, 8);
+                MemoryHelpers.MemCpyBitRegion((IntPtr)toPtr, (IntPtr)fromPtr, 28, 8);
 
                 Assert.That(toPtr[0], Is.Zero);
                 Assert.That(toPtr[1], Is.Zero);
@@ -277,9 +280,9 @@ namespace UnityExtensions.Unsafe.Tests
                 Assert.That(toPtr[4], Is.EqualTo(0x08));
                 Assert.That(toPtr[5], Is.Zero);
 
-                UnsafeUtility.MemClear(toPtr, 6);
+                UnsafeExtensions.MemClear((IntPtr)toPtr, 6);
 
-                MemoryHelpers.MemCpyBitRegion(toPtr, fromPtr, 0, 6 * 8);
+                MemoryHelpers.MemCpyBitRegion((IntPtr)toPtr, (IntPtr)fromPtr, 0, 6 * 8);
 
                 Assert.That(toPtr[0], Is.EqualTo(0x00));
                 Assert.That(toPtr[1], Is.EqualTo(0x01));
@@ -289,5 +292,6 @@ namespace UnityExtensions.Unsafe.Tests
                 Assert.That(toPtr[5], Is.EqualTo(0xC1));
             }
         }
+        #endregion // UnityEngine.InputSystem.Utilities
     }
 }

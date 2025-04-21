@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -18,7 +19,7 @@ namespace UnityExtensions.Unsafe.Tests
             {
                 fixed (void* sourcePtr = sourceArray)
                 {
-                    var nativeArray = NativeCopyUtility.PtrToNativeArrayWithDefault(defaultValue, sourcePtr, elementSize, length, Allocator.Temp);
+                    var nativeArray = NativeCopyUtility.PtrToNativeArrayWithDefault(defaultValue, (IntPtr)sourcePtr, elementSize, length, Allocator.Temp);
 
                     Assert.AreEqual(length, nativeArray.Length);
                     for (int i = 0; i < length; i++)
@@ -68,14 +69,14 @@ namespace UnityExtensions.Unsafe.Tests
         public unsafe void GetPointer_ShouldReturnNullForEmptyArray()
         {
             var emptyArray = new NativeArray<int>(0, Allocator.Temp);
-            Assert.IsTrue(null == emptyArray.GetPointer());
+            Assert.IsTrue(null == emptyArray.GetPtr());
         }
 
         [Test]
         public unsafe void GetPointer_ShouldReturnValidPointerForNonEmptyArray()
         {
             var array = new NativeArray<int>(10, Allocator.Temp);
-            Assert.IsTrue(null != array.GetPointer());
+            Assert.IsTrue(null != array.GetPtr());
         }
         
         [Test]

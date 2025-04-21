@@ -62,10 +62,10 @@ namespace UnityExtensions.Packages
         {
             if (loop)
             {
-                return (int)Mathf.Repeat(index, options.Length);
+                return (int)MathematicsExtensions.Repeat(index, options.Length);
             }
 
-            return Mathf.Clamp(index, 0, options.Length);
+            return System.Math.Clamp(index, 0, options.Length);
         }
     }
     #endregion // BoatAttack.UI

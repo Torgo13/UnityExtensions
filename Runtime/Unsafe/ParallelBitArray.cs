@@ -61,11 +61,11 @@ namespace UnityExtensions.Unsafe
             }
 
             // mask off bits past the length
-            int validLength = Mathf.Min(oldLength, newLength);
-            int validBitsLength = Mathf.Min(oldBitsLength, newBitsLength);
+            int validLength = System.Math.Min(oldLength, newLength);
+            int validBitsLength = System.Math.Min(oldBitsLength, newBitsLength);
             for (int chunkIndex = validBitsLength; chunkIndex < _bits.Length; ++chunkIndex)
             {
-                int validBitCount = Mathf.Max(validLength - 64 * chunkIndex, 0);
+                int validBitCount = System.Math.Max(validLength - 64 * chunkIndex, 0);
                 if (validBitCount < 64)
                 {
                     ulong validMask = (1ul << validBitCount) - 1;
@@ -160,7 +160,7 @@ namespace UnityExtensions.Unsafe
 
         public void FillZeroes(int length)
         {
-            length = Mathf.Min(length, _length);
+            length = System.Math.Min(length, _length);
             int chunkIndex = length / 64;
             int remainder = length & 63;
 

@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
+using static Unity.Mathematics.math;
 
 namespace UnityExtensions.Unsafe
 {
@@ -143,9 +145,16 @@ namespace UnityExtensions.Unsafe
         public static void CopyTo<T>(this List<T> list, void* dest, int count)
             where T : struct
         {
-            var c = Mathf.Min(count, list.Count);
+            var c = min(count, list.Count);
             for (int i = 0; i < c; ++i)
                 UnsafeUtility.WriteArrayElement(dest, i, list[i]);
+        }
+
+        /// <inheritdoc cref="CopyTo"/>
+        public static void CopyTo<T>(this List<T> list, IntPtr dest, int count)
+            where T : struct
+        {
+            CopyTo(list, (void*)dest, count);
         }
 
         /// <summary>
@@ -158,9 +167,16 @@ namespace UnityExtensions.Unsafe
         public static void CopyTo<T>(this T[] list, void* dest, int count)
             where T : struct
         {
-            var c = Mathf.Min(count, list.Length);
+            var c = min(count, list.Length);
             for (int i = 0; i < c; ++i)
                 UnsafeUtility.WriteArrayElement(dest, i, list[i]);
+        }
+
+        /// <inheritdoc cref="CopyTo"/>
+        public static void CopyTo<T>(this T[] list, IntPtr dest, int count)
+            where T : struct
+        {
+            CopyTo(list, (void*)dest, count);
         }
 
         private static void CalculateRadixParams(int radixBits, out int bitStates)
@@ -241,7 +257,7 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Mathf.Min(sortSize, arr.Length);
+            sortSize = min(sortSize, arr.Length);
             if (sortSize == 0)
                 return;
 
@@ -261,7 +277,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
         public static void MergeSort(NativeArray<uint> arr, int sortSize, ref NativeArray<uint> supportArray)
         {
-            sortSize = Mathf.Min(sortSize, arr.Length);
+            sortSize = min(sortSize, arr.Length);
             if (!arr.IsCreated || sortSize == 0)
                 return;
 
@@ -295,7 +311,7 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Mathf.Min(arr.Length, sortSize);
+            sortSize = min(arr.Length, sortSize);
             if (sortSize == 0)
                 return;
 
@@ -310,7 +326,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         public static void InsertionSort(NativeArray<uint> arr, int sortSize)
         {
-            sortSize = Mathf.Min(arr.Length, sortSize);
+            sortSize = min(arr.Length, sortSize);
             if (!arr.IsCreated || sortSize == 0)
                 return;
 
@@ -362,7 +378,7 @@ namespace UnityExtensions.Unsafe
             if (arr == null)
                 return;
 
-            sortSize = Mathf.Min(sortSize, arr.Length);
+            sortSize = min(sortSize, arr.Length);
             CalculateRadixParams(radixBits, out int bitStates);
             if (sortSize == 0)
                 return;
@@ -385,7 +401,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
         public static void RadixSort(NativeArray<uint> array, int sortSize, ref NativeArray<uint> supportArray, int radixBits = 8)
         {
-            sortSize = Mathf.Min(sortSize, array.Length);
+            sortSize = min(sortSize, array.Length);
             CalculateRadixParams(radixBits, out int bitStates);
             if (!array.IsCreated || sortSize == 0)
                 return;
@@ -414,6 +430,13 @@ namespace UnityExtensions.Unsafe
                     return i;
             }
             return -1;
+        }
+
+        /// <inheritdoc cref="IndexOf"/>
+        public static int IndexOf<T>(IntPtr data, int count, T v)
+            where T : struct, IEquatable<T>
+        {
+            return IndexOf((void*)data, count, v);
         }
         #endregion // UnityEngine.Rendering
     }

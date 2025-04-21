@@ -52,6 +52,16 @@ namespace UnityExtensions.Unsafe
             return array;
         }
 
+        public static unsafe NativeArray<T> PtrToNativeArrayWithDefault<T>(
+            T defaultT,
+            IntPtr source,
+            int sourceElementSize,
+            int length,
+            Allocator allocator) where T : struct
+        {
+            return PtrToNativeArrayWithDefault(defaultT, (void*)source, sourceElementSize, length, allocator);
+        }
+
         /// <summary>
         /// Fills <paramref name="array"/> with repeated copies of <paramref name="value"/>.
         /// </summary>
@@ -93,25 +103,25 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        public static unsafe void* GetPointer<T>(this NativeArray<T> array) where T : struct
+        public static unsafe void* GetPtr<T>(this NativeArray<T> array) where T : struct
         {
             return array.Length == 0 ? null : array.GetUnsafePtr();
         }
 
-        public static unsafe void* GetReadOnlyPointer<T>(this NativeArray<T> array) where T : struct
+        public static unsafe void* GetReadOnlyPtr<T>(this NativeArray<T> array) where T : struct
         {
             return array.Length == 0 ? null : array.GetUnsafeReadOnlyPtr();
         }
 
         #region IntPtr
-        public static unsafe IntPtr GetIntPointer<T>(this NativeArray<T> array) where T : struct
+        public static unsafe IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return (IntPtr)array.GetPointer();
+            return (IntPtr)array.GetPtr();
         }
 
-        public static unsafe IntPtr GetReadOnlyIntPointer<T>(this NativeArray<T> array) where T : struct
+        public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return (IntPtr)array.GetReadOnlyPointer();
+            return (IntPtr)array.GetReadOnlyPtr();
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
