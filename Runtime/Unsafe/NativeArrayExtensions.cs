@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
 using Unity.Collections;
@@ -96,13 +97,25 @@ namespace UnityExtensions.Unsafe
         {
             return array.Length == 0 ? null : array.GetUnsafePtr();
         }
-        #endregion // UnityEngine.Formats.Alembic.Importer
-        
+
         public static unsafe void* GetReadOnlyPointer<T>(this NativeArray<T> array) where T : struct
         {
             return array.Length == 0 ? null : array.GetUnsafeReadOnlyPtr();
         }
-        
+
+        #region IntPtr
+        public static unsafe IntPtr GetIntPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return (IntPtr)array.GetPointer();
+        }
+
+        public static unsafe IntPtr GetReadOnlyIntPointer<T>(this NativeArray<T> array) where T : struct
+        {
+            return (IntPtr)array.GetReadOnlyPointer();
+        }
+        #endregion // IntPtr
+        #endregion // UnityEngine.Formats.Alembic.Importer
+
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         /// <summary>

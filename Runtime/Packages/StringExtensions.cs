@@ -23,7 +23,7 @@ namespace UnityExtensions.Packages
         
         public static string RemoveEmptyLines(this string text, bool trimEnd = false)
         {
-            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            using var _0 = StringBuilderPool.Get(out var sb);
             bool isPreviousLineEmpty = true;
             foreach (char c in text)
             {

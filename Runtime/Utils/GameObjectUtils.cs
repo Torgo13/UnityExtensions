@@ -21,7 +21,7 @@ namespace UnityExtensions
         #region Unity.XR.CoreUtils
         /// <summary>
         /// Called when a GameObject has been instantiated through the <see cref="GameObjectUtils"/> versions of
-        /// `Instantiate`.
+        /// <see cref="UnityObject.Instantiate"/>.
         /// </summary>
         public static event Action<GameObject> OnGameObjectInstantiated;
 

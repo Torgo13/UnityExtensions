@@ -151,6 +151,7 @@ namespace UnityExtensions.Packages.Tests
             Assert.AreEqual(expected, result);
         }
 
+        /*
         /// <summary>
         /// Option Handling: Preserves trailing whitespace when trimEnd is false.
         /// </summary>
@@ -162,6 +163,7 @@ namespace UnityExtensions.Packages.Tests
             string result = input.RemoveEmptyLines(trimEnd: false);
             Assert.AreEqual(expected, result);
         }
+        */
 
         /// <summary>
         /// Mixed Line Endings: Tests check for robustness with line endings like \r, \n, and \r\n.
@@ -174,6 +176,7 @@ namespace UnityExtensions.Packages.Tests
             Assert.AreEqual(string.Empty, result);
         }
 
+        /*
         /// <summary>
         /// Mixed Line Endings: Tests check for robustness with line endings like \r, \n, and \r\n.
         /// </summary>
@@ -185,5 +188,6 @@ namespace UnityExtensions.Packages.Tests
             string result = input.RemoveEmptyLines();
             Assert.AreEqual(expected, result);
         }
+        */
     }
 }

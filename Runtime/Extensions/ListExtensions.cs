@@ -20,6 +20,8 @@ namespace UnityExtensions
         public static List<T> Fill<T>(this List<T> list, int count)
             where T : new()
         {
+            list.EnsureRoom(count);
+
             for (var i = 0; i < count; i++)
             {
                 list.Add(new T());
@@ -95,7 +97,7 @@ namespace UnityExtensions
         /// <param name="list">The list to search.</param>
         /// <param name="matcher">The predicate for testing the elements of the list.</param>
         /// <returns>Returns true if an element was removed.</returns>
-        public static bool RemoveSwapBack<T>(this List<T> list, System.Predicate<T> matcher)
+        public static bool RemoveSwapBack<T>(this List<T> list, Predicate<T> matcher)
         {
             int index = list.FindIndex(matcher);
             if (index < 0)

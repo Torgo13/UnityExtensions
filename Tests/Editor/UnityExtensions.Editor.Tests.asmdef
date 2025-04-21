@@ -6,15 +6,16 @@
         "GUID:7dabed3724aa64f438f2ac84f705af03",
         "GUID:1427a2291daa26248ae50ca4b4271389"
     ],
+    "optionalUnityReferences": [
+      "TestAssemblies"
+    ],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
+    "precompiledReferences": [],
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [

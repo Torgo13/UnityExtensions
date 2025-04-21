@@ -14,12 +14,12 @@ namespace UnityExtensions.Editor
         Action<IAsyncJob> _onComplete;
 
         public abstract string name { get; }
-        /// <inheritdoc cref="IAsyncJob"/>
+        /// <inheritdoc cref="IAsyncJob.progress"/>
         public float progress { get; private set; }
-        /// <inheritdoc cref="IAsyncJob"/>
+        /// <inheritdoc cref="IAsyncJob.message"/>
         public string message { get; private set; }
 
-        /// <inheritdoc cref="IAsyncJob"/>
+        /// <inheritdoc cref="IAsyncJob.Tick"/>
         public bool Tick()
         {
 #if UNITY_2020_1_OR_NEWER
@@ -34,7 +34,7 @@ namespace UnityExtensions.Editor
 
         protected abstract bool Internal_Tick();
 
-        /// <inheritdoc cref="IAsyncJob"/>
+        /// <inheritdoc cref="IAsyncJob.Cancel"/>
         public void Cancel()
         {
 #if UNITY_2020_1_OR_NEWER
@@ -48,7 +48,7 @@ namespace UnityExtensions.Editor
 
         protected abstract void Internal_Cancel();
 
-        /// <inheritdoc cref="IAsyncJob"/>
+        /// <inheritdoc cref="IAsyncJob.OnComplete(Action{IAsyncJob})"/>
         public void OnComplete(Action<IAsyncJob> action)
         {
             if (action == null)

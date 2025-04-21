@@ -17,7 +17,7 @@ namespace UnityExtensions
         /// Run a task on a list of items on all processors. The list of item will be split equally across the processors.
         /// </summary>
         /// <param name="items">The list of items on which to execute <paramref name="action"/>.</param>
-        /// <param name="action">The task to execute on each item of <see cref="items"/>.</param>
+        /// <param name="action">The task to execute on each item of <paramref name="items"/>.</param>
         /// <typeparam name="TInput">The type of each item.</typeparam>
         /// <typeparam name="TOutput">The type of the result.</typeparam>
         /// <returns>An enumerable of the execution results.</returns>

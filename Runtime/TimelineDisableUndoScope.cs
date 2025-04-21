@@ -46,7 +46,7 @@ namespace UnityExtensions
         #region Unity.LiveCapture
         const string TypeStr = "UnityEngine.Timeline.TimelineUndo+DisableUndoGuard";
         const string FieldStr = "enableUndo";
-        static readonly FieldInfo EnableUndo = AppDomain.CurrentDomain.GetAssemblies()
+        static readonly FieldInfo EnableUndo = ReflectionUtils.GetCachedAssemblies()
             .SelectMany(a => a.GetTypes())
             .FirstOrDefault(t => string.Equals(t.FullName, TypeStr))
             ?.GetField(FieldStr, BindingFlags.NonPublic | BindingFlags.Static);

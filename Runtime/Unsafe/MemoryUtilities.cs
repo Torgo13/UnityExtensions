@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -23,6 +24,24 @@ namespace UnityExtensions.Unsafe
             UnsafeUtility.Free(p, allocator);
         }
         #endregion // UnityEngine.Rendering
+
+        public static IntPtr GetIntPtr<T>(T obj) where T : struct
+        {
+            // Pin the object in memory
+            GCHandle handle = GCHandle.Alloc(obj, GCHandleType.Pinned);
+
+            try
+            {
+                // Get the address of the pinned object
+                IntPtr pointer = handle.AddrOfPinnedObject();
+                return pointer;
+            }
+            finally
+            {
+                // Release the pinned handle
+                handle.Free();
+            }
+        }
     }
 
     public static unsafe class MemoryHelpers
