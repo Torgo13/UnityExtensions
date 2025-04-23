@@ -230,40 +230,41 @@ namespace UnityExtensions.Packages
         {
             if (attrib == null)
             {
-                sb.Append("  - ");
-                sb.AppendLine(title);
-                sb.Append(' ');
-                sb.Append('(');
-                sb.Append(')');
-                sb.AppendLine();
-                sb.AppendLine("\tnull");
+                _ = sb.Append("  - ")
+                    .AppendLine(title)
+                    .Append(' ')
+                    .Append('(')
+                    .Append(')')
+                    .AppendLine()
+                    .AppendLine("\tnull");
                 return;
             }
 
             //using var _0 = ListPool<T>.Get(out var list);
             //list.AddRange(attrib);
 
-            sb.Append("  - ");
-            sb.Append(title);
-            sb.Append(' ');
-            sb.Append('(');
-            sb.Append(attrib.Count);
-            sb.Append(')');
-            sb.AppendLine();
+            _ = sb.Append("  - ")
+                .Append(title)
+                .Append(' ')
+                .Append('(')
+                .Append(attrib.Count)
+                .Append(')')
+                .AppendLine();
             //sb.AppendLine(title);
+
             if (attrib.Count > 0)
             {
                 foreach (var value in attrib)
                 {
-                    sb.Append("    ");
-                    sb.AppendFormat($"    {fmt}", value);
-                    sb.AppendLine();
+                    _ = sb.Append("    ")
+                        .AppendFormat($"    {fmt}", value)
+                        .AppendLine();
                     //sb.AppendLine(string.Format($"    {fmt}", value));
                 }
             }
             else
             {
-                sb.AppendLine("\tnull");
+                _ = sb.AppendLine("\tnull");
             }
         }
 
@@ -297,13 +298,13 @@ namespace UnityExtensions.Packages
             mesh.GetUVs(2, uv3);
             mesh.GetUVs(3, uv4);
 
-            sb.AppendLine("# Sanity Check");
+            _ = sb.AppendLine("# Sanity Check");
             //sb.AppendLine(MeshUtility.SanityCheck(mesh));
 
-            sb.Append("# Attributes (");
-            sb.Append(mesh.vertexCount);
-            sb.Append(')');
-            sb.AppendLine();
+            _ = sb.Append("# Attributes (")
+                .Append(mesh.vertexCount)
+                .Append(')')
+                .AppendLine();
 
             PrintAttribute(sb, "positions", positions, "pos: {0:F2}");
             PrintAttribute(sb, "normals", normals, "nrm: {0:F2}");
@@ -314,18 +315,18 @@ namespace UnityExtensions.Packages
             PrintAttribute(sb, "uv3", uv3, "uv3: {0:F2}");
             PrintAttribute(sb, "uv4", uv4, "uv4: {0:F2}");
 
-            sb.AppendLine("# Topology");
+            _ = sb.AppendLine("# Topology");
 
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
                 var topo = mesh.GetTopology(i);
                 var submesh = mesh.GetIndices(i);
-                sb.Append("  Submesh[");
-                sb.Append(i);
-                sb.Append("] (");
-                sb.Append(topo);
-                sb.Append(')');
-                sb.AppendLine();
+                _ = sb.Append("  Submesh[")
+                    .Append(i)
+                    .Append("] (")
+                    .Append(topo)
+                    .Append(')')
+                    .AppendLine();
                 //sb.AppendLine($"  Submesh[{i}] ({topo})");
 
                 switch (topo)
@@ -333,52 +334,56 @@ namespace UnityExtensions.Packages
                     case MeshTopology.Points:
                         for (int n = 0; n < submesh.Length; n += 1)
                         {
-                            sb.Append('\t');
-                            sb.Append(submesh[n]);
+                            _ = sb.Append('\t')
+                                .Append(submesh[n]);
                             //sb.AppendLine(string.Format("\t{0}", submesh[n]));
                         }
+
                         break;
                     case MeshTopology.Lines:
                         for (int n = 0; n < submesh.Length; n += 2)
                         {
-                            sb.Append('\t');
-                            sb.Append(submesh[n]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 1]);
+                            _ = sb.Append('\t')
+                                .Append(submesh[n])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 1]);
                             //sb.AppendLine(string.Format("\t{0}, {1}", submesh[n], submesh[n + 1]));
                         }
+
                         break;
                     case MeshTopology.Triangles:
                         for (int n = 0; n < submesh.Length; n += 3)
                         {
-                            sb.Append('\t');
-                            sb.Append(submesh[n]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 1]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 2]);
+                            _ = sb.Append('\t')
+                                .Append(submesh[n])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 1])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 2]);
                             //sb.AppendLine(string.Format("\t{0}, {1}, {2}", submesh[n], submesh[n + 1], submesh[n + 2]));
                         }
+
                         break;
                     case MeshTopology.Quads:
                         for (int n = 0; n < submesh.Length; n += 4)
                         {
-                            sb.Append('\t');
-                            sb.Append(submesh[n]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 1]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 2]);
-                            sb.Append(',');
-                            sb.Append(' ');
-                            sb.Append(submesh[n + 3]);
+                            _ = sb.Append('\t')
+                                .Append(submesh[n])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 1])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 2])
+                                .Append(',')
+                                .Append(' ')
+                                .Append(submesh[n + 3]);
                             //sb.AppendLine(string.Format("\t{0}, {1}, {2}, {3}", submesh[n], submesh[n + 1], submesh[n + 2], submesh[n + 3]));
                         }
+
                         break;
                 }
             }

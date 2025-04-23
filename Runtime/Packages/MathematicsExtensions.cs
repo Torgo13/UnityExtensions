@@ -3,70 +3,62 @@ using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 namespace UnityExtensions.Packages
 {
+    #region Union
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union2
+    {
+        [FieldOffset(0)] public UnityExtensions.Union2 __0;
+
+        [FieldOffset(0)] public half Half;
+    }
+    
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union4
+    {
+        [FieldOffset(0)] public UnityExtensions.Union4 __0;
+
+        [FieldOffset(0)] public half2 Half2;
+
+        [FieldOffset(0)] public Union2 _0;
+        [FieldOffset(2)] public Union2 _2;
+    }
+    
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union8
+    {
+        [FieldOffset(0)] public UnityExtensions.Union8 __0;
+
+        [FieldOffset(0)] public half4 Half4;
+        [FieldOffset(0)] public float2 Float2;
+        [FieldOffset(0)] public int2 Int2;
+        [FieldOffset(0)] public uint2 UInt2;
+
+        [FieldOffset(0)] public Union4 _0;
+        [FieldOffset(4)] public Union4 _4;
+    }
+
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16
     {
-        [FieldOffset(0)] public UnityExtensions.Union16 Union16_0;
+        [FieldOffset(0)] public UnityExtensions.Union16 __0;
 
-        [FieldOffset(0)] public half Half_0;
+        [FieldOffset(0)] public float4 Float4;
+        [FieldOffset(0)] public int4 Int4;
+        [FieldOffset(0)] public uint4 UInt4;
+        [FieldOffset(0)] public double2 Double2;
+        [FieldOffset(0)] public quaternion Quaternion;
+
+        [FieldOffset(0)] public Union8 _0;
+        [FieldOffset(8)] public Union8 _8;
     }
-    
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union32
-    {
-        [FieldOffset(0)] public UnityExtensions.Union32 Union32_0;
+    #endregion // Union
 
-        [FieldOffset(0)] public half2 Half2_0;
-
-
-        [FieldOffset(0)] public half Half_0;
-        [FieldOffset(2)] public half Half_1;
-    }
-    
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union64
-    {
-        [FieldOffset(0)] public UnityExtensions.Union32 Union32_0;
-        [FieldOffset(4)] public UnityExtensions.Union32 Union32_1;
-
-        [FieldOffset(0)] public half4 Half4_0;
-
-        [FieldOffset(0)] public float2 Float2_0;
-
-        [FieldOffset(0)] public int2 Int2_0;
-
-        [FieldOffset(0)] public uint2 UInt2_0;
-
-        [FieldOffset(0)] public double Double_0;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union128
-    {
-        [FieldOffset(0)] public UnityExtensions.Union128 Union128_0;
-
-        [FieldOffset(0)] public float4 Float4_0;
-
-        [FieldOffset(0)] public int4 Int4_0;
-
-        [FieldOffset(0)] public uint4 UInt4_0;
-
-        [FieldOffset(0)] public double2 Double2_0;
-
-        [FieldOffset(0)] public quaternion Quaternion_0;
-
-
-        [FieldOffset(0)] public half4 Half4_0;
-        [FieldOffset(8)] public half4 Half4_1;
-    }
-    
     public static class MathematicsExtensions
     {
         //https://github.com/Unity-Technologies/DOTSSample/blob/5a8230597a8c4b999b278a63844c5238dacf51b6/Assets/Unity.Sample.Core/Scripts/Utils/MathHelper.cs

@@ -77,110 +77,64 @@ namespace UnityExtensions
     }
     #endregion // Unity.Netcode
 
+    #region Union
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union1
+    {
+        [FieldOffset(0)] public byte Byte;
+        [FieldOffset(0)] public sbyte SByte;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union2
+    {
+        [FieldOffset(0)] public short Short;
+        [FieldOffset(0)] public ushort UShort;
+        [FieldOffset(0)] public char Char;
+
+        [FieldOffset(0)] public Union1 _0;
+        [FieldOffset(1)] public Union1 _1;
+    }
+    
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union4
+    {
+        [FieldOffset(0)] public float Float;        
+        [FieldOffset(0)] public int Int;
+        [FieldOffset(0)] public uint UInt;
+        [FieldOffset(0)] public bool Bool;
+        [FieldOffset(0)] public Color32 Color32;
+        
+        [FieldOffset(0)] public Union2 _0;
+        [FieldOffset(2)] public Union2 _2;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union8
+    {
+        [FieldOffset(0)] public double Double;
+        [FieldOffset(0)] public long Long;
+        [FieldOffset(0)] public ulong ULong;
+
+        [FieldOffset(0)] public Union4 _0;
+        [FieldOffset(4)] public Union4 _4;
+    }
+
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16
     {
-        [FieldOffset(0)] public short Short_0;
+        [FieldOffset(0)] public Vector4 Vector4;
+        [FieldOffset(0)] public Quaternion Quaternion;
+        [FieldOffset(0)] public Color Color;
 
-        [FieldOffset(0)] public ushort UShort_0;
-
-        [FieldOffset(0)] public char Char_0;
-
-
-        [FieldOffset(0)] public byte Byte_0;
-        [FieldOffset(1)] public byte Byte_1;
-
-        [FieldOffset(0)] public sbyte SByte_0;
-        [FieldOffset(1)] public sbyte SByte_1;
+        [FieldOffset(0)] public Vector3 Vector3;
+        [FieldOffset(0)] public Vector3Int Vector3Int;
+        
+        [FieldOffset(0)] public Union8 _0;
+        [FieldOffset(8)] public Union8 _8;
     }
-    
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union32
-    {
-        [FieldOffset(0)] public float Float_0;
-        
-        [FieldOffset(0)] public int Int_0;
+    #endregion // Union
 
-        [FieldOffset(0)] public uint UInt_0;
-
-        [FieldOffset(0)] public bool Bool_0;
-
-        [FieldOffset(0)] public Color32 Color32_0;
-        
-
-        [FieldOffset(0)] public Union16 Union16_0;
-        [FieldOffset(2)] public Union16 Union16_1;
-
-        [FieldOffset(0)] public short Short_0;
-        [FieldOffset(2)] public short Short_1;
-
-        [FieldOffset(0)] public ushort UShort_0;
-        [FieldOffset(2)] public ushort UShort_1;
-
-        [FieldOffset(0)] public char Char_0;
-        [FieldOffset(2)] public char Char_1;
-
-
-        [FieldOffset(0)] public byte Byte_0;
-        [FieldOffset(1)] public byte Byte_1;
-        [FieldOffset(2)] public byte Byte_2;
-        [FieldOffset(3)] public byte Byte_3;
-
-        [FieldOffset(0)] public sbyte SByte_0;
-        [FieldOffset(1)] public sbyte SByte_1;
-        [FieldOffset(2)] public sbyte SByte_2;
-        [FieldOffset(3)] public sbyte SByte_3;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union128
-    {
-        [FieldOffset(0)] public Vector4 Vector4_0;
-
-        [FieldOffset(0)] public Quaternion Quaternion_0;
-
-        [FieldOffset(0)] public Color Color_0;
-
-
-        [FieldOffset(0)] public Vector3 Vector3_0;
-
-        [FieldOffset(0)] public Vector3Int Vector3Int_0;
-        
-
-        [FieldOffset(0)] public Vector2 Vector2_0;
-        [FieldOffset(8)] public Vector2 Vector2_1;
-
-        [FieldOffset(0)] public double Double_0;
-        [FieldOffset(8)] public double Double_1;
-
-        [FieldOffset(0)] public long Long_0;
-        [FieldOffset(8)] public long Long_1;
-
-        [FieldOffset(0)] public ulong ULong_0;
-        [FieldOffset(8)] public ulong ULong_1;
-        
-
-        [FieldOffset(0)] public Union32 Union32_0;
-        [FieldOffset(4)] public Union32 Union32_1;
-        [FieldOffset(8)] public Union32 Union32_2;
-        [FieldOffset(12)] public Union32 Union32_3;
-        
-        [FieldOffset(0)] public float Float_0;
-        [FieldOffset(4)] public float Float_1;
-        [FieldOffset(8)] public float Float_2;
-        [FieldOffset(12)] public float Float_3;
-
-        [FieldOffset(0)] public int Int_0;
-        [FieldOffset(4)] public int Int_1;
-        [FieldOffset(8)] public int Int_2;
-        [FieldOffset(12)] public int Int_3;
-
-        [FieldOffset(0)] public uint UInt_0;
-        [FieldOffset(4)] public uint UInt_1;
-        [FieldOffset(8)] public uint UInt_2;
-        [FieldOffset(12)] public uint UInt_3;
-    }
-    
     public static class MathematicsExtensions
     {
         public static (int, int) CalculateLength(this int inputLength, int start = 0, int length = 0)

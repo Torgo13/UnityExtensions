@@ -143,7 +143,9 @@ namespace UnityExtensions.Unsafe
             return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), index);
         }
         #endregion // UnityEngine.Rendering.Universal
-        
+
+        //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
+        #region UnityEngine.InputSystem.Utilities
         public static unsafe void Resize<TValue>(ref NativeArray<TValue> array, int newSize, Allocator allocator)
             where TValue : struct
         {
@@ -245,5 +247,6 @@ namespace UnityExtensions.Unsafe
             count += growBy;
             return offset;
         }
+        #endregion // UnityEngine.InputSystem.Utilities
     }
 }

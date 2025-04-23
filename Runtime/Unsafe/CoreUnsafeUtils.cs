@@ -226,18 +226,22 @@ namespace UnityExtensions.Unsafe
                         {
                             support[m] = array[j++];
                         }
+
                         m++;
                     }
+
                     while (i < right)
                     {
                         support[m] = array[i++];
                         m++;
                     }
+
                     while (j < rightEnd)
                     {
                         support[m] = array[j++];
                         m++;
                     }
+
                     for (m = left; m < rightEnd; m++)
                     {
                         array[m] = support[m];
@@ -429,6 +433,7 @@ namespace UnityExtensions.Unsafe
                 if (UnsafeUtility.ReadArrayElement<T>(data, i).Equals(v))
                     return i;
             }
+
             return -1;
         }
 

@@ -78,7 +78,9 @@ namespace UnityExtensions.Unsafe.Tests
             var array = new NativeArray<int>(10, Allocator.Temp);
             Assert.IsTrue(null != array.GetPtr());
         }
-        
+
+        //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Assets/Tests/InputSystem/Utilities/ArrayHelperTests.cs
+        #region UnityEngine.InputSystem.Utilities
         [Test]
         [Category("Utilities")]
         public void Utilities_CanEraseInNativeArrayWithCapacity()
@@ -113,6 +115,7 @@ namespace UnityExtensions.Unsafe.Tests
                 array3.Dispose();
             }
         }
+        #endregion // UnityEngine.InputSystem.Utilities
 
         private NativeArray<int> _array;
         private int _count;

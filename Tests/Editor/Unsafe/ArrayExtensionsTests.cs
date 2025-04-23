@@ -86,44 +86,6 @@ namespace UnityExtensions.Unsafe.Tests
             }
         }
 
-        //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Assets/Tests/InputSystem/Utilities/ArrayHelperTests.cs
-        #region UnityEngine.InputSystem.Utilities
-        [Test]
-        [Category("Utilities")]
-        public void Utilities_CanEraseInNativeArrayWithCapacity()
-        {
-            var array1 = new NativeArray<int>(new[] { 1, 2, 3, 4, 5, 0, 0, 0 }, Allocator.Temp);
-            var array2 = new NativeArray<int>(new[] { 1, 2, 3, 4, 5, 6, 7, 8 }, Allocator.Temp);
-            var array3 = new NativeArray<int>(new[] { 1, 2, 3, 4, 0, 0, 0, 0 }, Allocator.Temp);
-
-            var array1Length = 5;
-            var array2Length = 8;
-            var array3Length = 4;
-
-            try
-            {
-                ArrayExtensions.EraseAtWithCapacity(array1, ref array1Length, 2);
-                ArrayExtensions.EraseAtWithCapacity(array2, ref array2Length, 7);
-                ArrayExtensions.EraseAtWithCapacity(array3, ref array3Length, 0);
-
-                // For NativeArray, we don't clear memory.
-                Assert.That(array1, Is.EqualTo(new[] { 1, 2, 4, 5, 5, 0, 0, 0 }));
-                Assert.That(array2, Is.EqualTo(new[] { 1, 2, 3, 4, 5, 6, 7, 8 }));
-                Assert.That(array3, Is.EqualTo(new[] { 2, 3, 4, 4, 0, 0, 0, 0 }));
-
-                Assert.That(array1Length, Is.EqualTo(4));
-                Assert.That(array2Length, Is.EqualTo(7));
-                Assert.That(array3Length, Is.EqualTo(3));
-            }
-            finally
-            {
-                array1.Dispose();
-                array2.Dispose();
-                array3.Dispose();
-            }
-        }
-        #endregion // UnityEngine.InputSystem.Utilities
-
         /// <summary>
         /// Correctness: Ensures the entire array is filled with the specified value
         /// </summary>

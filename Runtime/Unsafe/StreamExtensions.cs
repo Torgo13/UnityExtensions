@@ -35,7 +35,7 @@ namespace UnityExtensions.Unsafe
         #region Unity.LiveCapture.Networking
         [ThreadStatic]
         static byte[] s_TempBuffer;
-        static readonly UTF8Encoding s_Encoding = new UTF8Encoding(false);
+        static readonly UTF8Encoding s_Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         /// <summary>
         /// Writes a blittable struct to the stream.

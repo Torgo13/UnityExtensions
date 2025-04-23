@@ -23,7 +23,7 @@ namespace UnityExtensions.Unsafe
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return (IntPtr)nativeList.GetUnsafePtr();
+            return (IntPtr)nativeList.GetPtr();
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
@@ -60,6 +60,7 @@ namespace UnityExtensions.Unsafe
             }
         }
 
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
