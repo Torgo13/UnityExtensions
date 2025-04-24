@@ -315,6 +315,9 @@ namespace UnityExtensions
         /// <summary>
         /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values down.
+        /// </remarks>
         /// <param name="c">The colour to encode.</param>
         /// <returns>Byte containing the encoded RGB values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -330,16 +333,37 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a byte to Color32.RGB values.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values up by repeating the masked bits.
+        /// </remarks>
         /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ByteToColor32(byte b)
         {
             return new Color32(
-                (byte)(b & 0b1110_0000),
-                (byte)(b << 3 & 0b1110_0000),
-                (byte)(b << 6 & 0b1100_0000),
+                ByteToR(b),
+                ByteToG(b),
+                ByteToB(b),
                 byte.MaxValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ByteToR(byte b)
+        {
+            return (byte)(b & 0b1110_0000 | b >> 3 & 0b0001_1100 | b >> 6 & 0b0000_0011);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ByteToG(byte b)
+        {
+            return (byte)(b << 3 & 0b1110_0000 | b & 0b0001_1100 | b >> 3 & 0b0000_0011);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ByteToB(byte b)
+        {
+            return (byte)(b << 6 & 0b1100_0000 | b << 4 & 0b0011_0000 | b << 2 & 0b0000_1100 | b & 0b0000_0011);
         }
 
         /// <summary>
@@ -374,6 +398,9 @@ namespace UnityExtensions
         /// <summary>
         /// Encodes Color32.RGB values to a short, using 5:6:5 bits for RGB.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values down.
+        /// </remarks>
         /// <param name="c">The colour to encode.</param>
         /// <returns>Short containing the encoded RGB values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -389,16 +416,37 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a short to Color32.RGB values.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values up by repeating the masked bits.
+        /// </remarks>
         /// <param name="b">Short with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ShortToColor32(short b)
         {
             return new Color32(
-                (byte)(b >> 8 & 0b1111_1000),
-                (byte)(b >> 3 & 0b1111_1100),
-                (byte)(b << 3 & 0b1111_1000),
+                ShortToR(b),
+                ShortToG(b),
+                ShortToB(b),
                 byte.MaxValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ShortToR(short b)
+        {
+            return (byte)(b >> 8 & 0b1111_1000 | b >> 13 & 0b0000_0111);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ShortToG(short b)
+        {
+            return (byte)(b >> 3 & 0b1111_1100 | b >> 9 & 0b0000_0011);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte ShortToB(short b)
+        {
+            return (byte)(b << 3 & 0b1111_1000 | b >> 13 & 0b0000_0111);
         }
 
         /// <summary>
