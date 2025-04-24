@@ -14,10 +14,10 @@ namespace UnityExtensions
             if (camera == null)
                 throw new ArgumentNullException(nameof(camera));
 
-            scale = Mathf.Clamp01(scale);
+            scale = Math.Clamp(scale, 0f, 1f);
 
-            var width = Mathf.Max(1, Mathf.RoundToInt(camera.pixelWidth * scale));
-            var height = Mathf.Max(1, Mathf.RoundToInt(camera.pixelHeight * scale));
+            var width = Math.Max(1, (int)Math.Round(camera.pixelWidth * scale));
+            var height = Math.Max(1, (int)Math.Round(camera.pixelHeight * scale));
             var prevCameraRenderTexture = camera.targetTexture;
             var renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
 

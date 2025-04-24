@@ -139,7 +139,7 @@ namespace UnityExtensions
     {
         public static (int, int) CalculateLength(this int inputLength, int start = 0, int length = 0)
         {
-            start = Mathf.Clamp(start, 0, inputLength - 1);
+            start = System.Math.Clamp(start, 0, inputLength - 1);
             int maxLength = inputLength - start;
             if (length <= 0 || length > maxLength)
                 length = maxLength;

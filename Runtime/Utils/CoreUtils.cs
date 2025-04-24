@@ -892,13 +892,13 @@ namespace UnityExtensions
         /// <returns>The mip count</returns>
         public static int GetMipCount(int size)
         {
-            return Mathf.FloorToInt(Mathf.Log(size, 2.0f)) + 1;
+            return (int)Math.Floor(Math.Log(size, 2.0)) + 1;
         }
 
         /// <inheritdoc cref="GetMipCount(int)"/>
         public static int GetMipCount(float size)
         {
-            return Mathf.FloorToInt(Mathf.Log(size, 2.0f)) + 1;
+            return (int)Math.Floor(Math.Log(size, 2.0)) + 1;
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace UnityExtensions
             var cb = new ConcurrentBag<TOutput>();
             var count = Environment.ProcessorCount;
             var tasks = new Task[count];
-            int itemsPerTask = (int)Mathf.Ceil(items.Count / (float)count);
+            int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
 
             for (int i = 0; i < count; i++)
             {

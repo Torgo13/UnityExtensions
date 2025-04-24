@@ -9,8 +9,8 @@ namespace UnityExtensions
         #region UnityEditor.GraphToolsFoundation.Overdrive
         public static bool IntersectsSegment(Rect rect, Vector2 p1, Vector2 p2)
         {
-            float minX = Mathf.Min(p1.x, p2.x);
-            float maxX = Mathf.Max(p1.x, p2.x);
+            float minX = Math.Min(p1.x, p2.x);
+            float maxX = Math.Max(p1.x, p2.x);
 
             if (maxX > rect.xMax)
             {
@@ -27,12 +27,12 @@ namespace UnityExtensions
                 return false;
             }
 
-            float minY = Mathf.Min(p1.y, p2.y);
-            float maxY = Mathf.Max(p1.y, p2.y);
+            float minY = Math.Min(p1.y, p2.y);
+            float maxY = Math.Max(p1.y, p2.y);
 
             float dx = p2.x - p1.x;
 
-            if (Mathf.Abs(dx) > float.Epsilon)
+            if (Math.Abs(dx) > float.Epsilon)
             {
                 float a = (p2.y - p1.y) / dx;
                 float b = p1.y - a * p1.x;

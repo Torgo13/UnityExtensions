@@ -14,7 +14,7 @@ namespace UnityExtensions
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/GeometryUtils.cs
         #region Unity.XR.CoreUtils
         // Used in approximate equality checks
-        const float TwoPi = Mathf.PI * 2f;
+        const double TwoPi = Math.PI * 2;
 
         // constants/cached constructions for Vector/UV operations
         static readonly Vector3 Up = Vector3.up;
@@ -515,13 +515,13 @@ namespace UnityExtensions
                     return true;
                 }
 
-                double cosTheta = Vector3.Dot(toA, toB) / Mathf.Sqrt(sqrDistances);
+                double cosTheta = Vector3.Dot(toA, toB) / Math.Sqrt(sqrDistances);
                 var angle = Math.Acos(cosTheta);
                 angleSum += angle;
             }
             // The sum will only be 2*PI if the point is on the plane of the polygon and on the interior
             const float radiansCompareThreshold = 0.01f;
-            return Mathf.Abs((float)angleSum - TwoPi) < radiansCompareThreshold;
+            return Math.Abs(angleSum - TwoPi) < radiansCompareThreshold;
         }
 
 
@@ -1065,7 +1065,7 @@ namespace UnityExtensions
         static Quaternion NormalizeRotationKeepingUp(Quaternion rot)
         {
             var srcUp = (rot * Up).normalized;
-            var isMostlyVertical = Mathf.Abs(srcUp.y) > MostlyVertical;
+            var isMostlyVertical = Math.Abs(srcUp.y) > MostlyVertical;
 
             Vector3 modFwd;
 

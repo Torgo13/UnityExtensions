@@ -106,7 +106,7 @@ namespace UnityExtensions
                 {
                     int k0 = Math.Max(i - 1, 0);
                     int k1 = Math.Min(i, times.Length - 1);
-                    float delta = Mathf.Abs(times[k0] - times[k1]);
+                    float delta = Math.Abs(times[k0] - times[k1]);
                     // Do not compare if time is duplicated
                     if (delta > 0 && delta < smallestDelta)
                         smallestDelta = delta;
@@ -128,8 +128,8 @@ namespace UnityExtensions
                     scale = 4.0f;
                 else
                     scale = 2.0f;
-                float size = scale * Mathf.Ceil(1.0f / smallestDelta + 1.0f);
-                textureSize = Mathf.RoundToInt(size);
+                float size = scale * (float)Math.Ceiling(1.0 / smallestDelta + 1.0);
+                textureSize = (int)Math.Round(size);
                 // Arbitrary max (1024)
                 textureSize = Math.Min(textureSize, 1024);
             }

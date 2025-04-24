@@ -165,7 +165,7 @@ namespace UnityExtensions
             int max = int.MaxValue;
             
             foreach (int t in enumerable)
-                max = Mathf.Max(max, t);
+                max = Math.Max(max, t);
             
             return max;
         }

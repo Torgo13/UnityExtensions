@@ -277,7 +277,7 @@ namespace UnityExtensions
             }
 
             ret.center = bounds.center;
-            float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            float max = System.Math.Max(bounds.size.x, System.Math.Max(bounds.size.y, bounds.size.z));
             ret.size = new Vector3(max, max, max);  
 
             return ret;

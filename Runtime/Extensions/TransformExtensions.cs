@@ -156,15 +156,15 @@ namespace UnityExtensions
                 const float tolerance = 0.0001f;
                 t.GetLocalPositionAndRotation(out var p, out var r);
 
-                if (Mathf.Abs(p.x - pos.x) < tolerance
-                    && Mathf.Abs(p.y - pos.y) < tolerance
-                    && Mathf.Abs(p.z - pos.z) < tolerance)
+                if (Math.Abs(p.x - pos.x) < tolerance
+                    && Math.Abs(p.y - pos.y) < tolerance
+                    && Math.Abs(p.z - pos.z) < tolerance)
                     pos = p;
 
-                if (Mathf.Abs(r.x - rot.x) < tolerance
-                    && Mathf.Abs(r.y - rot.y) < tolerance
-                    && Mathf.Abs(r.z - rot.z) < tolerance
-                    && Mathf.Abs(r.w - rot.w) < tolerance)
+                if (Math.Abs(r.x - rot.x) < tolerance
+                    && Math.Abs(r.y - rot.y) < tolerance
+                    && Math.Abs(r.z - rot.z) < tolerance
+                    && Math.Abs(r.w - rot.w) < tolerance)
                     rot = r;
 
                 t.SetLocalPositionAndRotation(pos, rot);
