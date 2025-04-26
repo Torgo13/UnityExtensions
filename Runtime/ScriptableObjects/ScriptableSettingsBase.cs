@@ -240,20 +240,17 @@ namespace UnityExtensions
                 var assetPath = UnityEditor.AssetDatabase.GetAssetPath(scriptData);
 
                 // Get the first folder above 'assets' or 'packages/com.package.name'
-                var lower = assetPath.ToLowerInvariant();
                 var folderEnd = 0;
                 const int assetsLength = 7; // "Assets/".Length
                 const int packagesLength = 9; // "Packages/".Length
-                if (lower.StartsWith("assets/"))
+                if (assetPath.StartsWith("assets/", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    lower = lower.Substring(assetsLength);
-                    folderEnd = lower.IndexOf('/') + assetsLength;
+                    folderEnd = assetPath.AsSpan(assetsLength).IndexOf('/') + assetsLength;
                 }
-                else if (lower.StartsWith("packages/"))
+                else if (assetPath.StartsWith("packages/", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    lower = assetPath.Substring(packagesLength);
-                    folderEnd = lower.IndexOf('/') + 1;
-                    folderEnd += lower.AsSpan(folderEnd).IndexOf('/') + packagesLength;
+                    folderEnd = assetPath.AsSpan(packagesLength).IndexOf('/') + 1;
+                    folderEnd += assetPath.AsSpan(packagesLength + folderEnd).IndexOf('/') + packagesLength;
                 }
 
                 var specializationPath = string.Concat(assetPath.Substring(0, folderEnd), "/");

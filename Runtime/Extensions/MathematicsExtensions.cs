@@ -4,24 +4,6 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
-    //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/UIntFloat.cs
-    #region Unity.Netcode
-    /// <summary>
-    /// A struct with an explicit memory layout. The struct has 4 fields; float, uint, double and ulong.
-    /// Every field has the same starting point in memory. If you insert a float value, it can be extracted as a uint.
-    /// This is to allow for lockless and garbage free conversion from float to uint and double to ulong.
-    /// This allows for VarInt encoding and other integer encodings.
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct UIntFloat
-    {
-        [FieldOffset(0)] public float FloatValue;
-        [FieldOffset(0)] public uint UIntValue;
-        [FieldOffset(0)] public double DoubleValue;
-        [FieldOffset(0)] public ulong ULongValue;
-    }
-    #endregion // Unity.Netcode
-    
     //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/ByteBool.cs
     #region Unity.Netcode
     /// <summary>
@@ -78,6 +60,13 @@ namespace UnityExtensions
     #endregion // Unity.Netcode
 
     #region Union
+    /// <summary>
+    /// <see href="https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/UIntFloat.cs"/>
+    /// A struct with an explicit memory layout.
+    /// Every field has the same starting point in memory. If you insert a float value, it can be extracted as a uint.
+    /// This is to allow for lockless and garbage free conversion from float to uint and double to ulong.
+    /// This allows for VarInt encoding and other integer encodings.
+    /// </summary>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union1
     {
@@ -85,6 +74,7 @@ namespace UnityExtensions
         [FieldOffset(0)] public sbyte SByte;
     }
 
+    /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union2
     {
@@ -95,7 +85,8 @@ namespace UnityExtensions
         [FieldOffset(0)] public Union1 _0;
         [FieldOffset(1)] public Union1 _1;
     }
-    
+
+    /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union4
     {
@@ -109,6 +100,7 @@ namespace UnityExtensions
         [FieldOffset(2)] public Union2 _2;
     }
 
+    /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union8
     {
@@ -120,6 +112,7 @@ namespace UnityExtensions
         [FieldOffset(4)] public Union4 _4;
     }
 
+    /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16
     {

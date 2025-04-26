@@ -10,6 +10,8 @@ using static Unity.Mathematics.math;
 namespace UnityExtensions.Packages
 {
     #region Union
+    /// <inheritdoc cref="Union1"/>
+    /// <remarks>Use __0 to access the Union without extensions.</remarks>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union2
     {
@@ -17,7 +19,8 @@ namespace UnityExtensions.Packages
 
         [FieldOffset(0)] public half Half;
     }
-    
+
+    /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union4
     {
@@ -28,7 +31,8 @@ namespace UnityExtensions.Packages
         [FieldOffset(0)] public Union2 _0;
         [FieldOffset(2)] public Union2 _2;
     }
-    
+
+    /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union8
     {
@@ -43,6 +47,7 @@ namespace UnityExtensions.Packages
         [FieldOffset(4)] public Union4 _4;
     }
 
+    /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16
     {

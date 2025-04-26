@@ -294,7 +294,7 @@ namespace UnityExtensions
         public static string SplitPascalCase(this string str)
         {
             str = SplitCaseRegex.Replace(str, " $1");
-            return str.Substring(0, 1).ToUpper() + str.Substring(1);
+            return char.ToUpper(str[0]) + str.Substring(1);
         }
         #endregion // Unity.Entities.Editor
 

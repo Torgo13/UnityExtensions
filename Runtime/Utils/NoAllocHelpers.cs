@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
+using UnityEngine.Scripting;
 
 namespace UnityExtensions
 {
@@ -214,6 +215,7 @@ namespace UnityExtensions
         /// This is a helper class to allow the binding code to manipulate the internal fields of
         /// System.Collections.Generic.List. The field order below must not be changed.
         /// </summary>
+        [Preserve]
         internal class ListPrivateFieldAccess<T>
         {
 #pragma warning disable CS0649
