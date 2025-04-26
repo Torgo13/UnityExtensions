@@ -67,7 +67,7 @@ namespace UnityExtensions
         void Update()
         {
             if (update
-                && mainLight != null)
+                && _mainLightTransform != null)
             {
                 //Sending the forward vector to the material           
                 var dir = _mainLightTransform.forward;
