@@ -16,12 +16,12 @@ namespace UnityExtensions.Editor.Tests
         #endregion // dotnet
         */
 
-        static readonly string lowercaseString = "string";
-        static readonly string uppercaseString = "STRING";
-        static readonly string pascalcaseString = "String";
+        const string lowercaseString = "string";
+        const string uppercaseString = "STRING";
+        const string pascalcaseString = "String";
 
-        static readonly string lowercaseStringShort = "s";
-        static readonly string uppercaseStringShort = "S";
+        const string lowercaseStringShort = "s";
+        const string uppercaseStringShort = "S";
 
         static readonly char lowercaseChar = lowercaseString[0];
         static readonly char uppercaseChar = uppercaseString[0];
@@ -65,48 +65,48 @@ namespace UnityExtensions.Editor.Tests
             $"{lowercaseString}{System.Environment.NewLine}{System.Environment.NewLine}{uppercaseString}",
         };
         
-        internal static readonly string WhiteSpacesTrimmed = "some string";
-            internal static readonly string WhiteSpacesRemoved = "somestring";
-            internal static readonly string LeadingWhiteSpaces = "  some string";
-            internal static readonly string TrailingWhiteSpaces = "some string ";
-            internal static readonly string LeadingAndTrailingWhiteSpaces = "    some string  ";
-            internal static readonly string WhiteSpaces = "    ";
+        internal const string WhiteSpacesTrimmed = "some string";
+        internal const string WhiteSpacesRemoved = "somestring";
+        internal const string LeadingWhiteSpaces = "  some string";
+        internal const string TrailingWhiteSpaces = "some string ";
+        internal const string LeadingAndTrailingWhiteSpaces = "    some string  ";
+        internal const string WhiteSpaces = "    ";
 
-            internal static readonly char[] SymbolsToTrim = new char[] { '*', '^', '&' };
-            internal static readonly string SymbolsTrimmed = "some*&^string";
-            internal static readonly string SymbolsRemoved = "somestring";
-            internal static readonly string LeadingSymbols = "*&^some*&^string";
-            internal static readonly string TrailingSymbols = "some*&^string*&^";
-            internal static readonly string LeadingAndTrailingSymbols = "&^*some*&^string&*^";
+        internal static readonly char[] SymbolsToTrim = new char[] { '*', '^', '&' };
+        internal const string SymbolsTrimmed = "some*&^string";
+        internal const string SymbolsRemoved = "somestring";
+        internal const string LeadingSymbols = "*&^some*&^string";
+        internal const string TrailingSymbols = "some*&^string*&^";
+        internal const string LeadingAndTrailingSymbols = "&^*some*&^string&*^";
 
-            internal static readonly string ToIndexOfChars1 = SymbolsTrimmed + LeadingSymbols;
-            internal static readonly string ToIndexOfChars2 = LeadingSymbols + LeadingAndTrailingSymbols;
+        internal const string ToIndexOfChars1 = SymbolsTrimmed + LeadingSymbols;
+        internal const string ToIndexOfChars2 = LeadingSymbols + LeadingAndTrailingSymbols;
 
-            internal static readonly string SingleCharacter = "!";
-            internal static readonly string Searched = "mfsd42(*#D$#@cder23?"; // 20 symbols
-            internal static readonly string Composition1 = "sfreewfr3c 4vtc"; // 15 symbols
-            internal static readonly string Composition2 = "(dx D!@DWE 9&53 sr;'"; // 20 symbols
+        internal const string SingleCharacter = "!";
+        internal const string Searched = "mfsd42(*#D$#@cder23?"; // 20 symbols
+        internal const string Composition1 = "sfreewfr3c 4vtc"; // 15 symbols
+        internal const string Composition2 = "(dx D!@DWE 9&53 sr;'"; // 20 symbols
 
-            public static readonly string[] Strings =
-            {
-                WhiteSpacesTrimmed,
-                WhiteSpacesRemoved,
-                LeadingWhiteSpaces,
-                TrailingWhiteSpaces,
-                LeadingAndTrailingWhiteSpaces,
-                WhiteSpaces,
-                SymbolsTrimmed,
-                SymbolsRemoved,
-                LeadingSymbols,
-                TrailingSymbols,
-                LeadingAndTrailingSymbols,
-                ToIndexOfChars1,
-                ToIndexOfChars2,
-                SingleCharacter,
-                Searched,
-                Composition1,
-                Composition2,
-            };
+        public static readonly string[] Strings =
+        {
+            WhiteSpacesTrimmed,
+            WhiteSpacesRemoved,
+            LeadingWhiteSpaces,
+            TrailingWhiteSpaces,
+            LeadingAndTrailingWhiteSpaces,
+            WhiteSpaces,
+            SymbolsTrimmed,
+            SymbolsRemoved,
+            LeadingSymbols,
+            TrailingSymbols,
+            LeadingAndTrailingSymbols,
+            ToIndexOfChars1,
+            ToIndexOfChars2,
+            SingleCharacter,
+            Searched,
+            Composition1,
+            Composition2,
+        };
     }
     
     class StringExtensionsTests
@@ -368,6 +368,23 @@ namespace UnityExtensions.Editor.Tests
             Assert.AreEqual(expected, actual);
         }
         #endregion // UnityEditor.Rendering.Tests
+
+        [Test]
+        public void RemoveChar_Test()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                Assert.That(TestStrings.Strings[i].RemoveChar(' '), Is.EqualTo(TestStrings.WhiteSpacesRemoved));
+            }
+
+            for (int i = 6; i < 11; i++)
+            {
+                Assert.That(TestStrings.Strings[i].RemoveChar(TestStrings.SymbolsToTrim[0])
+                    .RemoveChar(TestStrings.SymbolsToTrim[1])
+                    .RemoveChar(TestStrings.SymbolsToTrim[2]),
+                    Is.EqualTo(TestStrings.WhiteSpacesRemoved));
+            }
+        }
     }
 }
 

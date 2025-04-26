@@ -233,6 +233,7 @@ namespace UnityExtensions
             {
                 if (!first)
                     sb.Append(delimiter);
+
                 sb.Append(e);
                 first = false;
             }
@@ -240,8 +241,24 @@ namespace UnityExtensions
             return sb.ToString();
         }
 
-        public static string SeparateBySpace(this IEnumerable<string> elements) => elements.SeparateBy(" ");
-        public static string SeparateByComma(this IEnumerable<string> elements) => elements.SeparateBy(",");
+        public static string SeparateBy(this IEnumerable<string> elements, char delimiter)
+        {
+            bool first = true;
+            using var _0 = StringBuilderPool.Get(out var sb);
+            foreach (var e in elements)
+            {
+                if (!first)
+                    sb.Append(delimiter);
+
+                sb.Append(e);
+                first = false;
+            }
+
+            return sb.ToString();
+        }
+
+        public static string SeparateBySpace(this IEnumerable<string> elements) => elements.SeparateBy(' ');
+        public static string SeparateByComma(this IEnumerable<string> elements) => elements.SeparateBy(',');
         #endregion // Unity.Entities.CodeGen
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/StringExtensions.cs
@@ -877,13 +894,39 @@ namespace UnityExtensions
         /// <summary>
         /// Remove all occurrences of char c.
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="c"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemoveChar(this string str, char c)
         {
-            return str.Replace(c.ToString(), string.Empty, System.StringComparison.Ordinal);
+            // If c wasn't found, return the original string
+            if (string.IsNullOrEmpty(str) || str.IndexOfOrdinal(c) == -1)
+                return str;
+
+            using (StringBuilderPool.Get(out var sb))
+            {
+                int start = 0;
+
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (str[i] == c)
+                    {
+                        // Append the chunk that does not contain the target character
+                        if (start < i)
+                        {
+                            _ = sb.Append(str.AsSpan(start, i - start));
+                        }
+
+                        start = i + 1;
+                    }
+                }
+
+                // Append any remaining part after the last occurrence
+                if (start < str.Length)
+                {
+                    _ = sb.Append(str.AsSpan(start, str.Length - start));
+                }
+
+                return sb.ToString();
+            }
         }
     }
 }
