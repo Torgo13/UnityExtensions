@@ -174,5 +174,10 @@ namespace UnityExtensions.Unsafe
             return true;
         }
         #endregion // Unity.LiveCapture.Networking
+
+        public static Span<byte> AsSpan(this MemoryStream stream)
+        {
+            return new Span<byte>(stream.GetBuffer(), 0, (int)stream.Length);
+        }
     }
 }

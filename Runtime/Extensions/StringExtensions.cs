@@ -894,7 +894,6 @@ namespace UnityExtensions
         /// <summary>
         /// Remove all occurrences of char c.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemoveChar(this string str, char c)
         {
             // If c wasn't found, return the original string
@@ -908,6 +907,40 @@ namespace UnityExtensions
                 for (int i = 0; i < str.Length; i++)
                 {
                     if (str[i] == c)
+                    {
+                        // Append the chunk that does not contain the target character
+                        if (start < i)
+                        {
+                            _ = sb.Append(str.AsSpan(start, i - start));
+                        }
+
+                        start = i + 1;
+                    }
+                }
+
+                // Append any remaining part after the last occurrence
+                if (start < str.Length)
+                {
+                    _ = sb.Append(str.AsSpan(start, str.Length - start));
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        public static string RemoveWhiteSpace(this string str)
+        {
+            // If c wasn't found, return the original string
+            if (string.IsNullOrEmpty(str))
+                return str;
+
+            using (StringBuilderPool.Get(out var sb))
+            {
+                int start = 0;
+
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (char.IsWhiteSpace(str[i]))
                     {
                         // Append the chunk that does not contain the target character
                         if (start < i)
