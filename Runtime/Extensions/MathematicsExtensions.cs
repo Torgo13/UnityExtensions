@@ -67,11 +67,16 @@ namespace UnityExtensions
     /// This is to allow for lockless and garbage free conversion from float to uint and double to ulong.
     /// This allows for VarInt encoding and other integer encodings.
     /// </summary>
+    /// <remarks>
+    /// <see cref="System.Runtime.InteropServices.Marshal.SizeOf{T}()"/> will return at least 4 bytes.
+    /// Use <see cref="Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf{T}()"/> to return the actual size.
+    /// </remarks>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union1
     {
         [FieldOffset(0)] public byte Byte;
         [FieldOffset(0)] public sbyte SByte;
+        [FieldOffset(0)] public bool Bool;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -93,7 +98,6 @@ namespace UnityExtensions
         [FieldOffset(0)] public float Float;        
         [FieldOffset(0)] public int Int;
         [FieldOffset(0)] public uint UInt;
-        [FieldOffset(0)] public bool Bool;
         [FieldOffset(0)] public Color32 Color32;
         
         [FieldOffset(0)] public Union2 _0;

@@ -8,11 +8,11 @@ namespace UnityExtensions.Tests
         [Test]
         public void Union_SizeOf()
         {
-            Assert.AreEqual(1, System.Runtime.InteropServices.Marshal.SizeOf<Union1>());
-            Assert.AreEqual(2, System.Runtime.InteropServices.Marshal.SizeOf<Union2>());
-            Assert.AreEqual(4, System.Runtime.InteropServices.Marshal.SizeOf<Union4>());
-            Assert.AreEqual(8, System.Runtime.InteropServices.Marshal.SizeOf<Union8>());
-            Assert.AreEqual(16, System.Runtime.InteropServices.Marshal.SizeOf<Union16>());
+            Assert.AreEqual(1, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Union1>());
+            Assert.AreEqual(2, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Union2>());
+            Assert.AreEqual(4, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Union4>());
+            Assert.AreEqual(8, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Union8>());
+            Assert.AreEqual(16, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<Union16>());
         }
 
         /// <summary>

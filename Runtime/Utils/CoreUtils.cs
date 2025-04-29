@@ -552,6 +552,7 @@ namespace UnityExtensions
         public static Mesh CreateCubeMesh(Vector3 min, Vector3 max)
         {
             Mesh mesh = new Mesh();
+            mesh.indexFormat = IndexFormat.UInt16;
 
             var vertices = new NativeArray<Vector3>(8, Allocator.Temp);
             vertices[0] = new Vector3(min.x, min.y, min.z);
@@ -562,31 +563,23 @@ namespace UnityExtensions
             vertices[5] = new Vector3(max.x, min.y, max.z);
             vertices[6] = new Vector3(max.x, max.y, max.z);
             vertices[7] = new Vector3(min.x, max.y, max.z);
-
             mesh.SetVertices(vertices);
-            vertices.Dispose();
 
-            var triangles = ListPool<int>.Get();
-            if (triangles.Capacity < 36)
-                triangles.Capacity = 36;
+            var triangles = new NativeArray<ushort>(36, Allocator.Temp);
+            triangles[0] = 0; triangles[1] = 2; triangles[2] = 1;
+            triangles[3] = 0; triangles[4] = 3; triangles[5] = 2;
+            triangles[6] = 1; triangles[7] = 6; triangles[8] = 5;
+            triangles[9] = 1; triangles[10] = 2; triangles[11] = 6;
+            triangles[12] = 5; triangles[13] = 7; triangles[14] = 4;
+            triangles[15] = 5; triangles[16] = 6; triangles[17] = 7;
+            triangles[18] = 4; triangles[19] = 3; triangles[20] = 0;
+            triangles[21] = 4; triangles[22] = 7; triangles[23] = 3;
+            triangles[24] = 3; triangles[25] = 6; triangles[26] = 2;
+            triangles[27] = 3; triangles[28] = 7; triangles[29] = 6;
+            triangles[30] = 4; triangles[31] = 1; triangles[32] = 5;
+            triangles[33] = 4; triangles[34] = 0; triangles[35] = 1;
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh: 0);
 
-            triangles.Add(0); triangles.Add(2); triangles.Add(1);
-            triangles.Add(0); triangles.Add(3); triangles.Add(2);
-            triangles.Add(1); triangles.Add(6); triangles.Add(5);
-            triangles.Add(1); triangles.Add(2); triangles.Add(6);
-            triangles.Add(5); triangles.Add(7); triangles.Add(4);
-            triangles.Add(5); triangles.Add(6); triangles.Add(7);
-            triangles.Add(4); triangles.Add(3); triangles.Add(0);
-            triangles.Add(4); triangles.Add(7); triangles.Add(3);
-            triangles.Add(3); triangles.Add(6); triangles.Add(2);
-            triangles.Add(3); triangles.Add(7); triangles.Add(6);
-            triangles.Add(4); triangles.Add(1); triangles.Add(5);
-            triangles.Add(4); triangles.Add(0); triangles.Add(1);
-
-            mesh.SetTriangles(triangles, 0);
-            ListPool<int>.Release(triangles);
-
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
             return mesh;
         }
 
