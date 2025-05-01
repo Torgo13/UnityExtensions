@@ -118,8 +118,7 @@ namespace UnityExtensions
             DrawWindow();
 
             // Force repaint of game view
-            var assembly = typeof(UnityEditor.EditorWindow).Assembly;
-            Type type = assembly.GetType("UnityEditor.GameView");
+            Type type = ReflectionUtils.FindTypeByFullName("UnityEditor.GameView");
             UnityEditor.EditorUtility.SetDirty(UnityEditor.EditorWindow.GetWindow(type, false, null, false));
         }
 

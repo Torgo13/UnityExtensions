@@ -268,22 +268,6 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Tests/Editor/ReflectionUtils.cs
         #region UnityEngine.Rendering.Tests
         /// <summary>
-        /// Finds a type by full name
-        /// </summary>
-        /// <param name="name">The full type name with namespace</param>
-        /// <returns>The found type</returns>
-        public static Type FindTypeByName(string name)
-        {
-            var type = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Select(assembly => assembly.GetType(name))
-                .FirstOrDefault(tt => tt != null);
-
-            Assert.IsTrue(type != null, "Type not found");
-            return type;
-        }
-
-        /// <summary>
         /// Calls a private method from a class
         /// </summary>
         /// <param name="targetType">The Type on which to invoke the static method.</param>

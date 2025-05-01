@@ -23,7 +23,6 @@ namespace UnityExtensions
         /// <returns>A string representation of the input value.</returns>
         public static string FormatDuration(TimeSpan timeSpan)
         {
-            //return timeSpan.Hours + ":" + timeSpan.Minutes.ToString("D2") + ":" + timeSpan.Seconds.ToString("D2");
             return $"{timeSpan.Hours}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
         }
 
@@ -36,12 +35,12 @@ namespace UnityExtensions
         {
             var timeMs = timeSpan.TotalMilliseconds;
             if (timeMs < 1000)
-                return $"{timeMs:F1} ms"; //timeMs.ToString("F1") + " ms";
+                return $"{timeMs:F1} ms";
 
             if (timeMs < 60000)
-                return $"{timeSpan.TotalSeconds:F2} s"; //timeSpan.TotalSeconds.ToString("F2") + " s";
+                return $"{timeSpan.TotalSeconds:F2} s";
 
-            return $"{timeSpan.TotalMinutes:F2} min"; //timeSpan.TotalMinutes.ToString("F2") + " min";
+            return $"{timeSpan.TotalMinutes:F2} min";
         }
 
         /// <summary>

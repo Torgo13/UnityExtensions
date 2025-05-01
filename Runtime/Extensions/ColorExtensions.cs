@@ -75,7 +75,6 @@ namespace UnityExtensions
             return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
         }
 
-
 		public static bool CompareRGB(this Color a, Color b)
 		{
 			return a.r == b.r && a.g == b.g && a.b == b.b;
@@ -142,6 +141,8 @@ namespace UnityExtensions
         
         public static string GetColorHex(this Color32 color)
         {
+            return $"{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}";
+            /*
             System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
             using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
             
@@ -155,10 +156,13 @@ namespace UnityExtensions
             sb.Append(buffer);
             
             return sb.ToString();
+            */
         }
 
         public static string GetColorTextCode(this Color32 color)
         {
+            return $"<color=#{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}>";
+            /*
             System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
             using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
             sb.Append("<color=#");
@@ -174,6 +178,7 @@ namespace UnityExtensions
             
             sb.Append('>');
             return sb.ToString();
+            */
         }
     }
 }

@@ -312,6 +312,7 @@ namespace UnityExtensions
         public static Color ToRGBA(uint hex) => new Color(((hex >> 16) & 0xff) / 255f, ((hex >> 8) & 0xff) / 255f, (hex & 0xff) / 255f, ((hex >> 24) & 0xff) / 255f);
         #endregion // UnityEngine.Rendering
 
+        #region Byte
         /// <summary>
         /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
         /// </summary>
@@ -394,88 +395,91 @@ namespace UnityExtensions
                 (b & 0b0001_1100) / (float)0b0001_1100,
                 (b & 0b0000_0011) / (float)0b0000_0011);
         }
+        #endregion // Byte
 
+        #region UShort
         /// <summary>
-        /// Encodes Color32.RGB values to a short, using 5:6:5 bits for RGB.
+        /// Encodes Color32.RGB values to a ushort, using 5:6:5 bits for RGB.
         /// </summary>
         /// <remarks>
         /// Rounds the colour values down.
         /// </remarks>
         /// <param name="c">The colour to encode.</param>
-        /// <returns>Short containing the encoded RGB values.</returns>
+        /// <returns>A ushort containing the encoded RGB values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short Color32ToShort(Color32 c)
+        public static ushort Color32ToUShort(Color32 c)
         {
             int r = c.r & 0b1111_1000;
             int g = c.g & 0b1111_1100;
             int b = c.b & 0b1111_1000;
 
-            return (short)(r << 8 | g << 3 | b >> 3);
+            return (ushort)(r << 8 | g << 3 | b >> 3);
         }
 
         /// <summary>
-        /// Decodes a short to Color32.RGB values.
+        /// Decodes a ushort to Color32.RGB values.
         /// </summary>
         /// <remarks>
         /// Rounds the colour values up by repeating the masked bits.
         /// </remarks>
-        /// <param name="b">Short with RGB colours encoded in 5:6:5 bits.</param>
+        /// <param name="b">A ushort with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color32 ShortToColor32(short b)
+        public static Color32 UShortToColor32(ushort u)
         {
             return new Color32(
-                ShortToR(b),
-                ShortToG(b),
-                ShortToB(b),
+                UShortToR(u),
+                UShortToG(u),
+                UShortToB(u),
                 byte.MaxValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte ShortToR(short b)
+        public static byte UShortToR(ushort u)
         {
-            return (byte)(b >> 8 & 0b1111_1000 | b >> 13 & 0b0000_0111);
+            return (byte)(u >> 8 & 0b1111_1000 | u >> 13 & 0b0000_0111);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte ShortToG(short b)
+        public static byte UShortToG(ushort u)
         {
-            return (byte)(b >> 3 & 0b1111_1100 | b >> 9 & 0b0000_0011);
+            return (byte)(u >> 3 & 0b1111_1100 | u >> 9 & 0b0000_0011);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte ShortToB(short b)
+        public static byte UShortToB(ushort u)
         {
-            return (byte)(b << 3 & 0b1111_1000 | b >> 13 & 0b0000_0111);
+            return (byte)(u << 3 & 0b1111_1000 | u >> 2 & 0b0000_0111);
         }
 
         /// <summary>
-        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// Encodes Color.RGB values to a ushort, using 5:6:5 bits for RGB.
         /// </summary>
         /// <param name="c">The colour to encode.</param>
-        /// <returns>Byte containing the encoded RGB values.</returns>
+        /// <returns>A ushort containing the encoded RGB values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short ColorToShort(Color c)
+        public static ushort ColorToUShort(Color c)
         {
             int r = Mathf.RoundToInt(c.r * 0b1111_1000_0000_0000);
             int g = Mathf.RoundToInt(c.g * 0b0000_0111_1110_0000);
             int b = Mathf.RoundToInt(c.b * 0b0000_0000_0001_1111);
 
-            return (short)(r & 0b1111_1000_0000_0000 | g & 0b0000_0111_1110_0000 | b & 0b0000_0000_0001_1111);
+            return (ushort)(r & 0b1111_1000_0000_0000 | g & 0b0000_0111_1110_0000 | b & 0b0000_0000_0001_1111);
         }
 
         /// <summary>
-        /// Decodes a byte to Color.RGB values.
+        /// Decodes a ushort to Color.RGB values.
         /// </summary>
-        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <param name="b">A ushort with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ShortToColor(short b)
+        public static Color UShortToColor(ushort u)
         {
             return new Color(
-                (b & 0b1111_1000_0000_0000) / (float)0b1111_1000_0000_0000,
-                (b & 0b0000_0111_1110_0000) / (float)0b0000_0111_1110_0000,
-                (b & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
+                (u & 0b1111_1000_0000_0000) / (float)0b1111_1000_0000_0000,
+                (u & 0b0000_0111_1110_0000) / (float)0b0000_0111_1110_0000,
+                (u & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
         }
+        #endregion // UShort
     }
 }

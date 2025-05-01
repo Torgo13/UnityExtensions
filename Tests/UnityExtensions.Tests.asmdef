@@ -9,9 +9,7 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [],
     "autoReferenced": false,
-    "defineConstraints": [],
     "versionDefines": [
         {
             "name": "com.unity.ugui",

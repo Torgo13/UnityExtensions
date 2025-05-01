@@ -90,7 +90,7 @@ namespace UnityExtensions.Unsafe
         /// <returns>Intersection result</returns>
         public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
         {
-            var inCount = 0;
+            int inCount;
             var inCountRef = new NativeReference<int>(Allocator.TempJob);
             var intersectResultRef = new NativeReference<bool>(Allocator.TempJob);
 

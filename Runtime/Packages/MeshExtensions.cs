@@ -257,7 +257,7 @@ namespace UnityExtensions.Packages
                 foreach (var value in attrib)
                 {
                     _ = sb.Append("    ")
-                        .AppendFormat($"    {fmt}", value)
+                        .AppendFormat($"    {0:fmt}", value)
                         .AppendLine();
                     //sb.AppendLine(string.Format($"    {fmt}", value));
                 }
