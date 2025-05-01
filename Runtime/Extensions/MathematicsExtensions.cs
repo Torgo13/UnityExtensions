@@ -108,9 +108,13 @@ namespace UnityExtensions
     [StructLayout(LayoutKind.Explicit)]
     public struct Union8
     {
+        [FieldOffset(0)] public Vector2 Vector2;
+        [FieldOffset(0)] public Vector2Int Vector2Int;
         [FieldOffset(0)] public double Double;
         [FieldOffset(0)] public long Long;
         [FieldOffset(0)] public ulong ULong;
+        [FieldOffset(0)] public GradientAlphaKey GradientAlphaKey;
+        [FieldOffset(0)] public RangeInt RangeInt;
 
         [FieldOffset(0)] public Union4 _0;
         [FieldOffset(4)] public Union4 _4;
@@ -123,10 +127,13 @@ namespace UnityExtensions
         [FieldOffset(0)] public Vector4 Vector4;
         [FieldOffset(0)] public Quaternion Quaternion;
         [FieldOffset(0)] public Color Color;
+        [FieldOffset(0)] public Rect Rect;
+        [FieldOffset(0)] public Plane Plane;
+        [FieldOffset(0)] public Random.State State;
 
         [FieldOffset(0)] public Vector3 Vector3;
         [FieldOffset(0)] public Vector3Int Vector3Int;
-        
+
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
     }
@@ -143,7 +150,84 @@ namespace UnityExtensions
 
             return (start, length);
         }
-        
+
+        #region SafeRange
+        /// <summary>
+        /// Check if the value is within the range that it can
+        /// be safely cast from signed to unsigned or vice versa.
+        /// </summary>
+        public static bool SafeRange(this byte Byte)
+        {
+            return Byte <= sbyte.MaxValue;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this sbyte SByte)
+        {
+            return SByte >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this ushort UShort)
+        {
+            return UShort <= short.MaxValue;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this short Short)
+        {
+            return Short >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this uint UInt)
+        {
+            return UInt <= int.MaxValue;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this int Int)
+        {
+            return Int >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this ulong ULong)
+        {
+            return ULong <= long.MaxValue;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this long Long)
+        {
+            return Long >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this Union1 Union1)
+        {
+            return Union1.SByte >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this Union2 Union2)
+        {
+            return Union2.Short >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this Union4 Union4)
+        {
+            return Union4.Int >= 0;
+        }
+
+        /// <inheritdoc cref="SafeRange"/>
+        public static bool SafeRange(this Union8 Union8)
+        {
+            return Union8.Long >= 0;
+        }
+        #endregion // SafeRange
+
         /// <summary>
         /// Creates a translation, rotation and scaling matrix from just the translation.
         /// </summary>
