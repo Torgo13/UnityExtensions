@@ -17,9 +17,10 @@ namespace UnityExtensions
 #endif // BLEND_SHADER
         
         static readonly int MipLevel = Shader.PropertyToID("_MipLevel");
-        
+
         [SerializeField] Shader skyboxShader;
-        Material _skyboxMaterial;
+        public Material _skyboxMaterial;
+        bool _createdMaterial;
 
         [SerializeField] Camera reflectionCamera;
         Transform _reflectionCameraTransform;
@@ -83,20 +84,29 @@ namespace UnityExtensions
 
         void Awake()
         {
-            if (skyboxShader == null)
+            if (_skyboxMaterial == null)
+            {
+                if (skyboxShader == null)
 #if BLEND_SHADER
-                skyboxShader = Shader.Find("Skybox/CubemapBlend");
+                    skyboxShader = Shader.Find("Skybox/CubemapBlend");
 #else
-                skyboxShader = Shader.Find("Skybox/GlossyReflection");
+                    skyboxShader = Shader.Find("Skybox/GlossyReflection");
 #endif // BLEND_SHADER
 
-            if (skyboxShader != null)
-            {
-                _skyboxMaterial = new Material(skyboxShader);
-                _skyboxMaterial.hideFlags = HideFlags.HideAndDontSave;
+                _skyboxMaterial = CoreUtils.CreateEngineMaterial(skyboxShader);
+
+                if (_skyboxMaterial == null)
+                {
+                    Destroy(this);
+                    return;
+                }
+
+                _createdMaterial = true;
             }
-            
+
+#if BLEND_SHADER
             RenderSettings.skybox = _skyboxMaterial;
+#endif // BLEND_SHADER
 
             if (reflectionCamera == null)
                 reflectionCamera = GetComponentInChildren<Camera>();
@@ -155,7 +165,7 @@ namespace UnityExtensions
 
         void OnDestroy()
         {
-            if (_skyboxMaterial != null)
+            if (_createdMaterial && _skyboxMaterial != null)
                 DestroyImmediate(_skyboxMaterial);
 
             if (_renderTextures != null)
@@ -174,7 +184,7 @@ namespace UnityExtensions
 #endif // BLEND_SHADER
         }
 
-        #endregion // MonoBehaviour
+#endregion // MonoBehaviour
 
         /// <inheritdoc cref="UnityEngine.Experimental.Rendering.ScriptableRuntimeReflectionSystem.TickRealtimeProbes"/>
         /// <remarks>
@@ -312,7 +322,9 @@ namespace UnityExtensions
             const int positiveX = (int)CubemapFace.PositiveX;
             const int negativeX = (int)CubemapFace.NegativeX;
             const int positiveY = (int)CubemapFace.PositiveY;
+#if GROUND_COLOUR
             const int negativeY = (int)CubemapFace.NegativeY;
+#endif // GROUND_COLOUR
             const int positiveZ = (int)CubemapFace.PositiveZ;
             const int negativeZ = (int)CubemapFace.NegativeZ;
 
@@ -333,10 +345,14 @@ namespace UnityExtensions
             }
             
             RenderSettings.ambientSkyColor = _ambientColours[positiveY];
+#if GROUND_COLOUR
             RenderSettings.ambientGroundColor = _ambientColours[negativeY];
+#else
+            RenderSettings.ambientGroundColor = equator;
+#endif // GROUND_COLOUR
             RenderSettings.ambientEquatorColor = equator;
         }
         
-        #endregion // Ambient
+#endregion // Ambient
     }
 }
