@@ -54,5 +54,17 @@ namespace UnityExtensions.Unsafe
             bitField = ((bitField & (ulong)~(1 << bitPosition)) | ((ulong)value.ToByte() << bitPosition));
         }
         #endregion // Unity.Netcode
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool GetBit(int bitField, int bitPosition)
+        {
+            return (bitField & (1 << bitPosition)) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetBit(ref int bitField, int bitPosition, bool value)
+        {
+            bitField = (bitField & ~(1 << bitPosition)) | (value.ToByte() << bitPosition);
+        }
     }
 }
