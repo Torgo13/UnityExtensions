@@ -1,4 +1,6 @@
 #if URP_14
+using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,14 +12,10 @@ namespace UnityExtensions.Packages
     using ProfilingSampler = UnityEngine.Rendering.ProfilingSampler;
     using ProfilingScope = UnityEngine.Rendering.ProfilingScope;
 
-    /// <summary>
-    /// This renderer feature lets you create single-pass full screen post processing effects without needing to write code.
-    /// </summary>
+    /// <inheritdoc/>
     public class CustomFullScreenPassRendererFeature : FullScreenPassRendererFeature
     {
-        /// <summary>
-        /// An injection point for the full screen pass. This is similar to the RenderPassEvent enum but limited to only supported events.
-        /// </summary>
+        /// <inheritdoc cref="FullScreenPassRendererFeature.InjectionPoint"/>
         public RenderPassEvent injectionPass;
 
         private FullScreenRenderPass m_FullScreenPass;
@@ -75,10 +73,13 @@ namespace UnityExtensions.Packages
 
             private static MaterialPropertyBlock s_SharedPropertyBlock = new MaterialPropertyBlock();
 
-            private static readonly FieldInfo _commandBufferFieldInfo =
-                ReflectionUtils.FindTypeInAssemblyByFullName("Unity.RenderPipelines.Universal.Runtime",
-                    "UnityEngine.Rendering.Universal.RenderingData")
-                .GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic);
+            private static readonly ParameterExpression param = Expression.Parameter(typeof(object), "instance");
+
+            private static readonly Func<object, object> getCommandBufferDelegate =
+                Expression.Lambda<Func<object, object>>(
+                Expression.Convert(Expression.Field(Expression.Convert(param, typeof(RenderingData)),
+                typeof(RenderingData).GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic)),
+                    typeof(object)), param).Compile();
 
             public FullScreenRenderPass(string passName)
             {
@@ -135,7 +136,7 @@ namespace UnityExtensions.Packages
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 ref var cameraData = ref renderingData.cameraData;
-                var cmd = (CommandBuffer)_commandBufferFieldInfo.GetValue(renderingData);
+                var cmd = (CommandBuffer)getCommandBufferDelegate(renderingData);
 
                 using (new ProfilingScope(cmd, profilingSampler))
                 {
@@ -145,7 +146,7 @@ namespace UnityExtensions.Packages
                         ExecuteCopyColorPass(cmd, cameraData.renderer.cameraColorTargetHandle);
                     }
 
-                    if (m_BindDepthStencilAttachment)
+                    if(m_BindDepthStencilAttachment)
                         CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle, cameraData.renderer.cameraDepthTargetHandle);
                     else
                         CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle);

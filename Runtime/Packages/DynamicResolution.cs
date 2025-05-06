@@ -14,8 +14,8 @@ namespace UnityExtensions.Packages
     //https://github.com/Unity-Technologies/DynamicResolutionSample/blob/9677fbd4d890f809d95aa1c3c266966646bb23c6/DynamicResolution.cs
     public class DynamicResolution : MonoBehaviour
     {
-        static double DesiredFrameRate = 60.0;
-        static double DesiredFrameTime = 1000.0 / DesiredFrameRate;
+        [SerializeField] double DesiredFrameRate = 60.0;
+        double DesiredFrameTime = 1000.0 / 60.0;
 
         #region Tweakables
 
@@ -38,7 +38,7 @@ namespace UnityExtensions.Packages
         // If your pipeline utilizes the DRH then the min and max scale factors should be defined by a separate config asset.
         // If not, then these values provide you that configuration.
 #if !PIPELINE_IMPLEMENTS_DRH
-        const float MinScaleFactor = 0.5f;
+        [SerializeField] float MinScaleFactor = 1.0f / 4;
         const float MaxScaleFactor = 1.0f;
 #endif
 
@@ -57,23 +57,23 @@ namespace UnityExtensions.Packages
 
         uint ScaleRaiseCounter = 0;
 
-        static float CurrentScaleFactor = 1.0f;
+        float CurrentScaleFactor = 1.0f;
 
-        static bool CanUpdate = false;
-        static bool SystemEnabled = true;  // Default to false if you plan to init from external settings.
-        static bool PlatformSupported = true;
+        bool CanUpdate = false;
+        [SerializeField] bool SystemEnabled = true; // Default to false if you plan to init from external settings.
+        bool PlatformSupported = true;
 
         // These are for an unfortunate hack to work around a current issue, see start of Update for more info.
         // Do not change these unless you are sure about what you are doing.
 #if PIPELINE_IMPLEMENTS_DRH
-        static bool HasDoneOneTimeInit = false;
-        static uint FramesUntilInit = 1;
+        bool HasDoneOneTimeInit = false;
+        uint FramesUntilInit = 1;
 #endif
 
         #endregion // Internal Tracking
 
 #if ENABLE_DYNAMIC_RESOLUTION_DEBUG
-        static GUIStyle DebugStyle;
+        GUIStyle DebugStyle;
 #endif
 
         private void Update()
@@ -182,7 +182,7 @@ namespace UnityExtensions.Packages
         // For pipelines with the DRH, we set a 0-1 scaler and we're done.
         // Otherwise, we need to remap our range and call the resize ourselves.
 #if PIPELINE_IMPLEMENTS_DRH
-        static private float ScalerDelegate()
+        private float ScalerDelegate()
         {
             return CurrentScaleFactor;
         }
@@ -194,7 +194,7 @@ namespace UnityExtensions.Packages
         }
 #endif
 
-        static private void ResetScale()
+        private void ResetScale()
         {
             CurrentScaleFactor = 1.0f;
 
@@ -237,7 +237,7 @@ namespace UnityExtensions.Packages
             CPUFrameTime = FrameTimings[0].cpuFrameTime;
         }
 
-        static public void Enable()
+        public void Enable()
         {
             if (PlatformSupported)
             {
@@ -245,7 +245,7 @@ namespace UnityExtensions.Packages
             }
         }
 
-        static public void Disable()
+        public void Disable()
         {
             if (PlatformSupported)
             {
@@ -255,22 +255,22 @@ namespace UnityExtensions.Packages
             }
         }
 
-        static public bool IsSupportedOnPlatform()
+        public bool IsSupportedOnPlatform()
         {
             return PlatformSupported;
         }
 
-        static public bool IsEnabled()
+        public bool IsEnabled()
         {
             return SystemEnabled;
         }
 
-        static public double GetTargetFramerate()
+        public double GetTargetFramerate()
         {
             return DesiredFrameRate;
         }
 
-        static public void SetTargetFramerate(double target)
+        public void SetTargetFramerate(double target)
         {
             DesiredFrameRate = target;
             DesiredFrameTime = 1000.0 / target;
@@ -280,6 +280,8 @@ namespace UnityExtensions.Packages
 
         private void Start()
         {
+            Application.targetFrameRate = (int)System.Math.Round(DesiredFrameRate);
+
             // Metal will fail the timer frequency check, but we know it works so skip the check in that case.
             if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Metal)
             {
@@ -314,9 +316,9 @@ namespace UnityExtensions.Packages
 #if ENABLE_DYNAMIC_RESOLUTION_DEBUG
         private void OnGUI()
         {
-            int rezWidth = (int)Mathf.Ceil(ScalableBufferManager.widthScaleFactor * Screen.width);
-            int rezHeight = (int)Mathf.Ceil(ScalableBufferManager.heightScaleFactor * Screen.height);
             float curScale = ScalableBufferManager.widthScaleFactor;
+            int rezWidth = (int)Mathf.Ceil(curScale * Screen.width);
+            int rezHeight = (int)Mathf.Ceil(ScalableBufferManager.heightScaleFactor * Screen.height);
 
             DebugStyle = GUI.skin.box;
             DebugStyle.fontSize = 20;

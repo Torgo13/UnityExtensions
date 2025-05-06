@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 176440914096187851}
   - component: {fileID: 4881690983956870252}
+  - component: {fileID: 3805463516428467826}
   m_Layer: 0
   m_Name: Runtime Reflection System Camera
   m_TagString: Untagged
@@ -46,9 +47,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyboxShader: {fileID: 4800000, guid: f7d9b0046be29e841a13ecfc7d85d869, type: 3}
+  _skyboxMaterial: {fileID: 2100000, guid: 4cd3ce06234c692468e8640b6b5ecd8e, type: 2}
   reflectionCamera: {fileID: 218857820870413775}
   resolutionScaleOverride: 0
   resolutionScale: 1
+--- !u!114 &3805463516428467826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4520693311591854286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0e635b9efd3d2b4e863eb02d1e7cb72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SystemEnabled: 1
 --- !u!1001 &7485392719950907051
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -20,11 +20,6 @@
     "defineConstraints": [],
     "versionDefines": [
         {
-            "name": "com.unity.render-pipelines.core",
-            "expression": "1.0.0",
-            "define": "PIPELINE_IMPLEMENTS_DRH"
-        },
-        {
             "name": "com.unity.render-pipelines.universal",
             "expression": "14.0.0",
             "define": "URP_14"

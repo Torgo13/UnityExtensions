@@ -30,7 +30,7 @@ namespace UnityExtensions.Packages.Tests
         public void IsEnabled_DefaultSystemState_ReturnsTrue()
         {
             // Verify default state of SystemEnabled
-            Assert.IsTrue(DynamicResolution.IsEnabled());
+            Assert.IsTrue(_dynamicResolution.IsEnabled());
         }
 
         /// <summary>
@@ -39,11 +39,11 @@ namespace UnityExtensions.Packages.Tests
         [Test]
         public void Enable_EnablesDynamicResolutionSystem()
         {
-            DynamicResolution.Disable();
-            Assert.IsFalse(DynamicResolution.IsEnabled());
+            _dynamicResolution.Disable();
+            Assert.IsFalse(_dynamicResolution.IsEnabled());
 
-            DynamicResolution.Enable();
-            Assert.IsTrue(DynamicResolution.IsEnabled());
+            _dynamicResolution.Enable();
+            Assert.IsTrue(_dynamicResolution.IsEnabled());
         }
 
         /// <summary>
@@ -52,11 +52,11 @@ namespace UnityExtensions.Packages.Tests
         [Test]
         public void Disable_DisablesDynamicResolutionSystemAndResetsScale()
         {
-            DynamicResolution.Enable();
-            Assert.IsTrue(DynamicResolution.IsEnabled());
+            _dynamicResolution.Enable();
+            Assert.IsTrue(_dynamicResolution.IsEnabled());
 
-            DynamicResolution.Disable();
-            Assert.IsFalse(DynamicResolution.IsEnabled());
+            _dynamicResolution.Disable();
+            Assert.IsFalse(_dynamicResolution.IsEnabled());
 
             float updatedScaleFactor = (float)_dynamicResolution.GetType()
                 .GetField("CurrentScaleFactor",
@@ -72,9 +72,9 @@ namespace UnityExtensions.Packages.Tests
         public void SetTargetFramerate_UpdatesDesiredFrameRateAndFrameTime()
         {
             double newFrameRate = 75.0;
-            DynamicResolution.SetTargetFramerate(newFrameRate);
+            _dynamicResolution.SetTargetFramerate(newFrameRate);
 
-            Assert.AreEqual(newFrameRate, DynamicResolution.GetTargetFramerate());
+            Assert.AreEqual(newFrameRate, _dynamicResolution.GetTargetFramerate());
         }
 
         /*
