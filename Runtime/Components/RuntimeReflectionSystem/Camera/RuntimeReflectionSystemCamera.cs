@@ -11,12 +11,12 @@ namespace UnityExtensions
     public class RuntimeReflectionSystemCamera : MonoBehaviour
     {
 #if BLEND_SHADER
-        static readonly int TexA = Shader.PropertyToID("_TexA");
-        static readonly int TexB = Shader.PropertyToID("_TexB");
-        static readonly int Blend = Shader.PropertyToID("_Blend");
+        readonly int TexA = Shader.PropertyToID("_TexA");
+        readonly int TexB = Shader.PropertyToID("_TexB");
+        readonly int Blend = Shader.PropertyToID("_Blend");
 #endif // BLEND_SHADER
         
-        static readonly int MipLevel = Shader.PropertyToID("_MipLevel");
+        readonly int MipLevel = Shader.PropertyToID("_MipLevel");
 
         [SerializeField] Shader skyboxShader;
         public Material _skyboxMaterial;
@@ -57,13 +57,11 @@ namespace UnityExtensions
         [Range(0.25f, 1.0f)]
         [SerializeField] float resolutionScale = 1.0f;
 
-        /*
-        /// <summary>Dynamic resolution on Vulkan only supports increments of 0.05 between 0.25 and 1.0</summary>
-        float resolutionScale => integerScale / 20f;
+        /// <summary>When true, one cubemap face is updated per frame. Otherwise, all six are updated each frame.</summary>
+        public bool timeSlice = true;
 
-        [Range(5, 20)]
-        [SerializeField] int integerScale = 20;
-        */
+        /// <summary>Increase the mip level of the skybox cubemap by one to filter out high frequency noise.</summary>
+        public bool noiseReduction = true;
 
         /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
         int _index = -1;
@@ -154,13 +152,27 @@ namespace UnityExtensions
         {
             if (_readbackRequest.done && !_readbackRequest.hasError)
                 GPUReadbackRequest();
-            
+
+
+            float scaleFactor = resolutionScaleOverride
+                ? resolutionScale
+                : ScalableBufferManager.widthScaleFactor;
+
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
-            
-            _skyboxMaterial.SetFloat(MipLevel, 1f / ScalableBufferManager.widthScaleFactor);
 
-            TickRealtimeProbes();
+            _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
+
+
+            if (!timeSlice)
+            {
+                UpdateReflectionCameraPosition();
+                _ = reflectionCamera.RenderToCubemap(_blendedTexture);
+                UpdateAmbient();
+                return;
+            }
+
+            _ = TickRealtimeProbes();
         }
 
         void OnDestroy()
@@ -298,6 +310,34 @@ namespace UnityExtensions
             return (_index + ProbeCount - 1) % ProbeCount;
         }
 
+        /// <summary>
+        /// Calculate the mipmap level to sample the skybox cubemap.
+        /// </summary>
+        /// <remarks>
+        /// This function approximates the following formula,
+        /// but since the mip level must be an integer a range check is used instead.
+        /// <code>
+        /// mipLevel = 1 - 1 / System.Math.Log(2, scaleFactor);
+        /// </code>
+        /// A higher mip level is used when noiseReduction is true
+        /// to ensure that high frequency noise is blurred together.
+        /// </remarks>
+        /// <returns>The mip level, which will be rounded to the nearest integer in the shader.</returns>
+        int GetMipLevel(float scaleFactor)
+        {
+            int mipLevel = 2;
+
+            if (scaleFactor > 0.7f)
+                mipLevel = 1;
+            else if (scaleFactor < 0.32f)
+                mipLevel = 3;
+
+            if (noiseReduction)
+                mipLevel = System.Math.Clamp(mipLevel + 1, 2, 3);
+
+            return mipLevel;
+        }
+
         #region Ambient
         
 #if BLEND_SHADER
@@ -308,8 +348,10 @@ namespace UnityExtensions
         /// </summary>
         void UpdateAmbient()
         {
-            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture, mipIndex: _blendedTexture.mipmapCount - 1,
-                x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6, GraphicsFormat.R8G8B8A8_UNorm);
+            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture, 
+                mipIndex: _blendedTexture.mipmapCount - 1,
+                x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
+                GraphicsFormat.R8G8B8A8_UNorm);
         }
 #endif // BLEND_SHADER
 
