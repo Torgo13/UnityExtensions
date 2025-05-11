@@ -524,7 +524,6 @@ namespace UnityExtensions
             return Math.Abs(angleSum - TwoPi) < radiansCompareThreshold;
         }
 
-
         /// <summary>
         /// Returns the point on a plane closest to a specified point.
         /// </summary>
@@ -756,7 +755,8 @@ namespace UnityExtensions
             }
 
             // compute & store the direction of every edge in the hull
-            var hullEdgeDirections = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
+            var hullEdgeDirections = new NativeArray<Vector3>(vertexCount, Allocator.Temp,
+                NativeArrayOptions.UninitializedMemory);
             var lastVertexIndex = vertexCount - 1;
             for (var i = 0; i < lastVertexIndex; i++)
             {

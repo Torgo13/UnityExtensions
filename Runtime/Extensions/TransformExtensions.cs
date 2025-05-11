@@ -225,13 +225,12 @@ namespace UnityExtensions
                 }
 
                 childEnumerator.Clear();
-                FindAllActiveDescendants(child, childEnumerator);
+                activeChildCount += FindAllActiveDescendants(child, childEnumerator);
                 foreach (var descendant in childEnumerator)
                 {
                     if (descendant.gameObject.activeInHierarchy)
                     {
                         activeDescendants.Add(descendant);
-                        ++activeChildCount;
                     }
                 }
             }
@@ -241,22 +240,20 @@ namespace UnityExtensions
         }
         #endregion // Unity.FilmInternalUtilities
         
-        public static int GetChildCount(this Transform t)
+        public static int GetChildCount(this Transform t, bool onlyActive = false)
         {
-            using (ListPool<Transform>.Get(out var children))
-            {
-                t.FindAllDescendants(children);
-                return children.Count;
-            }
-        }
+            var children = ListPool<Transform>.Get();
 
-        public static int GetActiveChildCount(this Transform t)
-        {
-            using (ListPool<Transform>.Get(out var children))
-            {
-                t.FindAllActiveDescendants(children);
-                return children.Count;
-            }
+            int childrenCount;
+
+            if (onlyActive)
+                childrenCount = t.FindAllActiveDescendants(children);
+            else
+                childrenCount = t.FindAllDescendants(children);
+
+            ListPool<Transform>.Release(children);
+
+            return childrenCount;
         }
         
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Exporter/Utils.cs

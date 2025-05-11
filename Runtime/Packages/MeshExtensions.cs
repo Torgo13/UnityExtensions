@@ -28,31 +28,31 @@ namespace UnityExtensions.Packages
             // http://answers.unity3d.com/questions/7789/calculating-tangents-vector4.html
 
             // speed up math by copying the mesh arrays
-            using var _0 = ListPool<int>.Get(out var triangles);
+            var triangles = ListPool<int>.Get();
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
                 mesh.GetTriangles(triangles, i); // TODO Check if this appends to the List or clears it
             }
 
-            using var _1 = ListPool<Vector3>.Get(out var vertices);
+            var vertices = ListPool<Vector3>.Get();
             mesh.GetVertices(vertices);
 
-            using var _2 = ListPool<Vector2>.Get(out var uv);
+            var uv = ListPool<Vector2>.Get();
             for (int i = 0; i < 8; i++)
             {
                 mesh.GetUVs(i, uv);
             }
 
-            using var _3 = ListPool<Vector3>.Get(out var normals);
+            var normals = ListPool<Vector3>.Get();
             mesh.GetNormals(normals);
 
             //variable definitions
             int triangleCount = triangles.Count;
             int vertexCount = vertices.Count;
 
-            var tan1 = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
-            var tan2 = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
-            var tangents = new NativeArray<Vector4>(vertexCount, Allocator.Temp);
+            var tan1 = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var tan2 = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var tangents = new NativeArray<Vector4>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
             for (int a = 0; a < triangleCount; a += 3)
             {
@@ -94,6 +94,10 @@ namespace UnityExtensions.Packages
                 tan2[i3] += tdir;
             }
 
+            ListPool<int>.Release(triangles);
+            ListPool<Vector3>.Release(vertices);
+            ListPool<Vector2>.Release(uv);
+
             for (int a = 0; a < vertexCount; ++a)
             {
                 Vector3 n = normals[a];
@@ -107,6 +111,8 @@ namespace UnityExtensions.Packages
                     (dot(cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f
                 );
             }
+
+            ListPool<Vector3>.Release(normals);
 
             mesh.SetTangents(tangents);
         }
@@ -278,21 +284,21 @@ namespace UnityExtensions.Packages
             if (mesh == null)
                 throw new ArgumentNullException(nameof(mesh));
 
-            using var _0 = StringBuilderPool.Get(out var sb);
+            var sb = StringBuilderPool.Get();
 
-            using var _1 = ListPool<Vector3>.Get(out var positions);
+            var positions = ListPool<Vector3>.Get();
             mesh.GetVertices(positions);
-            using var _2 = ListPool<Vector3>.Get(out var normals);
+            var normals = ListPool<Vector3>.Get();
             mesh.GetNormals(normals);
-            using var _3 = ListPool<Color>.Get(out var colors);
+            var colors = ListPool<Color>.Get();
             mesh.GetColors(colors);
-            using var _4 = ListPool<Vector4>.Get(out var tangents);
+            var tangents = ListPool<Vector4>.Get();
             mesh.GetTangents(tangents);
-            using var _5 = ListPool<Vector4>.Get(out var uv0);
-            using var _6 = ListPool<Vector2>.Get(out var uv2);
+            var uv0 = ListPool<Vector4>.Get();
+            var uv2 = ListPool<Vector2>.Get();
             mesh.GetUVs(1, uv2);
-            using var _7 = ListPool<Vector4>.Get(out var uv3);
-            using var _8 = ListPool<Vector4>.Get(out var uv4);
+            var uv3 = ListPool<Vector4>.Get();
+            var uv4 = ListPool<Vector4>.Get();
 
             mesh.GetUVs(0, uv0);
             mesh.GetUVs(2, uv3);
@@ -388,6 +394,16 @@ namespace UnityExtensions.Packages
                 }
             }
 
+            StringBuilderPool.Release(sb);
+            ListPool<Vector3>.Release(positions);
+            ListPool<Vector3>.Release(normals);
+            ListPool<Color>.Release(colors);
+            ListPool<Vector4>.Release(tangents);
+            ListPool<Vector4>.Release(uv0);
+            ListPool<Vector2>.Release(uv2);
+            ListPool<Vector4>.Release(uv3);
+            ListPool<Vector4>.Release(uv4);
+
             return sb.ToString();
         }
 
@@ -457,9 +473,9 @@ namespace UnityExtensions.Packages
             Vector2 billboard2 = new Vector2(1f, -1f);
             Vector2 billboard3 = new Vector2(1f, 1f);
 
-            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
-            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
-            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp);
+            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < pointCount; i++)
             {
@@ -497,9 +513,9 @@ namespace UnityExtensions.Packages
             Vector2 billboard2 = new Vector2(1f, -1f);
             Vector2 billboard3 = new Vector2(1f, 1f);
 
-            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp);
-            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp);
-            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp);
+            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < pointCount; i++)
             {
@@ -536,7 +552,7 @@ namespace UnityExtensions.Packages
             bool trianglesNeeded, out NativeArray<float3> vertices, out NativeArray<int3> triangles,
             Allocator allocator = Allocator.Temp)
         {
-            vertices = new NativeArray<float3>(meshData.vertexCount, allocator);
+            vertices = new NativeArray<float3>(meshData.vertexCount, allocator, NativeArrayOptions.UninitializedMemory);
             var verticesV3 = vertices.Reinterpret<Vector3>();
             meshData.GetVertices(verticesV3);
 
@@ -552,7 +568,7 @@ namespace UnityExtensions.Packages
                     var indices16 = meshData.GetIndexData<ushort>();
                     var numTriangles = indices16.Length / 3;
 
-                    triangles = new NativeArray<int3>(numTriangles, allocator);
+                    triangles = new NativeArray<int3>(numTriangles, allocator, NativeArrayOptions.UninitializedMemory);
 
                     int trianglesIndex = 0;
                     for (var sm = 0; sm < meshData.subMeshCount; ++sm)
@@ -572,7 +588,7 @@ namespace UnityExtensions.Packages
                     var indices32 = meshData.GetIndexData<uint>();
                     numTriangles = indices32.Length / 3;
 
-                    triangles = new NativeArray<int3>(numTriangles, allocator);
+                    triangles = new NativeArray<int3>(numTriangles, allocator, NativeArrayOptions.UninitializedMemory);
 
                     trianglesIndex = 0;
                     for (var sm = 0; sm < meshData.subMeshCount; ++sm)

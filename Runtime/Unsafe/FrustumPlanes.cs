@@ -131,11 +131,8 @@ namespace UnityExtensions.Unsafe
                 float3 normal = cullingPlanes[i].xyz;
                 float dist = dot(normal, m) + cullingPlanes[i].w;
                 float radius = dot(extent, abs(normal));
-                if (dist + radius <= 0)
-                    IntersectResultOut.Value = true;
-
-                if (dist > radius)
-                    inCount.Value++;
+                IntersectResultOut.Value |= dist + radius <= 0;
+                inCount.Value += (int)ceil(saturate(dist - radius));
             }
         }
 

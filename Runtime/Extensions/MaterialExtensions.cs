@@ -14,10 +14,11 @@ namespace UnityExtensions
         /// <param name="material">The material to add.</param>
         public static void AddMaterial(this Renderer renderer, Material material)
         {
-            using var _0 = ListPool<Material>.Get(out var materials);
+            var materials = ListPool<Material>.Get();
             renderer.GetSharedMaterials(materials);
             materials.Add(material);
             renderer.SetSharedMaterials(materials);
+            ListPool<Material>.Release(materials);
         }
         #endregion // Unity.XR.CoreUtils
     }

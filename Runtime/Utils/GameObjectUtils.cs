@@ -298,8 +298,8 @@ namespace UnityExtensions
         public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
             where T : Component
         {
-            using var _0 = ListPool<GameObject>.Get(out var gameObjects);
-            using var _1 = ListPool<T>.Get(out var children);
+            var gameObjects = ListPool<GameObject>.Get();
+            var children = ListPool<T>.Get();
             scene.GetRootGameObjects(gameObjects);
             foreach (var gameObject in gameObjects)
             {
@@ -310,6 +310,9 @@ namespace UnityExtensions
                 gameObject.GetComponentsInChildren(includeInactive, children);
                 components.AddRange(children);
             }
+
+            ListPool<GameObject>.Release(gameObjects);
+            ListPool<T>.Release(children);
         }
 
         /// <summary>

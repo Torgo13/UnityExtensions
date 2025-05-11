@@ -102,17 +102,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="enabled">The value to assign to runInEditMode.</param>
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void SetRunInEditModeRecursively(this GameObject gameObject, bool enabled)
         {
 #if UNITY_EDITOR
             if (Application.isPlaying)
                 return;
 
-            using var _0 = ListPool<MonoBehaviour>.Get(out var monoBehaviours);
+            var monoBehaviours = ListPool<MonoBehaviour>.Get();
             gameObject.GetComponents(monoBehaviours);
             foreach (var mb in monoBehaviours)
             {
-                if (mb)
+                if (mb != null)
                 {
                     if (enabled)
                         mb.StartRunInEditMode();
@@ -125,6 +126,8 @@ namespace UnityExtensions
             {
                 child.gameObject.SetRunInEditModeRecursively(enabled);
             }
+
+            ListPool<MonoBehaviour>.Release(monoBehaviours);
 #endif
         }
         #endregion // Unity.XR.CoreUtils
@@ -158,7 +161,7 @@ namespace UnityExtensions
         public static GameObject GetNamedChild(this GameObject go, string name, out bool found)
         {
             found = false;
-            using var _0 = ListPool<Transform>.Get(out var transforms);
+            var transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(transforms);
             GameObject foundObject = null;
             for (var i = 0; i < transforms.Count; i++)
@@ -171,6 +174,7 @@ namespace UnityExtensions
                 }
             }
 
+            ListPool<Transform>.Release(transforms);
             return foundObject;
         }
     }

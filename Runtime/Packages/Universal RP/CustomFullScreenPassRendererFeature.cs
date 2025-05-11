@@ -107,7 +107,8 @@ namespace UnityExtensions.Packages
             internal void ReAllocate(RenderTextureDescriptor desc)
             {
                 desc.msaaSamples = 1;
-                desc.depthBufferBits = (int)DepthBits.None;
+                const int depthBufferBits = (int)DepthBits.None;
+                desc.depthBufferBits = depthBufferBits;
                 RenderingUtils.ReAllocateIfNeeded(ref m_CopiedColor, desc, name: "_FullscreenPassColorCopy");
             }
 

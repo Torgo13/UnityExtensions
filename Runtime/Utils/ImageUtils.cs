@@ -829,7 +829,7 @@ namespace UnityExtensions
 
         public static float DeltaECIE(float[] lab1, float[] lab2)
         {
-            var diffs = new NativeArray<float>(3, Allocator.Temp);
+            var diffs = new NativeArray<float>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             diffs[0] = lab1[0] - lab2[0];
             diffs[1] = lab1[0] - lab2[0];
             diffs[2] = lab1[0] - lab2[0];
@@ -853,6 +853,7 @@ namespace UnityExtensions
                 var diff = lab1[0] - lab2[0];
                 sum += diff * diff;
             }
+
             var xDE = Mathf.Sqrt(sum);
 
             var xDH = (xDE * xDE) - (xDL * xDL) - (xDC * xDC);
@@ -914,6 +915,7 @@ namespace UnityExtensions
             {
                 histogram.AddPixel(pixel);
             }
+
             histogram.Normalize(pixels.Length);
         }
 
@@ -951,6 +953,7 @@ namespace UnityExtensions
                 ++colorMap[pixelValue];
                 rgbClusters.AddColor(pixel);
             }
+
             histogram.Normalize(nbPixels);
 
             // Get the best colors
@@ -1199,7 +1202,6 @@ namespace UnityExtensions
                 }
             }
 
-
             // Max distance is 255, so divide by 255 to get [0, 1]
             return distances.Sum() / (histogramA.channels * (histogramA.bins - 1));
         }
@@ -1273,6 +1275,7 @@ namespace UnityExtensions
                                 diffX = i - centroids[k].X;
                                 diffX = Math.Pow(diffX, momentOrder.P);
                             }
+
                             if (momentOrder.Q > 0)
                             {
                                 diffY = j - centroids[k].Y;
@@ -1427,7 +1430,7 @@ namespace UnityExtensions
             var n02 = CentralMomentToScaleInvariant(u02, areas, moment02);
             var n11 = CentralMomentToScaleInvariant(u11, areas, moment11);
 
-            var diff = new NativeArray<double>(n20.Length, Allocator.Temp);
+            var diff = new NativeArray<double>(n20.Length, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             for (var i = 0; i < n20.Length; ++i)
             {
                 diff[i] = n20[i] - n02[i];

@@ -141,9 +141,11 @@ namespace UnityExtensions
         #region UnityEngine.ProBuilder
         public static int GetMaterialCount(Renderer renderer)
         {
-            using var _0 = ListPool<Material>.Get(out var materials);
+            var materials = ListPool<Material>.Get();
             renderer.GetSharedMaterials(materials);
-            return materials.Count;
+            var materialsCount = materials.Count;
+            ListPool<Material>.Release(materials);
+            return materialsCount;
         }
 
         public static Material GetSharedMaterial(Renderer renderer, int index)

@@ -72,7 +72,7 @@ namespace UnityExtensions.Unsafe
         /// <remarks>
         /// Set the Capacity before calling this function.
         /// </remarks>
-        public static unsafe void ResetListContents<T>(List<T> list, NativeList<T> nativeList) where T : unmanaged
+        public static void ResetListContents<T>(List<T> list, NativeList<T> nativeList) where T : unmanaged
         {
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }

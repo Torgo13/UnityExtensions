@@ -70,6 +70,7 @@ namespace UnityExtensions
 
                 bounds = goBounds;
             }
+
             return bounds ?? new Bounds();
         }
         
@@ -87,6 +88,7 @@ namespace UnityExtensions
 
                 bounds = goBounds;
             }
+
             return bounds ?? new Bounds();
         }
 
@@ -107,7 +109,7 @@ namespace UnityExtensions
             // As a fallback when there are no bounds, collect all transform positions
             if (b.size == Vector3.zero)
             {
-                using var _0 = ListPool<Transform>.Get(out var transforms);
+                var transforms = ListPool<Transform>.Get();
                 transform.GetComponentsInChildren(transforms);
 
                 if (transforms.Count > 0)
@@ -117,6 +119,8 @@ namespace UnityExtensions
                 {
                     b.Encapsulate(t.position);
                 }
+
+                ListPool<Transform>.Release(transforms);
             }
 
             return b;
@@ -220,7 +224,7 @@ namespace UnityExtensions
             Vector3 max = bounds.max;
             Matrix4x4 matrix = transform.worldToLocalMatrix;
 
-            var points = new NativeArray<Vector3>(8, Allocator.Temp);
+            var points = new NativeArray<Vector3>(8, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             points[0] = new Vector3(min.x, min.y, min.z);
             points[1] = new Vector3(max.x, min.y, min.z);
             points[2] = new Vector3(min.x, min.y, max.z);

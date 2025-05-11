@@ -15,7 +15,7 @@ namespace UnityExtensions
         public string Format(string name)
         {
             return Regex.Replace(name, InvalidRegStr, "_",
-                RegexOptions.None, TimeSpan.FromSeconds(0.1));
+                RegexOptions.Compiled, TimeSpan.FromSeconds(0.1));
         }
         #endregion // Unity.LiveCapture
     }

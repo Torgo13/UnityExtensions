@@ -21,7 +21,8 @@ namespace UnityExtensions
         public static void GenerateMeshFromSprite(this Sprite sprite, ref Mesh mesh)
         {
             Vector2[] spriteVertices = sprite.vertices;
-            var vertices = new NativeArray<Vector3>(spriteVertices.Length, Allocator.Temp);
+            var vertices = new NativeArray<Vector3>(spriteVertices.Length, Allocator.Temp,
+                NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < spriteVertices.Length; i++)
             {

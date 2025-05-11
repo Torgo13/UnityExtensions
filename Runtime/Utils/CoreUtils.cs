@@ -98,12 +98,13 @@ namespace UnityExtensions
                 if (_magentaCubeTextureArray == null)
                 {
                     _magentaCubeTextureArray = new CubemapArray(1, 1, GraphicsFormat.R32G32B32A32_SFloat, TextureCreationFlags.None);
-                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     for (int i = 0; i < 6; ++i)
                     {
                         colors[0] = Color.magenta;
                         _magentaCubeTextureArray.SetPixelData(colors, mipLevel: 0, (CubemapFace)i, element: 0);
                     }
+
                     _magentaCubeTextureArray.Apply();
                 }
 
@@ -177,7 +178,7 @@ namespace UnityExtensions
             {
                 if (_blackVolumeTexture == null)
                 {
-                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     colors[0] = Color.black;
                     _blackVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
                     _blackVolumeTexture.SetPixelData(colors, mipLevel: 0);
@@ -199,7 +200,7 @@ namespace UnityExtensions
             {
                 if (_whiteVolumeTexture == null)
                 {
-                    var colors = new NativeArray<Color32>(1, Allocator.Temp);
+                    var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     colors[0] = Color.white;
                     _whiteVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
                     _whiteVolumeTexture.SetPixelData(colors, mipLevel: 0);
@@ -554,7 +555,7 @@ namespace UnityExtensions
             Mesh mesh = new Mesh();
             mesh.indexFormat = IndexFormat.UInt16;
 
-            var vertices = new NativeArray<Vector3>(8, Allocator.Temp);
+            var vertices = new NativeArray<Vector3>(8, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             vertices[0] = new Vector3(min.x, min.y, min.z);
             vertices[1] = new Vector3(max.x, min.y, min.z);
             vertices[2] = new Vector3(max.x, max.y, min.z);
@@ -565,7 +566,7 @@ namespace UnityExtensions
             vertices[7] = new Vector3(min.x, max.y, max.z);
             mesh.SetVertices(vertices);
 
-            var triangles = new NativeArray<ushort>(36, Allocator.Temp);
+            var triangles = new NativeArray<ushort>(36, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             triangles[0] = 0; triangles[1] = 2; triangles[2] = 1;
             triangles[3] = 0; triangles[4] = 3; triangles[5] = 2;
             triangles[6] = 1; triangles[7] = 6; triangles[8] = 5;
@@ -683,6 +684,7 @@ namespace UnityExtensions
         public static bool IsSceneLightingDisabled(Camera camera)
         {
             bool disabled = false;
+
 #if UNITY_EDITOR
             if (camera.cameraType == CameraType.SceneView)
             {
@@ -709,6 +711,7 @@ namespace UnityExtensions
         public static bool IsLightOverlapDebugEnabled(Camera camera)
         {
             bool enabled = false;
+
 #if UNITY_EDITOR
             if (camera.cameraType == CameraType.SceneView)
             {

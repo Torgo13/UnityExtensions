@@ -132,12 +132,16 @@ namespace UnityExtensions.Packages
                         && point.y >= minimumRadius && point.y <= height + minimumRadius;
                 }
 
+                var requiredCapacity = croppedSamples.Length + superSampledPoints.Length;
+                if (croppedSamples.Capacity < requiredCapacity)
+                    croppedSamples.Capacity = requiredCapacity;
+
                 // This list-building code is done separately from the filtering loop
                 // because it cannot be vectorized by burst.
                 for (var i = 0; i < superSampledPoints.Length; i++)
                 {
                     if (results[i])
-                        croppedSamples.Add(superSampledPoints[i]);
+                        croppedSamples.AddNoResize(superSampledPoints[i]);
                 }
 
                 // Remove the positional offset from the filtered-but-still-super-sampled points
@@ -186,7 +190,7 @@ namespace UnityExtensions.Packages
             var halfSamplingArc = samplingArc / 2;
 
             // Initialize a hash array that maps a sample's grid position to it's index
-            var gridToSampleIndex = new NativeArray<int>(gridSize, Allocator.Temp);
+            var gridToSampleIndex = new NativeArray<int>(gridSize, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             for (var i = 0; i < gridSize; i++)
                 gridToSampleIndex[i] = -1;
 

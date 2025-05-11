@@ -1,3 +1,5 @@
+using System.Buffers;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -68,6 +70,26 @@ namespace UnityExtensions
         public static double HorizontalToVerticalFOVRad(double horizontalFOV, double aspect)
         {
             return 2.0 * System.Math.Atan(System.Math.Tan(horizontalFOV * 0.5) / aspect);
+        }
+
+        public static bool GetAllCameras(List<Camera> cameras)
+        {
+            int allCamerasCount = Camera.allCamerasCount;
+            if (allCamerasCount == 0)
+                return false;
+
+            Camera[] allCameras = ArrayPool<Camera>.Shared.Rent(allCamerasCount);
+            _ = Camera.GetAllCameras(allCameras);
+
+            cameras.EnsureCapacity(allCamerasCount);
+            for (int i = 0; i < allCamerasCount; i++)
+            {
+                cameras.Add(allCameras[i]);
+            }
+
+            ArrayPool<Camera>.Shared.Return(allCameras);
+
+            return true;
         }
     }
 }

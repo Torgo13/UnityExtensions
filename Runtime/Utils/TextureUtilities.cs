@@ -139,7 +139,8 @@ namespace UnityExtensions
                                             * source.width * source.height * source.volumeDepth;
 
                     // Staging memory for the readback.
-                    var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.Persistent);
+                    var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.Persistent,
+                        NativeArrayOptions.UninitializedMemory);
 
                     // Async-readbacks do not work if the RT resource is not registered with the graphics API backend.
                     Assert.IsTrue(source.IsCreated());
