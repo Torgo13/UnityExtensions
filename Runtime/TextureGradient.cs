@@ -186,7 +186,8 @@ namespace UnityExtensions
 
             if (_texture == null)
             {
-                _texture = new Texture2D(textureSize, 1, GetTextureFormat(), TextureCreationFlags.None);
+                _texture = new Texture2D(textureSize, 1, GetTextureFormat(),
+                    TextureCreationFlags.DontInitializePixels);
                 _texture.name = "GradientTexture";
                 _texture.hideFlags = HideFlags.HideAndDontSave;
                 _texture.filterMode = FilterMode.Bilinear;

@@ -134,7 +134,8 @@ namespace UnityExtensions
         {
             if (_texture == null)
             {
-                _texture = new Texture2D(Precision, 1, GetTextureFormat(), TextureCreationFlags.None);
+                _texture = new Texture2D(Precision, 1, GetTextureFormat(),
+                    TextureCreationFlags.DontInitializePixels);
                 _texture.name = "CurveTexture";
                 _texture.hideFlags = HideFlags.HideAndDontSave;
                 _texture.filterMode = FilterMode.Bilinear;

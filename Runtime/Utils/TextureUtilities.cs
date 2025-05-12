@@ -36,7 +36,7 @@ namespace UnityExtensions
             if (cube != null)
             {
                 t2D = new Texture2D(cube.width * 6, cube.height, GraphicsFormat.R16G16B16A16_SFloat,
-                    TextureCreationFlags.None);
+                    TextureCreationFlags.DontInitializePixels);
                 var cmd = new CommandBuffer { name = "CopyCubemapToTexture2D" };
                 for (int i = 0; i < 6; ++i)
                 {
@@ -53,7 +53,7 @@ namespace UnityExtensions
                 return;
             }
 
-            throw new ArgumentException();
+            throw new ArgumentException("Texture target is not a Texture2D, a RenderTexture or a Cubemap.");
         }
 
         // Write to disk via the Unity Asset Pipeline rather than File.WriteAllBytes.
@@ -108,7 +108,8 @@ namespace UnityExtensions
                             resolution, result, 0, 0, i * resolution, 0);
                     Graphics.ExecuteCommandBuffer(cmd);
 
-                    var t2D = new Texture2D(resolution * 6, resolution, format, TextureCreationFlags.None);
+                    var t2D = new Texture2D(resolution * 6, resolution, format,
+                        TextureCreationFlags.DontInitializePixels);
                     var a = RenderTexture.active;
                     RenderTexture.active = result;
                     t2D.ReadPixels(new Rect(0, 0, 6 * resolution, resolution), 0, 0, recalculateMipMaps: false);
@@ -121,7 +122,8 @@ namespace UnityExtensions
                 case TextureDimension.Tex2D:
                 {
                     var resolution = source.width;
-                    var result = new Texture2D(resolution, resolution, format, TextureCreationFlags.None);
+                    var result = new Texture2D(resolution, resolution, format,
+                        TextureCreationFlags.DontInitializePixels);
 
                     Graphics.SetRenderTarget(source, 0);
                     result.ReadPixels(new Rect(0, 0, resolution, resolution), 0, 0);
@@ -132,7 +134,8 @@ namespace UnityExtensions
                 }
                 case TextureDimension.Tex3D:
                 {
-                    var result = new Texture3D(source.width, source.height, source.volumeDepth, format, TextureCreationFlags.None);
+                    var result = new Texture3D(source.width, source.height, source.volumeDepth, format,
+                        TextureCreationFlags.DontInitializePixels);
 
                     // Determine the number of bytes elements that need to be read based on the texture format.
                     int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format)

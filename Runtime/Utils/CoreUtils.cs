@@ -57,7 +57,8 @@ namespace UnityExtensions
             {
                 if (_blackCubeTexture == null)
                 {
-                    _blackCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
+                    _blackCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB,
+                        TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _blackCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.black);
                     _blackCubeTexture.Apply();
@@ -77,7 +78,8 @@ namespace UnityExtensions
             {
                 if (_magentaCubeTexture == null)
                 {
-                    _magentaCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
+                    _magentaCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB,
+                        TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _magentaCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.magenta);
                     _magentaCubeTexture.Apply();
@@ -97,7 +99,8 @@ namespace UnityExtensions
             {
                 if (_magentaCubeTextureArray == null)
                 {
-                    _magentaCubeTextureArray = new CubemapArray(1, 1, GraphicsFormat.R32G32B32A32_SFloat, TextureCreationFlags.None);
+                    _magentaCubeTextureArray = new CubemapArray(1, 1, GraphicsFormat.R32G32B32A32_SFloat,
+                        TextureCreationFlags.DontInitializePixels);
                     var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     for (int i = 0; i < 6; ++i)
                     {
@@ -122,7 +125,8 @@ namespace UnityExtensions
             {
                 if (_whiteCubeTexture == null)
                 {
-                    _whiteCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
+                    _whiteCubeTexture = new Cubemap(1, GraphicsFormat.R8G8B8A8_SRGB,
+                        TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _whiteCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.white);
                     _whiteCubeTexture.Apply();
@@ -180,7 +184,8 @@ namespace UnityExtensions
                 {
                     var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     colors[0] = Color.black;
-                    _blackVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
+                    _blackVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB,
+                        TextureCreationFlags.DontInitializePixels);
                     _blackVolumeTexture.SetPixelData(colors, mipLevel: 0);
                     _blackVolumeTexture.Apply();
                 }
@@ -202,7 +207,8 @@ namespace UnityExtensions
                 {
                     var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
                     colors[0] = Color.white;
-                    _whiteVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB, TextureCreationFlags.None);
+                    _whiteVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB,
+                        TextureCreationFlags.DontInitializePixels);
                     _whiteVolumeTexture.SetPixelData(colors, mipLevel: 0);
                     _whiteVolumeTexture.Apply();
                 }
@@ -359,7 +365,9 @@ namespace UnityExtensions
         /// <returns>Linear color if the active color space is ColorSpace.Linear, the original input otherwise.</returns>
         public static Color ConvertSRGBToActiveColorSpace(Color color)
         {
-            return (QualitySettings.activeColorSpace == ColorSpace.Linear) ? color.linear : color;
+            bool linear = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumEquals(
+                QualitySettings.activeColorSpace, ColorSpace.Linear);
+            return linear ? color.linear : color;
         }
 
         /// <summary>
@@ -369,7 +377,9 @@ namespace UnityExtensions
         /// <returns>sRGB color if the active color space is ColorSpace.Gamma, the original input otherwise.</returns>
         public static Color ConvertLinearToActiveColorSpace(Color color)
         {
-            return (QualitySettings.activeColorSpace == ColorSpace.Linear) ? color : color.gamma;
+            bool linear = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumEquals(
+                QualitySettings.activeColorSpace, ColorSpace.Linear);
+            return linear ? color : color.gamma;
         }
 
         /// <summary>
@@ -420,9 +430,11 @@ namespace UnityExtensions
         /// <param name="mask">Bitfield to test the flag against.</param>
         /// <param name="flag">Flag to be tested against the provided mask.</param>
         /// <returns>True if the flag is present in the mask.</returns>
-        public static bool HasFlag<T>(T mask, T flag) where T : IConvertible
+        public static bool HasFlag<T>(T mask, T flag) where T : struct, IConvertible
         {
-            return (mask.ToUInt32(null) & flag.ToUInt32(null)) != 0;
+            var maskInt = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumToInt(mask);
+            var flagInt = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumToInt(flag);
+            return (maskInt & flagInt) != 0;
         }
 
         /// <summary>

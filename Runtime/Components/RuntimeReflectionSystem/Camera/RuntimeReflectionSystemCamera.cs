@@ -123,6 +123,7 @@ namespace UnityExtensions
             for (int i = 0; i < ProbeCount; i++)
             {
                 _renderTextures[i] = new RenderTexture(desc);
+                _renderTextures[i].Create();
                 _renderTextures[i].hideFlags = HideFlags.HideAndDontSave;
             }
 
@@ -137,6 +138,7 @@ namespace UnityExtensions
             };
             
             _blendedTexture = new RenderTexture(desc);
+            _blendedTexture.Create();
             _blendedTexture.hideFlags = HideFlags.HideAndDontSave;
             
             // Take a full capture before applying it to the skybox
@@ -153,7 +155,6 @@ namespace UnityExtensions
             if (_readbackRequest.done && !_readbackRequest.hasError)
                 GPUReadbackRequest();
 
-
             float scaleFactor = resolutionScaleOverride
                 ? resolutionScale
                 : ScalableBufferManager.widthScaleFactor;
@@ -163,6 +164,8 @@ namespace UnityExtensions
 
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
+            if (!EnsureCreated())
+                return;
 
             if (!timeSlice)
             {
@@ -177,22 +180,28 @@ namespace UnityExtensions
 
         void OnDestroy()
         {
-            if (_createdMaterial && _skyboxMaterial != null)
-                DestroyImmediate(_skyboxMaterial);
+            if (_createdMaterial)
+                CoreUtils.Destroy(_skyboxMaterial);
 
             if (_renderTextures != null)
             {
                 for (int i = 0; i < _renderTextures.Length; i++)
                 {
                     if (_renderTextures[i] != null)
-                        DestroyImmediate(_renderTextures[i]);
+                    {
+                        _renderTextures[i].Release();
+                        CoreUtils.Destroy(_renderTextures[i]);
+                    }
                 }
             }
 
 #if BLEND_SHADER
 #else
             if (_blendedTexture != null)
-                DestroyImmediate(_blendedTexture);
+            {
+                _blendedTexture.Release();
+                CoreUtils.Destroy(_blendedTexture);
+            }
 #endif // BLEND_SHADER
         }
 
@@ -338,8 +347,26 @@ namespace UnityExtensions
             return mipLevel;
         }
 
+        bool EnsureCreated()
+        {
+            bool created = true;
+            foreach (var rt in _renderTextures)
+            {
+                if (!rt.IsCreated())
+                    created &= rt.Create();
+            }
+
+#if BLEND_SHADER
+#else
+            if (!_blendedTexture.IsCreated())
+                created &= _blendedTexture.Create();
+#endif // BLEND_SHADER
+
+            return created;
+        }
+
         #region Ambient
-        
+
 #if BLEND_SHADER
 #else
         /// <summary>

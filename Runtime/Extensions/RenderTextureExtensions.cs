@@ -66,7 +66,7 @@ namespace UnityExtensions
             }
             finally
             {
-                Object.DestroyImmediate(tempTex);
+                CoreUtils.Destroy(tempTex);
                 RenderTexture.active = prevRenderTexture;
             }
 

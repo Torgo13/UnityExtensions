@@ -74,7 +74,7 @@ namespace UnityExtensions
         void OnDestroy()
         {
             if (_skyboxMaterial != null)
-                DestroyImmediate(_skyboxMaterial);
+                CoreUtils.Destroy(_skyboxMaterial);
         }
         
         /// <summary>
