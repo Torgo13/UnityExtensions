@@ -64,7 +64,7 @@ namespace UnityExtensions.Unsafe
             var cameraToWorld = camera.cameraToWorldMatrix;
             var eyePos = cameraToWorld.MultiplyPoint(Vector3.zero);
             var viewDir = new float3(cameraToWorld.m02, cameraToWorld.m12, cameraToWorld.m22);
-            viewDir = -normalizesafe(viewDir);
+            viewDir = -math.normalizesafe(viewDir);
 
             // Near Plane
             sourcePlanes[4].SetNormalAndPosition(viewDir, eyePos);
@@ -117,22 +117,23 @@ namespace UnityExtensions.Unsafe
             return (inCount == cullingPlanes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
 
-        [BurstCompile]
+        [BurstCompile(FloatMode = FloatMode.Fast)]
         struct IntersectJob : IJobFor
         {
             [ReadOnly] public NativeArray<float4> cullingPlanes;
             [ReadOnly] public float3 m;
             [ReadOnly] public float3 extent;
             public NativeReference<int> inCount;
-            [WriteOnly] public NativeReference<bool> IntersectResultOut;
+            public NativeReference<bool> IntersectResultOut;
 
             public void Execute(int i)
             {
                 float3 normal = cullingPlanes[i].xyz;
-                float dist = dot(normal, m) + cullingPlanes[i].w;
-                float radius = dot(extent, abs(normal));
+                float dist = math.dot(normal, m) + cullingPlanes[i].w;
+                float radius = math.dot(extent, math.abs(normal));
                 IntersectResultOut.Value |= dist + radius <= 0;
-                inCount.Value += (int)ceil(saturate(dist - radius));
+                inCount.Value += (int)(math.ceil(math.saturate(dist - radius))
+                    * math.ceil(math.saturate(dist + radius)));
             }
         }
 
@@ -198,7 +199,7 @@ namespace UnityExtensions.Unsafe
         {
             int cullingPlaneCount = cullingPlanes.Length;
             int packetCount = (cullingPlaneCount + 3) >> 2;
-            var planes = new UnsafeList<PlanePacket4>(packetCount, allocator);
+            var planes = new UnsafeList<PlanePacket4>(packetCount, allocator, NativeArrayOptions.UninitializedMemory);
             planes.Resize(packetCount);
 
             InitializeSOAPlanePackets(planes.AsNativeArray(), cullingPlanes);
@@ -241,14 +242,14 @@ namespace UnityExtensions.Unsafe
             {
                 var p = cullingPlanePackets[i];
                 float4 distances = dot4(p.Xs, p.Ys, p.Zs, mx, my, mz) + p.Distances;
-                float4 radii = dot4(ex, ey, ez, abs(p.Xs), abs(p.Ys), abs(p.Zs));
+                float4 radii = dot4(ex, ey, ez, math.abs(p.Xs), math.abs(p.Ys), math.abs(p.Zs));
 
                 outCounts += (int4)(distances + radii < 0);
                 inCounts += (int4)(distances >= radii);
             }
 
-            int inCount = csum(inCounts);
-            int outCount = csum(outCounts);
+            int inCount = math.csum(inCounts);
+            int outCount = math.csum(outCounts);
 
             if (outCount != 0)
                 return IntersectResult.Out;
@@ -282,12 +283,12 @@ namespace UnityExtensions.Unsafe
             {
                 var p = cullingPlanePackets[i];
                 float4 distances = dot4(p.Xs, p.Ys, p.Zs, mx, my, mz) + p.Distances;
-                float4 radii = dot4(ex, ey, ez, abs(p.Xs), abs(p.Ys), abs(p.Zs));
+                float4 radii = dot4(ex, ey, ez, math.abs(p.Xs), math.abs(p.Ys), math.abs(p.Zs));
 
                 masks += (int4)(distances + radii <= 0);
             }
 
-            int outCount = csum(masks);
+            int outCount = math.csum(masks);
             return outCount > 0 ? IntersectResult.Out : IntersectResult.In;
         }
 
@@ -310,7 +311,7 @@ namespace UnityExtensions.Unsafe
 
             for (int i = 0; i < planes.Length; i++)
             {
-                var d = dot(planes[i].xyz, center) + planes[i].w;
+                var d = math.dot(planes[i].xyz, center) + planes[i].w;
                 if (d < -radius)
                 {
                     return IntersectResult.Out;

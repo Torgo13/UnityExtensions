@@ -67,4 +67,13 @@ namespace UnityExtensions.Unsafe
             bitField = (bitField & ~(1 << bitPosition)) | (value.ToByte() << bitPosition);
         }
     }
+
+    //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/develop/com.unity.netcode.gameobjects/Runtime/Serialization/ByteUtility.cs
+    #region Unity.Netcode
+    public static class ByteExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe byte ToByte(this bool b) => *(byte*)&b;
+    }
+    #endregion // Unity.Netcode
 }

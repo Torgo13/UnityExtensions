@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -51,40 +52,69 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // UnityEngine.Rendering.Universal
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
-        {
-            fixed (T* p = array)
-            {
-                nativeList.AddRange(p, array.Length);
-            }
-        }
-
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsNotNull(array);
+            Assert.IsTrue(count >= 0);
+            Assert.IsTrue(count <= array.Length);
+
             fixed (T* p = array)
             {
                 nativeList.AddRange(p, count);
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
+        {
+            Assert.IsNotNull(array);
+
+            nativeList.AddRange(array, array.Length);
+        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(ref this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
+            Assert.IsNotNull(list);
+
             nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void EnsureCapacity<T>(ref this NativeList<T> nativeList, int capacity) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+
+            if (nativeList.Capacity < capacity)
+                nativeList.Capacity = capacity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void EnsureRoom<T>(ref this NativeList<T> nativeList, int room) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+
+            var capacity = nativeList.Length + room;
+            if (nativeList.Capacity < capacity)
+                nativeList.Capacity = capacity;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
+            Assert.IsTrue(nativeList.IsCreated);
+
             return new Span<T>(nativeList.GetUnsafePtr(), nativeList.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
+            Assert.IsTrue(nativeList.IsCreated);
+
             return new ReadOnlySpan<T>(nativeList.GetUnsafeReadOnlyPtr(), nativeList.Length);
         }
     }

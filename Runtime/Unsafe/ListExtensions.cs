@@ -18,7 +18,8 @@ namespace UnityExtensions.Unsafe
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>A copy of this list.</returns>
-        public static unsafe NativeList<T> ToNativeList<T>(this List<T> list, AllocatorManager.AllocatorHandle allocator) where T : unmanaged
+        public static unsafe NativeList<T> ToNativeList<T>(this List<T> list,
+            AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             var container = new NativeList<T>(list.Count, allocator);
             fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
@@ -36,7 +37,8 @@ namespace UnityExtensions.Unsafe
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>An array that is a copy of this list.</returns>
-        public static unsafe NativeArray<T> ToNativeArray<T>(this List<T> list, AllocatorManager.AllocatorHandle allocator) where T : unmanaged
+        public static unsafe NativeArray<T> ToNativeArray<T>(this List<T> list,
+            AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             var container = CollectionHelper.CreateNativeArray<T>(list.Count, allocator, NativeArrayOptions.UninitializedMemory);
             fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
@@ -69,10 +71,8 @@ namespace UnityExtensions.Unsafe
             return list.AsSpan();
         }
 
-        /// <remarks>
-        /// Set the Capacity before calling this function.
-        /// </remarks>
-        public static void ResetListContents<T>(List<T> list, NativeList<T> nativeList) where T : unmanaged
+        public static void ResetListContents<T>(this List<T> list, NativeList<T> nativeList)
+            where T : unmanaged
         {
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }

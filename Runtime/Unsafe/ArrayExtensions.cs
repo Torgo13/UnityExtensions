@@ -23,38 +23,6 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 
-        //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
-        #region UnityEngine.Rendering
-        /// <summary>
-        /// Fills an array with the same value.
-        /// </summary>
-        /// <typeparam name="T">The type of the array</typeparam>
-        /// <param name="array">Target array to fill</param>
-        /// <param name="value">Value to fill</param>
-        /// <param name="startIndex">Start index to fill</param>
-        /// <param name="length">The number of entries to write, or -1 to fill until the end of the array</param>
-        public static void FillArray<T>(this ref NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
-            where T : unmanaged
-        {
-            if (!array.IsCreated)
-                throw new InvalidOperationException(nameof(array));
-            if (startIndex < 0)
-                throw new IndexOutOfRangeException(nameof(startIndex));
-            if (startIndex + length >= array.Length)
-                throw new IndexOutOfRangeException(nameof(length));
-
-            unsafe
-            {
-                T* ptr = (T*)array.GetUnsafePtr();
-
-                int endIndex = length == -1 ? array.Length : startIndex + length;
-
-                for (int i = startIndex; i < endIndex; ++i)
-                    ptr[i] = value;
-            }
-        }
-        #endregion // UnityEngine.Rendering
-
         //https://github.com/needle-mirror/com.unity.physics/blob/master/Unity.Physics/Base/Containers/UnsafeEx.cs
         #region Unity.Physics
         public static unsafe int CalculateOffset<T, U>(ref T value, ref U baseValue)
@@ -71,6 +39,7 @@ namespace UnityExtensions.Unsafe
             return (int)((byte*)value - (byte*)UnsafeUtility.AddressOf(ref baseValue));
         }
 
+        #region IntPtr
         public static unsafe int CalculateOffset<T>(IntPtr value, ref T baseValue)
             where T : struct
         {
@@ -81,6 +50,7 @@ namespace UnityExtensions.Unsafe
         {
             return (int)(value.ToInt64() - baseValue.ToInt64());
         }
+        #endregion // IntPtr
         #endregion // Unity.Physics
     }
 }

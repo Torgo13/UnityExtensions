@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
@@ -23,52 +24,71 @@ namespace UnityExtensions.Unsafe
             where T : unmanaged =>
             list.AsNativeArray().GetSubArray(start, length);
         #endregion // CullingExtensions
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> list, List<T> managedList)
-            where T : unmanaged
-        {
-            Assert.IsNotNull(managedList);
 
-            list.AddRange(NoAllocHelpers.ExtractArrayFromList(managedList), managedList.Count);
-        }
-
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this UnsafeList<T> list, T[] array) where T : unmanaged
+        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
         {
+            Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsNotNull(array);
+            Assert.IsTrue(count >= 0);
+            Assert.IsTrue(count <= array.Length);
 
             fixed (T* p = array)
             {
-                list.AddRange(p, array.Length);
+                unsafeList.AddRange(p, count);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this UnsafeList<T> list, T[] array, int count) where T : unmanaged
+        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
-            Assert.IsTrue(count >= 0 && count <= array.Length);
-            
-            fixed (T* p = array)
-            {
-                list.AddRange(p, count);
-            }
+
+            unsafeList.AddRange(array, array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureCapacity<T>(ref this UnsafeList<T> list, int capacity) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
         {
-            if (list.Capacity < capacity)
-                list.Capacity = capacity;
+            Assert.IsNotNull(list);
+
+            unsafeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureRoom<T>(ref this UnsafeList<T> list, int room) where T : unmanaged
+        public static void EnsureCapacity<T>(ref this UnsafeList<T> unsafeList, int capacity) where T : unmanaged
         {
-            var capacity = list.Length + room;
-            if (list.Capacity < capacity)
-                list.Capacity = capacity;
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            if (unsafeList.Capacity < capacity)
+                unsafeList.Capacity = capacity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void EnsureRoom<T>(ref this UnsafeList<T> unsafeList, int room) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            var capacity = unsafeList.Length + room;
+            if (unsafeList.Capacity < capacity)
+                unsafeList.Capacity = capacity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            return new Span<T>(unsafeList.Ptr, unsafeList.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            return new ReadOnlySpan<T>(unsafeList.Ptr, unsafeList.Length);
         }
     }
 }

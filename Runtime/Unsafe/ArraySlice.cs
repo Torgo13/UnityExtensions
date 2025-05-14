@@ -134,11 +134,6 @@ namespace UnityExtensions.Unsafe
             return newSlice;
         }
 
-        public static ArraySlice<T> ConvertExistingDataToArraySlice(IntPtr dataPointer, int stride, int length)
-        {
-            return ConvertExistingDataToArraySlice((void*)dataPointer, stride, length);
-        }
-
         public T this[int index]
         {
             get
@@ -167,11 +162,6 @@ namespace UnityExtensions.Unsafe
             return _buffer;
         }
 
-        private IntPtr GetUnsafeReadOnlyIntPtr()
-        {
-            return (IntPtr)GetUnsafeReadOnlyPtr();
-        }
-
         private void CopyTo(T[] array)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -196,6 +186,18 @@ namespace UnityExtensions.Unsafe
 
         public int Stride => _stride;
         public int Length => _length;
+
+        #region IntPtr
+        public static ArraySlice<T> ConvertExistingDataToArraySlice(IntPtr dataPointer, int stride, int length)
+        {
+            return ConvertExistingDataToArraySlice((void*)dataPointer, stride, length);
+        }
+
+        private IntPtr GetUnsafeReadOnlyIntPtr()
+        {
+            return (IntPtr)GetUnsafeReadOnlyPtr();
+        }
+        #endregion // IntPtr
         #endregion // UnityEngine.Rendering.Universal.UTess
     }
 

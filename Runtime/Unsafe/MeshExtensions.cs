@@ -7,7 +7,6 @@ namespace UnityExtensions.Unsafe
     public static class MeshExtensions
     {
         #region UnsafeList
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetVertices(this Mesh mesh, UnsafeList<Vector3> inVertices)
         {
@@ -15,15 +14,15 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>(this Mesh mesh, int channel, UnsafeList<T> uvs) where T : unmanaged
-        {
-            mesh.SetUVs(channel, uvs.AsNativeArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetNormals(this Mesh mesh, UnsafeList<Vector3> inNormals)
         {
             mesh.SetNormals(inNormals.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTangents(this Mesh mesh, UnsafeList<Vector4> inTangents)
+        {
+            mesh.SetTangents(inTangents.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -38,6 +37,19 @@ namespace UnityExtensions.Unsafe
             mesh.SetColors(inColors.AsNativeArray());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetUVs<T>(this Mesh mesh, int channel, UnsafeList<T> uvs) where T : unmanaged
+        {
+            mesh.SetUVs(channel, uvs.AsNativeArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetIndices(this Mesh mesh, UnsafeList<int> indices, MeshTopology topology,
+            int submesh, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
+                submesh, calculateBounds, baseVertex);
+        }
         #endregion // UnsafeList
     }
 }

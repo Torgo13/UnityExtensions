@@ -27,8 +27,8 @@ namespace UnityExtensions.Unsafe
             if (array.Length >= MinRadixSortArraySize)
             {
                 int workersCount = System.Math.Max(JobsUtility.JobWorkerCount + 1, 1);
-                int batchSize = System.Math.Max(MinRadixSortBatchSize, (int)System.Math.Ceiling((float)array.Length / workersCount));
-                int jobsCount = (int)System.Math.Ceiling((float)array.Length / batchSize);
+                int batchSize = System.Math.Max(MinRadixSortBatchSize, (int)System.Math.Ceiling((double)array.Length / workersCount));
+                int jobsCount = (int)System.Math.Ceiling((double)array.Length / batchSize);
 
                 Assert.IsTrue(jobsCount * batchSize >= array.Length);
 

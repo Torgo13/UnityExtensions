@@ -16,19 +16,28 @@ namespace UnityExtensions.Unsafe
     public static class UnsafeExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAt<T>(this T[] array, int index) where T : struct
+        public static ref T UnsafeElementAt<T>(this T[] array, int index) where T : struct
         {
-            return ref UnsafeUtility.ArrayElementAsRef<T>(UnsafeUtility.AddressOf(ref array[0]), index);
+            Assert.IsNotNull(array);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+
+            return ref array[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T UnsafeElementAt<T>(this List<T> list, int index) where T : struct
         {
-            return ref NoAllocHelpers.ExtractArrayFromList(list).UnsafeElementAt(index);
+            Assert.IsNotNull(list);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < list.Count);
+
+            return ref NoAllocHelpers.ExtractArrayFromList(list)[index];
         }
 
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
+        #region Blittable
         public static bool IsBlittableValueType(Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
 
         public static string GetReasonForTypeNonBlittableImpl(Type t, string name)
@@ -89,6 +98,7 @@ namespace UnityExtensions.Unsafe
             Type t = typeof(T);
             return GetReasonForTypeNonBlittableImpl(t, t.Name);
         }
+        #endregion // Blittable
 
         #region IntPtr
         /// <exception cref="ArgumentNullException">target</exception>
@@ -247,7 +257,7 @@ namespace UnityExtensions.Unsafe
         #endregion // IntPtr
         #endregion // Unity.Collections.LowLevel.Unsafe
 
-        #region ToArray
+        #region CopyToArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
         {
@@ -299,16 +309,14 @@ namespace UnityExtensions.Unsafe
 
             UnsafeUtility.ReleaseGCObject(arrayGCHandle);
         }
-        #endregion // ToArray
+        #endregion // CopyToArray
 
-        #region ToList
+        #region CopyToList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this T[] array, List<T> list) where T : struct
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsNotNull(array);
             Assert.IsNotNull(list);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             list.EnsureCapacity(array.Length);
             NoAllocHelpers.ResetListContents(list, array);
@@ -317,10 +325,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeArray<T> nativeArray, List<T> list) where T : struct
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsTrue(nativeArray.IsCreated);
             Assert.IsNotNull(list);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             list.EnsureCapacity(nativeArray.Length);
             NoAllocHelpers.ResetListContents(list, nativeArray);
@@ -329,24 +335,20 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsNotNull(list);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             list.EnsureCapacity(nativeList.Length);
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
-        #endregion // ToList
+        #endregion // CopyToList
 
-        #region ToNativeArray
+        #region CopyToNativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this T[] array, ref NativeArray<T> nativeArray) where T : struct
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsNotNull(array);
             Assert.IsTrue(nativeArray.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             Assert.IsTrue(
                 nativeArray.Length >= array.Length,
@@ -358,10 +360,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this List<T> list, ref NativeArray<T> nativeArray) where T : struct
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsNotNull(list);
             Assert.IsTrue(nativeArray.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             Assert.IsTrue(
                 nativeArray.Length >= list.Count,
@@ -373,10 +373,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsTrue(nativeArray.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             Assert.IsTrue(
                 nativeArray.Length >= nativeList.Length,
@@ -384,16 +382,14 @@ namespace UnityExtensions.Unsafe
 
             nativeArray.CopyFrom(nativeList.AsArray());
         }
-        #endregion // ToNativeArray
+        #endregion // CopyToNativeArray
 
-        #region ToNativeList
+        #region CopyToNativeList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsNotNull(array);
             Assert.IsTrue(nativeList.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             nativeList.Clear();
             nativeList.AddRange(array);
@@ -402,10 +398,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this List<T> list, ref NativeList<T> nativeList) where T : unmanaged
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsNotNull(list);
             Assert.IsTrue(nativeList.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             nativeList.Clear();
             nativeList.AddRange(list);
@@ -414,14 +408,12 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeArray<T> nativeArray, ref NativeList<T> nativeList) where T : unmanaged
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
             Assert.IsTrue(nativeArray.IsCreated);
             Assert.IsTrue(nativeList.IsCreated);
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             nativeList.Clear();
             nativeList.CopyFrom(nativeArray);
         }
-        #endregion // ToNativeList
+        #endregion // CopyToNativeList
     }
 }

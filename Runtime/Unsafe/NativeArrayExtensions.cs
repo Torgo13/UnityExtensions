@@ -52,6 +52,7 @@ namespace UnityExtensions.Unsafe
             return array;
         }
 
+        #region IntPtr
         public static unsafe NativeArray<T> PtrToNativeArrayWithDefault<T>(
             T defaultT,
             IntPtr source,
@@ -61,6 +62,7 @@ namespace UnityExtensions.Unsafe
         {
             return PtrToNativeArrayWithDefault(defaultT, (void*)source, sourceElementSize, length, allocator);
         }
+        #endregion // IntPtr
 
         /// <summary>
         /// Fills <paramref name="array"/> with repeated copies of <paramref name="value"/>.
@@ -126,6 +128,38 @@ namespace UnityExtensions.Unsafe
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
 
+        //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
+        #region UnityEngine.Rendering
+        /// <summary>
+        /// Fills an array with the same value.
+        /// </summary>
+        /// <typeparam name="T">The type of the array</typeparam>
+        /// <param name="array">Target array to fill</param>
+        /// <param name="value">Value to fill</param>
+        /// <param name="startIndex">Start index to fill</param>
+        /// <param name="length">The number of entries to write, or -1 to fill until the end of the array</param>
+        public static void FillArray<T>(ref this NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
+            where T : unmanaged
+        {
+            if (!array.IsCreated)
+                throw new InvalidOperationException(nameof(array));
+            if (startIndex < 0)
+                throw new IndexOutOfRangeException(nameof(startIndex));
+            if (startIndex + length >= array.Length)
+                throw new IndexOutOfRangeException(nameof(length));
+
+            unsafe
+            {
+                T* ptr = (T*)array.GetUnsafePtr();
+
+                int endIndex = length == -1 ? array.Length : startIndex + length;
+
+                for (int i = startIndex; i < endIndex; ++i)
+                    ptr[i] = value;
+            }
+        }
+        #endregion // UnityEngine.Rendering
+
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         /// <summary>
@@ -146,7 +180,7 @@ namespace UnityExtensions.Unsafe
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
-        public static unsafe void Resize<TValue>(ref NativeArray<TValue> array, int newSize, Allocator allocator)
+        public static unsafe void Resize<TValue>(ref this NativeArray<TValue> array, int newSize, Allocator allocator)
             where TValue : struct
         {
             var oldSize = array.Length;
@@ -174,7 +208,7 @@ namespace UnityExtensions.Unsafe
             array = newArray;
         }
 
-        public static unsafe int GrowBy<TValue>(ref NativeArray<TValue> array, int count, Allocator allocator)
+        public static unsafe int GrowBy<TValue>(ref this NativeArray<TValue> array, int count, Allocator allocator)
             where TValue : struct
         {
             var length = array.Length;
@@ -215,7 +249,7 @@ namespace UnityExtensions.Unsafe
             --count;
         }
 
-        public static int AppendWithCapacity<TValue>(ref NativeArray<TValue> array, ref int count, TValue value,
+        public static int AppendWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, TValue value,
             int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
             where TValue : struct
         {
@@ -230,7 +264,7 @@ namespace UnityExtensions.Unsafe
             return index;
         }
 
-        public static int GrowWithCapacity<TValue>(ref NativeArray<TValue> array, ref int count, int growBy,
+        public static int GrowWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, int growBy,
             int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
             where TValue : struct
         {

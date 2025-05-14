@@ -15,7 +15,7 @@ namespace UnityExtensions.Unsafe
     public static unsafe class CoreUnsafeUtils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(object from) where T : class
+        public static T As<T>(this object from) where T : class
         {
             return System.Runtime.CompilerServices.Unsafe.As<T>(from);
         }
@@ -150,13 +150,6 @@ namespace UnityExtensions.Unsafe
                 UnsafeUtility.WriteArrayElement(dest, i, list[i]);
         }
 
-        /// <inheritdoc cref="CopyTo"/>
-        public static void CopyTo<T>(this List<T> list, IntPtr dest, int count)
-            where T : struct
-        {
-            CopyTo(list, (void*)dest, count);
-        }
-
         /// <summary>
         /// Extension method to copy elements of an array into a buffer.
         /// </summary>
@@ -170,13 +163,6 @@ namespace UnityExtensions.Unsafe
             var c = min(count, list.Length);
             for (int i = 0; i < c; ++i)
                 UnsafeUtility.WriteArrayElement(dest, i, list[i]);
-        }
-
-        /// <inheritdoc cref="CopyTo"/>
-        public static void CopyTo<T>(this T[] list, IntPtr dest, int count)
-            where T : struct
-        {
-            CopyTo(list, (void*)dest, count);
         }
 
         private static void CalculateRadixParams(int radixBits, out int bitStates)
@@ -437,12 +423,28 @@ namespace UnityExtensions.Unsafe
             return -1;
         }
 
+        #region IntPtr
+        /// <inheritdoc cref="CopyTo"/>
+        public static void CopyTo<T>(this List<T> list, IntPtr dest, int count)
+            where T : struct
+        {
+            CopyTo(list, (void*)dest, count);
+        }
+
+        /// <inheritdoc cref="CopyTo"/>
+        public static void CopyTo<T>(this T[] list, IntPtr dest, int count)
+            where T : struct
+        {
+            CopyTo(list, (void*)dest, count);
+        }
+
         /// <inheritdoc cref="IndexOf"/>
         public static int IndexOf<T>(IntPtr data, int count, T v)
             where T : struct, IEquatable<T>
         {
             return IndexOf((void*)data, count, v);
         }
+        #endregion // IntPtr
         #endregion // UnityEngine.Rendering
     }
 }

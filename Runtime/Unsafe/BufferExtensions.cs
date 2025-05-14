@@ -5,15 +5,6 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityExtensions.Unsafe
 {
-    //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/develop/com.unity.netcode.gameobjects/Runtime/Serialization/ByteUtility.cs
-    #region Unity.Netcode
-    public static class ByteExtensions
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe byte ToByte(this bool b) => *(byte*)&b;
-    }
-    #endregion // Unity.Netcode
-
     //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Networking/Utilities/Extensions/BufferExtensions.cs
     #region Unity.LiveCapture.Networking
     /// <summary>
