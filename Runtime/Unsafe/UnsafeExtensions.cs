@@ -15,26 +15,6 @@ namespace UnityExtensions.Unsafe
 {
     public static class UnsafeExtensions
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this T[] array, int index) where T : struct
-        {
-            Assert.IsNotNull(array);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
-
-            return ref array[index];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this List<T> list, int index) where T : struct
-        {
-            Assert.IsNotNull(list);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < list.Count);
-
-            return ref NoAllocHelpers.ExtractArrayFromList(list)[index];
-        }
-
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         #region Blittable
@@ -257,6 +237,37 @@ namespace UnityExtensions.Unsafe
         #endregion // IntPtr
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+        //https://github.com/needle-mirror/com.unity.physics/blob/master/Unity.Physics/Base/Containers/UnsafeEx.cs
+        #region Unity.Physics
+        public static unsafe long CalculateOffset<T, U>(ref T value, ref U baseValue)
+            where T : struct
+            where U : struct
+        {
+            return (byte*)UnsafeUtility.AddressOf(ref value)
+                         - (byte*)UnsafeUtility.AddressOf(ref baseValue);
+        }
+
+        public static unsafe long CalculateOffset<T>(void* value, ref T baseValue)
+            where T : struct
+        {
+            return (byte*)value - (byte*)UnsafeUtility.AddressOf(ref baseValue);
+        }
+
+        #region IntPtr
+        public static unsafe long CalculateOffset<T>(IntPtr value, ref T baseValue)
+            where T : struct
+        {
+            return value.ToInt64() - AddressOf(ref baseValue).ToInt64();
+        }
+
+        public static unsafe long CalculateOffset(IntPtr value, IntPtr baseValue)
+        {
+            return value.ToInt64() - baseValue.ToInt64();
+        }
+        #endregion // IntPtr
+        #endregion // Unity.Physics
+
+        #region CopyTo
         #region CopyToArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
@@ -415,5 +426,6 @@ namespace UnityExtensions.Unsafe
             nativeList.CopyFrom(nativeArray);
         }
         #endregion // CopyToNativeList
+        #endregion // CopyTo
     }
 }

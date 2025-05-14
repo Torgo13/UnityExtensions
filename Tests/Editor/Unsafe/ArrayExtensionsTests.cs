@@ -57,14 +57,14 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = {
                 5, 10
             };
-            int offset = ArrayExtensions.CalculateOffset(ref array[1], ref array[0]);
+            var offset = UnsafeExtensions.CalculateOffset(ref array[1], ref array[0]);
             Assert.AreEqual(UnsafeUtility.SizeOf<int>(), offset);
 
             unsafe
             {
                 fixed (int* ptr = &array[0])
                 {
-                    offset = ArrayExtensions.CalculateOffset((IntPtr)(ptr + 1), (IntPtr)ptr);
+                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + 1), (IntPtr)ptr);
                     Assert.AreEqual(UnsafeUtility.SizeOf<int>(), offset);
                 }
             }
@@ -73,14 +73,14 @@ namespace UnityExtensions.Unsafe.Tests
             {
                 0, 1, 2, 3
             };
-            offset = ArrayExtensions.CalculateOffset(ref array[3], ref array[1]);
+            offset = UnsafeExtensions.CalculateOffset(ref array[3], ref array[1]);
             Assert.AreEqual(UnsafeUtility.SizeOf<int>() * 2, offset);
 
             unsafe
             {
                 fixed (int* ptr = &array[1])
                 {
-                    offset = ArrayExtensions.CalculateOffset((IntPtr)(ptr + 2), (IntPtr)ptr);
+                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + 2), (IntPtr)ptr);
                     Assert.AreEqual(UnsafeUtility.SizeOf<int>() * 2, offset);
                 }
             }

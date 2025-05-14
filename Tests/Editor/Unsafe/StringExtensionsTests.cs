@@ -78,7 +78,7 @@ namespace UnityExtensions.Unsafe.Tests
             string base64String = "SGVsbG8gV29ybGQ="; // "Hello World" in Base64
             fixed (char* p = base64String)
             {
-                int resultLength = StringUtils.FromBase64_ComputeResultLength(p, base64String.Length);
+                int resultLength = StringExtensions.FromBase64_ComputeResultLength(p, base64String.Length);
                 Assert.AreEqual(11, resultLength); // "Hello World" has 11 bytes
             }
         }
@@ -89,7 +89,7 @@ namespace UnityExtensions.Unsafe.Tests
             string base64String = " SG VsbG8g V2 9ybGQ= "; // "Hello World" in Base64 with spaces
             fixed (char* p = base64String)
             {
-                int resultLength = StringUtils.FromBase64_ComputeResultLength(p, base64String.Length);
+                int resultLength = StringExtensions.FromBase64_ComputeResultLength(p, base64String.Length);
                 Assert.AreEqual(11, resultLength); // "Hello World" has 11 bytes
             }
         }
@@ -100,7 +100,7 @@ namespace UnityExtensions.Unsafe.Tests
             string base64String = "";
             fixed (char* p = base64String)
             {
-                int resultLength = StringUtils.FromBase64_ComputeResultLength(p, base64String.Length);
+                int resultLength = StringExtensions.FromBase64_ComputeResultLength(p, base64String.Length);
                 Assert.AreEqual(0, resultLength);
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -9,6 +10,16 @@ namespace UnityExtensions.Unsafe
 {
     public static class ListExtensions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T UnsafeElementAtMutable<T>(this List<T> list, int index) where T : struct
+        {
+            Assert.IsNotNull(list);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < list.Count);
+
+            return ref NoAllocHelpers.ExtractArrayFromList(list)[index];
+        }
+
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/ListExtensions.cs
         #region Unity.Collections
         /// <summary>

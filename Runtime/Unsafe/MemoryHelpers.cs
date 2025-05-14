@@ -6,7 +6,7 @@ using static Unity.Mathematics.math;
 
 namespace UnityExtensions.Unsafe
 {
-    public static unsafe class MemoryUtilities
+    public static unsafe class MemoryHelpers
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
@@ -23,10 +23,21 @@ namespace UnityExtensions.Unsafe
             UnsafeUtility.Free(p, allocator);
         }
         #endregion // UnityEngine.Rendering
-    }
 
-    public static unsafe class MemoryHelpers
-    {
+        public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip) where T : unmanaged
+        {
+            return (T*)UnsafeUtility.MallocTracked(
+                UnsafeUtility.SizeOf<T>() * count,
+                UnsafeUtility.AlignOf<T>(),
+                allocator,
+                callstacksToSkip);
+        }
+
+        public static void FreeTracked<T>(T* p, Allocator allocator) where T : unmanaged
+        {
+            UnsafeUtility.FreeTracked(p, allocator);
+        }
+
         //https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/InputSystem/Utilities/MemoryHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         public readonly struct BitRegion

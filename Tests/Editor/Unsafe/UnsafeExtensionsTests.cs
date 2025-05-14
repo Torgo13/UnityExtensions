@@ -13,7 +13,7 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             int index = 2;
 
-            ref int element = ref array.UnsafeElementAt(index);
+            ref int element = ref array.UnsafeElementAtMutable(index);
 
             Assert.AreEqual(array[index], element);
 
@@ -28,7 +28,7 @@ namespace UnityExtensions.Unsafe.Tests
             int[] array = new int[0];
             Assert.Throws<IndexOutOfRangeException>(() =>
             {
-                ref int element = ref array.UnsafeElementAt(0);
+                ref int element = ref array.UnsafeElementAtMutable(0);
             });
         }
         */
@@ -39,7 +39,7 @@ namespace UnityExtensions.Unsafe.Tests
             List <int> list = new() { 1, 2, 3, 4, 5 };
             int index = 2;
 
-            ref int element = ref list.UnsafeElementAt(index);
+            ref int element = ref list.UnsafeElementAtMutable(index);
 
             Assert.AreEqual(list[index], element);
 

@@ -50,6 +50,14 @@ namespace UnityExtensions.Unsafe
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
                 submesh, calculateBounds, baseVertex);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetIndices(this Mesh mesh, UnsafeList<ushort> indices, MeshTopology topology,
+            int submesh, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
+                submesh, calculateBounds, baseVertex);
+        }
         #endregion // UnsafeList
     }
 }

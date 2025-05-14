@@ -2,7 +2,7 @@ using UnityEngine.Assertions;
 
 namespace UnityExtensions.Unsafe
 {
-    public static class StringUtils
+    public static class StringExtensions
     {
         //https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Convert.cs
         #region dotnet
@@ -54,17 +54,14 @@ namespace UnityExtensions.Unsafe
                 else if (padding == 2)
                     padding = 1;
                 //else
-                    //throw new FormatException(SR.Format_BadBase64Char);
+                //throw new FormatException(SR.Format_BadBase64Char);
             }
 
             // Done:
             return (usefulInputLength / 4) * 3 + padding;
         }
         #endregion // dotnet
-    }
 
-    public static class StringExtensions
-    {
         /// <summary>
         /// Calculate the size of the array or span required to store the result of
         /// System.Convert.TryFromBase64String.
@@ -75,7 +72,7 @@ namespace UnityExtensions.Unsafe
         {
             fixed (char* p = input)
             {
-                return StringUtils.FromBase64_ComputeResultLength(p, input.Length);
+                return FromBase64_ComputeResultLength(p, input.Length);
             }
         }
     }

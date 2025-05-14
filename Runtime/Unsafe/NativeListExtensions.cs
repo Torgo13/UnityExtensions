@@ -87,6 +87,7 @@ namespace UnityExtensions.Unsafe
         public static void EnsureCapacity<T>(ref this NativeList<T> nativeList, int capacity) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(capacity > 0);
 
             if (nativeList.Capacity < capacity)
                 nativeList.Capacity = capacity;
@@ -96,6 +97,7 @@ namespace UnityExtensions.Unsafe
         public static void EnsureRoom<T>(ref this NativeList<T> nativeList, int room) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(room > 0);
 
             var capacity = nativeList.Length + room;
             if (nativeList.Capacity < capacity)
