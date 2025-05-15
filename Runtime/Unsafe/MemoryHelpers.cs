@@ -10,20 +10,6 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
-        public static T* Malloc<T>(int count, Allocator allocator) where T : unmanaged
-        {
-            return (T*)UnsafeUtility.Malloc(
-                UnsafeUtility.SizeOf<T>() * count,
-                UnsafeUtility.AlignOf<T>(),
-                allocator);
-        }
-
-        public static void Free<T>(T* p, Allocator allocator) where T : unmanaged
-        {
-            UnsafeUtility.Free(p, allocator);
-        }
-        #endregion // UnityEngine.Rendering
-
         public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip) where T : unmanaged
         {
             return (T*)UnsafeUtility.MallocTracked(
@@ -37,6 +23,20 @@ namespace UnityExtensions.Unsafe
         {
             UnsafeUtility.FreeTracked(p, allocator);
         }
+
+        public static T* Malloc<T>(int count, Allocator allocator) where T : unmanaged
+        {
+            return (T*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<T>() * count,
+                UnsafeUtility.AlignOf<T>(),
+                allocator);
+        }
+
+        public static void Free<T>(T* p, Allocator allocator) where T : unmanaged
+        {
+            UnsafeUtility.Free(p, allocator);
+        }
+        #endregion // UnityEngine.Rendering
 
         //https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/InputSystem/Utilities/MemoryHelpers.cs
         #region UnityEngine.InputSystem.Utilities
@@ -304,7 +304,7 @@ namespace UnityExtensions.Unsafe
             unchecked
             {
                 // 64bit blocks.
-                #if UNITY_64
+#if UNITY_64
                 while (numBytes >= 8)
                 {
                     *(ulong*)&to[pos] = ((ulong)value << 56) | ((ulong)value << 48) | ((ulong)value << 40) | ((ulong)value << 32)
@@ -312,7 +312,7 @@ namespace UnityExtensions.Unsafe
                     numBytes -= 8;
                     pos += 8;
                 }
-                #endif
+#endif
 
                 // 32bit blocks.
                 while (numBytes >= 4)
@@ -356,7 +356,7 @@ namespace UnityExtensions.Unsafe
             unchecked
             {
                 // Copy 64bit blocks.
-                #if UNITY_64
+#if UNITY_64
                 while (numBytes >= 8)
                 {
                     *(ulong*)(to + pos) &= ~*(ulong*)(bits + pos); // Preserve unmasked bits.
@@ -364,7 +364,7 @@ namespace UnityExtensions.Unsafe
                     numBytes -= 8;
                     pos += 8;
                 }
-                #endif
+#endif
 
                 // Copy 32bit blocks.
                 while (numBytes >= 4)

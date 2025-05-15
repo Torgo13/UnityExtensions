@@ -54,34 +54,38 @@ namespace UnityExtensions.Unsafe.Tests
         [Test]
         public void CalculateOffset_ShouldReturnCorrectOffset()
         {
+            int idx = 0, idxOffset = 1;
+
             int[] array = {
                 5, 10
             };
-            var offset = UnsafeExtensions.CalculateOffset(ref array[1], ref array[0]);
-            Assert.AreEqual(UnsafeUtility.SizeOf<int>(), offset);
+            var offset = UnsafeExtensions.CalculateOffset(ref array[idx + idxOffset], ref array[idx]);
+            Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
 
             unsafe
             {
                 fixed (int* ptr = &array[0])
                 {
-                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + 1), (IntPtr)ptr);
-                    Assert.AreEqual(UnsafeUtility.SizeOf<int>(), offset);
+                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + idxOffset), (IntPtr)ptr);
+                    Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
                 }
             }
+
+            idx = 1; idxOffset = 2;
 
             array = new int[]
             {
                 0, 1, 2, 3
             };
-            offset = UnsafeExtensions.CalculateOffset(ref array[3], ref array[1]);
-            Assert.AreEqual(UnsafeUtility.SizeOf<int>() * 2, offset);
+            offset = UnsafeExtensions.CalculateOffset(ref array[idx + idxOffset], ref array[idx]);
+            Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
 
             unsafe
             {
                 fixed (int* ptr = &array[1])
                 {
-                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + 2), (IntPtr)ptr);
-                    Assert.AreEqual(UnsafeUtility.SizeOf<int>() * 2, offset);
+                    offset = UnsafeExtensions.CalculateOffset((IntPtr)(ptr + idxOffset), (IntPtr)ptr);
+                    Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
                 }
             }
         }

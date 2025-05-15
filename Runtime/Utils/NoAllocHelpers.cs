@@ -204,9 +204,17 @@ namespace UnityExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ResetListSize<T>(List<T> list, int size) where T : unmanaged
         {
+            var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+            tListAccess._size = size;
+            tListAccess._version++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ResetListSizeNoResize<T>(List<T> list, int size) where T : unmanaged
+        {
             Assert.IsTrue(list.Capacity >= size);
 
-            var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
             tListAccess._size = size;
             tListAccess._version++;
         }
