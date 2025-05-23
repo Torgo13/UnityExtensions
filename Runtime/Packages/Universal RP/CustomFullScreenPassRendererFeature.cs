@@ -75,11 +75,11 @@ namespace UnityExtensions.Packages
 
             private static readonly ParameterExpression param = Expression.Parameter(typeof(object), "instance");
 
-            private static readonly Func<object, object> getCommandBufferDelegate =
-                Expression.Lambda<Func<object, object>>(
-                Expression.Convert(Expression.Field(Expression.Convert(param, typeof(RenderingData)),
-                typeof(RenderingData).GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic)),
-                    typeof(object)), param).Compile();
+            private static readonly Func<object, CommandBuffer> getCommandBufferDelegate =
+                Expression.Lambda<Func<object, CommandBuffer>>(Expression.Convert(
+                    Expression.Field(Expression.Convert(param, typeof(RenderingData)),
+                    typeof(RenderingData).GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic)),
+                    typeof(CommandBuffer)), param).Compile();
 
             public FullScreenRenderPass(string passName)
             {
@@ -137,7 +137,7 @@ namespace UnityExtensions.Packages
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 ref var cameraData = ref renderingData.cameraData;
-                var cmd = (CommandBuffer)getCommandBufferDelegate(renderingData);
+                var cmd = getCommandBufferDelegate(renderingData);
 
                 using (new ProfilingScope(cmd, profilingSampler))
                 {

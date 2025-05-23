@@ -161,7 +161,7 @@ namespace UnityExtensions
                     return result;
                 }
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException("Texture target is not a Texture2D, a RenderTexture or a Cubemap.");
             }
         }
         #endregion // UnityEngine.Rendering.HighDefinition

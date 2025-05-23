@@ -14,7 +14,7 @@ namespace UnityExtensions.Collections
     /// This collection is not thread-safe.
     /// </remarks>
     /// <typeparam name="T">The element type.</typeparam>
-    public class ReadOnlyList<T> : IReadOnlyList<T>, IEquatable<ReadOnlyList<T>>
+    public sealed class ReadOnlyList<T> : IReadOnlyList<T>, IEquatable<ReadOnlyList<T>>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/ReadOnlyList.cs
         #region Unity.XR.CoreUtils.Collections

@@ -106,7 +106,7 @@ namespace UnityExtensions.Packages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IgnoreCase(StringComparison comparisonType = default)
         {
-            return UnsafeUtility.EnumToInt(comparisonType) % 2 != 0;
+            return (int)comparisonType % 2 != 0;
         }
 
         public static bool Contains(this StringBuilder stringBuilder, string value, bool ignoreCase = false)

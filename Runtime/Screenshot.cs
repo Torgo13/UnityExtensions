@@ -46,8 +46,7 @@ namespace UnityExtensions
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
-            var formatter = FileNameFormatter.Instance;
-            filename = formatter.Format(filename);
+            filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
             Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
@@ -65,8 +64,7 @@ namespace UnityExtensions
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
-            var formatter = FileNameFormatter.Instance;
-            filename = formatter.Format(filename);
+            filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
             Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
@@ -84,8 +82,7 @@ namespace UnityExtensions
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
-            var formatter = FileNameFormatter.Instance;
-            filename = formatter.Format(filename);
+            filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
             Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
@@ -102,8 +99,7 @@ namespace UnityExtensions
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
-            var formatter = FileNameFormatter.Instance;
-            filename = formatter.Format(filename);
+            filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
             Directory.CreateDirectory(directory);
 #if UNITY_EDITOR

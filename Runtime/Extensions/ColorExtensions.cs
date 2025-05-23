@@ -80,17 +80,7 @@ namespace UnityExtensions
 			return a.r == b.r && a.g == b.g && a.b == b.b;
 		}
 
-        public static Color32 Multiply (this Color32 c1, Color32 c2)
-        {
-            byte r = (byte)((c1.r / 255f) * (c2.r / 255f) * 255);
-            byte g = (byte)((c1.g / 255f) * (c2.g / 255f) * 255);
-            byte b = (byte)((c1.b / 255f) * (c2.b / 255f) * 255);
-            byte a = (byte)((c1.a / 255f) * (c2.a / 255f) * 255);
-
-            return new Color32(r, g, b, a);
-        }
-
-        public static Color32 Tint (this Color32 c1, Color32 c2)
+        public static Color32 Tint(this Color32 c1, Color32 c2)
         {
             byte r = (byte)((c1.r / 255f) * (c2.r / 255f) * 255);
             byte g = (byte)((c1.g / 255f) * (c2.g / 255f) * 255);
@@ -142,43 +132,11 @@ namespace UnityExtensions
         public static string GetColorHex(this Color32 color)
         {
             return $"{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}";
-            /*
-            System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
-            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
-            
-            color.r.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.g.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.b.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.a.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            
-            return sb.ToString();
-            */
         }
 
         public static string GetColorTextCode(this Color32 color)
         {
             return $"<color=#{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}>";
-            /*
-            System.Span<char> buffer = stackalloc char[2]; // Enough for a byte
-            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
-            sb.Append("<color=#");
-            
-            color.r.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.g.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.b.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            color.a.ConvertToHex(buffer, padZeroes: true);
-            sb.Append(buffer);
-            
-            sb.Append('>');
-            return sb.ToString();
-            */
         }
     }
 }

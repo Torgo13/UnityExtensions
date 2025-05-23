@@ -36,7 +36,7 @@ namespace UnityExtensions.Editor
             if (!includeSubDirectories)
             {
                 var directoryOS = directory.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-                paths = paths.Where(p => Path.GetDirectoryName(p) == directoryOS);
+                paths = paths.Where(p => Path.GetDirectoryName(p) == directoryOS).ToArray();
             }
 
             return paths.Select(AssetDatabase.LoadAssetAtPath<T>).ToList();

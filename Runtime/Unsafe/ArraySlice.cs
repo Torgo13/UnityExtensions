@@ -192,11 +192,6 @@ namespace UnityExtensions.Unsafe
         {
             return ConvertExistingDataToArraySlice((void*)dataPointer, stride, length);
         }
-
-        private IntPtr GetUnsafeReadOnlyIntPtr()
-        {
-            return (IntPtr)GetUnsafeReadOnlyPtr();
-        }
         #endregion // IntPtr
         #endregion // UnityEngine.Rendering.Universal.UTess
     }

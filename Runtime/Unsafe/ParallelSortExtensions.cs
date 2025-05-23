@@ -86,13 +86,7 @@ namespace UnityExtensions.Unsafe
 
                     JobHandle.ScheduleBatchedJobs();
 
-                    Swap(ref arraySource, ref arrayDest);
-                    continue;
-
-                    static void Swap(ref NativeArray<int> a, ref NativeArray<int> b)
-                    {
-                        (a, b) = (b, a);
-                    }
+                    (arraySource, arrayDest) = (arrayDest, arraySource);
                 }
 
                 supportArray.Dispose(jobHandle);

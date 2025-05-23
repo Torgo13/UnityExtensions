@@ -63,6 +63,12 @@ namespace UnityExtensions
         /// <summary>Increase the mip level of the skybox cubemap by one to filter out high frequency noise.</summary>
         public bool noiseReduction = true;
 
+        /// <summary>Set to false to use the equator colour for the ground colour.</summary>
+        public bool groundColour;
+
+        /// <summary>Remove the blue tint from the ambient colour.</summary>
+        public bool removeBlue;
+
         /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
         int _index = -1;
 
@@ -161,6 +167,8 @@ namespace UnityExtensions
 
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
+
+            RenderSettings.customReflectionTexture = _blendedTexture;
 
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
@@ -391,9 +399,7 @@ namespace UnityExtensions
             const int positiveX = (int)CubemapFace.PositiveX;
             const int negativeX = (int)CubemapFace.NegativeX;
             const int positiveY = (int)CubemapFace.PositiveY;
-#if GROUND_COLOUR
             const int negativeY = (int)CubemapFace.NegativeY;
-#endif // GROUND_COLOUR
             const int positiveZ = (int)CubemapFace.PositiveZ;
             const int negativeZ = (int)CubemapFace.NegativeZ;
 
@@ -401,7 +407,16 @@ namespace UnityExtensions
             {
                 _ambientColours[i] = _readbackRequest.GetData<Color32>(layer: i)[0];
             }
-            
+
+            if (removeBlue)
+            {
+                for (int i = 0; i < _ambientColours.Length; i++)
+                {
+                    _ambientColours[i] = new Color32(_ambientColours[i].r, _ambientColours[i].g,
+                        0, _ambientColours[i].a);
+                }
+            }
+
             // Get the average of the four colours at the horizon
             // Use a Vector4 to avoid colours being clamped to 1
             Vector4 equator = new Vector4(0, 0, 0, 1);
@@ -412,16 +427,14 @@ namespace UnityExtensions
                 
                 equator[i] /= 4 * byte.MaxValue;
             }
-            
+
             RenderSettings.ambientSkyColor = _ambientColours[positiveY];
-#if GROUND_COLOUR
-            RenderSettings.ambientGroundColor = _ambientColours[negativeY];
-#else
-            RenderSettings.ambientGroundColor = equator;
-#endif // GROUND_COLOUR
             RenderSettings.ambientEquatorColor = equator;
+            RenderSettings.ambientGroundColor = groundColour
+                ? _ambientColours[negativeY]
+                : equator;
         }
         
-#endregion // Ambient
+        #endregion // Ambient
     }
 }

@@ -365,9 +365,7 @@ namespace UnityExtensions
         /// <returns>Linear color if the active color space is ColorSpace.Linear, the original input otherwise.</returns>
         public static Color ConvertSRGBToActiveColorSpace(Color color)
         {
-            bool linear = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumEquals(
-                QualitySettings.activeColorSpace, ColorSpace.Linear);
-            return linear ? color.linear : color;
+            return ColorSpace.Linear == QualitySettings.activeColorSpace ? color.linear : color;
         }
 
         /// <summary>
@@ -377,9 +375,7 @@ namespace UnityExtensions
         /// <returns>sRGB color if the active color space is ColorSpace.Gamma, the original input otherwise.</returns>
         public static Color ConvertLinearToActiveColorSpace(Color color)
         {
-            bool linear = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumEquals(
-                QualitySettings.activeColorSpace, ColorSpace.Linear);
-            return linear ? color : color.gamma;
+            return ColorSpace.Linear == QualitySettings.activeColorSpace ? color : color.gamma;
         }
 
         /// <summary>

@@ -118,12 +118,12 @@ namespace UnityExtensions.Unsafe
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return (IntPtr)array.GetPtr();
+            return array.Length == 0 ? IntPtr.Zero : (IntPtr)array.GetUnsafePtr();
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return (IntPtr)array.GetReadOnlyPtr();
+            return array.Length == 0 ? IntPtr.Zero : (IntPtr)array.GetUnsafeReadOnlyPtr();
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
@@ -282,5 +282,15 @@ namespace UnityExtensions.Unsafe
             return offset;
         }
         #endregion // UnityEngine.InputSystem.Utilities
+
+        public unsafe static NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
+        {
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
+            return array;
+        }
     }
 }

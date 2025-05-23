@@ -23,7 +23,6 @@ namespace UnityExtensions
             QuickSort(data, 0, data.Length - 1, compare);
         }
 
-        // TODO: parallel alternative
         /// <summary>
         /// A non-allocating predicated sub-array quick sort for managed arrays.
         /// </summary>

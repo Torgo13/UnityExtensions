@@ -47,10 +47,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   skyboxShader: {fileID: 4800000, guid: f7d9b0046be29e841a13ecfc7d85d869, type: 3}
-  _skyboxMaterial: {fileID: -876546973899608171, guid: e46ee291a57e5054faeeb7a2463a0285, type: 3}
+  _skyboxMaterial: {fileID: 2100000, guid: 2c4f0502a2024aa4da8c80eb506bf31c, type: 2}
   reflectionCamera: {fileID: 218857820870413775}
   resolutionScaleOverride: 0
   resolutionScale: 1
+  timeSlice: 1
+  noiseReduction: 1
+  groundColour: 0
+  removeBlue: 0
 --- !u!114 &3805463516428467826
 MonoBehaviour:
   m_ObjectHideFlags: 0

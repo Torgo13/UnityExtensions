@@ -105,6 +105,6 @@ namespace UnityExtensions
         {
             ArrayPool<T>.Shared.Resize(ref array, newSize, clearArray);
         }
-#nullable disable
+#nullable restore
     }
 }

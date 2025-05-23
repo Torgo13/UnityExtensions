@@ -24,12 +24,12 @@ namespace UnityExtensions.Unsafe
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return (IntPtr)nativeList.GetPtr();
+            return nativeList.Length == 0 ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafePtr();
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return (IntPtr)nativeList.GetReadOnlyPtr();
+            return nativeList.Length == 0 ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafeReadOnlyPtr();
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer

@@ -272,7 +272,7 @@ namespace UnityExtensions
             return false;
         }
 
-        public static bool HaveEqualElements<TValue>(TValue[] first, TValue[] second, int count = int.MaxValue)
+        public static bool HaveEqualElements<TValue>(this TValue[] first, TValue[] second, int count = int.MaxValue)
         {
             if (first == null || second == null)
                 return second == first;
@@ -292,7 +292,7 @@ namespace UnityExtensions
         }
 
         ////REVIEW: remove this to get rid of default equality comparer?
-        public static int IndexOf<TValue>(TValue[] array, TValue value, int startIndex = 0, int count = -1)
+        public static int IndexOf<TValue>(this TValue[] array, TValue value, int startIndex = 0, int count = -1)
         {
             if (array == null)
                 return -1;
@@ -320,7 +320,7 @@ namespace UnityExtensions
             return -1;
         }
 
-        public static int IndexOf<TValue>(this TValue[] array, Predicate<TValue> predicate, int startIndex = 0, int count = -1)
+        public static int IndexOf<TValue>(this TValue[] array, Predicate<TValue> predicate, int startIndex, int count = -1)
         {
             if (array == null)
                 return -1;
@@ -560,7 +560,7 @@ namespace UnityExtensions
             return offset;
         }
 
-        public static TValue[] Join<TValue>(TValue value, params TValue[] values)
+        public static TValue[] Join<TValue>(this TValue value, params TValue[] values)
         {
             // Determine length.
             var length = 0;
@@ -585,7 +585,7 @@ namespace UnityExtensions
             return array;
         }
 
-        public static TValue[] Merge<TValue>(TValue[] first, TValue[] second)
+        public static TValue[] Merge<TValue>(this TValue[] first, TValue[] second)
             where TValue : IEquatable<TValue>
         {
             if (first == null)
@@ -608,7 +608,7 @@ namespace UnityExtensions
             return merged.ToArray();
         }
 
-        public static TValue[] Merge<TValue>(TValue[] first, TValue[] second, IEqualityComparer<TValue> comparer)
+        public static TValue[] Merge<TValue>(this TValue[] first, TValue[] second, IEqualityComparer<TValue> comparer)
         {
             if (first == null)
                 return second;
@@ -621,7 +621,7 @@ namespace UnityExtensions
             for (var i = 0; i < second.Length; ++i)
             {
                 var secondValue = second[i];
-                if (!merged.Exists(x => comparer.Equals(secondValue)))
+                if (!merged.Exists(_ => comparer.Equals(secondValue)))
                 {
                     merged.Add(secondValue);
                 }
@@ -687,7 +687,7 @@ namespace UnityExtensions
         /// This method does not re-allocate the array. Instead <paramref name="count"/> is used
         /// to keep track of how many elements there actually are in the array.
         /// </remarks>
-        public static void EraseAtByMovingTail<TValue>(TValue[] array, ref int count, int index)
+        public static void EraseAtByMovingTail<TValue>(this TValue[] array, ref int count, int index)
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(index >= 0 && index < array.Length);
@@ -704,7 +704,7 @@ namespace UnityExtensions
             --count;
         }
 
-        public static TValue[] Copy<TValue>(TValue[] array)
+        public static TValue[] Copy<TValue>(this TValue[] array)
         {
             if (array == null)
                 return null;
@@ -715,7 +715,7 @@ namespace UnityExtensions
             return result;
         }
 
-        public static TValue[] Clone<TValue>(TValue[] array)
+        public static TValue[] Clone<TValue>(this TValue[] array)
             where TValue : ICloneable
         {
             if (array == null)
@@ -730,7 +730,7 @@ namespace UnityExtensions
             return result;
         }
 
-        public static TNew[] Select<TOld, TNew>(TOld[] array, Func<TOld, TNew> converter)
+        public static TNew[] Select<TOld, TNew>(this TOld[] array, Func<TOld, TNew> converter)
         {
             if (array == null)
                 return null;
@@ -744,7 +744,7 @@ namespace UnityExtensions
             return result;
         }
 
-        private static void Swap<TValue>(ref TValue first, ref TValue second)
+        public static void Swap<TValue>(ref TValue first, ref TValue second)
         {
             var temp = first;
             first = second;
@@ -764,7 +764,7 @@ namespace UnityExtensions
         /// are supposed to go. This is not super efficient but avoids having to allocate a temporary
         /// array on the heap.
         /// </remarks>
-        public static void MoveSlice<TValue>(TValue[] array, int sourceIndex, int destinationIndex, int count)
+        public static void MoveSlice<TValue>(this TValue[] array, int sourceIndex, int destinationIndex, int count)
         {
             if (count <= 0 || sourceIndex == destinationIndex)
                 return;
@@ -850,7 +850,7 @@ namespace UnityExtensions
             Swap(ref array[index1], ref array[index2]);
         }
 
-        public static void SwapElements<TValue>(this NativeArray<TValue> array, int index1, int index2)
+        public static void SwapElements<TValue>(ref this NativeArray<TValue> array, int index1, int index2)
             where TValue : struct
         {
             var temp = array[index1];
