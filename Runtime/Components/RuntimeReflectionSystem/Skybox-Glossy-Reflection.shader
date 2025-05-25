@@ -90,8 +90,6 @@ Shader "Skybox/GlossyReflection"
 
             #include "UnityCG.cginc"
 
-            samplerCUBE _Tex;
-            half4 _Tex_HDR;
             half4 _Tint;
             half _Exposure;
             float _Rotation;
@@ -131,8 +129,14 @@ Shader "Skybox/GlossyReflection"
 
             half4 frag(v2f i) : SV_Target
             {
-                half4 tex = texCUBE(_Tex, i.texcoord);
-                half3 c = DecodeHDR(tex, _Tex_HDR);
+                //https://docs.unity3d.com/Manual/built-in-shader-examples-reflections.html
+                // unity_SpecCube0 and unity_SpecCube0_HDR are built-in shader variables.
+                // unity_SpecCube0 contains data for the active reflection probe.
+                // Most regular cubemaps are declared and used using standard HLSL syntax (samplerCUBE and texCUBE),
+                // however the reflection probe cubemaps in Unity are declared in a special way to save on sampler slots.
+                // The UNITY_SAMPLE_TEXCUBE macro is required to sample the unity_SpecCube0 cubemap.
+                half4 tex = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, i.texcoord);
+                half3 c = DecodeHDR(tex, unity_SpecCube0_HDR);
                 c = c * _Tint.rgb * unity_ColorSpaceDouble.rgb;
                 c *= _Exposure;
 

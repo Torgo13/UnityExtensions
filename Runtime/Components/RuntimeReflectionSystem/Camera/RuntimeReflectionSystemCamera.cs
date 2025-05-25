@@ -4,6 +4,7 @@
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 
 namespace UnityExtensions
 {
@@ -14,8 +15,10 @@ namespace UnityExtensions
         readonly int TexA = Shader.PropertyToID("_TexA");
         readonly int TexB = Shader.PropertyToID("_TexB");
         readonly int Blend = Shader.PropertyToID("_Blend");
+#else
+        readonly int Tex = Shader.PropertyToID("_Tex");
 #endif // BLEND_SHADER
-        
+
         readonly int MipLevel = Shader.PropertyToID("_MipLevel");
 
         [SerializeField] Shader skyboxShader;
@@ -94,14 +97,14 @@ namespace UnityExtensions
 #if BLEND_SHADER
                     skyboxShader = Shader.Find("Skybox/CubemapBlend");
 #else
-                    skyboxShader = Shader.Find("Skybox/GlossyReflection");
+                    skyboxShader = Shader.Find("Skybox/CubemapSimple");
 #endif // BLEND_SHADER
 
                 _skyboxMaterial = CoreUtils.CreateEngineMaterial(skyboxShader);
 
                 if (_skyboxMaterial == null)
                 {
-                    Destroy(this);
+                    CoreUtils.Destroy(this);
                     return;
                 }
 
@@ -129,8 +132,8 @@ namespace UnityExtensions
             for (int i = 0; i < ProbeCount; i++)
             {
                 _renderTextures[i] = new RenderTexture(desc);
-                _renderTextures[i].Create();
                 _renderTextures[i].hideFlags = HideFlags.HideAndDontSave;
+                _ = _renderTextures[i].Create();
             }
 
 #if BLEND_SHADER
@@ -144,15 +147,19 @@ namespace UnityExtensions
             };
             
             _blendedTexture = new RenderTexture(desc);
-            _blendedTexture.Create();
             _blendedTexture.hideFlags = HideFlags.HideAndDontSave;
-            
+            _ = _blendedTexture.Create();
+
             // Take a full capture before applying it to the skybox
-            reflectionCamera.RenderToCubemap(_blendedTexture);
+            _ = reflectionCamera.RenderToCubemap(_blendedTexture);
 
             // Sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
             // or GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
-            RenderSettings.customReflectionTexture = _blendedTexture;
+            UpdateCustomReflectionTexture(unloadedScene: default, loadedScene: default);
+
+            SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
+
+            _skyboxMaterial.SetTexture(Tex, _blendedTexture);
 #endif // BLEND_SHADER
         }
 
@@ -167,8 +174,6 @@ namespace UnityExtensions
 
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
-
-            RenderSettings.customReflectionTexture = _blendedTexture;
 
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
@@ -188,6 +193,8 @@ namespace UnityExtensions
 
         void OnDestroy()
         {
+            SceneManager.activeSceneChanged -= UpdateCustomReflectionTexture;
+
             if (_createdMaterial)
                 CoreUtils.Destroy(_skyboxMaterial);
 
@@ -232,9 +239,6 @@ namespace UnityExtensions
             bool finishedRendering = frameCount >= BlendFrames;
             if (finishedRendering)
             {
-                //ReflectionProbe.UpdateCachedState();
-                //return base.TickRealtimeProbes();
-
 #if BLEND_SHADER
                 _skyboxMaterial.SetTexture(TexA, _renderTextures[PreviousIndex()]);
                 _skyboxMaterial.SetTexture(TexB, _renderTextures[_index]);
@@ -253,7 +257,7 @@ namespace UnityExtensions
             }
 
             // Render a single cubemap face
-            reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
+            _ = reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
 
             // Blend between the previous and current camera render textures
             float blend = frameCount / (float)BlendFrames;
@@ -350,11 +354,19 @@ namespace UnityExtensions
                 mipLevel = 3;
 
             if (noiseReduction)
-                mipLevel = System.Math.Clamp(mipLevel + 1, 2, 3);
+                mipLevel = Mathf.Clamp(mipLevel + 1, 2, 3);
 
             return mipLevel;
         }
 
+        /// <summary>
+        /// <see cref="RenderTexture"/> contents can become "lost" on certain events, like loading a new level,
+        /// the system going to a screensaver mode, in and out of fullscreen and so on.
+        /// When that happens, existing render textures will become "not yet created" again.
+        /// Check for that with the <see cref="RenderTexture.IsCreated"/> function.
+        /// <see href="https://docs.unity3d.com/ScriptReference/RenderTexture.html"/>
+        /// </summary>
+        /// <returns>False if any of the RenderTextures could not be recreated.</returns>
         bool EnsureCreated()
         {
             bool created = true;
@@ -374,6 +386,14 @@ namespace UnityExtensions
         }
 
         #region Ambient
+
+        /// <summary>
+        /// Update customReflectionTexture when the scene changes.
+        /// </summary>
+        void UpdateCustomReflectionTexture(Scene unloadedScene, Scene loadedScene)
+        {
+            RenderSettings.customReflectionTexture = _blendedTexture;
+        }
 
 #if BLEND_SHADER
 #else
