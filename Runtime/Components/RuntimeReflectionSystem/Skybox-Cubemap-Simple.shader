@@ -7,6 +7,7 @@ Shader "Skybox/CubemapSimple"
         [Gamma] _Exposure("Exposure", Range(0, 8)) = 1.0
         _Rotation("Rotation", Range(0, 360)) = 0
         [MainTexture] [NoScaleOffset] _Tex("Cubemap (HDR)", Cube) = "grey" {}
+        _MipLevel("Mip Level", Range(1, 16)) = 1.0
     }
 
     SubShader
@@ -30,6 +31,7 @@ Shader "Skybox/CubemapSimple"
             CBUFFER_START(UnityPerMaterial)
             half4 _Tint;
             half _Exposure;
+            half _MipLevel;
             float _Rotation;
             CBUFFER_END
 
@@ -68,7 +70,7 @@ Shader "Skybox/CubemapSimple"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half3 c = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, IN.texcoord, 0).rgb;
+                half3 c = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, IN.texcoord, _MipLevel).rgb;
                 c *= _Tint.rgb;
                 c *= _Exposure;
 
