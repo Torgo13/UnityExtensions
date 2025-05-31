@@ -1,3 +1,5 @@
+#if PACKAGE_ENTITIES_GRAPHICS
+#else
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -246,3 +248,4 @@ namespace UnityExtensions.Packages
         #endregion // Unity.Rendering
     }
 }
+#endif // PACKAGE_ENTITIES_GRAPHICS

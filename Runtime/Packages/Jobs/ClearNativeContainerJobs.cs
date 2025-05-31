@@ -42,4 +42,53 @@ namespace UnityExtensions.Packages
         }
     }
     #endregion // Unity.Megacity.Traffic
+
+    [BurstCompile]
+    public struct CopyArrayJob<T> : IJobFor where T : struct
+    {
+        [ReadOnly] public NativeArray<T> src;
+        [WriteOnly] public NativeArray<T> dst;
+
+        public void Execute(int index)
+        {
+            dst[index] = src[index];
+        }
+    }
+
+    [BurstCompile]
+    public struct SetArrayJob<T> : IJobFor where T : struct
+    {
+        [ReadOnly] public T src;
+        [WriteOnly] public NativeArray<T> dst;
+
+        public void Execute(int index)
+        {
+            dst[index] = src;
+        }
+    }
+
+    [BurstCompile]
+    public struct SwapArrayJob<T> : IJobFor where T : struct
+    {
+        public NativeArray<T> src0;
+        public NativeArray<T> src1;
+
+        public void Execute(int index)
+        {
+            (src0[index], src1[index]) = (src1[index], src0[index]);
+        }
+    }
+
+    [BurstCompile]
+    public struct CompareArrayJob<T> : IJobFor where T : struct, System.IEquatable<T>
+    {
+        [ReadOnly] public NativeArray<T> src0;
+        [ReadOnly] public NativeArray<T> src1;
+        [WriteOnly] public NativeArray<bool> dst;
+
+        public void Execute(int index)
+        {
+            dst[index] = src0[index].Equals(src1[index]);
+        }
+    }
 }

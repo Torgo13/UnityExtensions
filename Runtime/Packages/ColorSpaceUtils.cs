@@ -1,4 +1,6 @@
-﻿using Unity.Mathematics;
+﻿#if PACKAGE_RENDER_PIPELINES_CORE
+#else
+using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 // The contents of this file should be kept is sync with the ShaderLibrary\HDROutput.hlsl "Color Space transforms" section.
@@ -58,3 +60,4 @@ namespace UnityExtensions.Packages
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // PACKAGE_RENDER_PIPELINES_CORE

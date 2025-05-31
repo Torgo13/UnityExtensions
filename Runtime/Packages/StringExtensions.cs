@@ -44,12 +44,16 @@ namespace UnityExtensions.Packages
                 }
             }
 
+#if PACKAGE_STRINGBUILDER_EXTENSIONS
             if (trimEnd)
             {
                 System.Text.StringBuilderExtensions.TrimEnd(sb);
             }
 
             return sb.ToString();
+#else
+            return sb.ToString().TrimEnd();
+#endif // PACKAGE_STRINGBUILDER_EXTENSIONS
         }
     }
 }

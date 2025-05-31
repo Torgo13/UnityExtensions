@@ -1,5 +1,10 @@
-using TMPro;
 using UnityEngine;
+
+#if PACKAGE_TEXTMESH_PRO
+using Text = TMPro.TextMeshProUGUI;
+#else
+using Text = UnityEngine.UI.Text;
+#endif // PACKAGE_TEXTMESH_PRO
 
 namespace UnityExtensions.Packages
 {
@@ -8,7 +13,7 @@ namespace UnityExtensions.Packages
     public class EnumSelector : MonoBehaviour
     {
         public string[] options;
-        public TextMeshProUGUI text;
+        public Text text;
         public bool loop;
         public int startOption;
         private int _currentOption;

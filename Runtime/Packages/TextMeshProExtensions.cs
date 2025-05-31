@@ -1,3 +1,4 @@
+#if PACKAGE_TEXTMESH_PRO
 using System;
 using TMPro;
 using UnityEngine.Pool;
@@ -104,3 +105,4 @@ namespace UnityExtensions.Packages
         #endregion // Unity.TouchFramework
     }
 }
+#endif // PACKAGE_TEXTMESH_PRO

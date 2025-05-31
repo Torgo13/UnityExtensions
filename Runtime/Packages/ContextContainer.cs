@@ -1,3 +1,5 @@
+#if PACKAGE_RENDER_PIPELINES_CORE
+#else
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -200,3 +202,4 @@ namespace UnityExtensions.Packages
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // PACKAGE_RENDER_PIPELINES_CORE
