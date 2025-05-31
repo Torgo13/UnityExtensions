@@ -100,6 +100,25 @@ namespace UnityExtensions
             return new Color32(r, g, b, a);
         }
 
+        public static Color GammaToLinear(this Color c)
+        {
+            return new Color(GammaToLinear(c.r), GammaToLinear(c.g), GammaToLinear(c.b), c.a);
+        }
+
+        static float GammaToLinear(float v)
+        {
+            if (v <= 0.04045f)
+                return v / 12.92f;
+
+            if (v < 1.0f)
+                return (float)System.Math.Pow((v + 0.055f) / 1.055f, 2.4f);
+
+            if (v == 1.0f)
+                return 1.0f;
+
+            return (float)System.Math.Pow(v, 2.2f);
+        }
+
         public static Color32 GammaToLinear(this Color32 c)
         {
             return new Color32(GammaToLinear(c.r), GammaToLinear(c.g), GammaToLinear(c.b), c.a);
