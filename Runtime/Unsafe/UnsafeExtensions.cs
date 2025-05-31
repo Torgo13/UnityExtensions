@@ -402,8 +402,10 @@ namespace UnityExtensions.Unsafe
             Assert.IsNotNull(array);
             Assert.IsTrue(nativeList.IsCreated);
 
-            nativeList.Clear();
-            nativeList.AddRange(array);
+            Unity.Collections.NotBurstCompatible.Extensions.CopyFromNBC(nativeList, array);
+
+            //nativeList.Clear();
+            //nativeList.AddRange(array);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -276,12 +276,14 @@ namespace UnityExtensions.Packages
             DesiredFrameRate = target;
             DesiredFrameTime = 1000.0 / target;
 
+            Application.targetFrameRate = (int)System.Math.Round(target);
+
             ResetScale();
         }
 
         private void Start()
         {
-            Application.targetFrameRate = (int)System.Math.Round(DesiredFrameRate);
+            SetTargetFramerate(DesiredFrameRate);
 
             // Metal will fail the timer frequency check, but we know it works so skip the check in that case.
             if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Metal)
