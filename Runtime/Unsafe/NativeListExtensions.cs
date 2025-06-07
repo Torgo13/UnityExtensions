@@ -68,7 +68,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
 

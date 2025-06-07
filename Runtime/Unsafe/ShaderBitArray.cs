@@ -77,6 +77,7 @@ namespace UnityExtensions.Unsafe
             set
             {
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
+
                 unsafe
                 {
                     fixed (float* floatData = _data)

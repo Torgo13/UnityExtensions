@@ -168,7 +168,7 @@ namespace UnityExtensions.Unsafe
         }
 
         /// <exception cref="UnityEngine.UnityException">Can only be called from the main thread</exception>
-        public unsafe static void MemClear(IntPtr destination, long size)
+        public static void MemClear(IntPtr destination, long size)
         {
             MemSet(destination, 0, size);
         }
@@ -237,6 +237,187 @@ namespace UnityExtensions.Unsafe
         #endregion // IntPtr
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+        #region Unmanaged
+        #region ArrayToIntPtr
+        /// <inheritdoc cref="MemCpy"/>
+        public unsafe static void MemCpy<T>(IntPtr destination, T[] source, long size) where T : unmanaged
+        {
+            fixed (void* p = source)
+            {
+                UnsafeUtility.MemCpy((void*)destination, p, size);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public unsafe static void MemCpyReplicate<T>(IntPtr destination, T[] source, int size, int count) where T : unmanaged
+        {
+            fixed (void* p = source)
+            {
+                UnsafeUtility.MemCpyReplicate((void*)destination, p, size, count);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public unsafe static void MemCpyStride<T>(IntPtr destination, int destinationStride, T[] source, int sourceStride, int elementSize, int count) where T : unmanaged
+        {
+            fixed (void* p = source)
+            {
+                UnsafeUtility.MemCpyStride((void*)destination, destinationStride, p, sourceStride, elementSize, count);
+            }
+        }
+        #endregion // ArrayToIntPtr
+
+        #region IntPtrToArray
+        /// <inheritdoc cref="MemCpy"/>
+        public unsafe static void MemCpy<T>(T[] destination, IntPtr source, long size) where T : unmanaged
+        {
+            fixed (void* p = destination)
+            {
+                UnsafeUtility.MemCpy(p, (void*)source, size);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public unsafe static void MemCpyReplicate<T>(T[] destination, IntPtr source, int size, int count) where T : unmanaged
+        {
+            fixed (void* p = destination)
+            {
+                UnsafeUtility.MemCpyReplicate(p, (void*)source, size, count);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public unsafe static void MemCpyStride<T>(T[] destination, int destinationStride, IntPtr source, int sourceStride, int elementSize, int count) where T : unmanaged
+        {
+            fixed (void* p = destination)
+            {
+                UnsafeUtility.MemCpyStride(p, destinationStride, (void*)source, sourceStride, elementSize, count);
+            }
+        }
+        #endregion // IntPtrToArray
+
+        #region ArrayToArray
+        /// <inheritdoc cref="MemCpy"/>
+        public unsafe static void MemCpy<T>(T[] destination, T[] source, long size) where T : unmanaged
+        {
+            fixed (void* p0 = source)
+            fixed (void* p1 = source)
+            {
+                UnsafeUtility.MemCpy(p1, p0, size);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public unsafe static void MemCpyReplicate<T>(T[] destination, T[] source, int size, int count) where T : unmanaged
+        {
+            fixed (void* p0 = source)
+            fixed (void* p1 = source)
+            {
+                UnsafeUtility.MemCpyReplicate(p1, p0, size, count);
+            }
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public unsafe static void MemCpyStride<T>(T[] destination, int destinationStride, T[] source, int sourceStride, int elementSize, int count) where T : unmanaged
+        {
+            fixed (void* p0 = source)
+            fixed (void* p1 = source)
+            {
+                UnsafeUtility.MemCpyStride(p1, destinationStride, p0, sourceStride, elementSize, count);
+            }
+        }
+        #endregion // ArrayToArray
+        #endregion // Unmanaged
+
+        #region Struct
+        #region ArrayToIntPtr
+        /// <inheritdoc cref="MemCpy"/>
+        public static void MemCpyStruct<T>(IntPtr destination, T[] source, long size) where T : struct
+        {
+            MemCpy(destination, PinGCArrayAndGetDataAddress(source, out var sourceGCHandle), size);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public static void MemCpyReplicateStruct<T>(IntPtr destination, T[] source, int size, int count) where T : struct
+        {
+            MemCpyReplicate(destination, PinGCArrayAndGetDataAddress(source, out var sourceGCHandle), size, count);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public static void MemCpyStrideStruct<T>(IntPtr destination, int destinationStride, T[] source, int sourceStride, int elementSize, int count) where T : struct
+        {
+            MemCpyStride(destination, destinationStride, PinGCArrayAndGetDataAddress(source, out var sourceGCHandle), sourceStride, elementSize, count);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+        #endregion // ArrayToIntPtr
+
+        #region IntPtrToArray
+        /// <inheritdoc cref="MemCpy"/>
+        public static void MemCpyStruct<T>(T[] destination, IntPtr source, long size) where T : struct
+        {
+            MemCpy(PinGCArrayAndGetDataAddress(destination, out var sourceGCHandle), source, size);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public static void MemCpyReplicateStruct<T>(T[] destination, IntPtr source, int size, int count) where T : struct
+        {
+            MemCpyReplicate(PinGCArrayAndGetDataAddress(destination, out var sourceGCHandle), source, size, count);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public static void MemCpyStrideStruct<T>(T[] destination, int destinationStride, IntPtr source, int sourceStride, int elementSize, int count) where T : struct
+        {
+            MemCpyStride(PinGCArrayAndGetDataAddress(destination, out var sourceGCHandle), destinationStride, source, sourceStride, elementSize, count);
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+        }
+        #endregion // IntPtrToArray
+
+        #region ArrayToArray
+        /// <inheritdoc cref="MemCpy"/>
+        public static void MemCpyStruct<T>(T[] destination, T[] source, long size) where T : struct
+        {
+            MemCpy(
+                PinGCArrayAndGetDataAddress(destination, out var destinationGCHandle),
+                PinGCArrayAndGetDataAddress(source, out var sourceGCHandle),
+                size);
+
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+            UnsafeUtility.ReleaseGCObject(destinationGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyReplicate"/>
+        public static void MemCpyReplicateStruct<T>(T[] destination, T[] source, int size, int count) where T : struct
+        {
+            MemCpyReplicate(
+                PinGCArrayAndGetDataAddress(destination, out var destinationGCHandle),
+                PinGCArrayAndGetDataAddress(source, out var sourceGCHandle),
+                size, count);
+
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+            UnsafeUtility.ReleaseGCObject(destinationGCHandle);
+        }
+
+        /// <inheritdoc cref="MemCpyStride"/>
+        public static void MemCpyStrideStruct<T>(T[] destination, int destinationStride, T[] source, int sourceStride, int elementSize, int count) where T : struct
+        {
+            MemCpyStride(
+                PinGCArrayAndGetDataAddress(destination, out var destinationGCHandle),
+                destinationStride,
+                PinGCArrayAndGetDataAddress(source, out var sourceGCHandle),
+                sourceStride,
+                elementSize,
+                count);
+
+            UnsafeUtility.ReleaseGCObject(sourceGCHandle);
+            UnsafeUtility.ReleaseGCObject(destinationGCHandle);
+        }
+        #endregion // ArrayToArray
+        #endregion // Struct
+
         //https://github.com/needle-mirror/com.unity.physics/blob/master/Unity.Physics/Base/Containers/UnsafeEx.cs
         #region Unity.Physics
         public static unsafe long CalculateOffset<T, U>(ref T value, ref U baseValue)
@@ -254,13 +435,13 @@ namespace UnityExtensions.Unsafe
         }
 
         #region IntPtr
-        public static unsafe long CalculateOffset<T>(IntPtr value, ref T baseValue)
+        public static long CalculateOffset<T>(IntPtr value, ref T baseValue)
             where T : struct
         {
             return value.ToInt64() - AddressOf(ref baseValue).ToInt64();
         }
 
-        public static unsafe long CalculateOffset(IntPtr value, IntPtr baseValue)
+        public static long CalculateOffset(IntPtr value, IntPtr baseValue)
         {
             return value.ToInt64() - baseValue.ToInt64();
         }
@@ -270,7 +451,7 @@ namespace UnityExtensions.Unsafe
         #region CopyTo
         #region CopyToArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void CopyTo<T>(this List<T> list, T[] array) where T : struct
+        public static void CopyTo<T>(this List<T> list, T[] array) where T : struct
         {
             Assert.IsNotNull(list);
             Assert.IsNotNull(array);
@@ -278,17 +459,14 @@ namespace UnityExtensions.Unsafe
                 array.Length >= list.Count,
                 $"Cannot copy {nameof(list)} of size {list.Count} into {nameof(array)} of size {array.Length}.");
 
-            UnsafeUtility.MemCpy(
-                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
-                UnsafeUtility.PinGCArrayAndGetDataAddress(NoAllocHelpers.ExtractArrayFromList(list), out var listGCHandle),
+            MemCpyStruct(
+                array,
+                NoAllocHelpers.ExtractArrayFromList(list),
                 list.Count * UnsafeUtility.SizeOf<T>());
-
-            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
-            UnsafeUtility.ReleaseGCObject(listGCHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void CopyTo<T>(this NativeArray<T> nativeArray, T[] array) where T : struct
+        public static void CopyTo<T>(this NativeArray<T> nativeArray, T[] array) where T : struct
         {
             Assert.IsTrue(nativeArray.IsCreated);
             Assert.IsNotNull(array);
@@ -296,16 +474,14 @@ namespace UnityExtensions.Unsafe
                 array.Length >= nativeArray.Length,
                 $"Cannot copy {nameof(nativeArray)} of size {nativeArray.Length} into {nameof(array)} of size {array.Length}.");
 
-            UnsafeUtility.MemCpy(
-                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
-                nativeArray.GetUnsafePtr(),
+            MemCpyStruct(
+                array,
+                nativeArray.GetIntPtr(),
                 nativeArray.Length * UnsafeUtility.SizeOf<T>());
-
-            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void CopyTo<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
+        public static void CopyTo<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsNotNull(array);
@@ -313,12 +489,10 @@ namespace UnityExtensions.Unsafe
                 array.Length >= nativeList.Length,
                 $"Cannot copy {nameof(nativeList)} of size {nativeList.Length} into {nameof(array)} of size {array.Length}.");
 
-            UnsafeUtility.MemCpy(
-                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out var arrayGCHandle),
-                nativeList.GetUnsafePtr(),
+            MemCpy(
+                array,
+                nativeList.GetIntPtr(),
                 nativeList.Length * UnsafeUtility.SizeOf<T>());
-
-            UnsafeUtility.ReleaseGCObject(arrayGCHandle);
         }
         #endregion // CopyToArray
 

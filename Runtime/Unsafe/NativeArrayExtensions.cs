@@ -103,6 +103,27 @@ namespace UnityExtensions.Unsafe
 
     public static class NativeArrayExtensions
     {
+        //https://github.com/Unity-Technologies/UnityCsReference/blob/4b463aa72c78ec7490b7f03176bd012399881768/Runtime/Export/NativeArray/NativeArray.cs#L1024
+        #region Unity.Collections.LowLevel.Unsafe
+        #region IntPtr
+        /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
+        /// <remarks>The caller is still the owner of the data.</remarks>
+        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(IntPtr dataPointer, int length, Allocator allocator) where T : struct
+        {
+            return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)dataPointer, length, allocator);
+        }
+        #endregion // IntPtr
+
+        /// <inheritdoc cref="ConvertExistingDataToNativeArray"/>
+        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data, Allocator allocator) where T : unmanaged
+        {
+            fixed (T* addr = data)
+            {
+                return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(addr, data.Length, allocator);
+            }
+        }
+        #endregion // Unity.Collections.LowLevel.Unsafe
+
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeArray<T> array) where T : struct

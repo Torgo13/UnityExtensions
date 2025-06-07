@@ -9,6 +9,31 @@ namespace UnityExtensions.Unsafe
 {
     public static class UnsafeListExtensions
     {
+        //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
+        #region UnityEngine.Formats.Alembic.Importer
+        public static unsafe void* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return unsafeList.Length == 0 ? null : unsafeList.Ptr;
+        }
+
+        public static unsafe void* GetReadOnlyPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return unsafeList.Length == 0 ? null : unsafeList.AsReadOnly().Ptr;
+        }
+
+        #region IntPtr
+        public static unsafe IntPtr GetIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return unsafeList.Length == 0 ? IntPtr.Zero : (IntPtr)unsafeList.Ptr;
+        }
+
+        public static unsafe IntPtr GetReadOnlyIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return unsafeList.Length == 0 ? IntPtr.Zero : (IntPtr)unsafeList.AsReadOnly().Ptr;
+        }
+        #endregion // IntPtr
+        #endregion // UnityEngine.Formats.Alembic.Importer
+
         //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs
         #region CullingExtensions
         public static unsafe NativeArray<T> AsNativeArray<T>(this UnsafeList<T> list) where T : unmanaged
@@ -41,7 +66,7 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
 

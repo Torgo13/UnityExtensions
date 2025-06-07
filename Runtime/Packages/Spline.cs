@@ -101,6 +101,7 @@ namespace UnityExtensions.Packages
                     SplinePoint point = segments[i].EvaluatePointAtDistance(remainingDistance);
                     return point;
                 }
+
                 remainingDistance -= segments[i].CurveLength;
             }
 

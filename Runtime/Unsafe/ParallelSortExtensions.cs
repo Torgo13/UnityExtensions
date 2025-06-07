@@ -143,7 +143,7 @@ namespace UnityExtensions.Unsafe
 
             private static unsafe int AtomicIncrement(NativeArray<int> counter)
             {
-                return Interlocked.Increment(ref UnsafeUtility.AsRef<int>((int*)counter.GetUnsafePtr()));
+                return Interlocked.Increment(ref UnsafeUtility.AsRef<int>(counter.GetUnsafePtr()));
             }
 
             private int JobIndexPrefixSum(int sum, int i)
