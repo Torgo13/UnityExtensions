@@ -103,7 +103,11 @@ namespace UnityExtensions.Packages
         public readonly Curve ToCurve()
         {
             NativeArray<Keyframe> keys = array;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref keys, AtomicSafetyHandle.Create());
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+
             return new Curve(keys);
         }
 
