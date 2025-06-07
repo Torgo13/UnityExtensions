@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace UnityExtensions.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(Quaternion))]
     internal class QuaternionPropertyDrawer : PropertyDrawer

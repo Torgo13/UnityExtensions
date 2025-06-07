@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace UnityExtensions.Collections
 {
     /// <summary>
     /// A queue-like data structure that allows read-only access to all values in the queue.

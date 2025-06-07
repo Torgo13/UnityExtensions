@@ -1,8 +1,9 @@
 using System;
 using System.Diagnostics;
+using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Unity.Collections
+namespace UnityExtensions.Unsafe
 {
     [GenerateTestsForBurstCompatibility]
     internal struct Bitwise

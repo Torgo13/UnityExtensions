@@ -1,5 +1,6 @@
 using System;
 using NUnit.Framework;
+using UnityExtensions.Collections;
 
 namespace UnityExtensions.Editor.Tests
 {
