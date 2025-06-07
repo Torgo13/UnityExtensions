@@ -13,7 +13,7 @@ namespace UnityExtensions.Packages
                 {
                     if (!removeChars.Contains(c))
                     {
-                        sb.Append(c);
+                        _ = sb.Append(c);
                     }
                 }
 

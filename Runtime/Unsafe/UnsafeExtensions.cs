@@ -32,7 +32,7 @@ namespace UnityExtensions.Unsafe
             foreach (FieldInfo f in t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 if (!IsBlittableValueType(f.FieldType))
-                    ret.Append(GetReasonForTypeNonBlittableImpl(f.FieldType, $"{name}.{f.Name}"));
+                    _ = ret.Append(GetReasonForTypeNonBlittableImpl(f.FieldType, $"{name}.{f.Name}"));
             }
 
             return ret.ToString();

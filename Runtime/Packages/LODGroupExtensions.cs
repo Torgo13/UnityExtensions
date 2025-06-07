@@ -60,7 +60,7 @@ namespace UnityExtensions.Packages
             }
 
             /// <inheritdoc/>
-            public int GetHashCode(LODParams obj)
+            public readonly int GetHashCode(LODParams obj)
             {
                 return System.HashCode.Combine(distanceScale, cameraPos.x, cameraPos.y, cameraPos.z, isOrtho, orthoSize);
             }

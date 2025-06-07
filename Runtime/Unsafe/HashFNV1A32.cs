@@ -104,8 +104,10 @@ namespace UnityExtensions.Unsafe
             }
         }
 
+        readonly
         public int value => (int)_hash;
 
+        readonly
         public override int GetHashCode()
         {
             return value;

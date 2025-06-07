@@ -123,7 +123,7 @@ namespace UnityExtensions.Packages
                 for (int i = 0; i < curves.Length; i++)
                 {
                     job.curves[i] = new CurveData(curves[i], alloc);
-                    int frameCount = (int)math.ceil(frameRate * curves[i].Duration);
+                    //int frameCount = (int)math.ceil(frameRate * curves[i].Duration);
                     //var outCurve = new Curve(frameCount, alloc);
                     //outCurves[i] = outCurve;
                     job.outCurves[i] = new CurveData(outCurves[i], alloc);
@@ -157,9 +157,9 @@ namespace UnityExtensions.Packages
                 int numKeys = keyframes.Length;
                 float start = keyframes[0].time;
                 float end = keyframes[numKeys - 1].time;
-                float duration = end - start;
+                //float duration = end - start;
                 float frame = 1 / frameRate;
-                int numFrames = bakedFrames.Length;
+                //int numFrames = bakedFrames.Length;
 
                 for (int i = 0; i < sampleRange.numFrames; i++)
                 {

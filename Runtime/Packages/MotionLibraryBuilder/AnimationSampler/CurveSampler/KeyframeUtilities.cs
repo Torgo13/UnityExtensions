@@ -115,7 +115,7 @@ namespace UnityExtensions.Packages
                 m1 = 0;
             }
 
-            return Hermite.Evaluate(t, lhs.value, m0, m1, rhs.value);
+            return HermitCurve.Evaluate(t, lhs.value, m0, m1, rhs.value);
         }
 
         public static void AlignWithNext(ref Keyframe key, Keyframe next, bool broken)

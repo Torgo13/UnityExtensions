@@ -115,7 +115,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="numBits">Number of bits to get (must be 1-16).</param>
         /// <exception cref="ArgumentException">Thrown if `pos` or `numBits` are out of bounds or if `pos + numBits` exceeds 16.</exception>
         /// <returns>The requested range of bits from the bit field stored in the least-significant bits of a ushort. All other bits of the ushort will be 0.</returns>
-        public ushort GetBits(int pos, int numBits = 1)
+        public readonly ushort GetBits(int pos, int numBits = 1)
         {
             CheckArgs(pos, numBits);
             var mask = (ushort)(0xffffu >> (16 - numBits));
@@ -127,7 +127,7 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         /// <param name="pos">Position in the bit field (must be 0-15).</param>
         /// <returns>True if the bit at the position is 1.</returns>
-        public bool IsSet(int pos)
+        public readonly bool IsSet(int pos)
         {
             return 0 != GetBits(pos);
         }
@@ -139,7 +139,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="numBits">Number of bits to test (must be 1-16).</param>
         /// <exception cref="ArgumentException">Thrown if `pos` or `numBits` are out of bounds or if `pos + numBits` exceeds 16.</exception>
         /// <returns>True if none of the bits in the contiguous range are 1.</returns>
-        public bool TestNone(int pos, int numBits = 1)
+        public readonly bool TestNone(int pos, int numBits = 1)
         {
             return 0 == GetBits(pos, numBits);
         }
@@ -151,7 +151,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="numBits">Number of bits to test (must be 1-16).</param>
         /// <exception cref="ArgumentException">Thrown if `pos` or `numBits` are out of bounds or if `pos + numBits` exceeds 16.</exception>
         /// <returns>True if at least one bit in the contiguous range is 1.</returns>
-        public bool TestAny(int pos, int numBits = 1)
+        public readonly bool TestAny(int pos, int numBits = 1)
         {
             return 0 != GetBits(pos, numBits);
         }
@@ -163,7 +163,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="numBits">Number of bits to test (must be 1-16).</param>
         /// <exception cref="ArgumentException">Thrown if `pos` or `numBits` are out of bounds or if `pos + numBits` exceeds 16.</exception>
         /// <returns>True if all bits in the contiguous range are 1.</returns>
-        public bool TestAll(int pos, int numBits = 1)
+        public readonly bool TestAll(int pos, int numBits = 1)
         {
             CheckArgs(pos, numBits);
             var mask = (ushort)(0xffffu >> (16 - numBits));
@@ -174,7 +174,7 @@ namespace UnityExtensions.Unsafe
         /// Returns the number of bits that are 1.
         /// </summary>
         /// <returns>The number of bits that are 1.</returns>
-        public int CountBits()
+        public readonly int CountBits()
         {
             return math.countbits((int)Value);
         }
@@ -183,7 +183,7 @@ namespace UnityExtensions.Unsafe
         /// Returns the number of leading zeroes.
         /// </summary>
         /// <returns>The number of leading zeros.</returns>
-        public int CountLeadingZeros()
+        public readonly int CountLeadingZeros()
         {
             return math.clamp(math.lzcnt(Value << 16), 0, 16);
         }
@@ -192,7 +192,7 @@ namespace UnityExtensions.Unsafe
         /// Returns the number of trailing zeros.
         /// </summary>
         /// <returns>The number of trailing zeros.</returns>
-        public int CountTrailingZeros()
+        public readonly int CountTrailingZeros()
         {
             return math.clamp(math.tzcnt((int)Value), 0, 16);
         }

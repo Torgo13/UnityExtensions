@@ -26,16 +26,16 @@ namespace UnityExtensions.Packages
 
         static float SubdivLength => 1.0f;
 
-        public float3 InPosition => p0;
-        public float3 OutPosition => p1;
-        public float3 InTangent => m0;
-        public float3 OutTangent => m1;
+        public readonly float3 InPosition => p0;
+        public readonly float3 OutPosition => p1;
+        public readonly float3 InTangent => m0;
+        public readonly float3 OutTangent => m1;
 
-        public float3 SegmentDirection => math.normalizesafe(p1 - p0, float3.zero);
+        public readonly float3 SegmentDirection => math.normalizesafe(p1 - p0, float3.zero);
 
-        public float CurveLength => curveLength;
+        public readonly float CurveLength => curveLength;
 
-        public float3 EvaluatePosition(float t)
+        public readonly float3 EvaluatePosition(float t)
         {
             float t2 = t * t;
             float t3 = t2 * t;
@@ -48,7 +48,7 @@ namespace UnityExtensions.Packages
             return p0 * h00 + m0 * h10 + p1 * h01 + m1 * h11;
         }
 
-        public float3 EvaluateTangent(float t)
+        public readonly float3 EvaluateTangent(float t)
         {
             float t2 = t * t;
 
@@ -70,7 +70,7 @@ namespace UnityExtensions.Packages
             };
         }
 
-        public float DistanceToTime(float distance)
+        public readonly float DistanceToTime(float distance)
         {
             float remainingDistance = distance;
 
@@ -120,5 +120,21 @@ namespace UnityExtensions.Packages
         int     subdivs;
         float   curveLength;
         #endregion // Unity.Kinematica
+
+        //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Hermite.cs
+        #region CurveSampler
+        public static float Evaluate(float t, float p0, float m0, float m1, float p1)
+        {
+            // Unrolled the equations to avoid precision issue.
+            // (2 * t^3 -3 * t^2 +1) * p0 + (t^3 - 2 * t^2 + t) * m0 + (-2 * t^3 + 3 * t^2) * p1 + (t^3 - t^2) * m1
+
+            var a = 2.0f * p0 + m0 - 2.0f * p1 + m1;
+            var b = -3.0f * p0 - 2.0f * m0 + 3.0f * p1 - m1;
+            var c = m0;
+            var d = p0;
+
+            return t * (t * (a * t + b) + c) + d;
+        }
+        #endregion // CurveSampler
     }
 }

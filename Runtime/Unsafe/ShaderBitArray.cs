@@ -24,9 +24,9 @@ namespace UnityExtensions.Unsafe
 
         private float[] _data;
 
-        public int elemLength => _data == null ? 0 : _data.Length;
-        public int bitCapacity => elemLength * BitsPerElement;
-        public float[] data => _data;
+        public readonly int elemLength => _data == null ? 0 : _data.Length;
+        public readonly int bitCapacity => elemLength * BitsPerElement;
+        public readonly float[] data => _data;
 
         public void Resize(int bitCount)
         {
@@ -43,16 +43,17 @@ namespace UnityExtensions.Unsafe
                 for (int i = 0; i < _data.Length; i++)
                     newData[i] = _data[i];
             }
+
             _data = newData;
         }
 
-        public void Clear()
+        public readonly void Clear()
         {
             for (int i = 0; i < _data.Length; i++)
                 _data[i] = 0;
         }
 
-        private void GetElementIndexAndBitOffset(int index, out int elemIndex, out int bitOffset)
+        private readonly void GetElementIndexAndBitOffset(int index, out int elemIndex, out int bitOffset)
         {
             elemIndex = index >> ElementShift;
             bitOffset = index & ElementMask;

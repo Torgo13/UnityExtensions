@@ -51,7 +51,7 @@ namespace UnityExtensions.Packages
             for (int i = 0; i < sb.Length;)
             {
                 if (removeChar == sb[i])
-                    sb.Remove(i, 1);
+                    _ = sb.Remove(i, 1);
                 else
                     i++;
             }
@@ -63,7 +63,9 @@ namespace UnityExtensions.Packages
         /// Discard StringComparison to keep compatibility with string.Replace
         /// </summary>
         public static StringBuilder Replace(this StringBuilder stringBuilder, string oldValue, string newValue,
+#pragma warning disable IDE0060 // Remove unused parameter
             StringComparison comparisonType)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             return stringBuilder.Replace(oldValue, newValue);
         }
@@ -78,8 +80,8 @@ namespace UnityExtensions.Packages
             int index = stringBuilder.IndexOf(oldValue, ignoreCase);
             while (index != -1)
             {
-                stringBuilder.Remove(index, oldValueLength);
-                stringBuilder.Insert(index, newValue);
+                _ = stringBuilder.Remove(index, oldValueLength);
+                _ = stringBuilder.Insert(index, newValue);
                 
                 index = stringBuilder.IndexOf(oldValue, ignoreCase);
             }

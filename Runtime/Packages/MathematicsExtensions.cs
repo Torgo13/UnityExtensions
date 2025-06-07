@@ -501,31 +501,6 @@ namespace UnityExtensions.Packages
                 return inverseAbs(z);
             }
         }
-
-        internal static void DisplayInverseAbs(float g)
-        {
-            var center = new Vector2(0.5f, 0.5f);
-            var size = new Vector2(0.1f, 0.1f);
-
-            var values = new float[100];
-
-            for (int i = 0; i < values.Length; ++i)
-            {
-                float f = i / (float)values.Length;
-
-                f = (f - 0.5f) * 2.0f;
-
-                f = inverseAbsHat(f, g);
-
-                values[i] = f;
-            }
-
-            var backgroundColor = new Color(0.0f, 0.0f, 0.0f, 0.25f);
-
-            //DebugDraw.Begin();
-            //DebugDraw.DrawGUIFunction(center, size, values, 0.0f, 1.0f, backgroundColor, Color.white);
-            //DebugDraw.End();
-        }
         #endregion // Unity.Mathematics
 
         //https://github.com/Unity-Technologies/DOTSSample/blob/5a8230597a8c4b999b278a63844c5238dacf51b6/Assets/Unity.Sample.Core/Scripts/Utils/MathHelper.cs

@@ -1,6 +1,5 @@
 using System.Xml;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace UnityExtensions.Packages
 {
@@ -13,7 +12,7 @@ namespace UnityExtensions.Packages
             var document = node.OwnerDocument;
             var attribute = document.CreateAttribute(name);
             attribute.Value = value;
-            node.Attributes.Append(attribute);
+            _ = node.Attributes.Append(attribute);
         }
 
         public static void CreateAttribute(this XmlNode node, string name, int value)
@@ -33,7 +32,7 @@ namespace UnityExtensions.Packages
             node.CreateAttribute("x", position.x);
             node.CreateAttribute("y", position.y);
             node.CreateAttribute("z", position.z);
-            parentNode.AppendChild(node);
+            _ = parentNode.AppendChild(node);
         }
 
         public static void CreateQuaternionNode(this XmlNode parentNode, string name, quaternion rotation)
@@ -44,7 +43,7 @@ namespace UnityExtensions.Packages
             node.CreateAttribute("y", rotation.value.y);
             node.CreateAttribute("z", rotation.value.z);
             node.CreateAttribute("w", rotation.value.w);
-            parentNode.AppendChild(node);
+            _ = parentNode.AppendChild(node);
         }
         #endregion // Unity.Kinematica
     }

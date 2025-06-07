@@ -276,7 +276,7 @@ namespace UnityExtensions.Unsafe
         {
             var capacity = array.Length;
             if (capacity == count)
-                GrowBy(ref array, capacityIncrement > 1 ? capacityIncrement : 1, allocator);
+                _ = GrowBy(ref array, capacityIncrement > 1 ? capacityIncrement : 1, allocator);
 
             var index = count;
             array[index] = value;
@@ -295,7 +295,7 @@ namespace UnityExtensions.Unsafe
                 if (capacityIncrement < growBy)
                     capacityIncrement = growBy;
 
-                GrowBy(ref array, capacityIncrement, allocator);
+                _ = GrowBy(ref array, capacityIncrement, allocator);
             }
 
             var offset = count;

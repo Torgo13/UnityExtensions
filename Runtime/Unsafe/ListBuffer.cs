@@ -10,29 +10,29 @@ namespace UnityExtensions.Unsafe
     /// </remarks>
     /// </summary>
     /// <typeparam name="T">The type of the data stored in the list.</typeparam>
-    public unsafe struct ListBuffer<T>
+    public readonly unsafe struct ListBuffer<T>
         where T : unmanaged
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ListBuffer.cs
         #region UnityEngine.Rendering
-        private T* _bufferPtr;
+        private readonly T* _bufferPtr;
         private readonly int _capacity;
         private readonly int* _countPtr;
 
         /// <summary>
         /// The pointer to the memory storage.
         /// </summary>
-        internal T* BufferPtr => _bufferPtr;
+        internal readonly T* BufferPtr => _bufferPtr;
 
         /// <summary>
         /// The number of item in the list.
         /// </summary>
-        public int Count => *_countPtr;
+        public readonly int Count => *_countPtr;
 
         /// <summary>
         /// The maximum number of item stored in this list.
         /// </summary>
-        public int Capacity => _capacity;
+        public readonly int Capacity => _capacity;
 
         /// <summary>
         /// Instantiate a new list.
@@ -53,7 +53,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="index">The index of the item to get.</param>
         /// <value>A reference to the item.</value>
         /// <exception cref="IndexOutOfRangeException">If the index is invalid.</exception>
-        public ref T this[in int index]
+        public readonly ref T this[in int index]
         {
             get
             {
@@ -71,7 +71,7 @@ namespace UnityExtensions.Unsafe
         /// </summary>
         /// <param name="index">The index of the item to get.</param>
         /// <returns>A reference to the item.</returns>
-        public ref T GetUnchecked(in int index) => ref _bufferPtr[index];
+        public readonly ref T GetUnchecked(in int index) => ref _bufferPtr[index];
 
         /// <summary>
         /// Try to add a value in the list.
@@ -81,7 +81,7 @@ namespace UnityExtensions.Unsafe
         ///   <c>true</c> when the value was added,
         ///   <c>false</c> when the value was not added because the capacity was reached.
         /// </returns>
-        public bool TryAdd(in T value)
+        public readonly bool TryAdd(in T value)
         {
             if (Count >= _capacity)
                 return false;
@@ -100,7 +100,7 @@ namespace UnityExtensions.Unsafe
         /// <param name="dstBuffer">The destination buffer of the copy operation.</param>
         /// <param name="startDstIndex">The index of the first element that will be copied in the destination buffer.</param>
         /// <param name="copyCount">The number of item to copy.</param>
-        public void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
+        public readonly void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
         {
             UnsafeUtility.MemCpy(dstBuffer + startDstIndex, _bufferPtr,
                 UnsafeUtility.SizeOf<T>() * copyCount);
@@ -114,7 +114,7 @@ namespace UnityExtensions.Unsafe
         ///   * <c>true</c> when the copy was performed.
         ///   * <c>false</c> when the copy was aborted because the destination have a capacity too small.
         /// </returns>
-        public bool TryCopyTo(ListBuffer<T> other)
+        public readonly bool TryCopyTo(ListBuffer<T> other)
         {
             if (other.Count + Count >= other._capacity)
                 return false;
@@ -133,7 +133,7 @@ namespace UnityExtensions.Unsafe
         ///   * <c>true</c> when the copy was performed.
         ///   * <c>false</c> when the copy was aborted because the capacity of this list is too small.
         /// </returns>
-        public bool TryCopyFrom(T* srcPtr, int count)
+        public readonly bool TryCopyFrom(T* srcPtr, int count)
         {
             if (count + Count > _capacity)
                 return false;

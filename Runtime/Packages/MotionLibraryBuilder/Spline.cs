@@ -1,6 +1,7 @@
 using System;
 using Unity.Collections;
 using Unity.Mathematics;
+
 #if USING_SNAPSHOT_DEBUGGER
 using Unity.SnapshotDebugger;
 using Buffer = Unity.SnapshotDebugger.Buffer;

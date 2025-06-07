@@ -100,7 +100,7 @@ namespace UnityExtensions.Packages
 
         public Keyframe this[int index] => array[index];
 
-        public Curve ToCurve()
+        public readonly Curve ToCurve()
         {
             NativeArray<Keyframe> keys = array;
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref keys, AtomicSafetyHandle.Create());

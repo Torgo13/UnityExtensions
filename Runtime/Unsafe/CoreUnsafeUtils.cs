@@ -126,13 +126,13 @@ namespace UnityExtensions.Unsafe
         }
 
         internal struct DefaultKeyGetter<T> : IKeyGetter<T, T>
-        { public T Get(ref T v) { return v; } }
+        { public readonly T Get(ref T v) { return v; } }
 
         // Note: this is a workaround needed to circumvent some AOT issues when building for xbox
         internal struct UintKeyGetter : IKeyGetter<uint, uint>
-        { public uint Get(ref uint v) { return v; } }
+        { public readonly uint Get(ref uint v) { return v; } }
         internal struct UlongKeyGetter : IKeyGetter<ulong, ulong>
-        { public ulong Get(ref ulong v) { return v; } }
+        { public readonly ulong Get(ref ulong v) { return v; } }
 
 
         /// <summary>
@@ -180,7 +180,9 @@ namespace UnityExtensions.Unsafe
         }
 
         private static void CalculateRadixSortSupportArrays(
+#pragma warning disable IDE0060 // Remove unused parameter
             int bitStates, int arrayLength, uint* supportArray,
+#pragma warning restore IDE0060 // Remove unused parameter
             out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
         {
             bucketIndices = supportArray;

@@ -63,7 +63,7 @@ namespace UnityExtensions.Unsafe
             var size = SizeOfCache<T>.Size;
 
             EnsureBufferCapacity(size);
-            s_TempBuffer.WriteStruct(ref data);
+            _ = s_TempBuffer.WriteStruct(ref data);
 
             stream.Write(s_TempBuffer, 0, size);
         }
@@ -97,7 +97,7 @@ namespace UnityExtensions.Unsafe
 
             EnsureBufferCapacity(size);
             var offset = s_TempBuffer.WriteStruct(ref strLen);
-            s_Encoding.GetBytes(str, 0, str.Length, s_TempBuffer, offset);
+            _ = s_Encoding.GetBytes(str, 0, str.Length, s_TempBuffer, offset);
 
             stream.Write(s_TempBuffer, 0, size);
         }

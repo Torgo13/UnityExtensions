@@ -89,11 +89,11 @@ namespace UnityExtensions.Unsafe
                     (arraySource, arrayDest) = (arrayDest, arraySource);
                 }
 
-                supportArray.Dispose(jobHandle);
-                counter.Dispose(jobHandle);
-                buckets.Dispose(jobHandle);
-                indices.Dispose(jobHandle);
-                indicesSum.Dispose(jobHandle);
+                _ = supportArray.Dispose(jobHandle);
+                _ = counter.Dispose(jobHandle);
+                _ = buckets.Dispose(jobHandle);
+                _ = indices.Dispose(jobHandle);
+                _ = indicesSum.Dispose(jobHandle);
             }
             else
             {
@@ -193,6 +193,7 @@ namespace UnityExtensions.Unsafe
                             IndicesSum[i] = sum;
                             sum += indexSum;
                         }
+
                         for (int i = 0; i < 8; ++i)
                         {
                             int indexSum = IndicesSum[i];

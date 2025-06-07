@@ -15,7 +15,7 @@ namespace UnityExtensions.Unsafe
         private NativeArray<long> _bits;
         private int _length;
 
-        public int Length => _length;
+        public readonly int Length => _length;
 
         public bool IsCreated
         {
@@ -37,7 +37,7 @@ namespace UnityExtensions.Unsafe
 
         public void Dispose(JobHandle inputDeps)
         {
-            _bits.Dispose(inputDeps);
+            _ = _bits.Dispose(inputDeps);
             _length = 0;
         }
 
@@ -57,6 +57,7 @@ namespace UnityExtensions.Unsafe
                     NativeArray<long>.Copy(_bits, newBits, _bits.Length);
                     _bits.Dispose();
                 }
+
                 _bits = newBits;
             }
 
@@ -72,10 +73,11 @@ namespace UnityExtensions.Unsafe
                     _bits[chunkIndex] &= (long)validMask;
                 }
             }
+
             _length = newLength;
         }
 
-        public void Set(int index, bool value)
+        public readonly void Set(int index, bool value)
         {
             unsafe
             {
@@ -97,7 +99,7 @@ namespace UnityExtensions.Unsafe
             }
         }
 
-        public bool Get(int index)
+        public readonly bool Get(int index)
         {
             unsafe
             {
@@ -122,13 +124,13 @@ namespace UnityExtensions.Unsafe
             _bits[chunkIndex] = (long)chunkBits;
         }
 
-        public unsafe ulong InterlockedReadChunk(int chunkIndex)
+        public readonly unsafe ulong InterlockedReadChunk(int chunkIndex)
         {
             long* entries = (long*)_bits.GetUnsafeReadOnlyPtr();
             return (ulong)Interlocked.Read(ref entries[chunkIndex]);
         }
 
-        public unsafe void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
+        public readonly unsafe void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
         {
             long* entries = (long*)_bits.GetUnsafePtr();
 
@@ -153,7 +155,7 @@ namespace UnityExtensions.Unsafe
             return array;
         }
 
-        public NativeArray<long> GetBitsArray()
+        public readonly NativeArray<long> GetBitsArray()
         {
             return _bits;
         }

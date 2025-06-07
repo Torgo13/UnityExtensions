@@ -41,17 +41,17 @@ namespace UnityExtensions.Packages
             }
         }
 
-        public float3 transform(float3 p)
+        public readonly float3 transform(float3 p)
         {
             return rotate(q, p) + t;
         }
 
-        public float3 transformDirection(float3 d)
+        public readonly float3 transformDirection(float3 d)
         {
             return rotate(q, d);
         }
 
-        public float3 inverseTransform(float3 p)
+        public readonly float3 inverseTransform(float3 p)
         {
             return inverse().transform(p);
         }
@@ -72,7 +72,7 @@ namespace UnityExtensions.Packages
         // v'-T=R*v
         // inverse(R)*(v' - T) = inverse(R)*R*v = v
         // v = -inverse(R)*T +inverse(R)*(v')
-        public AffineTransform inverse()
+        public readonly AffineTransform inverse()
         {
             quaternion inverseQ = conjugate(q);
             return new AffineTransform(
@@ -80,7 +80,7 @@ namespace UnityExtensions.Packages
         }
 
         // returns this.Inverse() * rhs
-        public AffineTransform inverseTimes(AffineTransform rhs)
+        public readonly AffineTransform inverseTimes(AffineTransform rhs)
         {
             quaternion inverseQ = conjugate(q);
             return new AffineTransform(
@@ -88,7 +88,7 @@ namespace UnityExtensions.Packages
                 mul(inverseQ, rhs.q));
         }
 
-        public AffineTransform alignHorizontally()
+        public readonly AffineTransform alignHorizontally()
         {
             quaternion alignRotation = MathematicsExtensions.forRotation(transformDirection(MathematicsExtensions.up), MathematicsExtensions.up);
 
@@ -96,7 +96,7 @@ namespace UnityExtensions.Packages
                 t, mul(alignRotation, q));
         }
 
-        public float3 Forward => transformDirection(new float3(0.0f, 0.0f, 1.0f));
+        public readonly float3 Forward => transformDirection(new float3(0.0f, 0.0f, 1.0f));
         #endregion // Unity.Mathematics
     }
 }

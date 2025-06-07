@@ -39,17 +39,17 @@ namespace UnityExtensions.Packages
             get { return new Interval(0, 0); }
         }
 
-        public bool IsEmpty()
+        public readonly bool IsEmpty()
         {
             return firstFrame == onePastLastFrame;
         }
 
-        public bool Contains(int frame)
+        public readonly bool Contains(int frame)
         {
             return (frame >= firstFrame && frame <= onePastLastFrame);
         }
 
-        public bool Overlaps(int firstFrame_, int onePastLastFrame_)
+        public readonly bool Overlaps(int firstFrame_, int onePastLastFrame_)
         {
             // The key to a better approach is inverting the sense of the question:
             // instead of asking whether two intervals overlap, try to find out when they don’t.
@@ -63,43 +63,43 @@ namespace UnityExtensions.Packages
             return firstFrame < onePastLastFrame_ && firstFrame_ < onePastLastFrame;
         }
 
-        public bool Overlaps(Interval rhs)
+        public readonly bool Overlaps(Interval rhs)
         {
             return Overlaps(rhs.firstFrame, rhs.onePastLastFrame);
         }
 
-        public bool Adjacent(Interval other)
+        public readonly bool Adjacent(Interval other)
         {
             return (OnePastLastFrame == other.FirstFrame) || (FirstFrame == other.OnePastLastFrame);
         }
 
-        public bool OverlapsOrAdjacent(Interval other)
+        public readonly bool OverlapsOrAdjacent(Interval other)
         {
             return Overlaps(other) || Adjacent(other);
         }
 
-        public bool Adjacent(int firstFrame_, int onePastLastFrame_)
+        public readonly bool Adjacent(int firstFrame_, int onePastLastFrame_)
         {
             return (OnePastLastFrame == firstFrame_) || (FirstFrame == onePastLastFrame_);
         }
 
-        public bool OverlapsOrAdjacent(int firstFrame_, int onePastLastFrame_)
+        public readonly bool OverlapsOrAdjacent(int firstFrame_, int onePastLastFrame_)
         {
             return Overlaps(firstFrame_, onePastLastFrame_) || Adjacent(firstFrame_, onePastLastFrame_);
         }
 
-        public bool Contains(Interval rhs)
+        public readonly bool Contains(Interval rhs)
         {
             return Contains(rhs.firstFrame) && Contains(rhs.onePastLastFrame);
         }
 
-        public bool Equals(Interval rhs)
+        public readonly bool Equals(Interval rhs)
         {
             return (FirstFrame == rhs.FirstFrame &&
                 OnePastLastFrame == rhs.OnePastLastFrame);
         }
 
-        public Interval Intersection(Interval rhs)
+        public readonly Interval Intersection(Interval rhs)
         {
             Assert.IsTrue(rhs.onePastLastFrame >= rhs.firstFrame);
             Assert.IsTrue(OverlapsOrAdjacent(rhs.firstFrame, rhs.onePastLastFrame));
@@ -109,7 +109,7 @@ namespace UnityExtensions.Packages
                 math.min(rhs.onePastLastFrame, onePastLastFrame));
         }
 
-        public Interval Union(int start, int end)
+        public readonly Interval Union(int start, int end)
         {
             Assert.IsTrue(end >= start);
             Assert.IsTrue(OverlapsOrAdjacent(start, end));
@@ -129,7 +129,7 @@ namespace UnityExtensions.Packages
             return lhs.Union(rhs.firstFrame, rhs.onePastLastFrame);
         }
 
-        public int FirstFrame
+        public readonly int FirstFrame
         {
             get
             {
@@ -139,7 +139,7 @@ namespace UnityExtensions.Packages
 
         public int NumFrames
         {
-            get
+            readonly get
             {
                 Assert.IsTrue(onePastLastFrame >= firstFrame);
                 return onePastLastFrame - firstFrame;
@@ -152,7 +152,7 @@ namespace UnityExtensions.Packages
             }
         }
 
-        public int OnePastLastFrame
+        public readonly int OnePastLastFrame
         {
             get
             {

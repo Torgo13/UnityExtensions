@@ -21,11 +21,11 @@ namespace UnityExtensions.Packages
 
         public float CurrentValue
         {
-            get { return m_currentValue; }
+            readonly get { return m_currentValue; }
             set { m_currentValue = value; }
         }
 
-        public float TargetValue
+        public readonly float TargetValue
         {
             get { return m_targetValue; }
         }
@@ -99,11 +99,11 @@ namespace UnityExtensions.Packages
 
         public float2 CurrentValue
         {
-            get { return m_currentValue; }
+            readonly get { return m_currentValue; }
             set { m_currentValue = value; }
         }
 
-        public float2 TargetValue
+        public readonly float2 TargetValue
         {
             get { return m_targetValue; }
         }
@@ -177,11 +177,11 @@ namespace UnityExtensions.Packages
 
         public float3 CurrentValue
         {
-            get { return m_currentValue; }
+            readonly get { return m_currentValue; }
             set { m_currentValue = value; }
         }
 
-        public float3 TargetValue
+        public readonly float3 TargetValue
         {
             get { return m_targetValue; }
         }
