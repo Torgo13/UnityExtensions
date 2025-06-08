@@ -91,22 +91,27 @@ namespace UnityExtensions
             else
             {
                 float smallestDelta = 1.0f;
-                float[] times = new float[cKeys.Length + aKeys.Length];
+                using var _0 = UnityEngine.Pool.ListPool<float>.Get(out var times);
+                times.EnsureCapacity(cKeys.Length + aKeys.Length);
                 for (int i = 0; i < cKeys.Length; ++i)
                 {
-                    times[i] = cKeys[i].time;
+                    times.Add(cKeys[i].time);
                 }
+
                 for (int i = 0; i < aKeys.Length; ++i)
                 {
-                    times[cKeys.Length + i] = aKeys[i].time;
+                    times.Add(aKeys[i].time);
                 }
-                Array.Sort(times);
+
+                times.Sort();
+
                 // Found the smallest increment between 2 keys
-                for (int i = 1; i < times.Length; ++i)
+                for (int i = 1, timesCount = times.Count; i < timesCount; ++i)
                 {
                     int k0 = Math.Max(i - 1, 0);
-                    int k1 = Math.Min(i, times.Length - 1);
+                    int k1 = Math.Min(i, timesCount - 1);
                     float delta = Math.Abs(times[k0] - times[k1]);
+
                     // Do not compare if time is duplicated
                     if (delta > 0 && delta < smallestDelta)
                         smallestDelta = delta;
@@ -128,6 +133,7 @@ namespace UnityExtensions
                     scale = 4.0f;
                 else
                     scale = 2.0f;
+
                 float size = scale * (float)Math.Ceiling(1.0 / smallestDelta + 1.0);
                 textureSize = (int)Math.Round(size);
                 // Arbitrary max (1024)
@@ -142,7 +148,7 @@ namespace UnityExtensions
         /// </summary>
         public void Dispose()
         {
-            //Release();
+            Release();
         }
 
         /// <summary>
@@ -150,8 +156,7 @@ namespace UnityExtensions
         /// </summary>
         public void Release()
         {
-            if (_texture != null)
-                CoreUtils.Destroy(_texture);
+            CoreUtils.Destroy(_texture);
             _texture = null;
         }
 
@@ -223,7 +228,6 @@ namespace UnityExtensions
 
             return gradient.Evaluate(time);
         }
-
 
         /// <summary>
         /// Setup Gradient with an array of color keys and alpha keys.

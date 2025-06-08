@@ -98,8 +98,7 @@ namespace UnityExtensions
         /// </summary>
         public void Release()
         {
-            if (_texture != null)
-                CoreUtils.Destroy(_texture);
+            CoreUtils.Destroy(_texture);
             _texture = null;
         }
 
@@ -120,6 +119,7 @@ namespace UnityExtensions
             // For now, we keep checking for `SetPixels` until the performance hit of doing the correct checks is evaluated
             if (SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, FormatUsage.SetPixels))
                 return GraphicsFormat.R16_SFloat;
+
             if (SystemInfo.IsFormatSupported(GraphicsFormat.R8_UNorm, FormatUsage.SetPixels))
                 return GraphicsFormat.R8_UNorm;
 
@@ -146,11 +146,13 @@ namespace UnityExtensions
 
             if (_isTextureDirty)
             {
-                var pixels = _texture.GetPixelData<Color>(mipLevel: 0);
+                // Cannot use GetPixelData without access to half
+                var pixels = _texture.GetPixels();
 
                 for (int i = 0; i < pixels.Length; i++)
                     pixels[i] = new Color(Evaluate(i * Step), pixels[i].g, pixels[i].b, pixels[i].a);
 
+                _texture.SetPixels(pixels);
                 _texture.Apply(false, false);
                 _isTextureDirty = false;
             }

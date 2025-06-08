@@ -29,9 +29,9 @@ Shader "Skybox/CubemapSimple"
             SAMPLER(sampler_Tex);
             
             CBUFFER_START(UnityPerMaterial)
-            half4 _Tint;
+            half3 _Tint;
             half _Exposure;
-            half _MipLevel;
+            float _MipLevel;
             float _Rotation;
             CBUFFER_END
 
@@ -71,7 +71,7 @@ Shader "Skybox/CubemapSimple"
             half4 frag(Varyings IN) : SV_Target
             {
                 half3 c = SAMPLE_TEXTURECUBE_LOD(_Tex, sampler_Tex, IN.texcoord, _MipLevel).rgb;
-                c *= _Tint.rgb;
+                c *= _Tint;
                 c *= _Exposure;
 
                 return half4(c, 1.0);
@@ -96,8 +96,9 @@ Shader "Skybox/CubemapSimple"
 
             samplerCUBE _Tex;
             half4 _Tex_HDR;
-            half4 _Tint;
+            half3 _Tint;
             half _Exposure;
+            float _MipLevel;
             float _Rotation;
 
             float3 RotateAroundYInDegrees(float3 vertex, float degrees)
@@ -135,9 +136,9 @@ Shader "Skybox/CubemapSimple"
 
             half4 frag(v2f i) : SV_Target
             {
-                half4 tex = texCUBE(_Tex, i.texcoord);
+                half4 tex = texCUBElod(_Tex, float4(i.texcoord, _MipLevel));
                 half3 c = DecodeHDR(tex, _Tex_HDR);
-                c = c * _Tint.rgb * unity_ColorSpaceDouble.rgb;
+                c = c * _Tint * unity_ColorSpaceDouble.rgb;
                 c *= _Exposure;
 
                 return half4(c, 1.0);
