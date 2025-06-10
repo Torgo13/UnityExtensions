@@ -289,7 +289,7 @@ namespace UnityExtensions
 
             // Check if it is on a child GameObject
             // It should be on a child because it will update its position to match the camera
-            reflectionCamera = GetComponentInChildren<Camera>();
+            reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
             if (reflectionCamera != null)
                 return;
 
