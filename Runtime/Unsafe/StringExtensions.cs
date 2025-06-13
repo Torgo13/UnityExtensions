@@ -70,6 +70,8 @@ namespace UnityExtensions.Unsafe
         /// <returns>Length of the byte array needed to allocate.</returns>
         public static unsafe int FromBase64_ComputeResultLength(this string input)
         {
+            Assert.IsNotNull(input);
+
             fixed (char* p = input)
             {
                 return FromBase64_ComputeResultLength(p, input.Length);

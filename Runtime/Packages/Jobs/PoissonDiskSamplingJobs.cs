@@ -47,6 +47,22 @@ namespace UnityExtensions.Packages
             int samplingResolution = k_DefaultSamplingResolution,
             Allocator allocator = Allocator.TempJob)
         {
+            GenerateSamplesJobHandle(out var croppedSamples,
+                width, height, minimumRadius, seed, samplingResolution, allocator).Complete();
+
+            return croppedSamples;
+        }
+
+        /// <inheritdoc cref="GenerateSamples"/>
+        public static JobHandle GenerateSamplesJobHandle(
+            out NativeList<float2> croppedSamples,
+            float width,
+            float height,
+            float minimumRadius,
+            uint seed = 12345,
+            int samplingResolution = k_DefaultSamplingResolution,
+            Allocator allocator = Allocator.TempJob)
+        {
             if (width < 0)
                 throw new ArgumentOutOfRangeException(nameof(width), "Width cannot be negative");
 
@@ -73,21 +89,20 @@ namespace UnityExtensions.Packages
                 samples = superSampledPoints
             }.Schedule();
 
-            var croppedSamples = new NativeList<float2>(allocator);
-            new CropJob
+            croppedSamples = new NativeList<float2>(allocator);
+            sampleJob = new CropJob
             {
                 width = width,
                 height = height,
                 minimumRadius = minimumRadius,
                 superSampledPoints = superSampledPoints.AsDeferredJobArray(),
                 croppedSamples = croppedSamples
-            }.Schedule(sampleJob).Complete();
-            superSampledPoints.Dispose();
+            }.Schedule(sampleJob);
 
-            return croppedSamples;
+            return sampleJob;
         }
 
-        [BurstCompile]
+        [BurstCompile(FloatMode = FloatMode.Fast)]
         struct SampleJob : IJob
         {
             public float width;
@@ -109,12 +124,13 @@ namespace UnityExtensions.Packages
         /// This job is for filtering out all super sampled Poisson points that are found outside the originally
         /// specified 2D region. This job will also shift the cropped points back to their original region.
         /// </summary>
-        [BurstCompile]
+        [BurstCompile(FloatMode = FloatMode.Fast)]
         struct CropJob : IJob
         {
             public float width;
             public float height;
             public float minimumRadius;
+            [DeallocateOnJobCompletion]
             [ReadOnly] public NativeArray<float2> superSampledPoints;
             public NativeList<float2> croppedSamples;
 

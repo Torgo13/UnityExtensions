@@ -22,7 +22,7 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<byte> GetByteSpanFromArray(this Array array, int elementSize)
         {
-            if (array == null || array.Length == 0)
+            if (array.IsNullOrEmpty())
                 return new Span<byte>();
 
             Assert.AreEqual(UnsafeUtility.SizeOf(array.GetType().GetElementType()), elementSize);
@@ -31,5 +31,11 @@ namespace UnityExtensions.Unsafe
             return new Span<byte>(UnsafeUtility.AddressOf(ref bArray[0]), array.Length * elementSize);
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrEmpty(this Array array)
+        {
+            return array == null || array.Length == 0;
+        }
     }
 }

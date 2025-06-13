@@ -21,6 +21,19 @@ namespace UnityExtensions
             stopwatch.Start();
         }
         #endregion // Unity.XR.CoreUtils
+
+        //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/StopwatchExtensions.cs
+        #region FPSSample
+        public static double GetTicksDeltaAsMilliseconds(this Stopwatch stopWatch, long previousTicks)
+        {
+            return stopWatch.GetTicksDeltaAsSeconds(previousTicks) * 1000;
+        }
+
+        public static double GetTicksDeltaAsSeconds(this Stopwatch stopWatch, long previousTicks)
+        {
+            return (double)(stopWatch.ElapsedTicks - previousTicks) / Stopwatch.Frequency;
+        }
+        #endregion // FPSSample
     }
 }
 #endif

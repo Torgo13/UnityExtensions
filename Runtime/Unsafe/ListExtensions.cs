@@ -23,7 +23,7 @@ namespace UnityExtensions.Unsafe
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/ListExtensions.cs
         #region Unity.Collections
         /// <summary>
-        /// Returns a copy of this list.
+        /// Returns a NativeList that is a copy of this list.
         /// </summary>
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to copy.</param>
@@ -32,6 +32,8 @@ namespace UnityExtensions.Unsafe
         public static unsafe NativeList<T> ToNativeList<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
+            Assert.IsNotNull(list);
+
             var container = new NativeList<T>(list.Count, allocator);
             fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
             {
@@ -42,7 +44,7 @@ namespace UnityExtensions.Unsafe
         }
 
         /// <summary>
-        /// Returns an array that is a copy of this list.
+        /// Returns a NativeArray that is a copy of this list.
         /// </summary>
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to copy.</param>
@@ -51,6 +53,8 @@ namespace UnityExtensions.Unsafe
         public static unsafe NativeArray<T> ToNativeArray<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
+            Assert.IsNotNull(list);
+
             var container = CollectionHelper.CreateNativeArray<T>(list.Count, allocator, NativeArrayOptions.UninitializedMemory);
             fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
             {
@@ -73,6 +77,9 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this List<T> list)
         {
+            if (list == null)
+                return new Span<T>();
+
             return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(0, list.Count);
         }
         

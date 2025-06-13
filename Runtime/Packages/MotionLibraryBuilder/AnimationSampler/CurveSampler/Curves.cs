@@ -1,6 +1,5 @@
 using System;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -105,7 +104,8 @@ namespace UnityExtensions.Packages
             NativeArray<Keyframe> keys = array;
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref keys, AtomicSafetyHandle.Create());
+            Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.SetAtomicSafetyHandle(
+                ref keys, Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle.Create());
 #endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             return new Curve(keys);

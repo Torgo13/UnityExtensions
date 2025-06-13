@@ -179,7 +179,8 @@ namespace UnityExtensions.Unsafe
 
         public static Span<byte> AsSpan(this MemoryStream stream)
         {
-            Assert.IsTrue(stream.TryGetBuffer(out _));
+            if (!stream.TryGetBuffer(out _))
+                return new Span<byte>();
 
             return new Span<byte>(stream.GetBuffer(), 0, (int)stream.Length);
         }

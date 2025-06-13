@@ -124,6 +124,18 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+        public static unsafe NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
+        {
+            Assert.IsFalse(span.IsEmpty);
+
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
+            return array;
+        }
+
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeArray<T> array) where T : struct
@@ -303,15 +315,5 @@ namespace UnityExtensions.Unsafe
             return offset;
         }
         #endregion // UnityEngine.InputSystem.Utilities
-
-        public unsafe static NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
-        {
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-                UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
-#endif
-            return array;
-        }
     }
 }

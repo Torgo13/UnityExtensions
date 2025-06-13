@@ -13,23 +13,23 @@ namespace UnityExtensions.Unsafe
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.Length == 0 ? null : nativeList.GetUnsafePtr();
+            return nativeList.IsEmpty ? null : nativeList.GetUnsafePtr();
         }
 
         public static unsafe void* GetReadOnlyPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.Length == 0 ? null : nativeList.GetUnsafeReadOnlyPtr();
+            return nativeList.IsEmpty ? null : nativeList.GetUnsafeReadOnlyPtr();
         }
 
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.Length == 0 ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafePtr();
+            return nativeList.IsEmpty ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafePtr();
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.Length == 0 ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafeReadOnlyPtr();
+            return nativeList.IsEmpty ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafeReadOnlyPtr();
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
@@ -107,7 +107,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            Assert.IsTrue(nativeList.IsCreated);
+            if (nativeList.IsEmpty)
+                return new Span<T>();
 
             return new Span<T>(nativeList.GetUnsafePtr(), nativeList.Length);
         }
@@ -115,7 +116,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            Assert.IsTrue(nativeList.IsCreated);
+            if (nativeList.IsEmpty)
+                return new ReadOnlySpan<T>();
 
             return new ReadOnlySpan<T>(nativeList.GetUnsafeReadOnlyPtr(), nativeList.Length);
         }

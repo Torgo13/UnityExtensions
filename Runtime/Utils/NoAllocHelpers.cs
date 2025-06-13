@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using UnityEngine.Scripting;
 
@@ -43,6 +42,7 @@ namespace UnityExtensions
                 int diff = end - start;
                 if (diff < 1)
                     return;
+
                 if (diff < 8)
                 {
                     InsertionSort(data, start, end, compare);
@@ -72,9 +72,15 @@ namespace UnityExtensions
 
         static T Median3Pivot<T>(T[] data, int start, int pivot, int end, Func<T, T, int> compare)
         {
-            if (compare(data[end], data[start]) < 0) Swap(start, end);
-            if (compare(data[pivot], data[start]) < 0) Swap(start, pivot);
-            if (compare(data[end], data[pivot]) < 0) Swap(pivot, end);
+            if (compare(data[end], data[start]) < 0)
+                Swap(start, end);
+
+            if (compare(data[pivot], data[start]) < 0)
+                Swap(start, pivot);
+
+            if (compare(data[end], data[pivot]) < 0)
+                Swap(pivot, end);
+
             return data[pivot];
 
             void Swap(int a, int b)
@@ -92,8 +98,11 @@ namespace UnityExtensions
 
             while (true)
             {
-                while (compare(data[start], pivotValue) < 0) ++start;
-                while (compare(data[end], pivotValue) > 0) --end;
+                while (compare(data[start], pivotValue) < 0)
+                    ++start;
+
+                while (compare(data[end], pivotValue) > 0)
+                    --end;
 
                 if (start >= end)
                 {
@@ -130,6 +139,7 @@ namespace UnityExtensions
                     data[j + 1] = data[j];
                     j--;
                 }
+
                 data[j + 1] = iData;
             }
         }
@@ -148,7 +158,9 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Scripting/NoAllocHelpers.bindings.cs
         #region UnityEngine
-        public static void EnsureListElemCount<T>(List<T> list, int count)
+        /// <summary><see cref="ResetListSize"/> with runtime checks.</summary>
+        /// <remarks>Also clears the List.</remarks>
+        public static void EnsureListElemCount<T>(this List<T> list, int count)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
@@ -164,18 +176,21 @@ namespace UnityExtensions
 
             if (count != list.Count)
             {
-                ListPrivateFieldAccess<T> tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+                var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
                 tListAccess._size = count;
                 tListAccess._version++;
             }
         }
 
         // tiny helpers
-        public static int SafeLength(Array values) { return values != null ? values.Length : 0; }
-        public static int SafeLength<T>(List<T> values) { return values != null ? values.Count : 0; }
+        public static int SafeLength(this Array values) { return values != null ? values.Length : 0; }
+        public static int SafeLength<T>(this List<T> values) { return values != null ? values.Count : 0; }
 
+        /// <summary>
+        /// Returned array will be invalid if the Capacity of the List is modified.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T[] ExtractArrayFromList<T>(List<T> list)
+        public static T[] ExtractArrayFromList<T>(this List<T> list)
         {
             if (list == null)
                 return null;
@@ -185,8 +200,10 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResetListContents<T>(List<T> list, ReadOnlySpan<T> span)
+        public static void ResetListContents<T>(this List<T> list, ReadOnlySpan<T> span)
         {
+            Assert.IsNotNull(list);
+
             var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
 
             // Do not reallocate the _items array if it is already
@@ -201,7 +218,7 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResetListSize<T>(List<T> list, int size) where T : unmanaged
+        internal static void ResetListSize<T>(this List<T> list, int size) where T : unmanaged
         {
             var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
             tListAccess._size = size;
@@ -209,13 +226,13 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResetListSizeNoResize<T>(List<T> list, int size) where T : unmanaged
+        public static void ResetListSizeNoResize<T>(this List<T> list, int size) where T : unmanaged
         {
-            Assert.IsTrue(list.Capacity >= size);
+            Assert.IsNotNull(list);
+            Assert.IsTrue(size >= 0);
+            Assert.IsTrue(size <= list.Capacity);
 
-            var tListAccess = UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
-            tListAccess._size = size;
-            tListAccess._version++;
+            list.ResetListSize(size);
         }
 
         /// <summary>

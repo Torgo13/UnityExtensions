@@ -309,5 +309,74 @@ namespace UnityExtensions
             return true;
         }
         #endregion // #region Unity.HLODSystem.SpaceManager
+
+        //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/PhysicsUtils.cs
+        #region FPSSample
+        public static Vector3 GetClosestPointOnCollider(this Collider c, Vector3 p)
+        {
+            if (c is SphereCollider)
+            {
+                var csc = c as SphereCollider;
+                var cscTransform = csc.transform;
+
+                var scale = cscTransform.localScale;
+                var cPosition = c.transform.position;
+                return cPosition + csc.radius
+                    * Mathf.Max(Mathf.Abs(scale.x), Mathf.Max(Mathf.Abs(scale.y), Mathf.Abs(scale.z)))
+                    * (p - cPosition).normalized;
+            }
+            else if (c is BoxCollider)
+            {
+                var cbc = c as BoxCollider;
+                var cbcTransform = cbc.transform;
+                Vector3 local_p = cbcTransform.InverseTransformPoint(p);
+
+                local_p -= cbc.center;
+
+                var minsize = -0.5f * cbc.size;
+                var maxsize = 0.5f * cbc.size;
+
+                local_p.x = Mathf.Clamp(local_p.x, minsize.x, maxsize.x);
+                local_p.y = Mathf.Clamp(local_p.y, minsize.y, maxsize.y);
+                local_p.z = Mathf.Clamp(local_p.z, minsize.z, maxsize.z);
+
+                local_p += cbc.center;
+
+                return cbcTransform.TransformPoint(local_p);
+            }
+            else if (c is CapsuleCollider)
+            {
+                // Only supports Y axis based capsules
+                var ccc = c as CapsuleCollider;
+                var cccTransform = ccc.transform;
+                Vector3 local_p = cccTransform.InverseTransformPoint(p);
+                local_p -= ccc.center;
+
+                // Clamp inside outer cylinder top/bot
+                local_p.y = Mathf.Clamp(local_p.y, -ccc.height * 0.5f, ccc.height * 0.5f);
+
+                // Clamp to cylinder edge
+                var h = new Vector2(local_p.x, local_p.z);
+                h = h.normalized * ccc.radius;
+                local_p.x = h.x;
+                local_p.z = h.y;
+
+                // Capsule ends
+                float dist_to_top = ccc.height * 0.5f - Mathf.Abs(local_p.y);
+                if (dist_to_top < ccc.radius)
+                {
+                    float f = (ccc.radius - dist_to_top) / ccc.radius;
+                    float scaledown = (float)System.Math.Sqrt(1.0 - f * f);
+                    local_p.x *= scaledown;
+                    local_p.z *= scaledown;
+                }
+
+                local_p += ccc.center;
+                return cccTransform.TransformPoint(local_p);
+            }
+
+            return c.ClosestPointOnBounds(p);
+        }
+        #endregion // FPSSample
     }
 }

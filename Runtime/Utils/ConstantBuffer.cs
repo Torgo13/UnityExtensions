@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityExtensions
 {
@@ -224,7 +223,6 @@ namespace UnityExtensions
         public abstract void Release();
     }
 
-
     /// <summary>
     /// An instance of a constant buffer.
     /// </summary>
@@ -243,7 +241,8 @@ namespace UnityExtensions
         /// </summary>
         public ConstantBuffer()
         {
-            _gpuConstantBuffer = new ComputeBuffer(1, UnsafeUtility.SizeOf<CBType>(), ComputeBufferType.Constant);
+            _gpuConstantBuffer = new ComputeBuffer(1,
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<CBType>(), ComputeBufferType.Constant);
         }
 
         /// <summary>

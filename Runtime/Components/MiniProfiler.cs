@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Pool;
+using Unity.Collections;
 
 namespace UnityExtensions
 {
@@ -15,7 +16,7 @@ namespace UnityExtensions
         private string _statsLabel;
         private GUIStyle _style;
 
-        private readonly float[] _frameTimes = new float[5000];
+        private NativeArray<float> _frameTimes;
         private int _totalFrames;
         private float _minFrameTime = 1000f;
         private float _maxFrameTime;
@@ -49,6 +50,9 @@ namespace UnityExtensions
 
         void Awake()
         {
+            _frameTimes = new NativeArray<float>(4096, Allocator.Persistent,
+                NativeArrayOptions.UninitializedMemory);
+
             for (int i = 0; i < _recordersList.Length; i++)
             {
                 var sampler = Sampler.Get(_recordersList[i].Name);
@@ -61,6 +65,11 @@ namespace UnityExtensions
             _style.normal.textColor = Color.white;
 
             ResetStats();
+        }
+
+        void OnDestroy()
+        {
+            _frameTimes.Dispose();
         }
 
         void RazCounters()

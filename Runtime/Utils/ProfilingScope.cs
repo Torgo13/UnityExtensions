@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Unity.Profiling;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace UnityExtensions
 {
@@ -31,7 +30,7 @@ namespace UnityExtensions
             var names = Enum.GetNames(typeof(TEnum));
 #if USE_UNSAFE
             var enumValues = Enum.GetValues(typeof(TEnum));
-            var values = UnsafeUtility.As<Array, int[]>(ref enumValues);
+            var values = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Array, int[]>(ref enumValues);
             Samples = new TProfilingSampler<TEnum>[values.Max() + 1];
 #else
             var values = Enum.GetValues(typeof(TEnum));

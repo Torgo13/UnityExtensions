@@ -447,7 +447,48 @@ namespace UnityExtensions
             }
         }
         #endregion // UnityEditor.ShaderGraph
-        
+
+        //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/StringExtensionMethods.cs
+        #region FPSSample
+        public static string AfterLast(this string str, string sub)
+        {
+            var idx = str.LastIndexOf(sub);
+            return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
+        }
+
+        public static string BeforeLast(this string str, string sub)
+        {
+            var idx = str.LastIndexOf(sub);
+            return idx < 0 ? string.Empty : str.Substring(0, idx);
+        }
+
+        public static string AfterFirst(this string str, string sub)
+        {
+            var idx = str.IndexOf(sub);
+            return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
+        }
+
+        public static string BeforeFirst(this string str, string sub)
+        {
+            var idx = str.IndexOf(sub);
+            return idx < 0 ? string.Empty : str.Substring(0, idx);
+        }
+
+        public static int PrefixMatch(this string str, string prefix)
+        {
+            int l = 0, slen = str.Length, plen = prefix.Length;
+            while (l < slen && l < plen)
+            {
+                if (str[l] != prefix[l])
+                    break;
+
+                l++;
+            }
+
+            return l;
+        }
+        #endregion // FPSSample
+
         //https://docs.unity3d.com/2022.3/Documentation/Manual/UnderstandingPerformanceStringsAndText.html
         #region Unity Documentation
         #region StartsWithOrdinal

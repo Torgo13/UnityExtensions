@@ -13,41 +13,43 @@ namespace UnityExtensions.Unsafe
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.Length == 0 ? null : unsafeList.Ptr;
+            return unsafeList.IsEmpty ? null : unsafeList.Ptr;
         }
 
         public static unsafe void* GetReadOnlyPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.Length == 0 ? null : unsafeList.AsReadOnly().Ptr;
+            return unsafeList.IsEmpty ? null : unsafeList.AsReadOnly().Ptr;
         }
 
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.Length == 0 ? IntPtr.Zero : (IntPtr)unsafeList.Ptr;
+            return unsafeList.IsEmpty ? IntPtr.Zero : (IntPtr)unsafeList.Ptr;
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.Length == 0 ? IntPtr.Zero : (IntPtr)unsafeList.AsReadOnly().Ptr;
+            return unsafeList.IsEmpty ? IntPtr.Zero : (IntPtr)unsafeList.AsReadOnly().Ptr;
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
 
         //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs
         #region CullingExtensions
-        public static unsafe NativeArray<T> AsNativeArray<T>(this UnsafeList<T> list) where T : unmanaged
+        public static unsafe NativeArray<T> AsNativeArray<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(list.Ptr, list.Length, Allocator.None);
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(unsafeList.Ptr, unsafeList.Length, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
             return array;
         }
 
-        public static NativeArray<T> GetSubNativeArray<T>(ref this UnsafeList<T> list, int start, int length)
+        public static NativeArray<T> GetSubNativeArray<T>(ref this UnsafeList<T> unsafeList, int start, int length)
             where T : unmanaged =>
-            list.AsNativeArray().GetSubArray(start, length);
+            unsafeList.AsNativeArray().GetSubArray(start, length);
         #endregion // CullingExtensions
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
@@ -105,7 +107,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            Assert.IsTrue(unsafeList.IsCreated);
+            if (unsafeList.IsEmpty)
+                return new Span<T>();
 
             return new Span<T>(unsafeList.Ptr, unsafeList.Length);
         }
@@ -113,7 +116,8 @@ namespace UnityExtensions.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            Assert.IsTrue(unsafeList.IsCreated);
+            if (unsafeList.IsEmpty)
+                return new ReadOnlySpan<T>();
 
             return new ReadOnlySpan<T>(unsafeList.Ptr, unsafeList.Length);
         }

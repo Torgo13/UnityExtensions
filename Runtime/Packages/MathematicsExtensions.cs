@@ -1238,6 +1238,13 @@ namespace UnityExtensions.Packages
         public static void GenerateEquidistantPointsOnSphere(ref NativeList<float3> points, int newPointsCount, float radius,
             int repelIterations = 50)
         {
+            GenerateEquidistantPointsOnSphereJobHandle(ref points, newPointsCount, radius,
+                repelIterations).Complete();
+        }
+
+        public static JobHandle GenerateEquidistantPointsOnSphereJobHandle(ref NativeList<float3> points, int newPointsCount, float radius,
+            int repelIterations = 50)
+        {
             int initialPointsCount = points.Length;
             int totalPointsCount = initialPointsCount + newPointsCount;
 
@@ -1257,7 +1264,7 @@ namespace UnityExtensions.Packages
                 points = points.AsArray(),
             };
 
-            var addPointsHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
+            var jobHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
                 innerloopBatchCount: 32, dependency: default);
 
             // Second pass: make points repel each other
@@ -1269,12 +1276,10 @@ namespace UnityExtensions.Packages
                     radius = radius,
                 };
 
-                var jobHandle = job.Schedule(repelIterations, addPointsHandle);
-                jobHandle.Complete();
-                return;
+                jobHandle = job.Schedule(repelIterations, jobHandle);
             }
 
-            addPointsHandle.Complete();
+            return jobHandle;
         }
         #endregion // MathUtilities
 
@@ -1295,11 +1300,8 @@ namespace UnityExtensions.Packages
                 float incline = acos(mad(-2f, distance, 1f));
                 float azimuth = angleIncrement * i;
 
-                float sinIncline = sin(incline);
-                float cosIncline = cos(incline);
-
-                float sinAzimuth = sin(azimuth);
-                float cosAzimuth = cos(azimuth);
+                sincos(incline, out float sinIncline, out float cosIncline);
+                sincos(azimuth, out float sinAzimuth, out float cosAzimuth);
 
                 float3 point;
                 point.x = sinIncline * cosAzimuth * radius;
@@ -1326,26 +1328,34 @@ namespace UnityExtensions.Packages
                     float closestPointRemappedDot = 0f;
                     float3 closestPointRotationAxis = default;
 
-                    for (int b = 0; b < points.Length; b++)
+                    for (int b = 0; b < a; b++)
                     {
-                        if (Hint.Likely(b != a))
-                        {
-                            float3 otherDir = normalizesafe(points[b]);
+                        float3 otherDir = normalizesafe(points[b]);
+                        ClosestPoint(dir, otherDir, ref closestPointRemappedDot, ref closestPointRotationAxis);
+                    }
 
-                            float dot = math.dot(dir, otherDir);
-                            float remappedDot = remap(-1f, 1f, 0f, 1f, dot);
-
-                            if (remappedDot > closestPointRemappedDot)
-                            {
-                                closestPointRemappedDot = remappedDot;
-                                closestPointRotationAxis = -normalizesafe(cross(dir, otherDir));
-                            }
-                        }
+                    for (int b = a + 1; b < points.Length; b++)
+                    {
+                        float3 otherDir = normalizesafe(points[b]);
+                        ClosestPoint(dir, otherDir, ref closestPointRemappedDot, ref closestPointRotationAxis);
                     }
 
                     quaternion repelRotation = Unity.Mathematics.quaternion.AxisAngle(closestPointRotationAxis, repelAngleIncrements);
                     dir = rotate(repelRotation, dir);
                     points[a] = dir * radius;
+                }
+            }
+
+            static void ClosestPoint(in float3 dir, in float3 otherDir,
+                ref float closestPointRemappedDot, ref float3 closestPointRotationAxis)
+            {
+                float dot = math.dot(dir, otherDir);
+                float remappedDot = remap(-1f, 1f, 0f, 1f, dot);
+
+                if (remappedDot > closestPointRemappedDot)
+                {
+                    closestPointRemappedDot = remappedDot;
+                    closestPointRotationAxis = -normalizesafe(cross(dir, otherDir));
                 }
             }
         }
