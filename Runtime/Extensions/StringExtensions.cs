@@ -420,34 +420,6 @@ namespace UnityExtensions
         }
         #endregion // UnityEditor.Rendering
 
-        //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.shadergraph/Editor/Utilities/StringBuilderExtensions.cs
-        #region UnityEditor.ShaderGraph
-        public static void AppendIndentedLines(this StringBuilder sb, string lines, string indentation)
-        {
-            sb.EnsureCapacity(sb.Length + lines.Length);
-            var charIndex = 0;
-            while (charIndex < lines.Length)
-            {
-                var nextNewLineIndex = lines.IndexOf(Environment.NewLine, charIndex, StringComparison.Ordinal);
-                if (nextNewLineIndex == -1)
-                {
-                    nextNewLineIndex = lines.Length;
-                }
-
-                sb.Append(indentation);
-
-                for (var i = charIndex; i < nextNewLineIndex; i++)
-                {
-                    sb.Append(lines[i]);
-                }
-
-                sb.AppendLine();
-
-                charIndex = nextNewLineIndex + Environment.NewLine.Length;
-            }
-        }
-        #endregion // UnityEditor.ShaderGraph
-
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/StringExtensionMethods.cs
         #region FPSSample
         public static string AfterLast(this string str, string sub)
@@ -931,7 +903,123 @@ namespace UnityExtensions
             return -1;
         }
         #endregion // IndexOfOrdinal
-        
+
+        #region LastIndexOfOrdinal
+        /// <summary>
+        /// Reports the zero-based index of the last occurrence of the specified Unicode
+        /// character within this instance.
+        /// </summary>
+        /// <param name="str">A <see cref="string"/> to search.</param>
+        /// <param name="value">A Unicode character to seek.</param>
+        /// <param name="ignoreCase">true to ignore case during the comparison; otherwise, false.</param>
+        /// <returns>
+        /// The zero-based index position of <paramref name="value"/> if that character is found, or -1
+        /// if it is not.
+        /// </returns>
+        public static int LastIndexOfOrdinal(this string str, char value, bool ignoreCase = false)
+        {
+            if (str == null)
+                throw new ArgumentNullException(nameof(str));
+
+            return LastIndexOfOrdinal(str, value, str.Length - 1, str.Length, ignoreCase);
+        }
+
+        /// <summary>
+        /// Reports the zero-based index position of the last occurrence of the specified Unicode character 
+        /// in a substring within this instance. The search starts at a specified character position and 
+        /// proceeds backward toward the beginning of the <see cref="string"/> 
+        /// for a specified number of character positions.
+        /// </summary>
+        /// <param name="str">A <see cref="string"/> to search.</param>
+        /// <param name="value">A Unicode character to seek.</param>
+        /// <param name="startIndex">
+        /// The starting position of the search. The search proceeds from <paramref name="startIndex"/> toward the beginning 
+        /// of this instance.
+        /// </param>
+        /// <param name="ignoreCase">true to ignore case during the comparison; otherwise, false.</param>
+        /// <returns>
+        /// The zero-based index position of <paramref name="value"/> if that character is found, or -1
+        /// if it is not.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The current instance <see cref="string.Length"/> does not equal 0, 
+        /// and <paramref name="startIndex"/> is less than zero or greater than or equal to the length of this instance.
+        /// </exception>
+        public static int LastIndexOfOrdinal(this string str, char value, int startIndex, bool ignoreCase = false)
+        {
+            if (str == null)
+                throw new ArgumentNullException(nameof(str));
+            if (str.Length != 0 && startIndex < 0)
+                throw new ArgumentOutOfRangeException();
+            if (str.Length != 0 && startIndex >= str.Length)
+                throw new ArgumentOutOfRangeException();
+
+            return str.LastIndexOfOrdinal(value, startIndex, startIndex + 1, ignoreCase);
+        }
+
+        /// <summary>
+        /// Reports the zero-based index of the last occurrence of the specified Unicode
+        /// character in this <see cref="string"/>. The search starts 
+        /// at a specified character position and examines a specified number of character positions.
+        /// </summary>
+        /// <param name="str">A <see cref="string"/> to search.</param>
+        /// <param name="value">A Unicode character to seek.</param>
+        /// <param name="startIndex">The search starting position.</param>
+        /// <param name="count">The number of character positions to examine.</param>
+        /// <param name="ignoreCase">true to ignore case during the comparison; otherwise, false.</param>
+        /// <returns>
+        /// The zero-based index position of <paramref name="value"/> if that character is found, or -1 
+        /// if it is not.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The current instance <see cref="string.Length"/> does not equal 0, 
+        /// and <paramref name="startIndex"/> is less than zero or greater than or equal to the length of this instance.
+        /// -or-The current instance <see cref="string.Length"/> 
+        /// does not equal 0, and <paramref name="startIndex"/> - <paramref name="count"/> + 1 is less than zero.
+        /// </exception>
+        public static int LastIndexOfOrdinal(this string str, char value, int startIndex, int count, bool ignoreCase = false)
+        {
+            if (str == null)
+                throw new ArgumentNullException(nameof(str));
+            if (str.Length != 0 && startIndex < 0)
+                throw new ArgumentOutOfRangeException();
+            if (str.Length != 0 && startIndex >= str.Length)
+                throw new ArgumentOutOfRangeException();
+            if (str.Length != 0 && count < 0)
+                throw new ArgumentOutOfRangeException();
+            if (str.Length != 0 && startIndex - count + 1 < 0)
+                throw new ArgumentOutOfRangeException();
+
+            if (str.Length == 0 || count == 0)
+                return -1;
+
+            if (ignoreCase)
+            {
+                value = char.ToLower(value);
+
+                for (int i = startIndex; i > startIndex - count; i--)
+                {
+                    if (char.ToLower(str[i]) == value)
+                    {
+                        return i;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = startIndex; i > startIndex - count; i--)
+                {
+                    if (str[i] == value)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+        #endregion // LastIndexOfOrdinal
+
         /// <summary>
         /// Remove all occurrences of char c.
         /// </summary>
