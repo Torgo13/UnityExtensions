@@ -16,7 +16,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="renderTexture">The source <see cref="RenderTexture" />.</param>
         /// <param name="texture">The destination <see cref="Texture2D" />.</param>
-        public static void RenderTextureToTexture2D(RenderTexture renderTexture, Texture2D texture)
+        public static void RenderTextureToTexture2D(this RenderTexture renderTexture, Texture2D texture)
         {
             Assert.IsNotNull(renderTexture);
             Assert.IsNotNull(texture);

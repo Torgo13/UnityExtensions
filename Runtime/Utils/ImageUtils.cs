@@ -58,8 +58,12 @@ namespace UnityExtensions
             var halfXOffset = kernel.SizeX / 2;
             var halfYOffset = kernel.SizeY / 2;
 
+#if UNITY_WEBGL
+            var range = (0, height);
+#else
             var rangeSize = ThreadUtils.GetBatchSizeByCore(height);
             var result = Parallel.ForEach(Partitioner.Create(0, height, rangeSize), range =>
+#endif // UNITY_WEBGL
             {
                 for (var i = range.Item1; i < range.Item2; ++i)
                 {
@@ -93,10 +97,14 @@ namespace UnityExtensions
                         outputPixels[i * width + j] = outputPixel;
                     }
                 }
-            });
+            }
+#if UNITY_WEBGL
+#else
+            );
 
             if (!result.IsCompleted)
                 Debug.LogError("Filtering did not complete successfully.");
+#endif // UNITY_WEBGL
 
             var outputTexture = new ImagePixels(width, height, outputPixels);
             return outputTexture;
@@ -114,8 +122,12 @@ namespace UnityExtensions
             var pixelsA = sourceA.Pixels;
             var pixelsB = sourceB.Pixels;
 
+#if UNITY_WEBGL
+            var range = (0, height);
+#else
             var batchSize = ThreadUtils.GetBatchSizeByCore(height);
             Parallel.ForEach(Partitioner.Create(0, height, batchSize), range =>
+#endif // UNITY_WEBGL
             {
                 for (var i = range.Item1; i < range.Item2; ++i)
                 {
@@ -125,12 +137,16 @@ namespace UnityExtensions
                         outputPixels[index] = pixelsA[index] - pixelsB[index];
                     }
                 }
-            });
+            }
+#if UNITY_WEBGL
+#else
+            );
+#endif // UNITY_WEBGL
 
             return new ImagePixels(width, height, outputPixels);
         }
     }
-    #endregion // UnityEditor.Search
+#endregion // UnityEditor.Search
     
     //https://github.com/Unity-Technologies/com.unity.search.extensions/blob/0896c65212ba17c718719ce75e53b9e97b0d261d/package-examples/Editor/ImageIndexing/ImagePixels.cs
     #region UnityEditor.Search
@@ -204,8 +220,13 @@ namespace UnityExtensions
 
             var magnitudePixels = new Color[source.Height * source.Width];
             gradients = new Color[source.Height * source.Width];
+
+#if UNITY_WEBGL
+            var range = (0, source.Height);
+#else
             var rangeSize = ThreadUtils.GetBatchSizeByCore(source.Height);
             Parallel.ForEach(Partitioner.Create(0, source.Height, rangeSize), range =>
+#endif // UNITY_WEBGL
             {
                 for (var i = range.Item1; i < range.Item2; ++i)
                 {
@@ -227,7 +248,11 @@ namespace UnityExtensions
                         gradients[index] = gradientOutput;
                     }
                 }
-            });
+            }
+#if UNITY_WEBGL
+#else
+            );
+#endif // UNITY_WEBGL
 
             return new ImagePixels(source.Width, source.Height, magnitudePixels);
         }
@@ -352,7 +377,7 @@ namespace UnityExtensions
             return sub;
         }
     }
-    #endregion // UnityEditor.Search
+#endregion // UnityEditor.Search
     
     //https://github.com/Unity-Technologies/com.unity.search.extensions/blob/0896c65212ba17c718719ce75e53b9e97b0d261d/package-examples/Editor/ImageIndexing/ImageData.cs
     #region UnityEditor.Search
@@ -1017,6 +1042,7 @@ namespace UnityExtensions
                         }
                     }
                 });
+
             histogram.Normalize(nbPixels);
 
             // Get the best colors

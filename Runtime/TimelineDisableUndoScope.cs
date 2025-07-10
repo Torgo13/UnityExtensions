@@ -63,7 +63,7 @@ namespace UnityExtensions
             SetUndoEnabled(false);
         }
 
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
             {
@@ -72,6 +72,12 @@ namespace UnityExtensions
 
             SetUndoEnabled(true);
             _disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion // Unity.LiveCapture
     }

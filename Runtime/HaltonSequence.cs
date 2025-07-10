@@ -16,6 +16,8 @@ namespace UnityExtensions
         /// <returns>A sample from the Halton sequence.</returns>
         public static float Get(int index, int radix)
         {
+            UnityEngine.Assertions.Assert.IsFalse(radix == 0);
+
             float result = 0f;
             float fraction = 1f / radix;
 

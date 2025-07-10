@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -157,5 +155,11 @@ namespace UnityExtensions
         {
             return $"<color=#{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}>";
         }
+
+        public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;
+        public static Color32 IntToColor32(this int color) => new Union4 { Int = color }.Color32;
+
+        public static uint Color32ToUInt(this Color32 color) => new Union4 { Color32 = color }.UInt;
+        public static Color32 UIntToColor32(this uint color) => new Union4 { UInt = color }.Color32;
     }
 }

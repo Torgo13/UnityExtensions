@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
-    /// <summary>Utility for tiles layout</summary>
     public static class TileLayoutUtils
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/TileLayoutUtils.cs
@@ -44,6 +43,7 @@ namespace UnityExtensions
                 width = mainWidth,
                 height = mainHeight,
             };
+
             topRow = new RectInt
             {
                 x = src.x,
@@ -51,6 +51,7 @@ namespace UnityExtensions
                 width = mainWidth,
                 height = src.height - mainHeight
             };
+
             rightCol = new RectInt
             {
                 x = src.x + mainWidth,
@@ -58,6 +59,7 @@ namespace UnityExtensions
                 width = src.width - mainWidth,
                 height = mainHeight
             };
+
             topRight = new RectInt
             {
                 x = src.x + mainWidth,
@@ -98,6 +100,7 @@ namespace UnityExtensions
                 width = src.width,
                 height = mainHeight,
             };
+
             other = new RectInt
             {
                 x = src.x,
@@ -138,6 +141,7 @@ namespace UnityExtensions
                 width = mainWidth,
                 height = src.height,
             };
+
             other = new RectInt
             {
                 x = src.x + mainWidth,

@@ -21,7 +21,8 @@ namespace UnityExtensions.Unsafe
 
             do
             {
-                int read = await stream.ReadAsync(buffer, offset, count);
+                int read = await stream.ReadAsync(buffer, offset, count)
+                    .ConfigureAwait(continueOnCapturedContext: false);
 
                 if (read == 0)
                     throw new EndOfStreamException();

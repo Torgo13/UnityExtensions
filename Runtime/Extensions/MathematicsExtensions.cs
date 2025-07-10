@@ -72,16 +72,20 @@ namespace UnityExtensions
     /// Use <see cref="Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf{T}()"/> to return the actual size.
     /// </remarks>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union1
+    public struct Union1 : System.IEquatable<Union1>
     {
         [FieldOffset(0)] public byte Byte;
         [FieldOffset(0)] public sbyte SByte;
         [FieldOffset(0)] public bool Bool;
+
+        public readonly bool Equals(Union1 other) => Byte == other.Byte;
+        public readonly override bool Equals(object obj) => obj is Union1 other && Equals(other);
+        public readonly override int GetHashCode() => Byte;
     }
 
     /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union2
+    public struct Union2 : System.IEquatable<Union2>
     {
         [FieldOffset(0)] public short Short;
         [FieldOffset(0)] public ushort UShort;
@@ -89,11 +93,15 @@ namespace UnityExtensions
 
         [FieldOffset(0)] public Union1 _0;
         [FieldOffset(1)] public Union1 _1;
+
+        public readonly bool Equals(Union2 other) => Short == other.Short;
+        public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
+        public readonly override int GetHashCode() => Short;
     }
 
     /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union4
+    public struct Union4 : System.IEquatable<Union4>
     {
         [FieldOffset(0)] public float Float;        
         [FieldOffset(0)] public int Int;
@@ -102,11 +110,15 @@ namespace UnityExtensions
         
         [FieldOffset(0)] public Union2 _0;
         [FieldOffset(2)] public Union2 _2;
+
+        public readonly bool Equals(Union4 other) => Int == other.Int;
+        public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
+        public readonly override int GetHashCode() => Int;
     }
 
     /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union8
+    public struct Union8 : System.IEquatable<Union8>
     {
         [FieldOffset(0)] public Vector2 Vector2;
         [FieldOffset(0)] public Vector2Int Vector2Int;
@@ -118,11 +130,15 @@ namespace UnityExtensions
 
         [FieldOffset(0)] public Union4 _0;
         [FieldOffset(4)] public Union4 _4;
+
+        public readonly bool Equals(Union8 other) => Long == other.Long;
+        public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
+        public readonly override int GetHashCode() => Long.GetHashCode();
     }
 
     /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union16
+    public struct Union16 : System.IEquatable<Union16>
     {
         [FieldOffset(0)] public Vector4 Vector4;
         [FieldOffset(0)] public Quaternion Quaternion;
@@ -136,6 +152,10 @@ namespace UnityExtensions
 
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
+
+        public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
+        public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
+        public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
     }
     #endregion // Union
 

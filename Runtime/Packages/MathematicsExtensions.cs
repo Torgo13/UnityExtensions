@@ -16,16 +16,20 @@ namespace UnityExtensions.Packages
     /// <inheritdoc cref="Union1"/>
     /// <remarks>Use __0 to access the Union without extensions.</remarks>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union2
+    public struct Union2 : System.IEquatable<Union2>
     {
         [FieldOffset(0)] public UnityExtensions.Union2 __0;
 
         [FieldOffset(0)] public half Half;
+
+        public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
+        public readonly override int GetHashCode() => __0.Short;
     }
 
     /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union4
+    public struct Union4 : System.IEquatable<Union4>
     {
         [FieldOffset(0)] public UnityExtensions.Union4 __0;
 
@@ -33,11 +37,15 @@ namespace UnityExtensions.Packages
 
         [FieldOffset(0)] public Union2 _0;
         [FieldOffset(2)] public Union2 _2;
+
+        public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
+        public readonly override int GetHashCode() => __0.Int;
     }
 
     /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union8
+    public struct Union8 : System.IEquatable<Union8>
     {
         [FieldOffset(0)] public UnityExtensions.Union8 __0;
 
@@ -48,11 +56,15 @@ namespace UnityExtensions.Packages
 
         [FieldOffset(0)] public Union4 _0;
         [FieldOffset(4)] public Union4 _4;
+
+        public readonly bool Equals(Union8 other) => Int2.Equals(other.Int2);
+        public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
+        public readonly override int GetHashCode() => UInt2.GetHashCode();
     }
 
     /// <inheritdoc cref="Union2"/>
     [StructLayout(LayoutKind.Explicit)]
-    public struct Union16
+    public struct Union16 : System.IEquatable<Union16>
     {
         [FieldOffset(0)] public UnityExtensions.Union16 __0;
 
@@ -64,6 +76,10 @@ namespace UnityExtensions.Packages
 
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
+
+        public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
+        public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
+        public readonly override int GetHashCode() => UInt4.GetHashCode();
     }
     #endregion // Union
 
@@ -1215,13 +1231,12 @@ namespace UnityExtensions.Packages
             return clamp(val, bounds.x, bounds.y);
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SegmentIntersectsSphere(float3 p1, float3 p2, float3 sphereCenter, float sphereRadius)
         {
-            float distanceSqToSphereCenter; // = float.MaxValue;
+            float distanceSqToSphereCenter;
             float segmentLengthSq = distancesq(p1, p2);
-            if (segmentLengthSq == 0.0)
+            if (segmentLengthSq == 0.0f)
             {
                 distanceSqToSphereCenter = distancesq(sphereCenter, p1);
             }
@@ -1290,6 +1305,8 @@ namespace UnityExtensions.Packages
             [ReadOnly] public float totalPointsCount;
             [ReadOnly] public float angleIncrement;
             [ReadOnly] public float radius;
+
+            [NativeDisableParallelForRestriction]
             [WriteOnly] public NativeArray<float3> points;
 
             public void Execute(int index)
@@ -1315,7 +1332,9 @@ namespace UnityExtensions.Packages
         [BurstCompile(FloatMode = FloatMode.Fast)]
         public struct GenerateEquidistantPointsOnSphereJob : IJobFor
         {
+            [NativeDisableParallelForRestriction]
             public NativeList<float3> points;
+
             [ReadOnly] public float radius;
 
             public void Execute(int index)

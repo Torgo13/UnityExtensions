@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -13,32 +14,32 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/BitArray.cs
         #region UnityEngine.Rendering
         /// <summary>Gets the capacity of this BitArray. This is the number of bits that are usable.</summary>
-        uint capacity { get; }
+        uint capacity { get; }        
         /// <summary>Return `true` if all the bits of this BitArray are set to 0. Returns `false` otherwise.</summary>
-        bool allFalse { get; }
+        bool allFalse { get; }        
         /// <summary>Return `true` if all the bits of this BitArray are set to 1. Returns `false` otherwise.</summary>
-        bool allTrue { get; }
+        bool allTrue { get; }        
         /// <summary>
         /// An indexer that allows access to the bit at a given index. This provides both read and write access.
         /// </summary>
         /// <param name="index">Index of the bit.</param>
         /// <value>State of the bit at the provided index.</value>
-        bool this[uint index] { get; set; }
+        bool this[uint index] { get; set; }        
         /// <summary>Writes the bits in the array in a human-readable form. This is as a string of 0s and 1s packed by 8 bits. This is useful for debugging.</summary>
         string humanizedData { get; }
-
+        
         /// <summary>
         /// Perform an AND bitwise operation between this BitArray and the one you pass into the function and return the result. Both BitArrays must have the same capacity. This will not change current BitArray values.
         /// </summary>
         /// <param name="other">BitArray with which to the And operation.</param>
         /// <returns>The resulting bit array.</returns>
-        IBitArray BitAnd(IBitArray other);
+        IBitArray BitAnd(IBitArray other);        
         /// <summary>
         /// Perform an OR bitwise operation between this BitArray and the one you pass into the function and return the result. Both BitArrays must have the same capacity. This will not change current BitArray values.
         /// </summary>
         /// <param name="other">BitArray with which to the Or operation.</param>
         /// <returns>The resulting bit array.</returns>
-        IBitArray BitOr(IBitArray other);
+        IBitArray BitOr(IBitArray other);        
         /// <summary>
         /// Return the BitArray with every bit inverted.
         /// </summary>
@@ -64,13 +65,13 @@ namespace UnityExtensions
         byte data;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 8u;
+        public readonly uint capacity => 8u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data == 0u;
+        public readonly bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data == byte.MaxValue;
+        public readonly bool allTrue => data == byte.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData => String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0');
+        public readonly string humanizedData => String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -79,7 +80,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => BitArrayUtilities.Get8(index, data);
+            readonly get => BitArrayUtilities.Get8(index, data);
             set => BitArrayUtilities.Set8(index, ref data, value);
         }
 
@@ -136,18 +137,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray8)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray8)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray8)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray8)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Equality operator.
@@ -168,12 +169,12 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj) => obj is BitArray8 ba8 && ba8.data == data;
+        public override readonly bool Equals(object obj) => obj is BitArray8 ba8 && ba8.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode() => 1768953197 + data.GetHashCode();
+        public override readonly int GetHashCode() => 1768953197 + data.GetHashCode();
         #endregion // UnityEngine.Rendering
     }
 
@@ -190,13 +191,15 @@ namespace UnityExtensions
         ushort data;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 16u;
+        public readonly uint capacity => 16u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data == 0u;
+        public readonly bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data == ushort.MaxValue;
+        public readonly bool allTrue => data == ushort.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
+        public readonly string humanizedData => System.Text.RegularExpressions.Regex.Replace(
+            String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.",
+            System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1)).TrimEnd('.');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -205,7 +208,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => BitArrayUtilities.Get16(index, data);
+            readonly get => BitArrayUtilities.Get16(index, data);
             set => BitArrayUtilities.Set16(index, ref data, value);
         }
 
@@ -262,18 +265,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray16)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray16)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray16)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray16)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Equality operator.
@@ -294,12 +297,12 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj) => obj is BitArray16 ba16 && ba16.data == data;
+        public override readonly bool Equals(object obj) => obj is BitArray16 ba16 && ba16.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode() => 1768953197 + data.GetHashCode();
+        public override readonly int GetHashCode() => 1768953197 + data.GetHashCode();
         #endregion // UnityEngine.Rendering
     }
 
@@ -316,14 +319,16 @@ namespace UnityExtensions
         uint data;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 32u;
+        public readonly uint capacity => 32u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data == 0u;
+        public readonly bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data == uint.MaxValue;
-        string humanizedVersion => Convert.ToString(data, 2);
+        public readonly bool allTrue => data == uint.MaxValue;
+        readonly string humanizedVersion => Convert.ToString(data, 2);
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
+        public readonly string humanizedData => System.Text.RegularExpressions.Regex.Replace(
+            String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.",
+            System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1)).TrimEnd('.');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -332,7 +337,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => BitArrayUtilities.Get32(index, data);
+            readonly get => BitArrayUtilities.Get32(index, data);
             set => BitArrayUtilities.Set32(index, ref data, value);
         }
 
@@ -369,18 +374,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray32)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray32)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray32)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray32)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Bit-wise Not operator
@@ -422,15 +427,15 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj) => obj is BitArray32 ba32 && ba32.data == data;
+        public override readonly bool Equals(object obj) => obj is BitArray32 ba32 && ba32.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode() => 1768953197 + data.GetHashCode();
+        public override readonly int GetHashCode() => 1768953197 + data.GetHashCode();
         #endregion // UnityEngine.Rendering
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return humanizedVersion;
         }
@@ -449,13 +454,15 @@ namespace UnityExtensions
         ulong data;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 64u;
+        public readonly uint capacity => 64u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data == 0uL;
+        public readonly bool allFalse => data == 0uL;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data == ulong.MaxValue;
+        public readonly bool allTrue => data == ulong.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData => System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + capacity + "}", Convert.ToString((long)data, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
+        public readonly string humanizedData => System.Text.RegularExpressions.Regex.Replace(
+            String.Format("{0, " + capacity + "}", Convert.ToString((long)data, 2)).Replace(' ', '0'), ".{8}", "$0.",
+            System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1)).TrimEnd('.');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -464,7 +471,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => BitArrayUtilities.Get64(index, data);
+            readonly get => BitArrayUtilities.Get64(index, data);
             set => BitArrayUtilities.Set64(index, ref data, value);
         }
 
@@ -522,18 +529,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray64)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray64)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray64)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray64)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Equality operator.
@@ -554,12 +561,12 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj) => obj is BitArray64 ba64 && ba64.data == data;
+        public override readonly bool Equals(object obj) => obj is BitArray64 ba64 && ba64.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode() => 1768953197 + data.GetHashCode();
+        public override readonly int GetHashCode() => 1768953197 + data.GetHashCode();
         #endregion // UnityEngine.Rendering
     }
 
@@ -568,6 +575,7 @@ namespace UnityExtensions
     /// </summary>
     [Serializable]
     [System.Diagnostics.DebuggerDisplay("{this.GetType().Name} {humanizedData}")]
+    [StructLayout(LayoutKind.Sequential)]
     public struct BitArray128 : IBitArray
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/BitArray.cs
@@ -578,15 +586,19 @@ namespace UnityExtensions
         ulong data2;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 128u;
+        public readonly uint capacity => 128u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data1 == 0uL && data2 == 0uL;
+        public readonly bool allFalse => data1 == 0uL && data2 == 0uL;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue;
+        public readonly bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData =>
-            System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.")
-            + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data1, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
+        public readonly string humanizedData =>
+            System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1))
+            + System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data1, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1)).TrimEnd('.');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -595,7 +607,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => index < 64u
+            readonly get => index < 64u
                 ? (data1 & (1uL << (int)index)) != 0uL
                 : (data2 & (1uL << (int)(index - 64u))) != 0uL;
 
@@ -670,18 +682,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray128)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray128)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray128)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray128)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Equality operator.
@@ -702,17 +714,20 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj) => obj is BitArray128 ba128 && data1.Equals(ba128.data1) && data2.Equals(ba128.data2);
+        public override readonly bool Equals(object obj) => obj is BitArray128 ba128 && data1.Equals(ba128.data1) && data2.Equals(ba128.data2);
         /// <summary>
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            var hashCode = 1755735569;
-            hashCode = hashCode * -1521134295 + data1.GetHashCode();
-            hashCode = hashCode * -1521134295 + data2.GetHashCode();
-            return hashCode;
+            unchecked
+            {
+                var hashCode = 1755735569;
+                hashCode = hashCode * -1521134295 + data1.GetHashCode();
+                hashCode = hashCode * -1521134295 + data2.GetHashCode();
+                return hashCode;
+            }
         }
         #endregion // UnityEngine.Rendering
     }
@@ -722,6 +737,7 @@ namespace UnityExtensions
     /// </summary>
     [Serializable]
     [System.Diagnostics.DebuggerDisplay("{this.GetType().Name} {humanizedData}")]
+    [StructLayout(LayoutKind.Sequential)]
     public struct BitArray256 : IBitArray
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/BitArray.cs
@@ -736,17 +752,25 @@ namespace UnityExtensions
         ulong data4;
 
         /// <summary>Number of elements in the bit array.</summary>
-        public uint capacity => 256u;
+        public readonly uint capacity => 256u;
         /// <summary>True if all bits are 0.</summary>
-        public bool allFalse => data1 == 0uL && data2 == 0uL && data3 == 0uL && data4 == 0uL;
+        public readonly bool allFalse => data1 == 0uL && data2 == 0uL && data3 == 0uL && data4 == 0uL;
         /// <summary>True if all bits are 1.</summary>
-        public bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue && data3 == ulong.MaxValue && data4 == ulong.MaxValue;
+        public readonly bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue && data3 == ulong.MaxValue && data4 == ulong.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
-        public string humanizedData =>
-            System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data4, 2)).Replace(' ', '0'), ".{8}", "$0.")
-            + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data3, 2)).Replace(' ', '0'), ".{8}", "$0.")
-            + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.")
-            + System.Text.RegularExpressions.Regex.Replace(String.Format("{0, " + 64u + "}", Convert.ToString((long)data1, 2)).Replace(' ', '0'), ".{8}", "$0.").TrimEnd('.');
+        public readonly string humanizedData =>
+            System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data4, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1))
+            + System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data3, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1))
+            + System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1))
+            + System.Text.RegularExpressions.Regex.Replace(
+                String.Format("{0, " + 64u + "}", Convert.ToString((long)data1, 2)).Replace(' ', '0'), ".{8}", "$0.",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1)).TrimEnd('.');
 
         /// <summary>
         /// Returns the state of the bit at a specific index.
@@ -755,7 +779,7 @@ namespace UnityExtensions
         /// <value>State of the bit at the provided index.</value>
         public bool this[uint index]
         {
-            get => BitArrayUtilities.Get256(index, data1, data2, data3, data4);
+            readonly get => BitArrayUtilities.Get256(index, data1, data2, data3, data4);
             set => BitArrayUtilities.Set256(index, ref data1, ref data2, ref data3, ref data4, value);
         }
 
@@ -828,18 +852,18 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitAnd(IBitArray other) => this & (BitArray256)other;
+        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray256)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitOr(IBitArray other) => this | (BitArray256)other;
+        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray256)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
-        public IBitArray BitNot() => ~this;
+        public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
         /// Equality operator.
@@ -860,7 +884,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
             => obj is BitArray256 ba256
             && data1.Equals(ba256.data1)
             && data2.Equals(ba256.data2)
@@ -870,14 +894,17 @@ namespace UnityExtensions
         /// Get the hashcode of the bit array.
         /// </summary>
         /// <returns>Hashcode of the bit array.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            var hashCode = 1870826326;
-            hashCode = hashCode * -1521134295 + data1.GetHashCode();
-            hashCode = hashCode * -1521134295 + data2.GetHashCode();
-            hashCode = hashCode * -1521134295 + data3.GetHashCode();
-            hashCode = hashCode * -1521134295 + data4.GetHashCode();
-            return hashCode;
+            unchecked
+            {
+                var hashCode = 1870826326;
+                hashCode = hashCode * -1521134295 + data1.GetHashCode();
+                hashCode = hashCode * -1521134295 + data2.GetHashCode();
+                hashCode = hashCode * -1521134295 + data3.GetHashCode();
+                hashCode = hashCode * -1521134295 + data4.GetHashCode();
+                return hashCode;
+            }
         }
         #endregion // UnityEngine.Rendering
     }

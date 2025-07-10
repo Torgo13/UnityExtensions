@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 using static UnityEngine.Mathf;
 
@@ -14,7 +15,8 @@ namespace UnityExtensions
         /// <summary>
         /// Individual curve segment.
         /// </summary>
-        public class Segment
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Segment
         {
             /// <summary>
             /// The offset of the segment on the X axis.
@@ -63,8 +65,15 @@ namespace UnityExtensions
 
                 return y0 * scaleY + offsetY;
             }
+
+            public void Normalise(float invScale)
+            {
+                offsetY *= invScale;
+                scaleY *= invScale;
+            }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         struct DirectParams
         {
             internal float x0;
@@ -230,7 +239,7 @@ namespace UnityExtensions
                     return y0*scaleY + m_offsetY;
                 */
 
-                var midSegment = segments[1];
+                ref var midSegment = ref segments[1];
                 midSegment.offsetX = -(b / m);
                 midSegment.offsetY = 0f;
                 midSegment.scaleX = 1f;
@@ -253,7 +262,7 @@ namespace UnityExtensions
 
             // Toe section
             {
-                var toeSegment = segments[0];
+                ref var toeSegment = ref segments[0];
                 toeSegment.offsetX = 0;
                 toeSegment.offsetY = 0f;
                 toeSegment.scaleX = 1f;
@@ -267,7 +276,7 @@ namespace UnityExtensions
             // Shoulder section
             {
                 // Use the simple version that is usually too flat
-                var shoulderSegment = segments[2];
+                ref var shoulderSegment = ref segments[2];
 
                 float x0 = (1f + paramsCopy.overshootX) - paramsCopy.x1;
                 float y0 = (1f + paramsCopy.overshootY) - paramsCopy.y1;
@@ -290,14 +299,9 @@ namespace UnityExtensions
                 float scale = segments[2].Eval(1f);
                 float invScale = 1f / scale;
 
-                segments[0].offsetY *= invScale;
-                segments[0].scaleY *= invScale;
-
-                segments[1].offsetY *= invScale;
-                segments[1].scaleY *= invScale;
-
-                segments[2].offsetY *= invScale;
-                segments[2].scaleY *= invScale;
+                segments[0].Normalise(invScale);
+                segments[1].Normalise(invScale);
+                segments[2].Normalise(invScale);
             }
         }
 
@@ -311,7 +315,7 @@ namespace UnityExtensions
         /// f'(x0) = m
         /// </code>
         /// </summary>
-        void SolveAB(out float lnA, out float B, float x0, float y0, float m)
+        static void SolveAB(out float lnA, out float B, float x0, float y0, float m)
         {
             B = (m * x0) / y0;
             lnA = Log(y0) - B * Log(x0);
@@ -320,7 +324,7 @@ namespace UnityExtensions
         /// <summary>
         /// Convert to <code>y=mx+b</code>
         /// </summary>
-        void AsSlopeIntercept(out float m, out float b, float x0, float x1, float y0, float y1)
+        static void AsSlopeIntercept(out float m, out float b, float x0, float x1, float y0, float y1)
         {
             float dy = (y1 - y0);
             float dx = (x1 - x0);
@@ -337,7 +341,7 @@ namespace UnityExtensions
         /// f(x) = (mx+b)^g
         /// f'(x) = gm(mx+b)^(g-1)
         /// </code></summary>
-        float EvalDerivativeLinearGamma(float m, float b, float g, float x)
+        static float EvalDerivativeLinearGamma(float m, float b, float g, float x)
         {
             return g * m * Pow(m * x + b, g - 1f);
         }
@@ -347,7 +351,7 @@ namespace UnityExtensions
         /// </summary>
         public class Uniforms
         {
-            HableCurve parent;
+            readonly HableCurve parent;
 
             internal Uniforms(HableCurve parent)
             {

@@ -54,6 +54,11 @@ namespace UnityExtensions
         /// <typeparam name="T">The type of list items to be swapped.</typeparam>
         public static void SwapAtIndices<T>(this List<T> list, int first, int second)
         {
+            UnityEngine.Assertions.Assert.IsTrue(first >= 0);
+            UnityEngine.Assertions.Assert.IsTrue(second >= 0);
+            UnityEngine.Assertions.Assert.IsTrue(first < list.Count);
+            UnityEngine.Assertions.Assert.IsTrue(second < list.Count);
+
             (list[first], list[second]) = (list[second], list[first]);
         }
         #endregion // Unity.XR.CoreUtils
@@ -116,6 +121,7 @@ namespace UnityExtensions
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to search.</param>
         /// <param name="index">The index at which to remove an element from the list.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException"/>
         public static void RemoveAtSwapBack<T>(this List<T> list, int index)
         {
             int lastIndex = list.Count - 1;
@@ -132,6 +138,18 @@ namespace UnityExtensions
         public static Span<T> AsSpan<T>(this List<T> list)
         {
             return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(start: 0, length: list.Count);
+        }
+
+        /// <inheritdoc cref="Dictionary{TKey, TValue}.TryAdd(TKey, TValue)"/>
+        public static bool TryAdd<T>(this List<T> list, T element)
+        {
+            if (!list.Contains(element))
+            {
+                list.Add(element);
+                return true;
+            }
+
+            return false;
         }
     }
 }

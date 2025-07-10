@@ -215,7 +215,7 @@ namespace UnityExtensions
             Vector3 s = s1 - s0;
             float len2 = Vector3.SqrMagnitude(s);
             if (len2 < Epsilon)
-                return 0; // degenrate segment
+                return 0; // degenerate segment
 
             return Mathf.Clamp01(Vector3.Dot(p - s0, s) / len2);
         }

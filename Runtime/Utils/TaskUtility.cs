@@ -53,12 +53,24 @@ namespace UnityExtensions
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
+        /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
         public static async Task<IEnumerable<TOutput>> RunTasksAsync<TInput, TOutput>(
             List<TInput> items,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
         {
             var cb = new ConcurrentBag<TOutput>();
+            await RunTasksAsync(items, cb, action, ct).ConfigureAwait(continueOnCapturedContext: false);
+            return cb;
+        }
+
+        /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
+        public static async Task RunTasksAsync<TInput, TOutput>(
+            List<TInput> items,
+            ConcurrentBag<TOutput> cb,
+            Action<TInput, ConcurrentBag<TOutput>> action,
+            CancellationToken ct = default)
+        {
             var count = Environment.ProcessorCount;
             using var _0 = UnityEngine.Pool.ListPool<Task>.Get(out var tasks);
             tasks.EnsureCapacity(count);
@@ -81,8 +93,7 @@ namespace UnityExtensions
                 cancellationToken: ct);
             }
 
-            await Task.WhenAll(tasks);
-            return cb;
+            await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
         }
     }
 }

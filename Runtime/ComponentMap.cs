@@ -34,7 +34,7 @@ namespace UnityExtensions
         {
             if (_keyToValueMap.Remove(key, out var value))
             {
-                _valueToKeyMap.Remove(value);
+                _ = _valueToKeyMap.Remove(value);
             }
         }
 
@@ -42,8 +42,8 @@ namespace UnityExtensions
         {
             if (_valueToKeyMap.TryGetValue(value, out var key))
             {
-                _keyToValueMap.Remove(key);
-                _valueToKeyMap.Remove(value);
+                _ = _keyToValueMap.Remove(key);
+                _ = _valueToKeyMap.Remove(value);
             }
         }
 

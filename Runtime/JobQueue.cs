@@ -6,7 +6,9 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
-    // Example: https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/TerrainHLODCreator.cs#L294
+    /// <example>
+    /// <see href="https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/TerrainHLODCreator.cs#L294"/>
+    /// </example>
     /// <remarks><code>
     /// private JobQueue m_queue;
     /// private WorkingObject CreateBakedTerrain(string name, Bounds bounds, Heightmap heightmap, int distance, bool isLeaf)
@@ -60,6 +62,7 @@ namespace UnityExtensions
             {
                 if (_mainThreadJobs.Count == 0)
                     return null;
+
                 return _mainThreadJobs.Dequeue();
             }
         }
@@ -69,6 +72,7 @@ namespace UnityExtensions
             {
                 if (_jobs.Count == 0)
                     return null;
+
                 return _jobs.Dequeue();
             }
         }        
@@ -83,6 +87,7 @@ namespace UnityExtensions
                     Action mainThreadJob = DequeueMainThreadJob();
                     if (mainThreadJob == null)
                         break;
+
                     mainThreadJob.Invoke();
                 }
 
@@ -99,6 +104,7 @@ namespace UnityExtensions
                     {
                         throw new Exception("Exception from worker thread.");
                     }
+
                     if (_workers[i].IsWorking())
                     {
                         isFinish = false;
@@ -107,9 +113,7 @@ namespace UnityExtensions
 
                 if (isFinish == false)
                     yield return null;
-
-            }
-            
+            }            
         }
 
         public void Dispose()
@@ -118,6 +122,7 @@ namespace UnityExtensions
             {
                 _workers[i].Stop();
             }
+
             _workers = null;
         }
 
@@ -127,7 +132,6 @@ namespace UnityExtensions
         private readonly Queue<Action> _jobs = new Queue<Action>();
         
         #region worker
-
         class Worker
         {
             private readonly JobQueue _queue;

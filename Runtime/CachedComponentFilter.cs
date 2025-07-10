@@ -298,10 +298,13 @@ namespace UnityExtensions
         /// <summary>
         /// Part of the IDisposable pattern.
         /// </summary>
+        /// <remarks>
+        /// Do not change this code. Put cleanup code in <see cref="Dispose(bool)"/>.
+        /// </remarks>
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion // Unity.XR.CoreUtils
     }

@@ -46,9 +46,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10ded20a5007030458bcc89252d54080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skyboxShader: {fileID: 4800000, guid: f7d9b0046be29e841a13ecfc7d85d869, type: 3}
+  skyboxShader: {fileID: 4800000, guid: 50c05d773dc603d4eb1c285c9a69a0d8, type: 3}
   _skyboxMaterial: {fileID: 2100000, guid: 2c4f0502a2024aa4da8c80eb506bf31c, type: 2}
   reflectionCamera: {fileID: 218857820870413775}
+  skyboxOverride: 0
+  cameraSkyboxOverride: 0
   resolutionScaleOverride: 0
   resolutionScale: 1
   timeSlice: 1

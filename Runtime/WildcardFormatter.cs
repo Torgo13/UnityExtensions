@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine.Pool;
 
 namespace UnityExtensions
@@ -14,6 +15,11 @@ namespace UnityExtensions
             using var _0 = StringBuilderPool.Get(out var stringBuilder);
             stringBuilder.Append(str);
 
+            return Format(stringBuilder).ToString();
+        }
+
+        protected StringBuilder Format(StringBuilder stringBuilder)
+        {
             foreach (var pair in Replacements)
             {
                 if (pair.Value != null)
@@ -22,7 +28,7 @@ namespace UnityExtensions
                 }
             }
 
-            return stringBuilder.ToString();
+            return stringBuilder;
         }
         #endregion // Unity.LiveCapture
     }

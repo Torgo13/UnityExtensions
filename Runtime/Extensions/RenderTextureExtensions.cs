@@ -1,4 +1,3 @@
-using System.IO;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -13,10 +12,7 @@ namespace UnityExtensions
         /// <param name="rt">the target RenderTexture</param>
         public static void ClearAll(this RenderTexture rt)
         {
-            RenderTexture prevRT = RenderTexture.active;
-            RenderTexture.active = rt;
-            GL.Clear(clearDepth: true, clearColor: true, Color.clear);
-            RenderTexture.active = prevRT;
+            rt.Clear(clearDepth: true, clearColor: true, Color.clear);
         }
 
         /// <summary>
@@ -32,45 +28,6 @@ namespace UnityExtensions
             RenderTexture.active = rt;
             GL.Clear(clearDepth, clearColor, bgColor);
             RenderTexture.active = prevRT;
-        }
-
-        /// <summary>
-        /// Write a RenderTexture to a file.
-        /// May forward exception
-        /// </summary>
-        /// <param name="rt">the target RenderTexture</param>
-        /// <param name="outputFilePath">The path of the output file </param>
-        /// <param name="textureFormat">The texture format of the output texture </param>
-        /// <param name="isPNG">The file format of the output file. </param>
-        /// <param name="isLinear">The color space of the output texture: linear or sRGB. </param>
-        public static bool WriteToFile(this RenderTexture rt, string outputFilePath, TextureFormat textureFormat,
-            bool isPNG = true, bool isLinear = false)
-        {
-            RenderTexture prevRenderTexture = RenderTexture.active;
-            RenderTexture.active = rt;
-            bool ret = false;
-
-            Texture2D tempTex = new Texture2D(rt.width, rt.height, textureFormat , mipChain: false, isLinear);
-            tempTex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0, recalculateMipMaps: false);
-            tempTex.Apply();
-
-            try
-            {
-                byte[] encodedData = isPNG ? tempTex.EncodeToPNG() : tempTex.EncodeToEXR();
-
-                if (null != encodedData)
-                {
-                    File.WriteAllBytesAsync(outputFilePath, encodedData);
-                    ret = true;
-                }
-            }
-            finally
-            {
-                CoreUtils.Destroy(tempTex);
-                RenderTexture.active = prevRenderTexture;
-            }
-
-            return ret;
         }
         #endregion // Unity.FilmInternalUtilities
     }

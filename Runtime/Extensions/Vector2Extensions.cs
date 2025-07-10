@@ -166,7 +166,7 @@ namespace UnityExtensions
             Vector2 s = s1 - s0;
             float len2 = Vector2.SqrMagnitude(s);
             if (len2 < Epsilon)
-                return 0; // degenrate segment
+                return 0; // degenerate segment
 
             return Mathf.Clamp01(Vector2.Dot(p - s0, s) / len2);
         }
@@ -250,6 +250,7 @@ namespace UnityExtensions
             {
                 y = 0f;
             }
+
             return new Vector2(x, y);
         }
     }

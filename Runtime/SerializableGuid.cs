@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -8,10 +9,11 @@ namespace UnityExtensions
     /// </summary>
     /// <remarks>
     /// The 128-bit <c>Guid</c>
-    /// is stored as two 64-bit <c>ulong</c>s. See the creation utility,
+    /// is stored as two 64-bit <see langword="ulong"/>s. See the creation utility,
     /// <see cref="SerializableGuidUtil"/>, for additional information.
     /// </remarks>
     [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct SerializableGuid : IEquatable<SerializableGuid>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/SerializableGuid.cs
@@ -35,7 +37,7 @@ namespace UnityExtensions
         public readonly Guid Guid => GuidUtil.Compose(guidLow, guidHigh);
 
         /// <summary>
-        /// Constructs a <see cref="SerializableGuid"/> from two 64-bit <c>ulong</c> values.
+        /// Constructs a <see cref="SerializableGuid"/> from two 64-bit <see langword="ulong"/> values.
         /// </summary>
         /// <param name="guidLow">The low 8 bytes of the <c>Guid</c>.</param>
         /// <param name="guidHigh">The high 8 bytes of the <c>Guid</c>.</param>

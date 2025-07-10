@@ -17,7 +17,7 @@ namespace UnityExtensions
         /// </summary>
         /// <typeparam name="T">The specific type of UnityObject in the dictionary.</typeparam>
         /// <param name="list">A list of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedObjects<T>(List<T> list) where T : UnityObject
+        public static void RemoveDestroyedObjects<T>(this List<T> list) where T : UnityObject
         {
             var nonNull = ListPool<T>.Get();
             nonNull.EnsureCapacity(list.Count);
@@ -39,7 +39,7 @@ namespace UnityExtensions
         /// <typeparam name="TKey">The specific type of UnityObject serving as keys in the dictionary.</typeparam>
         /// <typeparam name="TValue">The value type of the dictionary.</typeparam>
         /// <param name="dictionary">A dictionary of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedKeys<TKey, TValue>(Dictionary<TKey, TValue> dictionary)
+        public static void RemoveDestroyedKeys<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
             where TKey : UnityObject
         {
             var removeList = ListPool<TKey>.Get();
@@ -54,7 +54,7 @@ namespace UnityExtensions
 
             foreach (var key in removeList)
             {
-                dictionary.Remove(key);
+                _ = dictionary.Remove(key);
             }
 
             ListPool<TKey>.Release(removeList);

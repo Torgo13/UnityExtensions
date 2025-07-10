@@ -9,7 +9,7 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/Screenshot.cs
         #region Unity.LiveCapture
-        public static Texture2D Take(Camera camera, float scale = 1f, bool hdr = false)
+        public static Texture2D Take(this Camera camera, float scale = 1f, bool hdr = false)
         {
             if (camera == null)
                 throw new ArgumentNullException(nameof(camera));
@@ -32,7 +32,7 @@ namespace UnityExtensions
                 hdr ? TextureFormat.RGBAFloat : TextureFormat.RGB24, mipChain: false);
 
             texture.ReadPixels(new Rect(0, 0, width, height), 0, 0, recalculateMipMaps: false);
-            texture.Apply(false);
+            texture.Apply();
 
             camera.targetTexture = prevCameraRenderTexture;
             RenderTexture.active = prevRenderTexture;
@@ -41,7 +41,7 @@ namespace UnityExtensions
             return texture;
         }
 
-        public static string SaveAsPNG(Texture2D texture, string filename, string directory)
+        public static string SaveAsPNG(this Texture2D texture, string filename, string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -59,7 +59,7 @@ namespace UnityExtensions
         }
         #endregion // Unity.LiveCapture
 
-        public static async Task<string> SaveAsPNGAsync(Texture2D texture, string filename, string directory)
+        public static async Task<string> SaveAsPNGAsync(this Texture2D texture, string filename, string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -71,13 +71,14 @@ namespace UnityExtensions
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
             var bytes = texture.EncodeToPNG();
-            await File.WriteAllBytesAsync(assetPath, bytes);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
 
             return assetPath;
         }
 
         #region EXR
-        public static string SaveAsEXR(Texture2D texture, string filename, string directory)
+        public static string SaveAsEXR(this Texture2D texture, string filename, string directory,
+            Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -88,13 +89,14 @@ namespace UnityExtensions
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
-            var bytes = texture.EncodeToEXR(texture.format.IsHDR());
+            var bytes = texture.EncodeToEXR(texture.format.IsHDR() | flags);
             File.WriteAllBytes(assetPath, bytes);
 
             return assetPath;
         }
 
-        public static async Task<string> SaveAsEXRAsync(Texture2D texture, string filename, string directory)
+        public static async Task<string> SaveAsEXRAsync(this Texture2D texture, string filename, string directory,
+            Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -105,8 +107,8 @@ namespace UnityExtensions
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
-            var bytes = texture.EncodeToEXR(texture.format.IsHDR());
-            await File.WriteAllBytesAsync(assetPath, bytes);
+            var bytes = texture.EncodeToEXR(texture.format.IsHDR() | flags);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
 
             return assetPath;
         }
