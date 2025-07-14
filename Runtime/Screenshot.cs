@@ -71,7 +71,7 @@ namespace UnityExtensions
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
             var bytes = texture.EncodeToPNG();
-            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: true);
 
             return assetPath;
         }
@@ -108,7 +108,7 @@ namespace UnityExtensions
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
             var bytes = texture.EncodeToEXR(texture.format.IsHDR() | flags);
-            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: true);
 
             return assetPath;
         }

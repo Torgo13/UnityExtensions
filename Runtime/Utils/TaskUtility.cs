@@ -60,7 +60,7 @@ namespace UnityExtensions
             CancellationToken ct = default)
         {
             var cb = new ConcurrentBag<TOutput>();
-            await RunTasksAsync(items, cb, action, ct).ConfigureAwait(continueOnCapturedContext: false);
+            await RunTasksAsync(items, cb, action, ct).ConfigureAwait(continueOnCapturedContext: true);
             return cb;
         }
 
@@ -93,7 +93,7 @@ namespace UnityExtensions
                 cancellationToken: ct);
             }
 
-            await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
+            await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: true);
         }
     }
 }

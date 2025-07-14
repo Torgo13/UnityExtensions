@@ -171,6 +171,12 @@ namespace UnityExtensions
             return (start, length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Remap(this float value, float from0, float to0, float from1 = 0f, float to1 = 1f)
+        {
+            return from1 + (value - from0) * (to1 - from1) / (to0 - from0);
+        }
+
         #region SafeRange
         /// <summary>
         /// Check if the value is within the range that it can

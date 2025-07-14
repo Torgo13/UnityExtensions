@@ -190,14 +190,15 @@ namespace UnityExtensions
             var rt = target as RenderTexture;
             if (rt != null)
             {
-                target = await RenderTextureToTextureAsync(rt).ConfigureAwait(continueOnCapturedContext: false);
+                target = await RenderTextureToTextureAsync(rt)
+                    .ConfigureAwait(continueOnCapturedContext: true);
             }
 
             var t2D = target as Texture2D;
             if (t2D != null)
             {
                 _ = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
-                    .ConfigureAwait(continueOnCapturedContext: false);
+                    .ConfigureAwait(continueOnCapturedContext: true);
 
                 return;
             }
@@ -220,7 +221,7 @@ namespace UnityExtensions
                 Graphics.ExecuteCommandBuffer(cmd);
 
                 _ = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
-                    .ConfigureAwait(continueOnCapturedContext: false);
+                    .ConfigureAwait(continueOnCapturedContext: true);
 
                 cmd.Dispose();
                 return;
@@ -234,7 +235,7 @@ namespace UnityExtensions
         {
             Assert.IsTrue(source.dimension is TextureDimension.Tex2D or TextureDimension.Cube);
 
-            return await RenderTextureToTextureAsync(source).ConfigureAwait(continueOnCapturedContext: false) as Texture2D;
+            return await RenderTextureToTextureAsync(source).ConfigureAwait(continueOnCapturedContext: true) as Texture2D;
         }
 
         /// <inheritdoc cref="RenderTextureToTexture(RenderTexture)"/>
