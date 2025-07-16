@@ -16,7 +16,7 @@ namespace UnityExtensions
         #region UnityEngine.Rendering.HighDefinition
         /// <exception cref="ArgumentException">Thrown if <paramref name="target"/> is not a
         /// Texture2D, a RenderTexture or a Cubemap.</exception>
-        public static void WriteTextureToDisk(this Texture target, string filePath)
+        public static void WriteTextureToDisk(this Texture target, string filePath, string filename = "")
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -24,10 +24,13 @@ namespace UnityExtensions
                 target = RenderTextureToTexture(rt);
             }
 
+            if (string.IsNullOrEmpty(filename))
+                filename = target.name;
+
             var t2D = target as Texture2D;
             if (t2D != null)
             {
-                _ = t2D.SaveAsEXR(target.name, filePath, Texture2D.EXRFlags.CompressZIP);
+                _ = t2D.Save(filename, filePath);
                 return;
             }
 
@@ -47,7 +50,7 @@ namespace UnityExtensions
                 }
 
                 Graphics.ExecuteCommandBuffer(cmd);
-                _ = t2D.SaveAsEXR(target.name, filePath, Texture2D.EXRFlags.CompressZIP);
+                _ = t2D.Save(filename, filePath);
                 cmd.Dispose();
                 return;
             }

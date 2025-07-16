@@ -48,7 +48,8 @@ namespace UnityExtensions
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
@@ -66,7 +67,8 @@ namespace UnityExtensions
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
@@ -85,7 +87,8 @@ namespace UnityExtensions
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
@@ -103,7 +106,8 @@ namespace UnityExtensions
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
-            Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 #if UNITY_EDITOR
             assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
 #endif
@@ -113,6 +117,48 @@ namespace UnityExtensions
             return assetPath;
         }
         #endregion // EXR
+
+        public static string Save(this Texture2D texture, string filename, string directory,
+            TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
+        {
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+
+            _ = texture.IsHDR(ref fileType, ref flags);
+
+            var assetPath = CreatePath(filename, directory, fileType.GetTextureExtension());
+            var bytes = texture.Encode(fileType, flags);
+            File.WriteAllBytes(assetPath, bytes);
+
+            return assetPath;
+        }
+
+        public static async Task<string> SaveAsync(this Texture2D texture, string filename, string directory,
+            TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
+        {
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+
+            _ = texture.IsHDR(ref fileType, ref flags);
+
+            var assetPath = CreatePath(filename, directory, fileType.GetTextureExtension());
+            var bytes = texture.Encode(fileType, flags);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
+
+            return assetPath;
+        }
+
+        static string CreatePath(string filename, string directory, string textureExtension)
+        {
+            filename = FileNameFormatter.Format(filename);
+            var assetPath = $"{directory}/{filename}.{textureExtension}";
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+#if UNITY_EDITOR
+            assetPath = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(assetPath);
+#endif
+            return assetPath;
+        }
 
         static Texture2D.EXRFlags IsHDR(this TextureFormat format)
         {
@@ -137,5 +183,67 @@ namespace UnityExtensions
                     return Texture2D.EXRFlags.None;
             }
         }
+
+        #region TextureFileType
+        /// <summary>
+        /// Use EXR 32-bit float for HDR textures
+        /// </summary>
+        static bool IsHDR(this Texture2D texture, ref TextureFileType fileType, ref Texture2D.EXRFlags flags)
+        {
+            if ((fileType == TextureFileType.Auto || fileType == TextureFileType.EXR)
+                && texture.format.IsHDR() == Texture2D.EXRFlags.OutputAsFloat)
+            {
+                fileType = TextureFileType.EXR;
+                flags |= Texture2D.EXRFlags.OutputAsFloat;
+                return true;
+            }
+
+            return false;
+        }
+
+        public enum TextureFileType
+        {
+            Auto,
+            PNG,
+            JPG,
+            EXR,
+            TGA,
+        }
+
+        public static string GetTextureExtension(this TextureFileType textureFile)
+        {
+            switch (textureFile)
+            {
+                default:
+                case TextureFileType.PNG:
+                    return "png";
+                case TextureFileType.JPG:
+                    return "jpg";
+                case TextureFileType.EXR:
+                    return "exr";
+                case TextureFileType.TGA:
+                    return "tga";
+            }
+        }
+
+        static byte[] Encode(this Texture2D texture,
+            TextureFileType fileType = TextureFileType.Auto,
+            Texture2D.EXRFlags flags = Texture2D.EXRFlags.None,
+            int quality = 75)
+        {
+            switch (fileType)
+            {
+                default:
+                case TextureFileType.PNG:
+                    return texture.EncodeToPNG();
+                case TextureFileType.JPG:
+                    return texture.EncodeToJPG(quality);
+                case TextureFileType.EXR:
+                    return texture.EncodeToEXR(flags);
+                case TextureFileType.TGA:
+                    return texture.EncodeToTGA();
+            }
+        }
+        #endregion // TextureFileType
     }
 }
