@@ -69,6 +69,22 @@ namespace UnityExtensions
             if (list.Capacity < capacity)
                 list.Capacity = capacity;
         }
+
+        public static void RemoveNull<T>(this List<T> list)
+        {
+            var temp = UnityEngine.Pool.ListPool<T>.Get();
+            temp.EnsureCapacity(list.Count);
+
+            foreach (var item in list)
+            {
+                if (item != null)
+                    temp.Add(item);
+            }
+
+            list.Clear();
+            list.AddRange(temp);
+            UnityEngine.Pool.ListPool<T>.Release(temp);
+        }
         
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/ListExtensions.cs
         #region Unity.Collections
