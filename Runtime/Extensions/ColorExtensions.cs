@@ -1,7 +1,37 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace UnityExtensions
 {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Color24
+    {
+        public byte r;
+        public byte g;
+        public byte b;
+
+        public Color24(byte r, byte g, byte b)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public Color24(float r, float g, float b)
+        {
+            this.r = (byte)(r * byte.MaxValue);
+            this.g = (byte)(g * byte.MaxValue);
+            this.b = (byte)(b * byte.MaxValue);
+        }
+
+        public Color24(Vector3 f)
+        {
+            this.r = (byte)(f.x * byte.MaxValue);
+            this.g = (byte)(f.y * byte.MaxValue);
+            this.b = (byte)(f.z * byte.MaxValue);
+        }
+    }
+
     public static class ColorExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/MaterialUtils.cs

@@ -13,8 +13,8 @@ using Random = Unity.Mathematics.Random;
 namespace UnityExtensions.Packages
 {
     #region Union
-    /// <inheritdoc cref="Union1"/>
     /// <remarks>Use __0 to access the Union without extensions.</remarks>
+    /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
     public struct Union2 : System.IEquatable<Union2>
     {
@@ -33,6 +33,7 @@ namespace UnityExtensions.Packages
     {
         [FieldOffset(0)] public UnityExtensions.Union4 __0;
 
+        [FieldOffset(0)] public Random Random;
         [FieldOffset(0)] public half2 Half2;
 
         [FieldOffset(0)] public Union2 _0;
@@ -49,17 +50,17 @@ namespace UnityExtensions.Packages
     {
         [FieldOffset(0)] public UnityExtensions.Union8 __0;
 
-        [FieldOffset(0)] public half4 Half4;
         [FieldOffset(0)] public float2 Float2;
         [FieldOffset(0)] public int2 Int2;
         [FieldOffset(0)] public uint2 UInt2;
+        [FieldOffset(0)] public half4 Half4;
 
         [FieldOffset(0)] public Union4 _0;
         [FieldOffset(4)] public Union4 _4;
 
-        public readonly bool Equals(Union8 other) => Int2.Equals(other.Int2);
+        public readonly bool Equals(Union8 other) => __0.Equals(other.__0);
         public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
-        public readonly override int GetHashCode() => UInt2.GetHashCode();
+        public readonly override int GetHashCode() => __0.GetHashCode();
     }
 
     /// <inheritdoc cref="Union2"/>
@@ -68,11 +69,11 @@ namespace UnityExtensions.Packages
     {
         [FieldOffset(0)] public UnityExtensions.Union16 __0;
 
+        [FieldOffset(0)] public quaternion Quaternion;
+        [FieldOffset(0)] public double2 Double2;
         [FieldOffset(0)] public float4 Float4;
         [FieldOffset(0)] public int4 Int4;
         [FieldOffset(0)] public uint4 UInt4;
-        [FieldOffset(0)] public double2 Double2;
-        [FieldOffset(0)] public quaternion Quaternion;
 
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
@@ -80,6 +81,45 @@ namespace UnityExtensions.Packages
         public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
         public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => UInt4.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union12 : System.IEquatable<Union12>
+    {
+        [FieldOffset(0)] public UnityExtensions.Union12 __0;
+
+        [FieldOffset(0)] public float3 Float3;
+        [FieldOffset(0)] public int3 Int3;
+        [FieldOffset(0)] public uint3 UInt3;
+
+        [FieldOffset(0)] public Union4 Union4_0;
+        [FieldOffset(4)] public Union4 Union4_4;
+        [FieldOffset(8)] public Union4 Union4_8;
+
+        public readonly bool Equals(Union12 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object obj) => obj is Union12 other && Equals(other);
+        public readonly override int GetHashCode() => __0.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union48 : System.IEquatable<Union48>
+    {
+        [FieldOffset(0)] public UnityExtensions.Union48 __0;
+
+        [FieldOffset(00)] public Union16 U16_00;
+        [FieldOffset(16)] public Union16 U16_16;
+        [FieldOffset(32)] public Union16 U16_32;
+
+        [FieldOffset(00)] public Union12 U12_00;
+        [FieldOffset(12)] public Union12 U12_12;
+        [FieldOffset(24)] public Union12 U12_24;
+        [FieldOffset(36)] public Union12 U12_36;
+
+        public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object obj) => obj is Union48 other && Equals(other);
+        public readonly override int GetHashCode() => __0.GetHashCode();
     }
     #endregion // Union
 

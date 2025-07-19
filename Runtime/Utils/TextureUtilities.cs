@@ -326,5 +326,44 @@ namespace UnityExtensions
             }
         }
         #endregion // Async
+
+        /// <summary>
+        /// If <paramref name="tex"/> is not readable, creates a readable copy.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="dispose"/> returns <see langword="true"/>,
+        /// the returned <see cref="Texture2D"/> should be destroyed when no longer needed.
+        /// </remarks>
+        /// <param name="tex">Input <see cref="Texture2D"/>.</param>
+        /// <param name="dispose">True if a copy of <paramref name="tex"/> has been created.</param>
+        /// <param name="mipChain">Whether to create mipmaps on the created <see cref="Texture2D"/>.</param>
+        /// <returns>The original <paramref name="tex"/> if it is already readable,
+        /// otherwise returns a readable copy.</returns>
+        public static Texture2D ReadTexture(this Texture2D tex, out bool dispose, bool mipChain = false)
+        {
+            dispose = false;
+
+            if (tex.isReadable)
+                return tex;
+
+            RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, depthBuffer: 0,
+                RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+
+            Graphics.Blit(tex, rt);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = rt;
+
+            Texture2D readable = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32,
+                mipChain, linear: !tex.isDataSRGB, createUninitialized: true);
+
+            readable.ReadPixels(new Rect(x: 0, y: 0, rt.width, rt.height), destX: 0, destY: 0);
+            readable.Apply();
+
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(rt);
+
+            dispose = true;
+            return readable;
+        }
     }
 }
