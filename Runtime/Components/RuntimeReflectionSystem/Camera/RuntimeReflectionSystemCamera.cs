@@ -171,6 +171,9 @@ namespace UnityExtensions
                 GPUReadbackRequest();
 #endif // BLEND_SHADER
 
+            if (Time.timeScale <= float.Epsilon)
+                return;
+
             float scaleFactor = resolutionScaleOverride
                 ? resolutionScale
                 : ScalableBufferManager.widthScaleFactor;

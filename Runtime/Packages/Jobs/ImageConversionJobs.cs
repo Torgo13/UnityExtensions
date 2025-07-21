@@ -442,10 +442,10 @@ namespace UnityExtensions.Packages
             // Convert coordinates from source mip level to target mip level
             int wn = mipWidthn - 1;
             int hn = mipHeightn - 1;
-            int x0 = min(wn, x + x);
-            int y0 = min(hn, y + y);
-            int x1 = min(wn, x0 + 1);
-            int y1 = min(hn, y0 + 1);
+            int x0 = minUnlikely(wn, x + x);
+            int y0 = minUnlikely(hn, y + y);
+            int x1 = minUnlikely(wn, x0 + 1);
+            int y1 = minUnlikely(hn, y0 + 1);
 
             var tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
             var tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
@@ -459,6 +459,14 @@ namespace UnityExtensions.Packages
 
             rawTextureData[offset + index] = new Color32((byte)r, (byte)g, (byte)b, (byte)a);
         }
+
+#pragma warning disable IDE1006 // Naming Styles
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int minUnlikely(int x, int y)
+        {
+            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
+        }
+#pragma warning restore IDE1006 // Naming Styles
     }
 
     [BurstCompile(FloatMode = FloatMode.Fast)]
@@ -488,8 +496,8 @@ namespace UnityExtensions.Packages
                 int pow2 = 1 << mip;
                 int mipWidth = width / pow2;
                 int mipHeight = height / pow2;
-                int mipX = min(max(0, mipWidth - 1), x / pow2);
-                int mipY = min(max(0, mipHeight - 1), y / pow2);
+                int mipX = minUnlikely(maxUnlikely(0, mipWidth - 1), x / pow2);
+                int mipY = minUnlikely(maxUnlikely(0, mipHeight - 1), y / pow2);
 
                 int mipIndex = mad(mipY, mipWidth, mipX);
                 c = rawTextureData[offset + mipIndex];
@@ -508,6 +516,20 @@ namespace UnityExtensions.Packages
 
             rawTextureData[index] = new Color24(r, g, b);
         }
+
+#pragma warning disable IDE1006 // Naming Styles
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int maxUnlikely(int x, int y)
+        {
+            return Unity.Burst.CompilerServices.Hint.Unlikely(x > y) ? x : y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int minUnlikely(int x, int y)
+        {
+            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
+        }
+#pragma warning restore IDE1006 // Naming Styles
     }
 
     [BurstCompile(FloatMode = FloatMode.Fast)]
