@@ -95,6 +95,19 @@ namespace UnityExtensions.Packages
         }
         #endregion // UnityEngine.XR.ARCore
 
+        /// <summary>
+        /// Calculates the starting index of a mip level given the
+        /// original width and height of the texture.
+        /// Assumes the full mip chain is present.
+        /// </summary>
+        /// <remarks>
+        /// Provide <paramref name="mipLevel"/> + 1 to get the total number
+        /// of pixels including that mip level.
+        /// </remarks>
+        /// <param name="mipLevel">Mipmap level ranging from 0 to mipCount - 1.</param>
+        /// <param name="width">Full width of the texture.</param>
+        /// <param name="height">Full height of the texture.</param>
+        /// <returns>The starting index of the specified <paramref name="mipLevel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetMipOffset(int mipLevel, int width, int height)
         {
@@ -111,54 +124,45 @@ namespace UnityExtensions.Packages
         }
 
         /// <summary>
+        /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
+        /// when created with mipChain as <see langword="true"/>.
+        /// </summary>
+        public static int MipmapCount(int width, int height)
+        {
+            int mipmapCount = 0;
+            int s = max(width, height);
+            while (s > 1)
+            {
+                ++mipmapCount;
+                s /= 2;
+            }
+
+            return mipmapCount;
+        }
+
+        /// <summary>
         /// Create a normal map from colour intensity.
         /// </summary>
         /// <remarks>
         /// Must use <see cref="Texture2D.Apply()"/> on <paramref name="normal"/>
         /// after calling <see cref="JobHandle.Complete"/>.
         /// </remarks>
-        public static JobHandle CreateNormalMap(this Texture2D texture,
-            out Texture2D normal, float normalStrength = 8f, JobHandle handle = default)
+        public static JobHandle CreateNormalMap(this Texture2D texture, out Texture2D normal,
+            bool layered = false, float normalStrength = 8f, JobHandle handle = default)
         {
             int width = texture.width;
             int height = texture.height;
             normal = new Texture2D(width, height, TextureFormat.RGB24,
-                mipChain: false, linear: true, createUninitialized: true);
-
-            handle = texture.GetPixelData32(out var input, out bool dispose, out _, handle);
-
-            const float third = 1f / 3f;
-            handle = new CreateNormalMapJob
-            {
-                scale = new Vector3(third, third, third),
-                width = width,
-                hn = height - 1,
-                normalStrength = normalStrength,
-                wrap = false,
-                input = input,
-                output = normal.GetPixelData<Color24>(mipLevel: 0),
-            }.Schedule(width * height, handle);
-
-            if (dispose)
-                handle = new DisposeArrayJob<Color32> { Data = input, }.Schedule(handle);
-
-            return handle;
-        }
-
-        /// <inheritdoc cref="CreateNormalMap"/>
-        public static JobHandle CreateLayeredNormalmap(this Texture2D texture,
-            out Texture2D normal, float normalStrength = 8f, JobHandle handle = default)
-        {
-            int width = texture.width;
-            int height = texture.height;
-            normal = new Texture2D(width, height, TextureFormat.RGB24,
-                mipChain: true, linear: true, createUninitialized: true);
+                mipChain: layered, linear: true, createUninitialized: true);
 
             handle = texture.GetPixelData32(out var input, out bool dispose, out int mipmapCount, handle);
 
+            if (!layered)
+                mipmapCount = 1;
+
             const float third = 1f / 3f;
-            var scale = new Vector3(third, third, third);
-            for (int i = 0; i < mipmapCount - 1; i++)
+            var scale = new float3(third, third, third);
+            for (int i = 0; i < mipmapCount; i++)
             {
                 int pow2 = 1 << i;
                 int mipWidth = width / pow2;
@@ -177,17 +181,20 @@ namespace UnityExtensions.Packages
                     output = output,
                 }.Schedule(output.Length, handle);
             }
-
-            handle = new LayerMipsJob
+            
+            if (layered)
             {
-                rawTextureData = normal.GetRawTextureData<Color24>(),
-                width = width,
-                height = height,
-                mipmapCountn = mipmapCount - 3,
-            }.Schedule(width * height, handle);
+                handle = new LayerMipsJob
+                {
+                    rawTextureData = normal.GetRawTextureData<Color24>(),
+                    width = width,
+                    height = height,
+                    mipmapCount = mipmapCount,
+                }.Schedule(width * height, handle);
+            }
 
             if (dispose)
-                handle = new DisposeArrayJob<Color32> { Data = input, }.Schedule(handle);
+                handle = input.Dispose(handle);
 
             return handle;
         }
@@ -201,7 +208,6 @@ namespace UnityExtensions.Packages
             mipmapCount = texture.mipmapCount;
             bool convertColour = texture.format != TextureFormat.RGBA32;
             dispose = convertColour || mipmapCount <= 1;
-
             if (!dispose)
             {
                 colour32 = texture.GetRawTextureData<Color32>();
@@ -212,28 +218,27 @@ namespace UnityExtensions.Packages
             int height = texture.height;
             int size = width * height;
 
-            // Calculate number of mipmaps
-            int s = min(width, height);
-            mipmapCount = 0;
-            while (s > 0)
-            {
-                ++mipmapCount;
-                s /= 2;
-            }
-
-            // Calculate number pixels including mipmaps
-            int length = 0;
-            for (int i = 0; i < mipmapCount; i++)
-            {
-                int pow2 = 1 << i;
-                length += size / (pow2 * pow2);
-            }
-
+            mipmapCount = MipmapCount(width, height);
+            int length = GetMipOffset(mipmapCount + 1, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
 
-            Color32[] pixels = texture.GetPixels32(miplevel: 0);
-            NativeArray<Color32>.Copy(pixels, srcIndex: 0, colour32, dstIndex: 0, length: size);
+            if (convertColour)
+            {
+                Color32[] pixels = texture.GetPixels32(miplevel: 0);
+                NativeArray<Color32>.Copy(pixels, srcIndex: 0, colour32, dstIndex: 0, length: size);
+            }
+            else
+            {
+                NativeArray<Color32> pixels = texture.GetPixelData<Color32>(mipLevel: 0);
+                NativeArray<Color32>.Copy(pixels, srcIndex: 0, colour32, dstIndex: 0, length: size);
+            }
+
+            // Width and height of the previous (larger) mip level
+            int mipWidthn = width;
+            int mipHeightn = height;
+            int offset = width * height;
+            int offsetn = 0;
 
             // Create mipmaps
             for (int i = 1; i < mipmapCount; i++)
@@ -245,11 +250,17 @@ namespace UnityExtensions.Packages
                 handle = new CalculateMipsJob
                 {
                     rawTextureData = colour32,
-                    offsetn = GetMipOffset(i - 1, width, height),
-                    offset = GetMipOffset(i, width, height),
+                    offset = offset,
+                    offsetn = offsetn,
                     mipWidth = mipWidth,
-                }.ScheduleParallel(mipWidth * mipHeight,
-                    innerloopBatchCount: 32, handle);
+                    mipWidthn = mipWidthn,
+                    mipHeightn = mipHeightn,
+                }.Schedule(mipWidth * mipHeight, handle);
+
+                mipWidthn = mipWidth;
+                mipHeightn = mipHeight;
+                offsetn = offset;
+                offset += mipWidth * mipHeight;
             }
 
             return handle;
@@ -414,9 +425,11 @@ namespace UnityExtensions.Packages
     [BurstCompile(FloatMode = FloatMode.Fast)]
     public struct CalculateMipsJob : IJobFor
     {
-        [ReadOnly] public int offsetn;
         [ReadOnly] public int offset;
+        [ReadOnly] public int offsetn;
         [ReadOnly] public int mipWidth;
+        [ReadOnly] public int mipWidthn;
+        [ReadOnly] public int mipHeightn;
 
         [NativeDisableParallelForRestriction]
         public NativeArray<Color32> rawTextureData;
@@ -427,16 +440,17 @@ namespace UnityExtensions.Packages
             int y = index / mipWidth;
 
             // Convert coordinates from source mip level to target mip level
-            int tgtX = x + x;
-            int tgtY = y + y;
-            int tgtWidth = mipWidth + mipWidth;
+            int wn = mipWidthn - 1;
+            int hn = mipHeightn - 1;
+            int x0 = min(wn, x + x);
+            int y0 = min(hn, y + y);
+            int x1 = min(wn, x0 + 1);
+            int y1 = min(hn, y0 + 1);
 
-            int tlIdx = offsetn + tgtY * tgtWidth + tgtX;
-            int blIdx = offsetn + (tgtY + 1) * tgtWidth + tgtX;
-            var tl = rawTextureData[tlIdx];
-            var tr = rawTextureData[tlIdx + 1];
-            var bl = rawTextureData[blIdx];
-            var br = rawTextureData[blIdx + 1];
+            var tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
+            var tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
+            var bl = rawTextureData[offsetn + mad(y1, mipWidthn, x0)];
+            var br = rawTextureData[offsetn + mad(y1, mipWidthn, x1)];
 
             float r = (tl.r + tr.r + bl.r + br.r) * 0.25f;
             float g = (tl.g + tr.g + bl.g + br.g) * 0.25f;
@@ -452,7 +466,7 @@ namespace UnityExtensions.Packages
     {
         [ReadOnly] public int width;
         [ReadOnly] public int height;
-        [ReadOnly] public int mipmapCountn;
+        [ReadOnly] public int mipmapCount;
 
         [NativeDisableParallelForRestriction]
         public NativeArray<Color24> rawTextureData;
@@ -468,26 +482,29 @@ namespace UnityExtensions.Packages
             float b = c.b;
 
             // TODO Bilinear filtering for higher mip levels
-            for (int mip = 1; mip < mipmapCountn; mip++)
+            int offset = width * height;
+            for (int mip = 1; mip < mipmapCount; mip++)
             {
                 int pow2 = 1 << mip;
-                int mipX = x / pow2;
-                int mipY = y / pow2;
                 int mipWidth = width / pow2;
+                int mipHeight = height / pow2;
+                int mipX = min(max(0, mipWidth - 1), x / pow2);
+                int mipY = min(max(0, mipHeight - 1), y / pow2);
 
-                int offset = ImageConversionJobs.GetMipOffset(mip, width, height);
                 int mipIndex = mad(mipY, mipWidth, mipX);
                 c = rawTextureData[offset + mipIndex];
 
                 r += c.r;
                 g += c.g;
                 b += c.b;
+
+                offset += mipWidth * mipHeight;
             }
 
-            float scale = mipmapCountn * (float)byte.MaxValue;
-            r /= scale;
-            g /= scale;
-            b /= scale;
+            float scale = rcp(mipmapCount * (float)byte.MaxValue);
+            r *= scale;
+            g *= scale;
+            b *= scale;
 
             rawTextureData[index] = new Color24(r, g, b);
         }
@@ -579,11 +596,11 @@ namespace UnityExtensions.Packages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float dot(Color32 c, float3 v)
         {
-            const float maxValue = byte.MaxValue * byte.MaxValue;
-            float a = c.a;
-            float x = v.x * c.r * a / maxValue;
-            float y = v.y * c.g * a / maxValue;
-            float z = v.z * c.b * a / maxValue;
+            const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
+            float a = c.a * normalise;
+            float x = v.x * c.r * a;
+            float y = v.y * c.g * a;
+            float z = v.z * c.b * a;
             return x * x + y * y + z * z;
         }
 
