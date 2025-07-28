@@ -1361,8 +1361,8 @@ namespace UnityExtensions.Packages
                 sincos(azimuth, out float sinAzimuth, out float cosAzimuth);
 
                 float3 point;
-                point.x = sinIncline * cosAzimuth * radius;
-                point.y = sinIncline * sinAzimuth * radius;
+                point.x = cosAzimuth * (sinIncline * radius);
+                point.y = sinAzimuth * (sinIncline * radius);
                 point.z = cosIncline * radius;
 
                 points[i] = point;

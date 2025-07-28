@@ -73,6 +73,8 @@ namespace UnityExtensions.Packages
 
             private static MaterialPropertyBlock s_SharedPropertyBlock = new MaterialPropertyBlock();
 
+#if CUSTOM_URP
+#else
             private static readonly ParameterExpression param = Expression.Parameter(typeof(object), "instance");
 
             private static readonly Func<object, CommandBuffer> getCommandBufferDelegate =
@@ -80,6 +82,7 @@ namespace UnityExtensions.Packages
                     Expression.Field(Expression.Convert(param, typeof(RenderingData)),
                     typeof(RenderingData).GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic)),
                     typeof(CommandBuffer)), param).Compile();
+#endif // CUSTOM_URP
 
             public FullScreenRenderPass(string passName)
             {
@@ -137,7 +140,11 @@ namespace UnityExtensions.Packages
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 ref var cameraData = ref renderingData.cameraData;
+#if CUSTOM_URP
+                var cmd = renderingData.cmd;
+#else
                 var cmd = getCommandBufferDelegate(renderingData);
+#endif // CUSTOM_URP
 
                 using (new ProfilingScope(cmd, profilingSampler))
                 {
