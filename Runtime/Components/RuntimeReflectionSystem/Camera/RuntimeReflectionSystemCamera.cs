@@ -19,6 +19,13 @@ namespace UnityExtensions
         readonly int Blend = Shader.PropertyToID("_Blend");
 #endif // BLEND_SHADER
 
+        const string shaderName =
+#if BLEND_SHADER
+            "Skybox/CubemapBlend";
+#else
+            "Skybox/CubemapSimple";
+#endif // BLEND_SHADER
+
         [SerializeField] Shader skyboxShader;
         public Material _skyboxMaterial;
         bool _createdMaterial;
@@ -93,34 +100,19 @@ namespace UnityExtensions
 
         void Awake()
         {
-            if (_skyboxMaterial == null)
+            if (!InitialiseMaterial())
             {
-                if (skyboxShader == null)
-                {
-#if BLEND_SHADER
-                    skyboxShader = Shader.Find("Skybox/CubemapBlend");
-#else
-                    skyboxShader = Shader.Find("Skybox/CubemapSimple");
-#endif // BLEND_SHADER
-                }
-
-                _skyboxMaterial = CoreUtils.CreateEngineMaterial(skyboxShader);
-
-                if (_skyboxMaterial == null)
-                {
-                    CoreUtils.Destroy(this);
-                    return;
-                }
-
-                _createdMaterial = true;
+                CoreUtils.Destroy(this);
+                return;
             }
 
             GetReflectionCamera();
             _reflectionCameraTransform = reflectionCamera.transform;
             PrepareNextCubemap();
 
-            RenderTextureDescriptor desc = new RenderTextureDescriptor(Resolution, Resolution,
-                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0, RenderTextureReadWrite.Default)
+            var desc = new RenderTextureDescriptor(Resolution, Resolution,
+                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0,
+                RenderTextureReadWrite.Default)
             {
                 dimension = TextureDimension.Cube,
                 autoGenerateMips = false,
@@ -138,7 +130,8 @@ namespace UnityExtensions
             UpdateSkybox();
 #else
             desc = new RenderTextureDescriptor(Resolution, Resolution,
-                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: -1, RenderTextureReadWrite.Default)
+                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: -1,
+                RenderTextureReadWrite.Default)
             {
                 dimension = TextureDimension.Cube,
                 useMipMap = true,
@@ -153,8 +146,9 @@ namespace UnityExtensions
             _ = reflectionCamera.RenderToCubemap(_blendedTexture);
             UpdateAmbient();
 
-            // Sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
+            // Usually sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
             // or GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
+            // Cubemap must be sampled directly in Skybox shaders as unity_SpecCube0 is undefined
             UpdateCustomReflectionTexture(unloadedScene: default, loadedScene: default);
 
             SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
@@ -165,39 +159,7 @@ namespace UnityExtensions
 
         void LateUpdate()
         {
-#if BLEND_SHADER
-#else
-            if (_readbackRequest.done && !_readbackRequest.hasError)
-                GPUReadbackRequest();
-#endif // BLEND_SHADER
-
-            if (Time.timeScale <= float.Epsilon)
-                return;
-
-            float scaleFactor = resolutionScaleOverride
-                ? resolutionScale
-                : ScalableBufferManager.widthScaleFactor;
-
-            if (resolutionScaleOverride)
-                ScalableBufferManager.ResizeBuffers(resolutionScale, resolutionScale);
-
-            _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
-
-            if (!EnsureCreated())
-                return;
-
-#if BLEND_SHADER
-#else
-            if (!timeSlice)
-            {
-                UpdateReflectionCameraPosition();
-                _ = reflectionCamera.RenderToCubemap(_blendedTexture);
-                UpdateAmbient();
-                return;
-            }
-#endif // BLEND_SHADER
-
-            _ = TickRealtimeProbes();
+            Render(timeSlice, resolutionScaleOverride, resolutionScale);
         }
 
         void OnDestroy()
@@ -225,6 +187,43 @@ namespace UnityExtensions
         }
 
         #endregion // MonoBehaviour
+
+        public void Render(bool timeSlice, bool resolutionScaleOverride = false, float scaleFactor = 1)
+        {
+#if BLEND_SHADER
+#else
+            if (_readbackRequest.done && !_readbackRequest.hasError)
+                GPUReadbackRequest();
+#endif // BLEND_SHADER
+
+            // Only update when time is progressing
+            if (Time.timeScale <= float.Epsilon)
+                return;
+
+            if (!resolutionScaleOverride)
+                scaleFactor = ScalableBufferManager.widthScaleFactor;
+
+            if (resolutionScaleOverride)
+                ScalableBufferManager.ResizeBuffers(scaleFactor, scaleFactor);
+
+            _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
+
+            if (!EnsureCreated())
+                return;
+
+#if BLEND_SHADER
+#else
+            if (!timeSlice)
+            {
+                UpdateReflectionCameraPosition();
+                _ = reflectionCamera.RenderToCubemap(_blendedTexture);
+                UpdateAmbient();
+                return;
+            }
+#endif // BLEND_SHADER
+
+            _ = TickRealtimeProbes();
+        }
 
         /// <inheritdoc cref="UnityEngine.Experimental.Rendering.ScriptableRuntimeReflectionSystem.TickRealtimeProbes"/>
         /// <remarks>
@@ -275,6 +274,23 @@ namespace UnityExtensions
 #endif // BLEND_SHADER
             
             return updated;
+        }
+
+        bool InitialiseMaterial()
+        {
+            if (_skyboxMaterial != null)
+                return true;
+
+            if (skyboxShader == null)
+                skyboxShader = Shader.Find(shaderName);
+
+            _skyboxMaterial = CoreUtils.CreateEngineMaterial(skyboxShader);
+
+            if (_skyboxMaterial == null)
+                return false;
+
+            _createdMaterial = true;
+            return true;
         }
 
         void PrepareNextCubemap()
@@ -435,7 +451,7 @@ namespace UnityExtensions
         /// and if not attempt to create it.
         /// </summary>
         /// <returns>True if <paramref name="rt"/> is created.</returns>
-        bool CreateRenderTexture(RenderTexture rt)
+        static bool CreateRenderTexture(RenderTexture rt)
         {
             if (rt.IsCreated())
                 return true;
@@ -446,7 +462,7 @@ namespace UnityExtensions
         /// <summary>
         /// Release and destroy a <see cref="RenderTexture"/>.
         /// </summary>
-        void DestroyRenderTexture(RenderTexture rt)
+        static void DestroyRenderTexture(RenderTexture rt)
         {
             if (rt != null)
             {
@@ -522,12 +538,14 @@ namespace UnityExtensions
 
             // Get the average of the four colours at the horizon
             // Use a Vector4 to avoid colours being clamped to 1
-            Vector4 equator = new Vector4(0, 0, 0, 1);
-            Vector4 skyEquator = new Vector4(0, 0, 0, 1);
+            Vector4 equator = default;
+            Vector4 skyEquator = default;
             for (int i = 0; i < 3; i++)
             {
-                equator[i] = _ambientColours[positiveX][i] + _ambientColours[negativeX][i]
-                    + _ambientColours[positiveZ][i] + _ambientColours[negativeZ][i];
+                equator[i] = _ambientColours[positiveX][i]
+                    + _ambientColours[negativeX][i]
+                    + _ambientColours[positiveZ][i]
+                    + _ambientColours[negativeZ][i];
 
                 skyEquator[i] = equator[i] + (4 * _ambientColours[positiveY][i]);
                 skyEquator[i] /= 8 * byte.MaxValue;
@@ -545,6 +563,6 @@ namespace UnityExtensions
         }
 #endif // BLEND_SHADER
 
-#endregion // Ambient
-                }
-            }
+        #endregion // Ambient
+    }
+}
