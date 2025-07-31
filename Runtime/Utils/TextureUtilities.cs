@@ -331,7 +331,7 @@ namespace UnityExtensions
         /// If <paramref name="tex"/> is not readable, creates a readable copy.
         /// </summary>
         /// <remarks>
-        /// If <paramref name="dispose"/> returns <see langword="true"/>,
+        /// If <see cref="Texture2D.isReadable"/> returns <see langword="true"/>,
         /// the returned <see cref="Texture2D"/> should be destroyed when no longer needed.
         /// </remarks>
         /// <param name="tex">Input <see cref="Texture2D"/>.</param>
@@ -339,12 +339,23 @@ namespace UnityExtensions
         /// <param name="mipChain">Whether to create mipmaps on the created <see cref="Texture2D"/>.</param>
         /// <returns>The original <paramref name="tex"/> if it is already readable,
         /// otherwise returns a readable copy.</returns>
-        public static Texture2D ReadTexture(this Texture2D tex, out bool dispose, bool mipChain = false)
+        public static Texture2D ReadTexture(this Texture2D tex, bool mipChain = false)
         {
-            dispose = false;
-
             if (tex.isReadable)
                 return tex;
+
+            Texture2D readable;
+
+            // No blit is required if the source texture is uncompressed and in the correct format
+            var format = tex.format;
+            if (format == TextureFormat.RGB24 || format == TextureFormat.RGBA32)
+            {
+                readable = new Texture2D(tex.width, tex.height, format,
+                    mipChain, linear: !tex.isDataSRGB, createUninitialized: true);
+
+                Graphics.CopyTexture(tex, readable);
+                return readable;
+            }
 
             RenderTexture rt = RenderTexture.GetTemporary(tex.width, tex.height, depthBuffer: 0,
                 RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
@@ -353,7 +364,7 @@ namespace UnityExtensions
             RenderTexture previous = RenderTexture.active;
             RenderTexture.active = rt;
 
-            Texture2D readable = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32,
+            readable = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32,
                 mipChain, linear: !tex.isDataSRGB, createUninitialized: true);
 
             readable.ReadPixels(new Rect(x: 0, y: 0, rt.width, rt.height), destX: 0, destY: 0);
@@ -362,8 +373,27 @@ namespace UnityExtensions
             RenderTexture.active = previous;
             RenderTexture.ReleaseTemporary(rt);
 
-            dispose = true;
             return readable;
+        }
+
+        /// <inheritdoc cref="ReadTexture"/>
+        public static AsyncGPUReadbackRequest ReadTextureAsync(this Texture2D tex,
+            out Texture2D readable, out NativeArray<Color32> readableData, bool mipChain = false,
+            Action<AsyncGPUReadbackRequest> callback = null)
+        {
+            if (tex.isReadable)
+            {
+                readable = tex;
+                readableData = readable.GetPixelData<Color32>(mipLevel: 0);
+                return default;
+            }
+
+            readable = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32,
+                mipChain, linear: !tex.isDataSRGB, createUninitialized: true);
+
+            readableData = readable.GetPixelData<Color32>(mipLevel: 0);
+
+            return AsyncGPUReadback.RequestIntoNativeArray(ref readableData, tex, mipIndex: 0, callback);
         }
     }
 }
