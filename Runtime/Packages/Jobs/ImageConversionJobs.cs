@@ -107,20 +107,46 @@ namespace UnityExtensions.Packages
         /// <param name="mipLevel">Mipmap level ranging from 0 to mipCount - 1.</param>
         /// <param name="width">Full width of the texture.</param>
         /// <param name="height">Full height of the texture.</param>
-        /// <returns>The starting index of the specified <paramref name="mipLevel"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetMipOffset(int mipLevel, int width, int height)
+        /// <returns>
+        /// The starting index of the specified <paramref name="mipLevel"/>.
+        /// </returns>
+        public static void GetMipData(int mipLevel, int width, int height,
+            out int offset, out int pow2, out int mipWidth, out int mipHeight)
         {
-            int offset = 0;
-            for (int i = 0; i < mipLevel; i++)
-            {
-                int pow2 = 1 << i;
-                int mipWidth = width / pow2;
-                int mipHeight = height / pow2;
-                offset += mipWidth * mipHeight;
-            }
+            offset = 0;
+            pow2 = 1;
+            mipWidth = width;
+            mipHeight = height;
 
+            for (int i = 1; i <= mipLevel; i++)
+            {
+                offset += mipWidth * mipHeight;
+                pow2 = 1 << i;
+                mipWidth = width / pow2;
+                mipHeight = height / pow2;
+            }
+        }
+
+        /// <summary>
+        /// Calculates the total number of elements a texture with a mip chain would require.
+        /// </summary>
+        /// <param name="mipmapCount">Use <see cref="Texture.mipmapCount"/>
+        /// to calculate the full mip chain.</param>
+        /// <param name="width">The original width of the texture at mip 0.</param>
+        /// <param name="height">The original height of the texture at mip 0.</param>
+        /// <returns>The number of elements required for all given mip levels.</returns>
+        public static int MipChainSize(int mipmapCount, int width, int height)
+        {
+            GetMipData(mipmapCount, width, height,
+                out int offset, out _, out _, out _);
+            
             return offset;
+        }
+
+        /// <inheritdoc cref="MipChainSize(int, int, int)"/>
+        public static int MipChainSize(Texture2D tex)
+        {
+            return MipChainSize(tex.mipmapCount, tex.width, tex.height);
         }
 
         /// <summary>
@@ -156,6 +182,7 @@ namespace UnityExtensions.Packages
                 mipChain: layered, linear: true, createUninitialized: true);
 
             handle = texture.GetPixelData32(out var input, out bool dispose, out int mipmapCount, handle);
+            var normalData = normal.GetRawTextureData<Color24>();
 
             if (!layered)
                 mipmapCount = 1;
@@ -164,17 +191,17 @@ namespace UnityExtensions.Packages
             var scale = new float3(third, third, third);
             for (int i = 0; i < mipmapCount; i++)
             {
-                int pow2 = 1 << i;
-                int mipWidth = width / pow2;
-                int mipHeight = height / pow2;
-                var output = normal.GetPixelData<Color24>(mipLevel: i);
+                GetMipData(i, width, height,
+                    out int offset, out _, out int mipWidth, out int mipHeight);
+
+                var output = normalData.GetSubArray(offset, mipWidth * mipHeight);
 
                 handle = new CreateNormalMapJob
                 {
                     scale = scale,
                     width = mipWidth,
                     hn = mipHeight - 1,
-                    offset = GetMipOffset(i, width, height),
+                    offset = offset,
                     normalStrength = normalStrength,// / pow2,
                     wrap = false,
                     input = input,
@@ -186,7 +213,7 @@ namespace UnityExtensions.Packages
             {
                 handle = new LayerMipsJob
                 {
-                    rawTextureData = normal.GetRawTextureData<Color24>(),
+                    rawTextureData = normalData,
                     width = width,
                     height = height,
                     mipmapCount = mipmapCount,
@@ -219,7 +246,7 @@ namespace UnityExtensions.Packages
             int size = width * height;
 
             mipmapCount = MipmapCount(width, height);
-            int length = GetMipOffset(mipmapCount + 1, width, height);
+            int length = MipChainSize(mipmapCount, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
 
@@ -442,31 +469,29 @@ namespace UnityExtensions.Packages
             // Convert coordinates from source mip level to target mip level
             int wn = mipWidthn - 1;
             int hn = mipHeightn - 1;
-            int x0 = minUnlikely(wn, x + x);
-            int y0 = minUnlikely(hn, y + y);
-            int x1 = minUnlikely(wn, x0 + 1);
-            int y1 = minUnlikely(hn, y0 + 1);
+            int x0 = MinUnlikely(wn, x + x);
+            int y0 = MinUnlikely(hn, y + y);
+            int x1 = MinUnlikely(wn, x0 + 1);
+            int y1 = MinUnlikely(hn, y0 + 1);
 
-            var tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
-            var tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
-            var bl = rawTextureData[offsetn + mad(y1, mipWidthn, x0)];
-            var br = rawTextureData[offsetn + mad(y1, mipWidthn, x1)];
+            Color32 tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
+            Color32 tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
+            Color32 bl = rawTextureData[offsetn + mad(y1, mipWidthn, x0)];
+            Color32 br = rawTextureData[offsetn + mad(y1, mipWidthn, x1)];
 
-            float r = (tl.r + tr.r + bl.r + br.r) * 0.25f;
-            float g = (tl.g + tr.g + bl.g + br.g) * 0.25f;
-            float b = (tl.b + tr.b + bl.b + br.b) * 0.25f;
-            float a = (tl.a + tr.a + bl.a + br.a) * 0.25f;
+            byte r = (byte)((tl.r + tr.r + bl.r + br.r) >> 2);
+            byte g = (byte)((tl.g + tr.g + bl.g + br.g) >> 2);
+            byte b = (byte)((tl.b + tr.b + bl.b + br.b) >> 2);
+            byte a = (byte)((tl.a + tr.a + bl.a + br.a) >> 2);
 
-            rawTextureData[offset + index] = new Color32((byte)r, (byte)g, (byte)b, (byte)a);
+            rawTextureData[offset + index] = new Color32(r, g, b, a);
         }
 
-#pragma warning disable IDE1006 // Naming Styles
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int minUnlikely(int x, int y)
+        static int MinUnlikely(int x, int y)
         {
             return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
         }
-#pragma warning restore IDE1006 // Naming Styles
     }
 
     [BurstCompile(FloatMode = FloatMode.Fast)]
@@ -484,10 +509,14 @@ namespace UnityExtensions.Packages
             int x = index % width;
             int y = index / width;
 
+#if MIP_AVERAGE
+            const float scale = 1f;
+#else
+            const float scale = 1f / byte.MaxValue;
+#endif // MIP_AVERAGE
+
             Color24 c = rawTextureData[index];
-            float r = c.r;
-            float g = c.g;
-            float b = c.b;
+            float3 rgb = new float3(c.r, c.g, c.b) * scale;
 
             // TODO Bilinear filtering for higher mip levels
             int offset = width * height;
@@ -496,40 +525,50 @@ namespace UnityExtensions.Packages
                 int pow2 = 1 << mip;
                 int mipWidth = width / pow2;
                 int mipHeight = height / pow2;
-                int mipX = minUnlikely(maxUnlikely(0, mipWidth - 1), x / pow2);
-                int mipY = minUnlikely(maxUnlikely(0, mipHeight - 1), y / pow2);
+                int mipX = MinUnlikely(MaxUnlikely(0, mipWidth - 1), x / pow2);
+                int mipY = MinUnlikely(MaxUnlikely(0, mipHeight - 1), y / pow2);
 
                 int mipIndex = mad(mipY, mipWidth, mipX);
                 c = rawTextureData[offset + mipIndex];
-
-                r += c.r;
-                g += c.g;
-                b += c.b;
+#if MIP_AVERAGE
+                rgb += new float3(c.r, c.g, c.b);
+#else
+                rgb = BlendNormal(rgb, new float3(c.r, c.g, c.b) * scale);
+#endif // MIP_AVERAGE
 
                 offset += mipWidth * mipHeight;
             }
 
-            float scale = rcp(mipmapCount * (float)byte.MaxValue);
-            r *= scale;
-            g *= scale;
-            b *= scale;
+#if MIP_AVERAGE
+            rgb *= rcp(mipmapCount * byte.MaxValue);
+#endif // MIP_AVERAGE
 
-            rawTextureData[index] = new Color24(r, g, b);
+            rawTextureData[index] = new Color24(rgb);
         }
 
-#pragma warning disable IDE1006 // Naming Styles
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int maxUnlikely(int x, int y)
+        static int MaxUnlikely(int x, int y)
         {
             return Unity.Burst.CompilerServices.Hint.Unlikely(x > y) ? x : y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int minUnlikely(int x, int y)
+        static int MinUnlikely(int x, int y)
         {
             return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
         }
-#pragma warning restore IDE1006 // Naming Styles
+
+        /// <see href="https://github.com/Unity-Technologies/Graphics/blob/a44ef5e6307acc343ba19066be9f82e08bf14546/Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl#L305"/>
+        static float3 BlendNormal(float3 n1, float3 n2)
+        {
+            float4 n = mad(n1.xyzz, new float4(2, 2, 2, -2), new float4(-1, -1, -1, 1));
+            n2 = mad(n2, 2, -1);
+            float3 r;
+            r.x = dot(n.zxx, n2.xyz);
+            r.y = dot(n.yzy, n2.xyz);
+            r.z = dot(n.xyw, -n2.xyz);
+            return normalize(r);
+        }
     }
 
     [BurstCompile(FloatMode = FloatMode.Fast)]
