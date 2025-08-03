@@ -58,7 +58,7 @@ namespace UnityExtensions
             }
 
             ListPool<Vector3>.Release(vertices);
-            
+
             // Texture
             var result = new Texture2D(resolution, slicesY.Count);
             var data = result.GetPixelData<Color>(mipLevel: 0);
@@ -105,6 +105,7 @@ namespace UnityExtensions
 
             result.Apply();
             var bytes = result.EncodeToPNG();
+            CoreUtils.Destroy(result);
             string path = Application.dataPath + "/Artifacts/" + mesh.name + ".png";
             File.WriteAllBytes(path, bytes);
             Debug.Log("Texture file written at " + path);
@@ -124,7 +125,7 @@ namespace UnityExtensions
             var vertices = ListPool<Vector3>.Get();
             var colors = ListPool<Color>.Get();
             var uvs = ListPool<Vector2>.Get();
-            
+
             mesh.GetColors(colors);
             mesh.GetVertices(vertices);
             mesh.GetUVs(channel: 0, uvs);
@@ -145,7 +146,7 @@ namespace UnityExtensions
 
                 slice.Add(pointWithUV);
             }
-            
+
             ListPool<Vector3>.Release(vertices);
             ListPool<Color>.Release(colors);
             ListPool<Vector2>.Release(uvs);
@@ -180,7 +181,7 @@ namespace UnityExtensions
             var position = transform.position;
             var offsetMin = new Vector3(bounds.min.x, bounds.min.y, 0.0f);
             var offsetMax = new Vector3(bounds.max.x, bounds.max.y, 0.0f);
-            
+
             Gizmos.color = Color.green;
             Gizmos.DrawRay(position + offsetMin, new Vector3(bounds.size.x, 0.0f, 0.0f));
             Gizmos.DrawRay(position + offsetMin, new Vector3(0.0f, bounds.size.y, 0.0f));

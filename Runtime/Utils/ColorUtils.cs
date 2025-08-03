@@ -422,7 +422,7 @@ namespace UnityExtensions
         /// <remarks>
         /// Rounds the colour values up by repeating the masked bits.
         /// </remarks>
-        /// <param name="b">A ushort with RGB colours encoded in 5:6:5 bits.</param>
+        /// <param name="u">A ushort with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color32 containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 UShortToColor32(ushort u)
@@ -470,7 +470,7 @@ namespace UnityExtensions
         /// <summary>
         /// Decodes a ushort to Color.RGB values.
         /// </summary>
-        /// <param name="b">A ushort with RGB colours encoded in 5:6:5 bits.</param>
+        /// <param name="u">A ushort with RGB colours encoded in 5:6:5 bits.</param>
         /// <returns>Color containing the decoded values.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color UShortToColor(ushort u)

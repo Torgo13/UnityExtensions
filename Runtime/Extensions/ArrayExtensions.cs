@@ -57,7 +57,7 @@ namespace UnityExtensions
             Array.Resize(ref array, capacity);
         }
         #endregion // UnityEngine.Rendering
-        
+
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/ArrayUtils.cs
         #region Unity.LiveCapture.VideoStreaming.Client.Utils
         public static bool IsBytesEquals(this byte[] bytes1, int offset1, int count1, byte[] bytes2, int offset2, int count2)
@@ -129,7 +129,7 @@ namespace UnityExtensions
             return -1;
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
-        
+
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/ArraySegmentExtensions.cs
         #region Unity.LiveCapture.VideoStreaming.Client.Utils
         public static ArraySegment<T> SubSegment<T>(this ArraySegment<T> arraySegment, int offset)
@@ -138,7 +138,7 @@ namespace UnityExtensions
             return new ArraySegment<T>(arraySegment.Array, arraySegment.Offset + offset, arraySegment.Count - offset);
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
-        
+
         //https://github.com/needle-mirror/com.unity.addressables/blob/b9b97fefbdf24fe7f86d2f50efae7f0fd5a1bba7/Runtime/Utility/SerializationUtilities.cs
         #region UnityEngine.AddressableAssets.Utility
         public static int ReadInt32FromByteArray(this byte[] data, int offset)
@@ -593,7 +593,7 @@ namespace UnityExtensions
             if (second == null)
                 return first;
 
-            var merged = new List<TValue>();
+            var merged = UnityEngine.Pool.ListPool<TValue>.Get();
             merged.AddRange(first);
 
             for (var i = 0; i < second.Length; ++i)
@@ -605,7 +605,9 @@ namespace UnityExtensions
                 }
             }
 
-            return merged.ToArray();
+            var array = merged.ToArray();
+            UnityEngine.Pool.ListPool<TValue>.Release(merged);
+            return array;
         }
 
         public static TValue[] Merge<TValue>(this TValue[] first, TValue[] second, IEqualityComparer<TValue> comparer)
@@ -615,7 +617,7 @@ namespace UnityExtensions
             if (second == null)
                 return null;
 
-            var merged = new List<TValue>();
+            var merged = UnityEngine.Pool.ListPool<TValue>.Get();
             merged.AddRange(first);
 
             for (var i = 0; i < second.Length; ++i)
@@ -627,7 +629,9 @@ namespace UnityExtensions
                 }
             }
 
-            return merged.ToArray();
+            var array = merged.ToArray();
+            UnityEngine.Pool.ListPool<TValue>.Release(merged);
+            return array;
         }
 
         public static void EraseAt<TValue>(ref TValue[] array, int index)

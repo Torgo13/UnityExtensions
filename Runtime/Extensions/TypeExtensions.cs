@@ -23,11 +23,15 @@ namespace UnityExtensions
         /// Return false to ignore given type.</param>
         public static void GetAssignableTypes(this Type type, List<Type> list, Func<Type, bool> predicate = null)
         {
-            ReflectionUtils.ForEachType(t =>
+            var typesPerAssembly = ReflectionUtils.GetCachedTypesPerAssembly();
+            foreach (var types in typesPerAssembly)
             {
-                if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
-                    list.Add(t);
-            });
+                foreach (var t in types)
+                {
+                    if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
+                        list.Add(t);
+                }
+            }
         }
 
         /// <summary>

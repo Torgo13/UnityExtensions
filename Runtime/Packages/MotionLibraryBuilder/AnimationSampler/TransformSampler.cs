@@ -67,7 +67,7 @@ namespace UnityExtensions.Packages
         {
             curveIndex = -1;
 
-            string[] curveNameStrings = curveName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] curveNameStrings = curveName.Split('.', StringSplitOptions.RemoveEmptyEntries);
             if (curveNameStrings.Length != 2)
             {
                 return null;

@@ -33,7 +33,7 @@ namespace UnityExtensions
 
             return bounds ?? new Bounds();
         }
-        
+
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
         public static Bounds GetBounds(GameObject[] gameObjects)
         {
@@ -73,7 +73,7 @@ namespace UnityExtensions
 
             return bounds ?? new Bounds();
         }
-        
+
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
         public static Bounds GetBounds(Transform[] transforms)
         {
@@ -100,10 +100,10 @@ namespace UnityExtensions
         public static Bounds GetBounds(Transform transform)
         {
             List<Renderer> renderers = ListPool<Renderer>.Get();
-            
+
             transform.GetComponentsInChildren(renderers);
             var b = GetBounds(renderers);
-            
+
             ListPool<Renderer>.Release(renderers);
 
             // As a fallback when there are no bounds, collect all transform positions
@@ -193,19 +193,19 @@ namespace UnityExtensions
                 var point = points[i];
                 if (point.x < minPoint.x)
                     minPoint.x = point.x;
-                
+
                 if (point.y < minPoint.y)
                     minPoint.y = point.y;
-                
+
                 if (point.z < minPoint.z)
                     minPoint.z = point.z;
-                
+
                 if (point.x > maxPoint.x)
                     maxPoint.x = point.x;
-                
+
                 if (point.y > maxPoint.y)
                     maxPoint.y = point.y;
-                
+
                 if (point.z > maxPoint.z)
                     maxPoint.z = point.z;
             }
@@ -214,7 +214,7 @@ namespace UnityExtensions
             return bounds;
         }
         #endregion // Unity.XR.CoreUtils
-        
+
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/Utils/BoundsUtils.cs
         #region Unity.HLODSystem.Utils
         public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
@@ -246,10 +246,10 @@ namespace UnityExtensions
             {
                 if (newMin.x > points[i].x) newMin.x = points[i].x;
                 if (newMax.x < points[i].x) newMax.x = points[i].x;
-                
+
                 if (newMin.y > points[i].y) newMin.y = points[i].y;
                 if (newMax.y < points[i].y) newMax.y = points[i].y;
-                
+
                 if (newMin.z > points[i].z) newMin.z = points[i].z;
                 if (newMax.z < points[i].z) newMax.z = points[i].z;
             }
@@ -261,7 +261,7 @@ namespace UnityExtensions
             return newBounds;
         }
         #endregion // Unity.HLODSystem.Utils
-        
+
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
         #region Unity.HLODSystem
         public static Bounds GetBounds(List<MeshRenderer> renderers, Transform transform)
@@ -282,12 +282,12 @@ namespace UnityExtensions
 
             ret.center = bounds.center;
             float max = System.Math.Max(bounds.size.x, System.Math.Max(bounds.size.y, bounds.size.z));
-            ret.size = new Vector3(max, max, max);  
+            ret.size = new Vector3(max, max, max);
 
             return ret;
         }
         #endregion // Unity.HLODSystem
-        
+
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/SpaceManager/QuadTreeSpaceSplitter.cs
         #region Unity.HLODSystem.SpaceManager
         public static bool CalculateBounds(GameObject obj, Transform transform, out Bounds result)
@@ -334,7 +334,7 @@ namespace UnityExtensions
                 local_p -= cbc.center;
 
                 var minsize = -0.5f * cbc.size;
-                var maxsize = 0.5f * cbc.size;
+                var maxsize = -minsize;
 
                 local_p.x = Mathf.Clamp(local_p.x, minsize.x, maxsize.x);
                 local_p.y = Mathf.Clamp(local_p.y, minsize.y, maxsize.y);

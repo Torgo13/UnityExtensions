@@ -21,7 +21,7 @@ namespace UnityExtensions
         #region Unity.XR.CoreUtils
         /// <summary>
         /// Called when a GameObject has been instantiated through the <see cref="GameObjectUtils"/> versions of
-        /// <see cref="UnityObject.Instantiate"/>.
+        /// <see cref="UnityObject.Instantiate(UnityObject)"/>.
         /// </summary>
         public static event Action<GameObject> OnGameObjectInstantiated;
 
@@ -139,7 +139,7 @@ namespace UnityExtensions
         {
             CopyHideFlagsRecursively(copyFrom.transform, copyTo.transform);
         }
-        
+
         static void CopyHideFlagsRecursively(Transform copyFrom, Transform copyTo)
         {
             copyTo.hideFlags = copyFrom.hideFlags;
@@ -226,7 +226,7 @@ namespace UnityExtensions
                         break;
                     }
                 }
-                
+
                 ListPool<T>.Release(matchingObjects);
             }
 
@@ -384,7 +384,16 @@ namespace UnityExtensions
         {
             List<Transform> transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(transforms);
-            var foundObject = transforms.Find(currentTransform => currentTransform.name == name);
+            Transform foundObject = null;
+            foreach (var currentTransform in transforms)
+            {
+                if (string.Equals(currentTransform.name, name, StringComparison.Ordinal))
+                {
+                    foundObject = currentTransform;
+                    break;
+                }
+            }
+            
             ListPool<Transform>.Release(transforms);
 
             if (foundObject != null)

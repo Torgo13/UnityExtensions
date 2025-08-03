@@ -140,7 +140,7 @@ namespace UnityExtensions.Packages
             public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
             {
                 ref var cameraData = ref renderingData.cameraData;
-#if CUSTOM_URP
+#if CUSTOM_URP // RenderingData is a struct so it still must be boxed in the compiled lambda function
                 var cmd = renderingData.cmd;
 #else
                 var cmd = getCommandBufferDelegate(renderingData);

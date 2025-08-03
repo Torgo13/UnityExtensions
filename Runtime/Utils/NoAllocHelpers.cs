@@ -158,7 +158,7 @@ namespace UnityExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Scripting/NoAllocHelpers.bindings.cs
         #region UnityEngine
-        /// <summary><see cref="ResetListSize"/> with runtime checks.</summary>
+        /// <summary><see cref="ResetListSize{T}"/> with runtime checks.</summary>
         /// <remarks>Also clears the List.</remarks>
         public static void EnsureListElemCount<T>(this List<T> list, int count)
         {

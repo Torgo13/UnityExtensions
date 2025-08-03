@@ -27,7 +27,7 @@ namespace UnityExtensions
                 || transform.root != animator.transform.root)
                 return false;
 
-            var names = new List<string>();
+            using var _0 = UnityEngine.Pool.ListPool<string>.Get(out var names);
             var root = animator.transform;
 
             while (transform != null && transform != root)

@@ -96,7 +96,11 @@ namespace UnityExtensions
                 Directory.CreateDirectory(folderPath!);
             }
 
-            UnityEditorInternal.InternalEditorUtility.SaveToSerializedFileAndForget(new[] { _instance },
+            UnityEngine.Object obj = _instance;
+            if (obj == null)
+                return;
+
+            UnityEditorInternal.InternalEditorUtility.SaveToSerializedFileAndForget(new[] { obj },
                 filePath, true);
         }
 

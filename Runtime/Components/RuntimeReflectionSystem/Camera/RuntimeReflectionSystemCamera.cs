@@ -1,6 +1,7 @@
 // Uncomment the line below to perform cubemap blending in the skybox with Skybox-Cubed-Blend.shader
 // #define BLEND_SHADER
 
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -59,7 +60,8 @@ namespace UnityExtensions
         /// <summary>
         /// Store the average colour of each cubemap face.
         /// </summary>
-        public readonly Color32[] _ambientColours = new Color32[6];
+        public NativeArray<Color32> _ambientColours = new NativeArray<Color32>(6,
+            Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 
         public bool skyboxOverride;
         public bool cameraSkyboxOverride;
@@ -117,8 +119,10 @@ namespace UnityExtensions
                 dimension = TextureDimension.Cube,
                 autoGenerateMips = false,
             };
-            
-            _renderTextures = new RenderTexture[ProbeCount];
+
+            if (_renderTextures == null || _renderTextures.Length != ProbeCount)
+                _renderTextures = new RenderTexture[ProbeCount];
+
             for (int i = 0; i < ProbeCount; i++)
             {
                 _renderTextures[i] = new RenderTexture(desc);
@@ -137,7 +141,7 @@ namespace UnityExtensions
                 useMipMap = true,
                 autoGenerateMips = true,
             };
-            
+
             _blendedTexture = new RenderTexture(desc);
             _blendedTexture.hideFlags = HideFlags.HideAndDontSave;
             _ = _blendedTexture.Create();
@@ -184,6 +188,8 @@ namespace UnityExtensions
                     DestroyRenderTexture(rt);
                 }
             }
+
+            _ambientColours.Dispose();
         }
 
         #endregion // MonoBehaviour
@@ -234,10 +240,10 @@ namespace UnityExtensions
         public bool TickRealtimeProbes()
         {
             bool updated = false;
-            
+
             // Calculate how many frames have been rendered since PrepareNextCubemap() was last called
             int frameCount = Time.frameCount - _renderedFrameCount;
-            
+
             // Return if the current cubemap still has more faces to render
             bool finishedRendering = frameCount >= BlendFrames;
             if (finishedRendering)
@@ -246,7 +252,7 @@ namespace UnityExtensions
                 _skyboxMaterial.SetTexture(Tex, _renderTextures[PreviousIndex()]);
                 _skyboxMaterial.SetTexture(TexB, _renderTextures[_index]);
                 _skyboxMaterial.SetFloat(Blend, 0f);
-                
+
                 // Update reflection texture
                 RenderSettings.customReflectionTexture = _renderTextures[_index];
 #else
@@ -272,7 +278,7 @@ namespace UnityExtensions
             ReflectionProbe.BlendCubemap(_renderTextures[NextIndex()], _renderTextures[PreviousIndex()],
                 blend, _blendedTexture);
 #endif // BLEND_SHADER
-            
+
             return updated;
         }
 
@@ -490,7 +496,7 @@ namespace UnityExtensions
         /// </summary>
         void UpdateAmbient()
         {
-            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture, 
+            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture,
                 mipIndex: _blendedTexture.mipmapCount - 1,
                 x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
                 GraphicsFormat.R8G8B8A8_UNorm);

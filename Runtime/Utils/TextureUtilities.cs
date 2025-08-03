@@ -180,14 +180,14 @@ namespace UnityExtensions
         {
             var fileInfo = new FileInfo(path);
             Assert.IsNotNull(fileInfo.Directory);
-            
+
             if (!fileInfo.Directory.Exists)
                 fileInfo.Directory.Create();
         }
         #endregion // UnityEngine.Rendering.HighDefinition
 
         #region Async
-        /// <inheritdoc cref="WriteTextureToDisk(Texture, string)"/>
+        /// <inheritdoc cref="WriteTextureToDisk(Texture,string,string)"/>
         public static async Task WriteTextureToDiskAsync(this Texture target, string filePath)
         {
             var rt = target as RenderTexture;

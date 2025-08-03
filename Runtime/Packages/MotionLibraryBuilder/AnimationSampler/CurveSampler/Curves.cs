@@ -132,6 +132,7 @@ namespace UnityExtensions.Packages
 
             public static float EvaluateWithHint(NativeArray<Keyframe> keys, float curveT, ref int hintIndex)
             {
+                const
                 int startIndex = 0;
                 int endIndex = keys.Length - 1;
                 if (endIndex <= hintIndex)
@@ -317,8 +318,8 @@ namespace UnityExtensions.Packages
 
                         // Extract cubic roots.
                         float u1 = 2.0F * r_3 * math.cos(phi_3) + p;
-                        float u2 = 2.0F * r_3 * math.cos(phi_3 + 2.0F * (float)math.PI / 3.0f) + p;
-                        float u3 = 2.0F * r_3 * math.cos(phi_3 - 2.0F * (float)math.PI / 3.0f) + p;
+                        float u2 = 2.0F * r_3 * math.cos(phi_3 + math.PI2 / 3.0f) + p;
+                        float u3 = 2.0F * r_3 * math.cos(phi_3 - math.PI2 / 3.0f) + p;
 
                         if (u1 >= 0.0F && u1 <= 1.0F)
                             return u1;
@@ -326,9 +327,6 @@ namespace UnityExtensions.Packages
                             return u2;
                         else if (u3 >= 0.0F && u3 <= 1.0F)
                             return u3;
-
-                        // Aiming at solving numerical imprecision when u is outside [0,1].
-                        return (t < 0.5F) ? 0.0F : 1.0F;
                     }
                     else
                     {
@@ -337,10 +335,10 @@ namespace UnityExtensions.Packages
 
                         if (u >= 0.0F && u <= 1.0F)
                             return u;
-
-                        // Aiming at solving numerical imprecision when u is outside [0,1].
-                        return (t < 0.5F) ? 0.0F : 1.0F;
                     }
+
+                    // Aiming at solving numerical imprecision when u is outside [0,1].
+                    return (t < 0.5F) ? 0.0F : 1.0F;
                 }
 
                 if (math.abs(b) > 1e-3f)

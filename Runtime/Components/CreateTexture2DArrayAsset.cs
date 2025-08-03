@@ -17,12 +17,12 @@ namespace UnityExtensions
         [ContextMenu("Create Texture2D Array asset")]
         internal void CreateTexture2DAsset()
         {
-            if (!Validate(textures))
+            if (textures is not Texture[] texture2Ds || !Validate(texture2Ds))
                 return;
-            
+
             Texture2DArray array = new Texture2DArray(textures[0].width, textures[0].height, textures.Length,
                 textures[0].format, mipmaps);
-            
+
             for (int i = 0; i < textures.Length; i++)
                 array.SetPixels(textures[i].GetPixels(), arrayElement: i);
 
@@ -33,7 +33,7 @@ namespace UnityExtensions
         [ContextMenu("Create Cubemap Array asset")]
         internal void CreateCubeArrayAsset()
         {
-            if (!Validate(cubeMaps))
+            if (cubeMaps is not Texture[] cubeMapTextures || !Validate(cubeMapTextures))
                 return;
 
             CubemapArray array = new CubemapArray(cubeMaps[0].width, cubeMaps.Length,
@@ -72,7 +72,7 @@ namespace UnityExtensions
         {
             if (textures == null || textures.Length == 0)
                 return false;
-            
+
             bool allValid = true;
 
             var width = textures[0].width;
@@ -98,7 +98,7 @@ namespace UnityExtensions
                         Debug.LogWarning($"{textures[i]} format: {textures[i].graphicsFormat}, {textures[0]} format: {graphicsFormat}.");
                 }
             }
-            
+
             return allValid;
         }
 #endif // UNITY_EDITOR
