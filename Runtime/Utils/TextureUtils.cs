@@ -15,6 +15,9 @@ namespace UnityExtensions
     /// Ensure that an <see cref="AsyncGPUReadbackRequest"/> does not outlive
     /// the <see cref="NativeArray{T}"/> it is writing to.
     /// </summary>
+    /// <remarks>
+    /// Assumes that textures either have a single mip level or a full mip chain.
+    /// </remarks>
     public struct Texture2DProperties : IEnumerator, IDisposable, IAsyncDisposable
     {
         /// <summary>Only used to store a reference to the original <see cref="Texture2D"/>.</summary>
@@ -23,18 +26,26 @@ namespace UnityExtensions
         /// <summary>If <see cref="tex"/> is compressed, <see cref="Texture2DParameters.format"/>
         /// is changed to an uncompressed format. Otherwise, if <see cref="AsyncGPUReadbackRequest"/>
         /// is used, <see cref="Texture2DParameters.mipCount"/> is set to one.</summary>
-        public readonly Texture2DParameters parameters;
+        public readonly Texture2DParameters texParams;
 
-        public readonly bool isReadable; // Moved from Texture2DParameters to remain at 16 bytes
+        public readonly bool isReadable;
         public readonly bool isCompressed;
+        public readonly bool isLinear;
 
-        /// <returns><see langword="default"/> if <see cref="AsyncGPUReadback"/> is in progress.</returns>
+        /// <returns>An preallocated <see cref="NativeArray{byte}"/>
+        /// if <see cref="AsyncGPUReadback"/> is in progress.</returns>
         private NativeArray<byte> data;
+        private NativeArray<MipLevelParameters> mipParams;
         private readonly ReadbackAsyncDispose readback;
+        private readonly Texture2D tempTex;
 
         /// <summary>Ensure that only either <see cref="Dispose"/> or <see cref="DisposeAsync"/>
         /// is called once total on disposal.</summary>
         private bool disposed;
+
+        private readonly bool NoAllocation => !isCompressed && isReadable;
+        private readonly bool PerformedReadback => !isCompressed && !isReadable && supportsAsyncGPUReadback == SupportsAsyncGPUReadback.True;
+        private readonly bool PerformedBlit => !NoAllocation && !PerformedReadback;
 
         #region SupportsAsyncGPUReadback
         enum SupportsAsyncGPUReadback : sbyte
@@ -49,110 +60,166 @@ namespace UnityExtensions
         private static SupportsAsyncGPUReadback supportsAsyncGPUReadback = SupportsAsyncGPUReadback.Unchecked;
         #endregion // SupportsAsyncGPUReadback
 
-        public Texture2DProperties(Texture2D tex)
+        /// <param name="tex">The original <see cref="Texture2D"/> to be kept but not modified.</param>
+        /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
+        /// <param name="allocator">Only change to <see cref="Allocator.TempJob"/> if the
+        /// <see cref="AsyncGPUReadbackRequest"/> and job will complete within four frames.</param>
+        public Texture2DProperties(Texture2D tex, bool mipChain = true,
+            Allocator allocator = Allocator.Persistent)
         {
             this.tex = tex;
-            var inputParams = new Texture2DParameters(tex.width, tex.height, tex.format, tex.mipmapCount);
+            var inputParams = new Texture2DParameters(tex);
+            
             isReadable = tex.isReadable;
             isCompressed = inputParams.IsCompressed;
+            isLinear = !tex.isDataSRGB;
             disposed = false;
 
             if (supportsAsyncGPUReadback == SupportsAsyncGPUReadback.Unchecked)
             {
-                supportsAsyncGPUReadback = SystemInfo.supportsAsyncGPUReadback // Set supportsAsyncGPUReadback for the first and only time
+                // Set supportsAsyncGPUReadback for the first and only time
+                supportsAsyncGPUReadback = SystemInfo.supportsAsyncGPUReadback
                     ? SupportsAsyncGPUReadback.True
                     : SupportsAsyncGPUReadback.False;
             }
 
             if (!isCompressed && isReadable)
             {
-                data = this.tex.GetRawTextureData<byte>(); // Allocator.None
+                tempTex = default;
+                data = mipChain
+                    ? tex.GetRawTextureData<byte>()         // Allocator.None
+                    : tex.GetPixelData<byte>(mipLevel: 0);  // Allocator.None
                 readback = default;
-                parameters = inputParams; // Use original texture parameters
+                texParams = mipChain
+                    ? inputParams // Use original texture parameters
+                    : new Texture2DParameters(inputParams.width, inputParams.height, inputParams.format, mipCount: 1);
             }
             else if (!isCompressed && supportsAsyncGPUReadback == SupportsAsyncGPUReadback.True)
             {
-                data = new NativeArray<byte>(inputParams.Mip0Length,
-                    Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-                readback = new ReadbackAsyncDispose(ref data, this.tex);
-                parameters = new Texture2DParameters(inputParams.width, inputParams.height,
+                mipChain = false;
+
+                tempTex = default;
+                data = new NativeArray<byte>(inputParams.Mip0Length,    // Empty NativeArray until
+                    allocator, NativeArrayOptions.UninitializedMemory); // AsyncGPUReadbackRequest is completed 
+                readback = new ReadbackAsyncDispose(ref data, tex);
+                texParams = new Texture2DParameters(inputParams.width, inputParams.height,
                     inputParams.format, mipCount: 1); // AsyncGPUReadback only supports one mip level per request
             }
-            else // Compressed texture formats require a blit to an uncompressed format
+            else // Compressed texture formats require a blit to an uncompressed RGBA32 format
             {
-                Texture2D tempTex = new Texture2D(inputParams.width, inputParams.height,
-                    TextureFormat.RGBA32, inputParams.mipCount != 1, linear: false, createUninitialized: true);
-                RenderTexture tempRT = RenderTexture.GetTemporary(inputParams.width, inputParams.height,
-                    depthBuffer: 0, GraphicsFormat.R8G8B8A8_SRGB);
-                RenderTexture previous = RenderTexture.active;
-                RenderTexture.active = tempRT;
-
-                // Copy texture data on the GPU from the non-readable Texture2D into the temporary RenderTexture
-                Graphics.Blit(this.tex, tempRT);
-
-                // Copy texture data from the active RenderTexture into the temporary readable Texture2D
-                // MipMaps are recalculated anyway in Texture2D.Apply()
-                tempTex.ReadPixels(new Rect(0, 0, inputParams.width, inputParams.height), 0, 0, recalculateMipMaps: false);
-                tempTex.Apply(updateMipmaps: true, makeNoLongerReadable: false);
-
-                // Create a new NativeArray to copy the data into
-                // as GetRawTextureData will no longer refer to Texture2D tempTex after it is destroyed
-                data = new NativeArray<byte>(tempTex.GetRawTextureData<byte>(), Allocator.Persistent);
-
-                RenderTexture.active = previous;
-                RenderTexture.ReleaseTemporary(tempRT);
-                CoreUtils.Destroy(tempTex, skipNullCheck: true);
-
+                tempTex = new Texture2D(inputParams.width, inputParams.height,
+                    TextureFormat.RGBA32, mipChain, isLinear, createUninitialized: true);
+                data = Blit(tex, tempTex, inputParams, isLinear);   // Allocator.None
                 readback = default;
-                parameters = new Texture2DParameters(inputParams.width, inputParams.height,
-                    TextureFormat.RGBA32, inputParams.mipCount); // Blit can convert into nearly any uncompressed format
+                texParams = new Texture2DParameters(inputParams.width, inputParams.height,  // Blit can convert into any
+                    TextureFormat.RGBA32, mipChain ? inputParams.mipCount : 1);             // supported uncompressed format
             }
+
+            mipParams = mipChain
+                ? InitialiseMipParameters(texParams, allocator)
+                : default;
+        }
+
+        private static NativeArray<byte> Blit(Texture2D tex, Texture2D tempTex,
+            Texture2DParameters inputParams, bool isLinear)
+        {
+            RenderTexture tempRT = RenderTexture.GetTemporary(inputParams.width, inputParams.height,
+                depthBuffer: 0, isLinear ? GraphicsFormat.R8G8B8A8_UNorm : GraphicsFormat.R8G8B8A8_SRGB);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = tempRT;
+
+            // Copy texture data on the GPU from the non-readable Texture2D into the temporary RenderTexture
+            Graphics.Blit(tex, tempRT);
+
+            // Copy texture data from the active RenderTexture into the temporary readable Texture2D
+            tempTex.ReadPixels(new Rect(0, 0, inputParams.width, inputParams.height), 0, 0,
+                recalculateMipMaps: tempTex.mipmapCount > 1);
+
+            // MipMaps can also be recalculated in Texture2D.Apply()
+            //tempTex.Apply(updateMipmaps: tempTex.mipmapCount > 1, makeNoLongerReadable: false);
+
+            // data will continue to refer to the readable CPU data of tempTex until Dispose is called
+            NativeArray<byte> rawTextureData = tempTex.GetRawTextureData<byte>();   // Allocator.None
+
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(tempRT);
+
+            return rawTextureData;
+        }
+
+        private static NativeArray<MipLevelParameters> InitialiseMipParameters(
+            Texture2DParameters texParams, Allocator allocator)
+        {
+            var mipParameters = new NativeArray<MipLevelParameters>(texParams.mipCount,
+                allocator, NativeArrayOptions.UninitializedMemory);
+
+            for (int i = 0; i < mipParameters.Length; i++)
+            {
+                TextureUtils.GetMipData(mipLevel: i, texParams.width, texParams.height,
+                    out int offset, out _, out int mipWidth, out int mipHeight);
+                mipParameters[i] = new MipLevelParameters(mipWidth, mipHeight, offset, mipLevel: i);
+            }
+
+            return mipParameters;
         }
 
         #region Properties
         #region GetData
-        /// <inheritdoc cref="data"/>
-        public readonly NativeArray<Color32> ColorData32(int mipLevel = -1)
+        /// <param name="mipLevel">Request a specific mip level,
+        /// or use -1 to return all present mipmaps.</param>
+        /// <param name="waitForCompletion">Set to <see langword="true"/>
+        /// to force the <see cref="AsyncGPUReadbackRequest"/> to complete.</param>
+        /// <returns><see langword="default"/> if <see cref="texParams.format"/>
+        /// does not match the type for this function, or if
+        /// <see cref="AsyncGPUReadbackRequest"/>is still pending and
+        /// <paramref name="waitForCompletion"/> is not <see langword="true"/></returns>
+        public readonly NativeArray<Color32> GetData32(int mipLevel = -1, bool waitForCompletion = false)
         {
-            if (parameters.format != TextureFormat.RGBA32)
+            if (texParams.format != TextureFormat.RGBA32)
                 return default;
 
-            if (!IsReady())
+            if (!IsReady(waitForCompletion))
                 return default;
 
-            var rawTextureData = data.Reinterpret<Color32>(parameters.PixelLength());
+            var rawTextureData = data.Reinterpret<Color32>(texParams.PixelLength());
 
-            if (mipLevel == -1)
+            if (mipLevel == -1 || texParams.mipCount == 1)
                 return rawTextureData; // Return entire mip chain
 
-            GetMipParameters(parameters, mipLevel,
-                out int offset, out int mipLength);
+            if (mipLevel >= mipParams.Length)
+                return default;
 
-            return rawTextureData.GetSubArray(offset, mipLength);
+            var mipParameters = mipParams[mipLevel];
+
+            return rawTextureData.GetSubArray(mipParameters.offset,
+                mipParameters.mipWidth * mipParameters.mipHeight);
+        }
+
+        /// <inheritdoc cref="GetData32(int, bool)"/>
+        public readonly NativeArray<Color24> GetData24(int mipLevel = -1, bool waitForCompletion = false)
+        {
+            if (texParams.format != TextureFormat.RGB24)
+                return default;
+
+            if (!IsReady(waitForCompletion))
+                return default;
+
+            var rawTextureData = data.Reinterpret<Color24>(texParams.PixelLength());
+
+            if (mipLevel == -1 || texParams.mipCount == 1)
+                return rawTextureData; // Return entire mip chain
+
+            if (mipLevel >= mipParams.Length)
+                return default;
+
+            var mipParameters = mipParams[mipLevel];
+
+            return rawTextureData.GetSubArray(mipParameters.offset,
+                mipParameters.mipWidth * mipParameters.mipHeight);
         }
 
         /// <inheritdoc cref="data"/>
-        public readonly NativeArray<Color24> ColorData24(int mipLevel = -1)
-        {
-            if (parameters.format != TextureFormat.RGB24)
-                return default;
-
-            if (!IsReady())
-                return default;
-
-            var rawTextureData = data.Reinterpret<Color24>(parameters.PixelLength());
-
-            if (mipLevel == -1)
-                return rawTextureData; // Return entire mip chain
-
-            GetMipParameters(parameters, mipLevel,
-                out int offset, out int mipLength);
-
-            return rawTextureData.GetSubArray(offset, mipLength);
-        }
-
-        /// <inheritdoc cref="data"/>
-        public readonly NativeArray<byte> ColorData8()
+        public readonly NativeArray<byte> GetData8()
         {
             if (!IsReady())
                 return default;
@@ -161,22 +228,93 @@ namespace UnityExtensions
         }
         #endregion // GetData
 
-        /// <returns><see langword="true"/> if <see cref="data"/>
-        /// currently contains valid <see cref="Texture2D"/> data.</returns>
-        public readonly bool IsReady()
+        public readonly Texture2D Apply32(bool updateMipmaps = true, bool makeNoLongerReadable = false)
         {
-            if (isCompressed)
-                return true; // Blit has been performed in the constructor
+            if (texParams.format != TextureFormat.RGBA32)
+                return default;
 
-            return isReadable || readback.GetCompleted();
+            bool mipChain = texParams.mipCount != 1;
+
+            Texture2D output = new Texture2D(texParams.width, texParams.height,
+                texParams.format, mipChain, isLinear, createUninitialized: true);
+
+            var rawTextureData = data.Reinterpret<Color32>(texParams.PixelLength());
+
+            // Only copy mip 0 if Texture2D.Apply() will update the mipmaps anyway
+            // or the original data does not contain multiple mip levels.
+            if (updateMipmaps || !mipChain)
+            {
+                var mipData = mipChain
+                    ? rawTextureData.GetSubArray(0, texParams.width * texParams.height)
+                    : rawTextureData;   // rawTextureData is the full size of mip 0
+                output.SetPixelData(mipData, mipLevel: 0);
+            }
+            else
+            {
+                foreach (var mipParam in mipParams)
+                {
+                    var mipData = rawTextureData.GetSubArray(mipParam.offset, mipParam.mipWidth * mipParam.mipHeight);
+                    output.SetPixelData(mipData, mipParam.mipLevel);
+                }
+            }
+
+            output.Apply(updateMipmaps, makeNoLongerReadable);
+            return output;
         }
 
-        private static void GetMipParameters(Texture2DParameters parameters, int mipLevel,
+        public readonly Texture2D Apply24(bool updateMipmaps = true, bool makeNoLongerReadable = false)
+        {
+            if (texParams.format != TextureFormat.RGB24)
+                return default;
+
+            bool mipChain = texParams.mipCount != 1;
+
+            Texture2D output = new Texture2D(texParams.width, texParams.height,
+                texParams.format, texParams.mipCount != 1, isLinear, createUninitialized: true);
+
+            var rawTextureData = data.Reinterpret<Color24>(texParams.PixelLength());
+
+            // Only copy mip 0 if Texture2D.Apply() will update the mipmaps anyway
+            // or the original data does not contain multiple mip levels.
+            if (updateMipmaps || !mipChain)
+            {
+                var mipData = mipChain
+                    ? rawTextureData.GetSubArray(0, texParams.width * texParams.height)
+                    : rawTextureData;   // rawTextureData is the full size of mip 0
+                output.SetPixelData(mipData, mipLevel: 0);
+            }
+            else
+            {
+                foreach (var mipParam in mipParams)
+                {
+                    var mipData = rawTextureData.GetSubArray(mipParam.offset, mipParam.mipWidth * mipParam.mipHeight);
+                    output.SetPixelData(mipData, mipParam.mipLevel);
+                }
+            }
+
+            output.Apply(updateMipmaps, makeNoLongerReadable);
+            return output;
+        }
+
+        /// <returns><see langword="true"/> if <see cref="data"/>
+        /// currently contains valid <see cref="Texture2D"/> data.</returns>
+        public readonly bool IsReady(bool waitForCompletion = false)
+        {
+            if (isCompressed || isReadable)
+                return true; // Already readable or Blit has been performed in the constructor
+
+            if (waitForCompletion)
+                readback.GetResult(token: 0);
+
+            return readback.GetCompleted();
+        }
+
+        private static void GetMipParameters(Texture2DParameters texParams, int mipLevel,
             out int offset, out int mipLength)
         {
             offset = 0;
-            int mipWidth = parameters.width;
-            int mipHeight = parameters.height;
+            int mipWidth = texParams.width;
+            int mipHeight = texParams.height;
 
             Assert.IsTrue(mipWidth > 0);
             Assert.IsTrue(mipHeight > 0);
@@ -189,7 +327,7 @@ namespace UnityExtensions
                 Assert.IsTrue(mipLevel < TextureUtils.MipmapCount(mipWidth, mipHeight),
                     "Provided mipLevel is too large for the texture dimensions.");
 
-                TextureUtils.GetMipData(mipLevel, parameters.width, parameters.height,
+                TextureUtils.GetMipData(mipLevel, texParams.width, texParams.height,
                     out offset, out _, out mipWidth, out mipHeight);
             }
 
@@ -200,7 +338,7 @@ namespace UnityExtensions
         /// matches the calculated mip chain length for its <see cref="TextureFormat"/>.</returns>
         public readonly bool IsCorrectLength(bool mipChain = false)
         {
-            return data.Length == (mipChain ? parameters.Mip0Length : parameters.MipChainLength);
+            return data.Length == (mipChain ? texParams.Mip0Length : texParams.MipChainLength);
         }
 
         /// <returns><see langword="true"/> if the length of <see cref="data"/>
@@ -213,13 +351,13 @@ namespace UnityExtensions
         /// <inheritdoc cref="IsValidLength(TextureFormat)"/>
         public readonly bool IsValidLength()
         {
-            return IsValidLength(parameters.format);
+            return IsValidLength(texParams.format);
         }
         #endregion // Properties
 
         #region IEnumerator
         public readonly object Current => null;
-        public readonly bool MoveNext() => !isReadable && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending;
+        public readonly bool MoveNext() => PerformedReadback && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending;
         public readonly void Reset() {}
         #endregion // IEnumerator
 
@@ -234,17 +372,12 @@ namespace UnityExtensions
             if (disposed)
                 return;
 
-            bool disposeRequired = isCompressed || !isReadable;
-            if (disposeRequired)
-            {
-                if (readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending)
-                    readback.GetResult(token: 0); // Performs synchronous GPU readback request
-
-                if (data.IsCreated)
-                    data.Dispose();
-            }
-
             disposed = true;
+
+            if (PerformedReadback && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending)
+                readback.GetResult(token: 0); // Performs synchronous GPU readback request
+
+            DisposeCore();
         }
 
         public async ValueTask DisposeAsync()
@@ -252,19 +385,26 @@ namespace UnityExtensions
             if (disposed)
                 return;
 
-            bool disposeRequired = isCompressed || !isReadable;
-            if (disposeRequired)
-            {
-                // Return to the main thread after calling ConfigureAwait
-                // to call other Unity functions
-                if (readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending)
-                    await new ValueTask(readback, token: 0).ConfigureAwait(continueOnCapturedContext: true);
-
-                if (data.IsCreated)
-                    data.Dispose();
-            }
-
             disposed = true;
+
+            // Return to the main thread after calling ConfigureAwait
+            // to call other Unity functions
+            if (PerformedReadback && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending)
+                await new ValueTask(readback, token: 0).ConfigureAwait(continueOnCapturedContext: true);
+
+            DisposeCore();
+        }
+
+        private void DisposeCore()
+        {
+            if (PerformedReadback) // && data.IsCreated)
+                data.Dispose();
+
+            if (PerformedBlit)
+                CoreUtils.Destroy(tempTex, skipNullCheck: true);
+
+            if (texParams.mipCount > 1)
+                mipParams.Dispose();
         }
         #endregion // Dispose
     }
@@ -292,6 +432,14 @@ namespace UnityExtensions
             this.mipCount = mipCount;
         }
 
+        public Texture2DParameters(Texture2D tex)
+        {
+            width = tex.width;
+            height = tex.height;
+            format = tex.format;
+            mipCount = tex.mipmapCount;
+        }
+
         // Use size to refer to the number of elements
         // Use length to refer to the number of bytes
 
@@ -308,15 +456,18 @@ namespace UnityExtensions
         public readonly bool SupportsTextureFormat => SystemInfo.SupportsTextureFormat(format);
 
         /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo-maxTextureSize.html"/></remarks>
-        /// <summary>Unity only supports textures up to a size of 16384,
+        /// <summary>Unity only supports textures up to a size of 16_384,
         /// even if <see cref="SystemInfo.maxTextureSize"/> returns a larger size.</summary>
-        public static int MaxTextureSize => Math.Min(16384, SystemInfo.maxTextureSize);
+        public static int MaxTextureSize => Math.Min(16_384, SystemInfo.maxTextureSize);
 
         /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/NPOTSupport.Restricted.html"/></remarks>
         /// <summary>If <see langword="false"/>, limited NPOT support: no mipmaps and clamp wrap mode will be forced.
         /// If NPOT <see cref="Texture"/> does have mipmaps it will be upscaled/padded at loading time.</summary>
         public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
 
+        /// <remarks>4 bytes per pixel has no issues with array length.
+        /// The maximum byte count is 16_384 * 16_384 * 4 = 1_073_741_824,
+        /// which is less than <see cref="int.MaxValue"/> of 2_147_483_647.</remarks>
         /// <returns>The number of bytes for the given <paramref name="format"/>,
         /// otherwise -1 for any compressed <see cref="TextureFormat"/>.</returns>
         public static int PixelLength(TextureFormat format)
@@ -353,6 +504,52 @@ namespace UnityExtensions
                     return -1;
             }
         }
+
+        public static bool HasAlpha(TextureFormat format)
+        {
+            switch (format)
+            {
+                case TextureFormat.Alpha8:
+                case TextureFormat.RGBA4444:
+                case TextureFormat.ARGB4444:
+                case TextureFormat.RGBA32:
+                case TextureFormat.ARGB32:
+                case TextureFormat.BGRA32:
+                case TextureFormat.RGBA64:
+                case TextureFormat.RGBAHalf:
+                case TextureFormat.RGBAFloat:
+                    return true;
+                case TextureFormat.R8:
+                case TextureFormat.RGB565:
+                case TextureFormat.R16:
+                case TextureFormat.RHalf:
+                case TextureFormat.RGB24:
+                case TextureFormat.RG32:
+                case TextureFormat.RGHalf:
+                case TextureFormat.RFloat:
+                case TextureFormat.RGB48:
+                case TextureFormat.RGFloat:
+                default:
+                    return false;
+            }
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct MipLevelParameters
+    {
+        public readonly int mipWidth;
+        public readonly int mipHeight;
+        public readonly int offset;
+        public readonly int mipLevel;
+
+        public MipLevelParameters(int mipWidth, int mipHeight, int offset, int mipLevel)
+        {
+            this.mipWidth = mipWidth;
+            this.mipHeight = mipHeight;
+            this.offset = offset;
+            this.mipLevel = mipLevel;
+        }
     }
 
     /// <summary>
@@ -371,6 +568,15 @@ namespace UnityExtensions
         public ReadbackAsyncDispose(ref NativeArray<byte> output, Texture src)
         {
             readbackRequest = AsyncGPUReadback.RequestIntoNativeArray(ref output, src, mipIndex: 0);
+        }
+
+        /// <summary>Request a region of a <see cref="Texture2D"/> or <see cref="Texture3D"/>.</summary>
+        public ReadbackAsyncDispose(ref NativeArray<byte> output, Texture src,
+            int x, int width, int y, int height, int z = 0, int depth = 1)
+        {
+            readbackRequest = AsyncGPUReadback.RequestIntoNativeArray(ref output, src, mipIndex: 0,
+                x, width, y, height, z, depth,
+                dstFormat: src.isDataSRGB ? GraphicsFormat.R8G8B8A8_SRGB : GraphicsFormat.R8G8B8A8_UNorm);
         }
 
         public readonly bool GetCompleted() => GetStatus(token: 0) == ValueTaskSourceStatus.Succeeded;
