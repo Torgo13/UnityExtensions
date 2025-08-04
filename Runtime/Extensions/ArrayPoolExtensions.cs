@@ -86,6 +86,7 @@ namespace UnityExtensions
         /// <summary>
         /// Throws an <see cref="ArgumentOutOfRangeException"/> when the "capacity" parameter is negative.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The array capacity must be a positive number.</exception>
         private static void ThrowArgumentOutOfRangeExceptionForNegativeArrayCapacity()
         {
             throw new ArgumentOutOfRangeException("capacity", "The array capacity must be a positive number.");

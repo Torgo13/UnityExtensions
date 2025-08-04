@@ -517,9 +517,11 @@ namespace UnityExtensions
         /// Destroys a UnityObject safely.
         /// </summary>
         /// <param name="obj">Object to be destroyed.</param>
-        public static void Destroy(UnityObject obj)
+        /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is false
+        /// before destroying it.</param>
+        public static void Destroy(UnityObject obj, bool skipNullCheck = false)
         {
-            if (obj != null)
+            if (skipNullCheck || obj != null)
             {
 #if UNITY_EDITOR
                 if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)

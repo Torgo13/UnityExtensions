@@ -2,6 +2,7 @@
 
 using System.Runtime.CompilerServices;
 using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -98,72 +99,24 @@ namespace UnityExtensions.Packages
         #endregion // UnityEngine.XR.ARCore
 
         /// <summary>
-        /// Calculates the starting index of a mip level given the
-        /// original width and height of the texture.
-        /// Assumes the full mip chain is present.
-        /// </summary>
-        /// <remarks>
-        /// Provide <paramref name="mipLevel"/> + 1 to get the total number
-        /// of pixels including that mip level.
-        /// </remarks>
-        /// <param name="mipLevel">Mipmap level ranging from 0 to mipCount - 1.</param>
-        /// <param name="width">Full width of the texture.</param>
-        /// <param name="height">Full height of the texture.</param>
-        /// <returns>
-        /// The starting index of the specified <paramref name="mipLevel"/>.
-        /// </returns>
-        public static void GetMipData(int mipLevel, int width, int height,
-            out int offset, out int pow2, out int mipWidth, out int mipHeight)
-        {
-            offset = 0;
-            pow2 = 1;
-            mipWidth = width;
-            mipHeight = height;
-
-            for (int i = 1; i <= mipLevel; i++)
-            {
-                offset += mipWidth * mipHeight;
-                pow2 = 1 << i;
-                mipWidth = width / pow2;
-                mipHeight = height / pow2;
-            }
-        }
-
-        /// <summary>
-        /// Calculates the total number of elements a texture with a mip chain would require.
-        /// </summary>
-        /// <param name="mipmapCount">Use <see cref="Texture.mipmapCount"/>
-        /// to calculate the full mip chain.</param>
-        /// <param name="width">The original width of the texture at mip 0.</param>
-        /// <param name="height">The original height of the texture at mip 0.</param>
-        /// <returns>The number of elements required for all given mip levels.</returns>
-        public static int MipChainSize(int mipmapCount, int width, int height)
-        {
-            GetMipData(mipmapCount, width, height,
-                out int offset, out _, out _, out _);
-            
-            return offset;
-        }
-
-        /// <inheritdoc cref="MipChainSize(int, int, int)"/>
-        public static int MipChainSize(Texture2D tex)
-        {
-            return MipChainSize(tex.mipmapCount, tex.width, tex.height);
-        }
-
-        /// <summary>
         /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
         /// when created with mipChain as <see langword="true"/>.
         /// </summary>
-        public static int MipmapCount(int width, int height)
+        [return: AssumeRange(1, 8 * sizeof(ushort))]
+        public static int MipmapCount(
+            [AssumeRange(1, ushort.MaxValue)] int width,
+            [AssumeRange(1, ushort.MaxValue)] int height)
         {
             int mipmapCount = 0;
             int s = max(width, height);
             while (s > 1)
             {
                 ++mipmapCount;
-                s /= 2;
+                s >>= 1;
             }
+
+            //return (int)System.Math.Floor(System.Math.Log(s, 2.0)) + 1;
+            //return (int)floor(log2(s)) + 1;
 
             return mipmapCount;
         }
@@ -193,7 +146,7 @@ namespace UnityExtensions.Packages
             var scale = new float3(third, third, third);
             for (int i = 0; i < mipmapCount; i++)
             {
-                GetMipData(i, width, height,
+                TextureUtils.GetMipData(i, width, height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
 
                 var output = normalData.GetSubArray(offset, mipWidth * mipHeight);
@@ -248,7 +201,7 @@ namespace UnityExtensions.Packages
             int size = width * height;
 
             mipmapCount = MipmapCount(width, height);
-            int length = MipChainSize(mipmapCount, width, height);
+            int length = TextureUtils.MipChainSize(mipmapCount, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
 
