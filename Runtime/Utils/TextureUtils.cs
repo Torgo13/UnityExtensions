@@ -21,7 +21,7 @@ namespace UnityExtensions
     public struct Texture2DProperties : IEnumerator, IDisposable, IAsyncDisposable
     {
         /// <summary>Only used to store a reference to the original <see cref="Texture2D"/>.</summary>
-        public readonly Texture2D tex;
+        public readonly Texture tex;
 
         /// <summary>If <see cref="tex"/> is compressed, <see cref="Texture2DParameters.format"/>
         /// is changed to an uncompressed format. Otherwise, if <see cref="AsyncGPUReadbackRequest"/>
@@ -64,9 +64,12 @@ namespace UnityExtensions
         /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
         /// <param name="allocator">Only change to <see cref="Allocator.TempJob"/> if the
         /// <see cref="AsyncGPUReadbackRequest"/> and job will complete within four frames.</param>
-        public Texture2DProperties(Texture2D tex, bool mipChain = true,
+        public Texture2DProperties(Texture tex, bool mipChain = true,
             Allocator allocator = Allocator.Persistent)
         {
+            Assert.IsNotNull(tex);
+            Assert.AreEqual(TextureDimension.Tex2D, tex.dimension);
+
             this.tex = tex;
             var inputParams = new Texture2DParameters(tex);
             
@@ -83,12 +86,12 @@ namespace UnityExtensions
                     : SupportsAsyncGPUReadback.False;
             }
 
-            if (!isCompressed && isReadable)
+            if (!isCompressed && isReadable && tex is Texture2D tex2D)
             {
                 tempTex = default;
                 data = mipChain
-                    ? tex.GetRawTextureData<byte>()         // Allocator.None
-                    : tex.GetPixelData<byte>(mipLevel: 0);  // Allocator.None
+                    ? tex2D.GetRawTextureData<byte>()         // Allocator.None
+                    : tex2D.GetPixelData<byte>(mipLevel: 0);  // Allocator.None
                 readback = default;
                 texParams = mipChain
                     ? inputParams // Use original texture parameters
@@ -115,12 +118,12 @@ namespace UnityExtensions
                     TextureFormat.RGBA32, mipChain ? inputParams.mipCount : 1);             // supported uncompressed format
             }
 
-            mipParams = mipChain
+            mipParams = mipChain && texParams.mipCount > 1
                 ? InitialiseMipParameters(texParams, allocator)
                 : default;
         }
 
-        private static NativeArray<byte> Blit(Texture2D tex, Texture2D tempTex,
+        private static NativeArray<byte> Blit(Texture tex, Texture2D tempTex,
             Texture2DParameters inputParams, bool isLinear)
         {
             RenderTexture tempRT = RenderTexture.GetTemporary(inputParams.width, inputParams.height,
@@ -181,7 +184,7 @@ namespace UnityExtensions
             if (!IsReady(waitForCompletion))
                 return default;
 
-            var rawTextureData = data.Reinterpret<Color32>(texParams.PixelLength());
+            var rawTextureData = data.Reinterpret<Color32>(sizeof(byte));
 
             if (mipLevel == -1 || texParams.mipCount == 1)
                 return rawTextureData; // Return entire mip chain
@@ -204,7 +207,7 @@ namespace UnityExtensions
             if (!IsReady(waitForCompletion))
                 return default;
 
-            var rawTextureData = data.Reinterpret<Color24>(texParams.PixelLength());
+            var rawTextureData = data.Reinterpret<Color24>(sizeof(byte));
 
             if (mipLevel == -1 || texParams.mipCount == 1)
                 return rawTextureData; // Return entire mip chain
@@ -238,7 +241,7 @@ namespace UnityExtensions
             Texture2D output = new Texture2D(texParams.width, texParams.height,
                 texParams.format, mipChain, isLinear, createUninitialized: true);
 
-            var rawTextureData = data.Reinterpret<Color32>(texParams.PixelLength());
+            var rawTextureData = data.Reinterpret<Color32>(sizeof(byte));
 
             // Only copy mip 0 if Texture2D.Apply() will update the mipmaps anyway
             // or the original data does not contain multiple mip levels.
@@ -272,7 +275,7 @@ namespace UnityExtensions
             Texture2D output = new Texture2D(texParams.width, texParams.height,
                 texParams.format, texParams.mipCount != 1, isLinear, createUninitialized: true);
 
-            var rawTextureData = data.Reinterpret<Color24>(texParams.PixelLength());
+            var rawTextureData = data.Reinterpret<Color24>(sizeof(byte));
 
             // Only copy mip 0 if Texture2D.Apply() will update the mipmaps anyway
             // or the original data does not contain multiple mip levels.
@@ -430,6 +433,16 @@ namespace UnityExtensions
             this.height = height;
             this.format = format;
             this.mipCount = mipCount;
+        }
+
+        public Texture2DParameters(Texture tex)
+        {
+            width = tex.width;
+            height = tex.height;
+            format = tex is Texture2D tex2D
+                ? tex2D.format
+                : GraphicsFormatUtility.GetTextureFormat(tex.graphicsFormat);
+            mipCount = tex.mipmapCount;
         }
 
         public Texture2DParameters(Texture2D tex)
