@@ -114,7 +114,7 @@ namespace UnityExtensions.Unsafe
         }
         #endregion // IntPtr
 
-        /// <inheritdoc cref="ConvertExistingDataToNativeArray"/>
+        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(IntPtr, int, Allocator)"/>
         public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data, Allocator allocator) where T : unmanaged
         {
             fixed (T* addr = data)

@@ -25,7 +25,7 @@ namespace UnityExtensions.Unsafe
         {
             //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/DebugOverlay/TextFormatter.cs
             #region FPSSample
-            public static Converter instance = new Converter();
+            public static readonly Converter instance = new Converter();
 
             unsafe void IConverter<int>.Convert(ref char* dst, char* end, int value, FormatSpec formatSpec)
             {
@@ -155,7 +155,7 @@ namespace UnityExtensions.Unsafe
             #endregion // FPSSample
         }
 
-        public struct CharBufView
+        public readonly struct CharBufView
         {
             public CharBufView(char[] buf, int start, int length)
             {
@@ -171,9 +171,9 @@ namespace UnityExtensions.Unsafe
                 this.start = 0;
             }
 
-            public char[] buf;
-            public int start;
-            public int length;
+            public readonly char[] buf;
+            public readonly int start;
+            public readonly int length;
         }
 
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/DebugOverlay/TextFormatter.cs
@@ -212,14 +212,13 @@ namespace UnityExtensions.Unsafe
 
         public static int Write<T0, T1, T2, T3, T4, T5>(ref char[] dst, int destIdx, string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5)
         {
-            int written = 0;
+            int written;
             unsafe
             {
                 fixed (char* p = format, d = &dst[0])
                 {
                     var dest = d + destIdx;
                     var end = d + dst.Length;
-                    var l = format.Length;
                     var src = p;
                     while (*src > 0 && dest < end)
                     {
@@ -251,8 +250,7 @@ namespace UnityExtensions.Unsafe
                             s.leadingZero = false;
 
                             // Parse argument number
-                            int argNum = 0;
-                            argNum = ReadNum(ref src);
+                            int argNum = ReadNum(ref src);
 
                             // Parse optional width
                             if (*src == ',')

@@ -301,7 +301,7 @@ namespace UnityExtensions.Unsafe
         public unsafe static void MemCpy<T>(T[] destination, T[] source, long size) where T : unmanaged
         {
             fixed (void* p0 = source)
-            fixed (void* p1 = source)
+            fixed (void* p1 = destination)
             {
                 UnsafeUtility.MemCpy(p1, p0, size);
             }
@@ -311,7 +311,7 @@ namespace UnityExtensions.Unsafe
         public unsafe static void MemCpyReplicate<T>(T[] destination, T[] source, int size, int count) where T : unmanaged
         {
             fixed (void* p0 = source)
-            fixed (void* p1 = source)
+            fixed (void* p1 = destination)
             {
                 UnsafeUtility.MemCpyReplicate(p1, p0, size, count);
             }
@@ -321,7 +321,7 @@ namespace UnityExtensions.Unsafe
         public unsafe static void MemCpyStride<T>(T[] destination, int destinationStride, T[] source, int sourceStride, int elementSize, int count) where T : unmanaged
         {
             fixed (void* p0 = source)
-            fixed (void* p1 = source)
+            fixed (void* p1 = destination)
             {
                 UnsafeUtility.MemCpyStride(p1, destinationStride, p0, sourceStride, elementSize, count);
             }
