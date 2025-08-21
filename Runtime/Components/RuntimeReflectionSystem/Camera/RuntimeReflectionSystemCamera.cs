@@ -55,13 +55,12 @@ namespace UnityExtensions
         RenderTexture _blendedTexture;
 
         AsyncGPUReadbackRequest _readbackRequest;
-#endif // BLEND_SHADER
 
         /// <summary>
         /// Store the average colour of each cubemap face.
         /// </summary>
-        public NativeArray<Color32> _ambientColours = new NativeArray<Color32>(6,
-            Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+        public NativeArray<Color32> _ambientColours;
+#endif // BLEND_SHADER
 
         public bool skyboxOverride;
         public bool cameraSkyboxOverride;
@@ -158,6 +157,8 @@ namespace UnityExtensions
             SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
 
             _skyboxMaterial.SetTexture(Tex, _blendedTexture);
+
+            _ambientColours = new NativeArray<Color32>(6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 #endif // BLEND_SHADER
         }
 
@@ -173,6 +174,8 @@ namespace UnityExtensions
             SceneManager.activeSceneChanged -= UpdateCustomReflectionTexture;
 
             DestroyRenderTexture(_blendedTexture);
+
+            _ambientColours.Dispose();
 #endif // BLEND_SHADER
 
             if (_createdMaterial)
@@ -188,8 +191,6 @@ namespace UnityExtensions
                     DestroyRenderTexture(rt);
                 }
             }
-
-            _ambientColours.Dispose();
         }
 
         #endregion // MonoBehaviour

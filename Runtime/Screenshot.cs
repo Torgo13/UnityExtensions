@@ -143,7 +143,7 @@ namespace UnityExtensions
 
             var assetPath = CreatePath(filename, directory, fileType.GetTextureExtension());
             var bytes = texture.Encode(fileType, flags);
-            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: false);
+            await File.WriteAllBytesAsync(assetPath, bytes).ConfigureAwait(continueOnCapturedContext: true);
 
             return assetPath;
         }

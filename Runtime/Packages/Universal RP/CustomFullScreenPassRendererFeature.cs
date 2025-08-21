@@ -1,7 +1,4 @@
 #if URP_14
-using System;
-using System.Linq.Expressions;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -75,12 +72,17 @@ namespace UnityExtensions.Packages
 
 #if CUSTOM_URP
 #else
-            private static readonly ParameterExpression param = Expression.Parameter(typeof(object), "instance");
+            private const System.Reflection.BindingFlags bindingAttr
+                = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
 
-            private static readonly Func<object, CommandBuffer> getCommandBufferDelegate =
-                Expression.Lambda<Func<object, CommandBuffer>>(Expression.Convert(
-                    Expression.Field(Expression.Convert(param, typeof(RenderingData)),
-                    typeof(RenderingData).GetField("commandBuffer", BindingFlags.Instance | BindingFlags.NonPublic)),
+            private static readonly System.Linq.Expressions.ParameterExpression param
+                = System.Linq.Expressions.Expression.Parameter(typeof(object), "instance");
+
+            private static readonly System.Func<object, CommandBuffer> getCommandBufferDelegate =
+                System.Linq.Expressions.Expression.Lambda<System.Func<object, CommandBuffer>>(
+                    System.Linq.Expressions.Expression.Convert(System.Linq.Expressions.Expression.Field(
+                    System.Linq.Expressions.Expression.Convert(param, typeof(RenderingData)),
+                    typeof(RenderingData).GetField("commandBuffer", bindingAttr)),
                     typeof(CommandBuffer)), param).Compile();
 #endif // CUSTOM_URP
 
