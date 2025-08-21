@@ -1,5 +1,3 @@
-#define MIP_AVERAGE
-
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -102,7 +100,7 @@ namespace UnityExtensions.Packages
         /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
         /// when created with mipChain as <see langword="true"/>.
         /// </summary>
-        [return: AssumeRange(1, 8 * sizeof(ushort))]
+        [return: AssumeRange(1, sizeof(ushort))]
         public static int MipmapCount(
             [AssumeRange(1, ushort.MaxValue)] int width,
             [AssumeRange(1, ushort.MaxValue)] int height)
@@ -129,7 +127,7 @@ namespace UnityExtensions.Packages
         /// after calling <see cref="JobHandle.Complete"/>.
         /// </remarks>
         public static JobHandle CreateNormalMap(this Texture2D texture, out Texture2D normal,
-            bool layered = false, float normalStrength = 8f, JobHandle handle = default)
+            bool layered = false, bool wrap = false, float normalStrength = 8f, JobHandle handle = default)
         {
             int width = texture.width;
             int height = texture.height;
@@ -142,8 +140,7 @@ namespace UnityExtensions.Packages
             if (!layered)
                 mipmapCount = 1;
 
-            const float third = 1f / 3f;
-            var scale = new float3(third, third, third);
+            var scale = new float3(0.299f, 0.587f, 0.144f);
             for (int i = 0; i < mipmapCount; i++)
             {
                 TextureUtils.GetMipData(i, width, height,
@@ -151,22 +148,32 @@ namespace UnityExtensions.Packages
 
                 var output = normalData.GetSubArray(offset, mipWidth * mipHeight);
 
-                handle = new CreateNormalMapJob
-                {
-                    scale = scale,
-                    width = mipWidth,
-                    hn = mipHeight - 1,
-                    offset = offset,
-                    normalStrength = normalStrength,// / pow2,
-                    wrap = false,
-                    input = input,
-                    output = output,
-                }.Schedule(output.Length, handle);
+                handle = wrap
+                    ? new CreateNormalMapWrapJob
+                    {
+                        scale = scale,
+                        width = mipWidth,
+                        hn = mipHeight - 1,
+                        offset = offset,
+                        normalStrength = normalStrength,// / pow2,
+                        input = input,
+                        output = output,
+                    }.Schedule(output.Length, handle)
+                    : new CreateNormalMapJob
+                    {
+                        scale = scale,
+                        width = mipWidth,
+                        hn = mipHeight - 1,
+                        offset = offset,
+                        normalStrength = normalStrength,// / pow2,
+                        input = input,
+                        output = output,
+                    }.Schedule(output.Length, handle);
             }
             
             if (layered)
             {
-                handle = new LayerMipsJob
+                handle = new LayerMipsAverageJob
                 {
                     rawTextureData = normalData,
                     width = width,
@@ -246,6 +253,137 @@ namespace UnityExtensions.Packages
             }
 
             return handle;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MaxUnlikely(int x, int y)
+        {
+            return Hint.Unlikely(x > y) ? x : y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int MinUnlikely(int x, int y)
+        {
+            return Hint.Unlikely(x < y) ? x : y;
+        }
+
+        /// <remarks><see href="https://github.com/Unity-Technologies/Graphics/blob/a44ef5e6307acc343ba19066be9f82e08bf14546/Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl#L305"/></remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 BlendNormal(in float3 n1, in float3 n2)
+        {
+            float4 n = mad(n1.xyzz, new float4(2, 2, 2, -2), new float4(-1, -1, -1, 1));
+            float3 n0 = mad(n2, 2, -1);
+            float3 r;
+            r.x = dot(n.zxx, n0.xyz);
+            r.y = dot(n.yzy, n0.xyz);
+            r.z = dot(n.xyw, -n0.xyz);
+            return normalize(r);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color24 NormalMap(in float3 scale, int width, int offset, float normalStrength,
+            in NativeArray<Color32> input, int x0, int y0, int xn, int yn, int xp, int yp)
+        {
+            // Obtain the colors of the eight surrounding pixels
+            Color32 c_xn_yn = input[offset + mad(yn, width, xn)];
+            Color32 c_x0_yn = input[offset + mad(yn, width, x0)];
+            Color32 c_xp_yn = input[offset + mad(yn, width, xp)];
+
+            Color32 c_xn_y0 = input[offset + mad(y0, width, xn)];
+            Color32 c_xp_y0 = input[offset + mad(y0, width, xp)];
+
+            Color32 c_xn_yp = input[offset + mad(yp, width, xn)];
+            Color32 c_x0_yp = input[offset + mad(yp, width, x0)];
+            Color32 c_xp_yp = input[offset + mad(yp, width, xp)];
+
+            // Average the colour values
+            float f_xn_yn = dot(c_xn_yn, scale);
+            float f_x0_yn = dot(c_x0_yn, scale);
+            float f_xp_yn = dot(c_xp_yn, scale);
+
+            float f_xn_y0 = dot(c_xn_y0, scale);
+            float f_xp_y0 = dot(c_xp_y0, scale);
+
+            float f_xn_yp = dot(c_xn_yp, scale);
+            float f_x0_yp = dot(c_x0_yp, scale);
+            float f_xp_yp = dot(c_xp_yp, scale);
+
+            // Calculate the horizontal and vertical gradients
+            float edgeX =
+                  (f_xn_yn - f_xp_yn) * 0.25f
+                + (f_xn_y0 - f_xp_y0) * 0.50f
+                + (f_xn_yp - f_xp_yp) * 0.25f;
+
+            float edgeY =
+                  (f_xn_yn - f_xn_yp) * 0.25f
+                + (f_x0_yn - f_x0_yp) * 0.50f
+                + (f_xp_yn - f_xp_yp) * 0.25f;
+
+            // Apply the scale factor
+            float normX = edgeX * normalStrength;
+            float normY = edgeY * normalStrength;
+
+            // Convert the vector to the normal map colour
+            float normDot = normX * normX + normY * normY + 1.0f;
+            float normRsqrt = rsqrt(normDot);
+
+            normX *= normRsqrt;
+            normY *= normRsqrt;
+            normX = mad(normX, 0.5f, 0.5f);
+            normY = mad(normY, 0.5f, 0.5f);
+            float normZ = mad(normRsqrt, 0.5f, 0.5f);
+
+            return new Color24(normX, normY, normZ);
+
+#pragma warning disable IDE1006 // Naming Styles
+            /// <summary>
+            /// Take the dot product of a <see cref="Color32"/> and a
+            /// <see cref="Unity.Mathematics.float3"/> by normalising the colour byte values.
+            /// </summary>
+            /// <remarks>
+            /// Also multiplies <paramref name="c"/> by its alpha channel
+            /// so that transparent pixels are treated as black.
+            /// </remarks>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static float dot(Color32 c, float3 v)
+            {
+                const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
+                float a = c.a * normalise;
+                float x = v.x * c.r * a;
+                float y = v.y * c.g * a;
+                float z = v.z * c.b * a;
+                return x * x + y * y + z * z;
+            }
+#pragma warning restore IDE1006 // Naming Styles
+        }
+
+        public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip, ref int offset,
+            in NativeArray<Color24> rawTextureData)
+        {
+            int pow2 = 1 << mip;
+            int mipWidth = width / pow2;
+            int mipHeight = height / pow2;
+            int mipX = MinUnlikely(MaxUnlikely(0, mipWidth - 1), x / pow2);
+            int mipY = MinUnlikely(MaxUnlikely(0, mipHeight - 1), y / pow2);
+
+            int mipIndex = mad(mipY, mipWidth, mipX);
+            Color24 c = rawTextureData[offset + mipIndex];
+            offset += mipWidth * mipHeight;
+
+            return c;
+        }
+
+        public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip,
+            in NativeArray<Color24> rawTextureData)
+        {
+            TextureUtils.GetMipData(mip, width, height,
+                out int offset, out int pow2, out int mipWidth, out int mipHeight);
+
+            int mipX = MinUnlikely(MaxUnlikely(0, mipWidth - 1), x / pow2);
+            int mipY = MinUnlikely(MaxUnlikely(0, mipHeight - 1), y / pow2);
+
+            int mipIndex = mad(mipY, mipWidth, mipX);
+            return rawTextureData[offset + mipIndex];
         }
     }
 
@@ -424,10 +562,10 @@ namespace UnityExtensions.Packages
             // Convert coordinates from source mip level to target mip level
             int wn = mipWidthn - 1;
             int hn = mipHeightn - 1;
-            int x0 = MinUnlikely(wn, x + x);
-            int y0 = MinUnlikely(hn, y + y);
-            int x1 = MinUnlikely(wn, x0 + 1);
-            int y1 = MinUnlikely(hn, y0 + 1);
+            int x0 = min(wn, x + x);
+            int y0 = min(hn, y + y);
+            int x1 = min(wn, x0 + 1);
+            int y1 = min(hn, y0 + 1);
 
             Color32 tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
             Color32 tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
@@ -440,12 +578,6 @@ namespace UnityExtensions.Packages
             byte a = (byte)((tl.a + tr.a + bl.a + br.a) >> 2);
 
             rawTextureData[offset + index] = new Color32(r, g, b, a);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int MinUnlikely(int x, int y)
-        {
-            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
         }
     }
 
@@ -464,65 +596,50 @@ namespace UnityExtensions.Packages
             int x = index % width;
             int y = index / width;
 
-#if MIP_AVERAGE
-            const float scale = 1f;
-#else
             const float scale = 1f / byte.MaxValue;
-#endif // MIP_AVERAGE
 
             Color24 c = rawTextureData[index];
             float3 rgb = new float3(c.r, c.g, c.b) * scale;
 
             // TODO Bilinear filtering for higher mip levels
-            int offset = width * height;
             for (int mip = 1; mip < mipmapCount; mip++)
             {
-                int pow2 = 1 << mip;
-                int mipWidth = width / pow2;
-                int mipHeight = height / pow2;
-                int mipX = MinUnlikely(MaxUnlikely(0, mipWidth - 1), x / pow2);
-                int mipY = MinUnlikely(MaxUnlikely(0, mipHeight - 1), y / pow2);
-
-                int mipIndex = mad(mipY, mipWidth, mipX);
-                c = rawTextureData[offset + mipIndex];
-#if MIP_AVERAGE
-                rgb += new float3(c.r, c.g, c.b);
-#else
-                rgb = BlendNormal(rgb, new float3(c.r, c.g, c.b) * scale);
-#endif // MIP_AVERAGE
-
-                offset += mipWidth * mipHeight;
+                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureData);
+                rgb = ImageConversionJobs.BlendNormal(rgb, new float3(c.r, c.g, c.b) * scale);
             }
-
-#if MIP_AVERAGE
-            rgb *= rcp(mipmapCount * byte.MaxValue);
-#endif // MIP_AVERAGE
 
             rawTextureData[index] = new Color24(rgb);
         }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int MaxUnlikely(int x, int y)
-        {
-            return Unity.Burst.CompilerServices.Hint.Unlikely(x > y) ? x : y;
-        }
+    [BurstCompile(FloatMode = FloatMode.Fast)]
+    public struct LayerMipsAverageJob : IJobFor
+    {
+        [ReadOnly] public int width;
+        [ReadOnly] public int height;
+        [ReadOnly] public int mipmapCount;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int MinUnlikely(int x, int y)
-        {
-            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
-        }
+        [NativeDisableParallelForRestriction]
+        public NativeArray<Color24> rawTextureData;
 
-        /// <see href="https://github.com/Unity-Technologies/Graphics/blob/a44ef5e6307acc343ba19066be9f82e08bf14546/Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl#L305"/>
-        static float3 BlendNormal(float3 n1, float3 n2)
+        public void Execute(int index)
         {
-            float4 n = mad(n1.xyzz, new float4(2, 2, 2, -2), new float4(-1, -1, -1, 1));
-            n2 = mad(n2, 2, -1);
-            float3 r;
-            r.x = dot(n.zxx, n2.xyz);
-            r.y = dot(n.yzy, n2.xyz);
-            r.z = dot(n.xyw, -n2.xyz);
-            return normalize(r);
+            int x = index % width;
+            int y = index / width;
+
+            Color24 c = rawTextureData[index];
+            float3 rgb = new float3(c.r, c.g, c.b);
+
+            // TODO Bilinear filtering for higher mip levels
+            for (int mip = 1; mip < mipmapCount; mip++)
+            {
+                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureData);
+                rgb += new float3(c.r, c.g, c.b);
+            }
+
+            rgb *= rcp(mipmapCount * byte.MaxValue);
+
+            rawTextureData[index] = new Color24(rgb);
         }
     }
 
@@ -534,7 +651,6 @@ namespace UnityExtensions.Packages
         [ReadOnly] public int hn;
         [ReadOnly] public int offset;
         [ReadOnly] public float normalStrength;
-        [ReadOnly] public bool wrap;
         [ReadOnly] public NativeArray<Color32> input;
         [WriteOnly] public NativeArray<Color24> output;
 
@@ -546,80 +662,47 @@ namespace UnityExtensions.Packages
             int x0 = index % width;
             int y0 = index / width;
 
-            int xn = wrap ? mod(x0 - 1, wn) : max(0, x0 - 1);
-            int yn = wrap ? mod(y0 - 1, hn) : max(0, y0 - 1);
+            int xn = max(0, x0 - 1);
+            int yn = max(0, y0 - 1);
 
-            int xp = wrap ? mod(x0 + 1, wn) : min(wn, x0 + 1);
-            int yp = wrap ? mod(y0 + 1, hn) : min(hn, y0 + 1);
+            int xp = min(wn, x0 + 1);
+            int yp = min(hn, y0 + 1);
 
-            Color32 c_xn_yn = input[offset + mad(yn, width, xn)];
-            Color32 c_x0_yn = input[offset + mad(yn, width, x0)];
-            Color32 c_xp_yn = input[offset + mad(yn, width, xp)];
+            output[index] = ImageConversionJobs.NormalMap(scale, width, offset, normalStrength,
+                input, x0, y0, xn, yn, xp, yp);
+        }
+    }
 
-            Color32 c_xn_y0 = input[offset + mad(y0, width, xn)];
-            Color32 c_xp_y0 = input[offset + mad(y0, width, xp)];
+    [BurstCompile(FloatMode = FloatMode.Fast)]
+    public struct CreateNormalMapWrapJob : IJobFor
+    {
+        [ReadOnly] public float3 scale;
+        [ReadOnly] public int width;
+        [ReadOnly] public int hn;
+        [ReadOnly] public int offset;
+        [ReadOnly] public float normalStrength;
+        [ReadOnly] public NativeArray<Color32> input;
+        [WriteOnly] public NativeArray<Color24> output;
 
-            Color32 c_xn_yp = input[offset + mad(yp, width, xn)];
-            Color32 c_x0_yp = input[offset + mad(yp, width, x0)];
-            Color32 c_xp_yp = input[offset + mad(yp, width, xp)];
+        public void Execute(int index)
+        {
+            // Fix out of bounds array access on image edges
+            int wn = width - 1;
 
-            float f_xn_yn = dot(c_xn_yn, scale);
-            float f_x0_yn = dot(c_x0_yn, scale);
-            float f_xp_yn = dot(c_xp_yn, scale);
+            int x0 = index % width;
+            int y0 = index / width;
 
-            float f_xn_y0 = dot(c_xn_y0, scale);
-            float f_xp_y0 = dot(c_xp_y0, scale);
+            int xn = mod(x0 - 1, wn);
+            int yn = mod(y0 - 1, hn);
 
-            float f_xn_yp = dot(c_xn_yp, scale);
-            float f_x0_yp = dot(c_x0_yp, scale);
-            float f_xp_yp = dot(c_xp_yp, scale);
+            int xp = mod(x0 + 1, wn);
+            int yp = mod(y0 + 1, hn);
 
-            float edgeX =
-                  (f_xn_yn - f_xp_yn) * 0.25f
-                + (f_xn_y0 - f_xp_y0) * 0.50f
-                + (f_xn_yp - f_xp_yp) * 0.25f;
-
-            float edgeY =
-                  (f_xn_yn - f_xn_yp) * 0.25f
-                + (f_x0_yn - f_x0_yp) * 0.50f
-                + (f_xp_yn - f_xp_yp) * 0.25f;
-
-            float normX = edgeX * normalStrength;
-            float normY = edgeY * normalStrength;
-
-            // Normalise
-            float normDot = normX * normX + normY * normY + 1.0f;
-            float normRsqrt = rsqrt(normDot);
-
-            normX *= normRsqrt;
-            normY *= normRsqrt;
-            normX = mad(normX, 0.5f, 0.5f);
-            normY = mad(normY, 0.5f, 0.5f);
-            float normZ = mad(normRsqrt, 0.5f, 0.5f);
-
-            output[index] = new Color24(normX, normY, normZ);
+            output[index] = ImageConversionJobs.NormalMap(scale, width, offset, normalStrength,
+                input, x0, y0, xn, yn, xp, yp);
         }
 
 #pragma warning disable IDE1006 // Naming Styles
-        /// <summary>
-        /// Take the dot product of a <see cref="Color32"/> and a
-        /// <see cref="Unity.Mathematics.float3"/> by normalising the colour byte values.
-        /// </summary>
-        /// <remarks>
-        /// Also multiplies <paramref name="c"/> by its alpha channel
-        /// so that transparent pixels are treated as black.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float dot(Color32 c, float3 v)
-        {
-            const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
-            float a = c.a * normalise;
-            float x = v.x * c.r * a;
-            float y = v.y * c.g * a;
-            float z = v.z * c.b * a;
-            return x * x + y * y + z * z;
-        }
-
         /// <summary>
         /// Integer modulus function to allow texture coordinates
         /// to wrap around to the other side.
