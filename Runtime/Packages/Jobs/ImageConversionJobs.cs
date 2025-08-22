@@ -208,7 +208,7 @@ namespace UnityExtensions.Packages
             int size = width * height;
 
             mipmapCount = MipmapCount(width, height);
-            int length = TextureUtils.MipChainSize(mipmapCount, width, height);
+            int length = TextureUtils.MipChainLength(mipmapCount, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
 

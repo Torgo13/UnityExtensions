@@ -151,9 +151,24 @@ namespace UnityExtensions
         public static void Add<T>(this List<T> list, IEnumerable<T> elementsToAdd) => list.AddRange(elementsToAdd);
         #endregion // Unity.Entities.CodeGen
 
+        public static T[] AsArray<T>(this List<T> list)
+        {
+            UnityEngine.Assertions.Assert.IsNotNull(list);
+
+            return NoAllocHelpers.ExtractArrayFromList(list);
+        }
+
         public static Span<T> AsSpan<T>(this List<T> list)
         {
-            return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(start: 0, length: list.Count);
+            if (list == null)
+                return new Span<T>();
+
+            return list.AsArray().AsSpan(start: 0, length: list.Count);
+        }
+
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list)
+        {
+            return list.AsSpan();
         }
 
         /// <inheritdoc cref="Dictionary{TKey, TValue}.TryAdd(TKey, TValue)"/>

@@ -75,7 +75,7 @@ namespace UnityExtensions
                 mipChain = false;
 
                 tempTex = default;
-                data = new NativeArray<byte>(inputParams.Mip0Length,    // Empty NativeArray until
+                data = new NativeArray<byte>(inputParams.Mip0Size,      // Empty NativeArray until
                     allocator, NativeArrayOptions.UninitializedMemory); // AsyncGPUReadbackRequest is completed 
                 readback = new ReadbackAsyncDispose(ref data, tex);
                 texParams = new Texture2DParameters(inputParams.width, inputParams.height,
@@ -297,14 +297,14 @@ namespace UnityExtensions
         /// matches the calculated mip chain length for its <see cref="TextureFormat"/>.</returns>
         public readonly bool IsCorrectLength(bool mipChain = false)
         {
-            return data.Length == (mipChain ? texParams.Mip0Length : texParams.MipChainLength);
+            return data.Length == (mipChain ? texParams.MipChainSize : texParams.Mip0Size);
         }
 
         /// <returns><see langword="true"/> if the length of <see cref="data"/>
         /// is valid for the given <paramref name="format"/>.</returns>
         public readonly bool IsValidLength(TextureFormat format)
         {
-            return (data.Length % Texture2DParameters.PixelLength(format)) != 0;
+            return (data.Length % Texture2DParameters.PixelSize(format)) != 0;
         }
 
         /// <inheritdoc cref="IsValidLength(TextureFormat)"/>
@@ -407,7 +407,7 @@ namespace UnityExtensions
         public Texture2DReadable(Texture tex)
         {
             this.isReadable =  tex.isReadable;
-            this.isCompressed = Texture2DParameters.PixelLength(tex.graphicsFormat) == -1;
+            this.isCompressed = Texture2DParameters.PixelSize(tex.graphicsFormat) == -1;
             this.isLinear = !tex.isDataSRGB;
             this.isTexture2D = tex is Texture2D;
 
@@ -469,11 +469,14 @@ namespace UnityExtensions
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Texture2DParameters
     {
+        #region Fields
         public readonly int width;
         public readonly int height;
         public readonly TextureFormat format;
         public readonly int mipCount;
+        #endregion // Fields
 
+        #region Constructors
         public Texture2DParameters(int width, int height, TextureFormat format, int mipCount)
         {
             Assert.IsTrue(width > 0);
@@ -504,18 +507,41 @@ namespace UnityExtensions
             format = tex.format;
             mipCount = tex.mipmapCount;
         }
+        #endregion // Constructors
 
-        // To remain consistent with Unity
-        // Use size to refer to the number of elements
-        // Use length to refer to the number of bytes
+        // Use length to refer to the number of elements
+        // Use size to refer to the number of bytes
 
-        public int Mip0Size => width * height;
-        public int MipChainSize => TextureUtils.MipChainSize(mipCount, width, height);
+        #region Accessors
+        /// <summary>Number of elements in mip 0.</summary>
+        public int Mip0Length => width * height;
+        /// <summary>Number of elements in mip chain.</summary>
+        public int MipChainLength => TextureUtils.MipChainLength(mipCount, width, height);
 
-        public int Mip0Length => PixelLength() * Mip0Size;
-        public int MipChainLength => PixelLength() * MipChainSize;
-        public bool IsCompressed => PixelLength() == -1;
-        public int PixelLength() => PixelLength(format);
+        /// <summary>Number of bytes in mip 0.</summary>
+        public int Mip0Size => PixelSize() * Mip0Length;
+        /// <summary>Number of bytes in mip chain.</summary>
+        public int MipChainSize => PixelSize() * MipChainLength;
+
+        /// <summary>Number of bytes per pixel.</summary>
+        /// <returns>-1 if a compressed format is used.</returns>
+        public int PixelSize() => PixelSize(format);
+        public bool IsCompressed => PixelSize() == -1;
+
+        /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo.SupportsTextureFormat.html"/></remarks>
+        /// <exception cref="ArgumentException">Failed SupportsTextureFormat; format is not a valid TextureFormat</exception>
+        public bool SupportsTextureFormat => SystemInfo.SupportsTextureFormat(format);
+
+        /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo-maxTextureSize.html"/></remarks>
+        /// <summary>Unity only supports textures up to a size of 16_384,
+        /// even if <see cref="SystemInfo.maxTextureSize"/> returns a larger size.</summary>
+        public static int MaxTextureLength => Math.Min(16_384, SystemInfo.maxTextureSize);
+
+        /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/NPOTSupport.Restricted.html"/></remarks>
+        /// <summary>If <see langword="false"/>, limited NPOT support: no mipmaps and clamp wrap mode will be forced.
+        /// If NPOT <see cref="Texture"/> does have mipmaps it will be upscaled/padded at loading time.</summary>
+        public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
+        #endregion // Accessors
 
         public MipLevelParameters GetMipParameters(int mipLevel)
         {
@@ -537,26 +563,12 @@ namespace UnityExtensions
             return new MipLevelParameters(mipWidth, mipHeight, offset, mipLevel);
         }
 
-        /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo.SupportsTextureFormat.html"/></remarks>
-        /// <exception cref="ArgumentException">Failed SupportsTextureFormat; format is not a valid TextureFormat</exception>
-        public bool SupportsTextureFormat => SystemInfo.SupportsTextureFormat(format);
-
-        /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo-maxTextureSize.html"/></remarks>
-        /// <summary>Unity only supports textures up to a size of 16_384,
-        /// even if <see cref="SystemInfo.maxTextureSize"/> returns a larger size.</summary>
-        public static int MaxTextureSize => Math.Min(16_384, SystemInfo.maxTextureSize);
-
-        /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/NPOTSupport.Restricted.html"/></remarks>
-        /// <summary>If <see langword="false"/>, limited NPOT support: no mipmaps and clamp wrap mode will be forced.
-        /// If NPOT <see cref="Texture"/> does have mipmaps it will be upscaled/padded at loading time.</summary>
-        public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
-
         /// <remarks>4 bytes per pixel has no issues with array length.
         /// The maximum byte count is 16_384 * 16_384 * 4 = 1_073_741_824,
         /// which is less than <see cref="int.MaxValue"/> of 2_147_483_647.</remarks>
         /// <returns>The number of bytes for the given <paramref name="format"/>,
         /// otherwise -1 for any compressed <see cref="TextureFormat"/>.</returns>
-        public static int PixelLength(TextureFormat format)
+        public static int PixelSize(TextureFormat format)
         {
             switch (format)
             {
@@ -591,8 +603,8 @@ namespace UnityExtensions
             }
         }
         
-        /// <inheritdoc cref="PixelLength(TextureFormat)"/>
-        public static int PixelLength(GraphicsFormat format)
+        /// <inheritdoc cref="PixelSize(TextureFormat)"/>
+        public static int PixelSize(GraphicsFormat format)
         {
             switch (format)
             {
@@ -743,7 +755,7 @@ namespace UnityExtensions
             Assert.IsTrue(mipHeight > 0);
             Assert.IsTrue(offset >= 0);
             Assert.IsTrue(mipLevel >= 0);
-            
+
             this.mipWidth = mipWidth;
             this.mipHeight = mipHeight;
             this.offset = offset;
@@ -818,31 +830,73 @@ namespace UnityExtensions
     {
         private readonly NativeArray<AsyncGPUReadbackRequest> _readbackRequests;
 
+        #region Constructors
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
         public ReadbackMipsAsyncDispose(Texture src, int mipCount)
         {
-            _readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount, Allocator.Persistent,
-                NativeArrayOptions.UninitializedMemory);
+            Assert.IsNotNull(src);
+            Assert.IsTrue(mipCount <= src.mipmapCount);
 
-            for (int i = 0; i < _readbackRequests.Length; i++)
-            {
-                _readbackRequests[i] = AsyncGPUReadback.Request(src, mipIndex: i);
-            }
+            _readbackRequests = InitialiseReadbackRequests(src, mipCount);
+        }
+
+        /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
+        public ReadbackMipsAsyncDispose(Texture src)
+        {
+            Assert.IsNotNull(src);
+
+            _readbackRequests = InitialiseReadbackRequests(src, src.mipmapCount);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
         public ReadbackMipsAsyncDispose(Texture src, int mipCount,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
-            _readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount, Allocator.Persistent,
-                NativeArrayOptions.UninitializedMemory);
+            Assert.IsNotNull(src);
+            Assert.IsTrue(mipCount <= src.mipmapCount);
 
-            for (int i = 0; i < _readbackRequests.Length; i++)
+            _readbackRequests = InitialiseReadbackRequests(src, mipCount,
+                x, width, y, height, z, depth);
+        }
+
+        /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
+        public ReadbackMipsAsyncDispose(Texture src,
+            int x, int width, int y, int height, int z = 0, int depth = 1)
+        {
+            Assert.IsNotNull(src);
+
+            _readbackRequests = InitialiseReadbackRequests(src, src.mipmapCount,
+                x, width, y, height, z, depth);
+        }
+        #endregion // Constructors
+
+        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, int mipCount)
+        {
+            var readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount,
+                Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+
+            for (int i = 0; i < readbackRequests.Length; i++)
             {
-                _readbackRequests[i] = AsyncGPUReadback.Request(src, mipIndex: i,
+                readbackRequests[i] = AsyncGPUReadback.Request(src, mipIndex: i);
+            }
+
+            return readbackRequests;
+        }
+
+        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, int mipCount,
+            int x, int width, int y, int height, int z = 0, int depth = 1)
+        {
+            var readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount,
+                Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+
+            for (int i = 0; i < readbackRequests.Length; i++)
+            {
+                readbackRequests[i] = AsyncGPUReadback.Request(src, mipIndex: i,
                     x, width, y, height, z, depth,
                     dstFormat: src.isDataSRGB ? GraphicsFormat.R8G8B8A8_SRGB : GraphicsFormat.R8G8B8A8_UNorm);
             }
+
+            return readbackRequests;
         }
 
         public bool GetCompleted(short token) => GetStatus(token) == ValueTaskSourceStatus.Succeeded;
@@ -866,10 +920,46 @@ namespace UnityExtensions
             }
         }
 
-        public NativeArray<byte> GetData(int mipIndex)
+        public NativeArray<byte> GetData(int mipIndex, Allocator allocator = Allocator.Persistent)
         {
             WaitForCompletionAll();
-            return _readbackRequests[mipIndex].GetData<byte>();
+
+            if (mipIndex < 0)
+            {
+                // Temporarily store the sizes for each mip level in bytes
+                NativeArray<int> mipLevelSizes = new NativeArray<int>(_readbackRequests.Length,
+                    Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+                int length = 0;
+                for (int i = 0; i < _readbackRequests.Length; i++)
+                {
+                    int layerDataSize = _readbackRequests[i].layerDataSize;
+                    mipLevelSizes[i] = layerDataSize;
+                    length += layerDataSize;
+                }
+
+                // Allocate a NativeArray<byte> to store the entire mip chain
+                NativeArray<byte> mipChainData = new NativeArray<byte>(length,
+                    allocator, NativeArrayOptions.ClearMemory);
+
+                for (int i = 0; i < _readbackRequests.Length; i++)
+                {
+                    int mipLevelOffset = 0;
+                    for (int j = 0; j < i; j++)
+                    {
+                        mipLevelOffset += mipLevelSizes[j];
+                    }
+
+                    _readbackRequests[i].GetData<byte>(layer: 0)
+                        .CopyTo(mipChainData.GetSubArray(mipLevelOffset, mipLevelSizes[i]));
+                }
+
+                return mipChainData;
+            }
+
+            Assert.IsTrue(mipIndex < _readbackRequests.Length);
+
+            return _readbackRequests[mipIndex].GetData<byte>(layer: 0);
         }
         
         public void GetData(ref NativeArray<byte> data, NativeArray<MipLevelParameters> mips)
@@ -935,6 +1025,7 @@ namespace UnityExtensions
             }
             
             Assert.IsTrue(token < _readbackRequests.Length);
+
             if (_readbackRequests[token].hasError)
                 return ValueTaskSourceStatus.Faulted;
 
@@ -1024,7 +1115,7 @@ namespace UnityExtensions
         /// <param name="width">The original width of the texture at mip 0.</param>
         /// <param name="height">The original height of the texture at mip 0.</param>
         /// <returns>The number of elements required for all given mip levels.</returns>
-        public static int MipChainSize(int mipmapCount, int width, int height)
+        public static int MipChainLength(int mipmapCount, int width, int height)
         {
             GetMipData(mipmapCount, width, height,
                 out int offset, out _, out _, out _);
@@ -1032,8 +1123,8 @@ namespace UnityExtensions
             return offset;
         }
 
-        /// <inheritdoc cref="MipChainSize(int, int, int)"/>
-        public static int MipChainSize(Texture2D tex) => MipChainSize(tex.mipmapCount, tex.width, tex.height);
+        /// <inheritdoc cref="MipChainLength(int, int, int)"/>
+        public static int MipChainLength(Texture2D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height);
         
         /// <summary>Calculate the required number of mipmaps for the given
         /// <see cref="width"/> and <see cref="height"/>.</summary>
@@ -1077,8 +1168,8 @@ namespace UnityExtensions
             }
         }
 
-        /// <inheritdoc cref="MipChainSize(int, int, int)"/>
-        public static int MipChainSize(int mipmapCount, int width, int height, int depth)
+        /// <inheritdoc cref="MipChainLength(int, int, int)"/>
+        public static int MipChainLength(int mipmapCount, int width, int height, int depth)
         {
             GetMipData(mipmapCount, width, height, depth,
                 out int offset, out _, out _, out _, out _);
@@ -1086,8 +1177,8 @@ namespace UnityExtensions
             return offset;
         }
 
-        /// <inheritdoc cref="MipChainSize(int, int, int, int)"/>
-        public static int MipChainSize(Texture3D tex) => MipChainSize(tex.mipmapCount, tex.width, tex.height, tex.depth);
+        /// <inheritdoc cref="MipChainLength(int, int, int, int)"/>
+        public static int MipChainLength(Texture3D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height, tex.depth);
 
         /// <inheritdoc cref="MipmapCount(int, int)"/>
         public static int MipmapCount(int width, int height, int depth)

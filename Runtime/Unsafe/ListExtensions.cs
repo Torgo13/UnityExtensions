@@ -73,21 +73,6 @@ namespace UnityExtensions.Unsafe
             return MemoryMarshal.AsBytes(list.AsSpan());
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this List<T> list)
-        {
-            if (list == null)
-                return new Span<T>();
-
-            return NoAllocHelpers.ExtractArrayFromList(list).AsSpan(0, list.Count);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list)
-        {
-            return list.AsSpan();
-        }
 
         public static void ResetListContents<T>(this List<T> list, NativeList<T> nativeList)
             where T : unmanaged
