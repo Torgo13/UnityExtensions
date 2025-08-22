@@ -11,67 +11,61 @@ namespace UnityExtensions.Unsafe
         #region FPSSample
         public static void Format<T0>(this Text me, string format, T0 arg0)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 
 #if PACKAGE_TEXTMESH_PRO
         public static void Format<T0>(this TMPro.TextMeshProUGUI me, string format, T0 arg0)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 #endif // PACKAGE_TEXTMESH_PRO
 
         public static void Format<T0, T1>(this Text me, string format, T0 arg0, T1 arg1)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 
 #if PACKAGE_TEXTMESH_PRO
         public static void Format<T0, T1>(this TMPro.TextMeshProUGUI me, string format, T0 arg0, T1 arg1)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 #endif // PACKAGE_TEXTMESH_PRO
 
         public static void Format<T0, T1, T2>(this Text me, string format, T0 arg0, T1 arg1, T2 arg2)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1, arg2);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 
 #if PACKAGE_TEXTMESH_PRO
         public static void Format<T0, T1, T2>(this TMPro.TextMeshProUGUI me, string format, T0 arg0, T1 arg1, T2 arg2)
         {
-            char[] buf = ArrayPool<char>.Shared.Rent(1000);
-            
+            using var pooledArray = DisposeArrayPool<char>.Rent(1024);
+            char[] buf = pooledArray.PooledArray;
+
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1, arg2);
             me.Set(buf, l);
-            
-            ArrayPool<char>.Shared.Return(buf);
         }
 #endif // PACKAGE_TEXTMESH_PRO
 

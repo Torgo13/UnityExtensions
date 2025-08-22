@@ -26,6 +26,7 @@ namespace UnityExtensions
                 list.Add(item);
                 return true;
             }
+
             return false;
         }
 
@@ -39,35 +40,11 @@ namespace UnityExtensions
             {
                 if (predicate(element))
                     return i;
+
                 i++;
             }
 
             return -1;
-        }
-
-        /// <summary>
-        /// Returns the camera that has the higher depth.
-        /// </summary>
-        /// <returns>The camera that has the higher depth, if any.</returns>
-        public static Camera GetTopCamera()
-        {
-            int allCamerasCount = Camera.allCamerasCount;
-            if (allCamerasCount == 0)
-                return null;
-
-            Camera[] allCameras = ArrayPool<Camera>.Shared.Rent(allCamerasCount);
-            _ = Camera.GetAllCameras(allCameras);
-
-            Camera topCamera = allCameras[0];
-            for (int i = 1; i < allCamerasCount; i++)
-            {
-                if (allCameras[i].depth > topCamera.depth)
-                    topCamera = allCameras[i];
-            }
-
-            ArrayPool<Camera>.Shared.Return(allCameras);
-
-            return topCamera;
         }
 
 #if !NETSTANDARD2_1

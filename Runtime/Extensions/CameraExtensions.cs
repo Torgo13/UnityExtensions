@@ -72,13 +72,43 @@ namespace UnityExtensions
             return 2.0 * System.Math.Atan(System.Math.Tan(horizontalFOV * 0.5) / aspect);
         }
 
+        //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/LiveCaptureUtility.cs
+        #region Unity.LiveCapture
+        /// <summary>
+        /// Returns the camera that has the higher depth.
+        /// </summary>
+        /// <returns>The camera that has the higher depth, if any.</returns>
+        public static Camera GetTopCamera()
+        {
+            int allCamerasCount = Camera.allCamerasCount;
+            if (allCamerasCount == 0)
+                return null;
+
+            using var pooledArray = DisposeArrayPool<Camera>.Rent(allCamerasCount);
+            Camera[] allCameras = pooledArray.PooledArray;
+
+            _ = Camera.GetAllCameras(allCameras);
+
+            Camera topCamera = allCameras[0];
+            for (int i = 1; i < allCamerasCount; i++)
+            {
+                if (allCameras[i].depth > topCamera.depth)
+                    topCamera = allCameras[i];
+            }
+
+            return topCamera;
+        }
+        #endregion // Unity.LiveCapture
+
         public static bool GetAllCameras(List<Camera> cameras)
         {
             int allCamerasCount = Camera.allCamerasCount;
             if (allCamerasCount == 0)
                 return false;
 
-            Camera[] allCameras = ArrayPool<Camera>.Shared.Rent(allCamerasCount);
+            using var pooledArray = DisposeArrayPool<Camera>.Rent(allCamerasCount);
+            Camera[] allCameras = pooledArray.PooledArray;
+
             _ = Camera.GetAllCameras(allCameras);
 
             cameras.EnsureCapacity(allCamerasCount);
@@ -87,9 +117,35 @@ namespace UnityExtensions
                 cameras.Add(allCameras[i]);
             }
 
-            ArrayPool<Camera>.Shared.Return(allCameras);
-
             return true;
+        }
+
+        public static Camera GetFirstCamera()
+        {
+            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
+            if (GetAllCameras(cameras))
+                return cameras[0];
+
+            return default;
+        }
+
+        public static Camera GetCamera(string identifier, bool compareTag = false)
+        {
+            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
+            if (!GetAllCameras(cameras))
+                return default;
+
+            foreach (var cam in cameras)
+            {
+                bool found = compareTag
+                    ? cam.CompareTag(identifier)
+                    : string.Equals(cam.name, identifier, System.StringComparison.Ordinal);
+
+                if (found)
+                    return cam;
+            }
+
+            return default;
         }
     }
 }

@@ -4,6 +4,65 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace UnityExtensions
 {
+    public readonly struct DisposeArrayPool<T> : IDisposable
+    {
+        private readonly T[] _pooledArray;
+        public T[] PooledArray => _pooledArray;
+
+        public DisposeArrayPool(int minimumLength)
+        {
+            UnityEngine.Assertions.Assert.IsTrue(minimumLength > 0);
+
+            _pooledArray = ArrayPool<T>.Shared.Rent(minimumLength);
+        }
+
+        public static DisposeArrayPool<T> Rent(int minimumLength)
+        {
+            return new DisposeArrayPool<T>(minimumLength);
+        }
+
+        #region IDisposable
+        public void Dispose()
+        {
+            ArrayPool<T>.Shared.Return(PooledArray, clearArray: true);
+        }
+        #endregion // IDisposable
+    }
+
+    public struct ResizableArrayPool<T> : IDisposable
+    {
+        private T[] _pooledArray;
+        public readonly T[] PooledArray => _pooledArray;
+
+        public ResizableArrayPool(int minimumLength)
+        {
+            UnityEngine.Assertions.Assert.IsTrue(minimumLength > 0);
+
+            _pooledArray = ArrayPool<T>.Shared.Rent(minimumLength);
+        }
+
+        public static ResizableArrayPool<T> Rent(int minimumLength)
+        {
+            return new ResizableArrayPool<T>(minimumLength);
+        }
+
+        public T[] Resize(int minimumLength)
+        {
+            UnityEngine.Assertions.Assert.IsTrue(minimumLength > 0);
+
+            ArrayPoolExtensions.Resize(ref _pooledArray, minimumLength);
+
+            return _pooledArray;
+        }
+
+        #region IDisposable
+        public readonly void Dispose()
+        {
+            ArrayPool<T>.Shared.Return(PooledArray, clearArray: true);
+        }
+        #endregion // IDisposable
+    }
+
     public static class ArrayPoolExtensions
     {
         //https://github.com/CommunityToolkit/dotnet/blob/657c6971a8d42655c648336b781639ed96c2c49f/src/CommunityToolkit.HighPerformance/Extensions/ArrayPoolExtensions.cs
@@ -19,7 +78,8 @@ namespace UnityExtensions
         /// <param name="clearArray">Indicates whether the contents of the array should be cleared before reuse.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="newSize"/> is less than 0.</exception>
         /// <remarks>When this method returns, the caller must not use any references to the old array anymore.</remarks>
-        public static void Resize<T>(this ArrayPool<T> pool, [NotNull] ref T[]? array, int newSize, bool clearArray = false)
+        public static void Resize<T>(this ArrayPool<T> pool, [NotNull] ref T[]? array, int newSize, bool clearArray = false,
+            bool copyArray = true)
         {
             // If the old array is null, just create a new one with the requested size
             if (array is null)
@@ -41,9 +101,12 @@ namespace UnityExtensions
             // items from the original array into the new one. Otherwise, copy as many items as possible,
             // until the new array is completely filled, and ignore the remaining items in the first array.
             T[] newArray = pool.Rent(newSize);
-            int itemsToCopy = Math.Min(array.Length, newSize);
 
-            Array.Copy(array, 0, newArray, 0, itemsToCopy);
+            if (copyArray)
+            {
+                int itemsToCopy = Math.Min(array.Length, newSize);
+                Array.Copy(array, 0, newArray, 0, itemsToCopy);
+            }
 
             pool.Return(array, clearArray);
 
