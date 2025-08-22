@@ -159,7 +159,7 @@ namespace UnityExtensions
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Scripting/NoAllocHelpers.bindings.cs
         #region UnityEngine
         /// <summary><see cref="ResetListSize{T}"/> with runtime checks.</summary>
-        /// <remarks>Also clears the List.</remarks>
+        /// <remarks>Also clears the <see cref="List{T}"/> <paramref name="list"/>.</remarks>
         public static void EnsureListElemCount<T>(this List<T> list, int count)
         {
             if (list == null)
@@ -218,7 +218,7 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ResetListSize<T>(this List<T> list, int size) where T : unmanaged
+        internal static void ResetListSize<T>(this List<T> list, int size)
         {
             var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
             tListAccess._size = size;
@@ -226,7 +226,7 @@ namespace UnityExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResetListSizeNoResize<T>(this List<T> list, int size) where T : unmanaged
+        public static void ResetListSizeNoResize<T>(this List<T> list, int size)
         {
             Assert.IsNotNull(list);
             Assert.IsTrue(size >= 0);

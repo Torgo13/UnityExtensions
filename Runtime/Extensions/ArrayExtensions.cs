@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
@@ -862,5 +863,24 @@ namespace UnityExtensions
             array[index2] = temp;
         }
         #endregion // UnityEngine.InputSystem.Utilities
+
+        //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Runtime/Export/Unsafe/UnsafeUtility.cs
+        #region Unity.Collections.LowLevel.Unsafe
+        public static Span<byte> AsBytes<T>(this T[] array) where T : struct
+        {
+            return MemoryMarshal.AsBytes(array.AsSpan());
+        }
+        #endregion // Unity.Collections.LowLevel.Unsafe
+
+        public static Span<TTo> Cast<TFrom, TTo>(this TFrom[] array)
+            where TFrom : struct
+            where TTo : struct
+        {
+            Assert.IsTrue(
+                array.Length * Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TFrom))
+                % Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TTo)) == 0);
+
+            return MemoryMarshal.Cast<TFrom, TTo>(array.AsSpan());
+        }
     }
 }

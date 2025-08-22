@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace UnityExtensions
 {
@@ -151,10 +152,27 @@ namespace UnityExtensions
         public static void Add<T>(this List<T> list, IEnumerable<T> elementsToAdd) => list.AddRange(elementsToAdd);
         #endregion // Unity.Entities.CodeGen
 
+        //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Runtime/Export/Unsafe/UnsafeUtility.cs
+        #region Unity.Collections.LowLevel.Unsafe
+        public static Span<byte> AsBytes<T>(this List<T> list) where T : struct
+        {
+            return MemoryMarshal.AsBytes(list.AsSpan());
+        }
+        #endregion // Unity.Collections.LowLevel.Unsafe
+
+        public static Span<TTo> Cast<TFrom, TTo>(this List<TFrom> list)
+            where TFrom : struct
+            where TTo : struct
+        {
+            UnityEngine.Assertions.Assert.IsTrue(
+                list.Count * Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TFrom))
+                % Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TTo)) == 0);
+
+            return MemoryMarshal.Cast<TFrom, TTo>(list.AsSpan());
+        }
+
         public static T[] AsArray<T>(this List<T> list)
         {
-            UnityEngine.Assertions.Assert.IsNotNull(list);
-
             return NoAllocHelpers.ExtractArrayFromList(list);
         }
 
@@ -181,6 +199,22 @@ namespace UnityExtensions
             }
 
             return false;
+        }
+
+        public static List<T> Remove<T>(this List<T> list, List<T> remove)
+        {
+            using var _0 = UnityEngine.Pool.ListPool<T>.Get(out var temp);
+            temp.EnsureCapacity(list.Count);
+
+            foreach (var item in list)
+            {
+                if (!remove.Contains(item))
+                    temp.Add(item);
+            }
+
+            list.Clear();
+            list.AddRange(temp);
+            return list;
         }
     }
 }

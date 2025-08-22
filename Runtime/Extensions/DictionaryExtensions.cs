@@ -97,7 +97,7 @@ namespace UnityExtensions
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/DictionaryExtensions.cs
         #region Unity.FilmInternalUtilities
-        public static void Loop<K,V>(this Dictionary<K,V> collection, System.Action<K,V> eachAction)
+        public static void Loop<K, V>(this Dictionary<K, V> collection, System.Action<K, V> eachAction)
         {
             using var enumerator = collection.GetEnumerator();
             while (enumerator.MoveNext())
@@ -107,5 +107,45 @@ namespace UnityExtensions
             }
         }
         #endregion // Unity.FilmInternalUtilities
+
+        public static Dictionary<K, V> RemoveKeys<K, V>(this Dictionary<K, V> dictionary, List<K> remove)
+        {
+            using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
+
+            foreach (var item in dictionary)
+            {
+                if (!remove.Contains(item.Key))
+                    temp.Add(item.Key, item.Value);
+            }
+
+            dictionary.Clear();
+
+            foreach (var item in temp)
+            {
+                dictionary.Add(item.Key, item.Value);
+            }
+
+            return dictionary;
+        }
+
+        public static Dictionary<K, V> RemoveValues<K, V>(this Dictionary<K, V> dictionary, List<V> remove)
+        {
+            using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
+
+            foreach (var item in dictionary)
+            {
+                if (!remove.Contains(item.Value))
+                    temp.Add(item.Key, item.Value);
+            }
+
+            dictionary.Clear();
+
+            foreach (var item in temp)
+            {
+                dictionary.Add(item.Key, item.Value);
+            }
+
+            return dictionary;
+        }
     }
 }

@@ -175,15 +175,78 @@ namespace UnityExtensions
             return new Color(c1.r, c1.g, c1.b, a);
         }
         #endregion // TMPro
-        
+
+        public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
+        {
+            (hex[0], hex[1]) = ByteToHex(color.r);
+            (hex[2], hex[3]) = ByteToHex(color.g);
+            (hex[4], hex[5]) = ByteToHex(color.b);
+            (hex[6], hex[7]) = ByteToHex(color.a);
+
+            return hex;
+        }
+
         public static string GetColorHex(this Color32 color)
         {
-            return $"{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}";
+            System.Span<char> hex = stackalloc char[8];      
+            
+            return color.GetColorHexSpan(hex).ToString();
         }
 
         public static string GetColorTextCode(this Color32 color)
         {
-            return $"<color=#{color.r:X2}{color.g:X2}{color.b:X2}{color.a:X2}>";
+            System.Span<char> hex = stackalloc char[8];
+
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
+            _ = sb.Append("<color=#");
+            _ = sb.Append(color.GetColorHexSpan(hex));
+            _ = sb.Append('>');
+
+            return sb.ToString();
+        }
+
+        public static (char, char) ByteToHex(byte b)
+        {
+            return (NibbleToHex(b >> 4), NibbleToHex(b & 15));
+        }
+
+        public static char NibbleToHex(int nibble)
+        {
+            switch (nibble)
+            {
+                default:
+                    return '0';
+                case 1:
+                    return '1';
+                case 2:
+                    return '2';
+                case 3:
+                    return '3';
+                case 4:
+                    return '4';
+                case 5:
+                    return '5';
+                case 6:
+                    return '6';
+                case 7:
+                    return '7';
+                case 8:
+                    return '8';
+                case 9:
+                    return '9';
+                case 10:
+                    return 'A';
+                case 11:
+                    return 'B';
+                case 12:
+                    return 'C';
+                case 13:
+                    return 'D';
+                case 14:
+                    return 'E';
+                case 15:
+                    return 'F';
+            }
         }
 
         public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;
