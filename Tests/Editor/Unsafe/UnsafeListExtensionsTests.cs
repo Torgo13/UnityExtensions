@@ -142,8 +142,7 @@ namespace UnityExtensions.Unsafe.Tests
             // _intDefault is not created
         }
 
-        // ----- GetPtr -----
-
+        #region GetPtr
         [Test]
         public unsafe void GetPtr_ReturnsNull_OnDefaultNotCreated()
         {
@@ -165,9 +164,9 @@ namespace UnityExtensions.Unsafe.Tests
             NUnitAssert.AreNotEqual(IntPtr.Zero, (IntPtr)p);
             NUnitAssert.AreEqual(new IntPtr(_intSmall.Ptr), (IntPtr)p);
         }
+        #endregion // GetPtr
 
-        // ----- GetReadOnlyPtr -----
-
+        #region GetReadOnlyPtr
         [Test]
         public unsafe void GetReadOnlyPtr_ReturnsNull_OnDefaultNotCreated()
         {
@@ -189,9 +188,9 @@ namespace UnityExtensions.Unsafe.Tests
             NUnitAssert.AreNotEqual(IntPtr.Zero, (IntPtr)p);
             NUnitAssert.AreEqual(new IntPtr(_intSmall.AsReadOnly().Ptr), (IntPtr)p);
         }
+        #endregion // GetReadOnlyPtr
 
-        // ----- GetIntPtr -----
-
+        #region GetIntPtr
         [Test]
         public void GetIntPtr_ReturnsZero_OnDefaultNotCreated()
         {
@@ -213,9 +212,9 @@ namespace UnityExtensions.Unsafe.Tests
             NUnitAssert.AreNotEqual(IntPtr.Zero, ip);
             NUnitAssert.AreEqual(new IntPtr(_intSmall.Ptr), ip);
         }
+        #endregion // GetIntPtr
 
-        // ----- GetReadOnlyIntPtr -----
-
+        #region GetReadOnlyIntPtr
         [Test]
         public void GetReadOnlyIntPtr_ReturnsZero_OnDefaultNotCreated()
         {
@@ -237,9 +236,9 @@ namespace UnityExtensions.Unsafe.Tests
             NUnitAssert.AreNotEqual(IntPtr.Zero, ip);
             NUnitAssert.AreEqual(new IntPtr(_intSmall.AsReadOnly().Ptr), ip);
         }
+        #endregion // GetReadOnlyIntPtr
 
-        // ----- EnsureCapacity -----
-
+        #region EnsureCapacity
         [Test]
         public void EnsureCapacity_Throws_WhenNotCreated()
         {
@@ -308,9 +307,9 @@ namespace UnityExtensions.Unsafe.Tests
                     list.Dispose();
             }
         }
+        #endregion // EnsureCapacity
 
-        // ----- EnsureRoom -----
-
+        #region EnsureRoom
         [Test]
         public void EnsureRoom_Throws_WhenNotCreated()
         {
@@ -376,9 +375,9 @@ namespace UnityExtensions.Unsafe.Tests
                     list.Dispose();
             }
         }
+        #endregion // EnsureRoom
 
-        // ----- AsSpan -----
-
+        #region AsSpan
         [Test]
         public void AsSpan_ReturnsEmpty_OnDefaultNotCreated()
         {
@@ -426,9 +425,9 @@ namespace UnityExtensions.Unsafe.Tests
             var raw = UnsafeUtility.ReadArrayElement<MyStruct>(_structList.Ptr, 0);
             NUnitAssert.AreEqual(42, raw.B);
         }
+        #endregion // AsSpan
 
-        // ----- AsReadOnlySpan -----
-
+        #region AsReadOnlySpan
         [Test]
         public void AsReadOnlySpan_ReturnsEmpty_OnDefaultNotCreated()
         {
@@ -454,9 +453,9 @@ namespace UnityExtensions.Unsafe.Tests
             NUnitAssert.AreEqual(2, ro[1]);
             NUnitAssert.AreEqual(3, ro[2]);
         }
+        #endregion // AsReadOnlySpan
 
-        // ----- Helper: populate / dispose -----
-
+        #region Helpers
         private static unsafe void Populate<T>(ref UnsafeList<T> list, T[] values) where T : unmanaged
         {
             if (!list.IsCreated)
@@ -473,6 +472,7 @@ namespace UnityExtensions.Unsafe.Tests
         {
             if (list.IsCreated)
                 list.Dispose();
+
             list = default;
         }
 
@@ -481,5 +481,6 @@ namespace UnityExtensions.Unsafe.Tests
             public int A;
             public int B;
         }
+        #endregion // Helpers
     }
 }

@@ -31,8 +31,8 @@ namespace UnityExtensions
         public Material _skyboxMaterial;
         bool _createdMaterial;
 
-        [SerializeField] Camera reflectionCamera;
-        Transform _reflectionCameraTransform;
+        [SerializeField] internal Camera reflectionCamera;
+        internal Transform _reflectionCameraTransform;
         bool _createdReflectionCamera;
 
         Transform _mainCameraTransform;
@@ -44,7 +44,7 @@ namespace UnityExtensions
         /// While one RenderTexture is being rendered to over six frames, the previous
         /// two completed RenderTextures will be blended to produce an interpolated cubemap.
         /// </remarks>
-        RenderTexture[] _renderTextures;
+        internal RenderTexture[] _renderTextures;
 
 #if BLEND_SHADER
 #else
@@ -52,7 +52,7 @@ namespace UnityExtensions
         /// Create a fourth RenderTexture for the blended result if it's needed for
         /// more than just the skybox.
         /// </summary>
-        RenderTexture _blendedTexture;
+        internal RenderTexture _blendedTexture;
 
         AsyncGPUReadbackRequest _readbackRequest;
 
@@ -83,10 +83,10 @@ namespace UnityExtensions
         public bool removeBlue;
 
         /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
-        int _index = -1;
+        internal int _index = -1;
 
         /// <summary>Snapshot of Time.frameCount the last time ResetFrameCount() was called.</summary>
-        int _renderedFrameCount;
+        internal int _renderedFrameCount;
 
         /// <summary>Number of RenderTextures in _renderTextures.</summary>
         const int ProbeCount = 3;
@@ -283,7 +283,7 @@ namespace UnityExtensions
             return updated;
         }
 
-        bool InitialiseMaterial()
+        internal bool InitialiseMaterial()
         {
             if (_skyboxMaterial != null)
                 return true;
@@ -300,14 +300,14 @@ namespace UnityExtensions
             return true;
         }
 
-        void PrepareNextCubemap()
+        internal void PrepareNextCubemap()
         {
             UpdateReflectionCameraPosition();
             ResetFrameCount();
             _index = NextIndex();
         }
 
-        void GetReflectionCamera()
+        internal void GetReflectionCamera()
         {
             // Check if the field has already been assigned
             if (reflectionCamera != null)
@@ -325,7 +325,7 @@ namespace UnityExtensions
             _createdReflectionCamera = true;
         }
 
-        bool FindMainCamera()
+        internal bool FindMainCamera()
         {
             if (_mainCameraTransform != null)
                 return true;
@@ -346,7 +346,7 @@ namespace UnityExtensions
         /// <remarks>
         /// Do not make the reflection camera a child of the main camera, or it may move during time slicing.
         /// </remarks>
-        void UpdateReflectionCameraPosition()
+        internal void UpdateReflectionCameraPosition()
         {
             if (FindMainCamera())
             {
@@ -357,7 +357,7 @@ namespace UnityExtensions
         /// <summary>
         /// Override the skybox material for the scene or the camera.
         /// </summary>
-        void UpdateSkybox()
+        internal void UpdateSkybox()
         {
             if (skyboxOverride)
                 RenderSettings.skybox = _skyboxMaterial;
@@ -366,7 +366,7 @@ namespace UnityExtensions
                 UpdateCameraSkybox();
         }
 
-        void UpdateCameraSkybox()
+        internal void UpdateCameraSkybox()
         {
             if (FindMainCamera()
                 && _mainCameraTransform.TryGetComponent<Skybox>(out var skybox))
@@ -378,7 +378,7 @@ namespace UnityExtensions
         /// <summary>
         /// Reset the timer used to measure how many frames the camera has been rendering for.
         /// </summary>
-        void ResetFrameCount()
+        internal void ResetFrameCount()
         {
             _renderedFrameCount = Time.frameCount;
         }
@@ -387,7 +387,7 @@ namespace UnityExtensions
         /// Get the index of the next RenderTexture in _renderTextures.
         /// </summary>
         /// <returns>Index of the next RenderTexture.</returns>
-        int NextIndex()
+        internal int NextIndex()
         {
             return (_index + 1) % ProbeCount;
         }
@@ -396,7 +396,7 @@ namespace UnityExtensions
         /// Get the index of the previous RenderTexture in _renderTextures.
         /// </summary>
         /// <returns>Index of the previous RenderTexture.</returns>
-        int PreviousIndex()
+        internal int PreviousIndex()
         {
             return (_index + ProbeCount - 1) % ProbeCount;
         }
@@ -414,7 +414,7 @@ namespace UnityExtensions
         /// to ensure that high frequency noise is blurred together.
         /// </remarks>
         /// <returns>The mip level, which will be rounded to the nearest integer in the shader.</returns>
-        int GetMipLevel(float scaleFactor)
+        internal int GetMipLevel(float scaleFactor)
         {
             int mipLevel = 2;
 
@@ -437,7 +437,7 @@ namespace UnityExtensions
         /// <see href="https://docs.unity3d.com/ScriptReference/RenderTexture.html"/>
         /// </summary>
         /// <returns>False if any of the RenderTextures could not be recreated.</returns>
-        bool EnsureCreated()
+        internal bool EnsureCreated()
         {
             bool created = true;
             foreach (var rt in _renderTextures)
@@ -485,7 +485,7 @@ namespace UnityExtensions
         /// <summary>
         /// Update customReflectionTexture when the scene changes.
         /// </summary>
-        void UpdateCustomReflectionTexture(Scene unloadedScene, Scene loadedScene)
+        internal void UpdateCustomReflectionTexture(Scene unloadedScene, Scene loadedScene)
         {
             RenderSettings.customReflectionTexture = _blendedTexture;
             UpdateSkybox();
@@ -495,7 +495,7 @@ namespace UnityExtensions
         /// Sample the highest mipmap level of each cubemap face.
         /// Apply the colours to RenderSettings.
         /// </summary>
-        void UpdateAmbient()
+        internal void UpdateAmbient()
         {
             _readbackRequest = AsyncGPUReadback.Request(_blendedTexture,
                 mipIndex: _blendedTexture.mipmapCount - 1,
@@ -506,7 +506,7 @@ namespace UnityExtensions
         /// <summary>
         /// Callback after AsyncGPUReadback has completed.
         /// </summary>
-        void GPUReadbackRequest()
+        internal void GPUReadbackRequest()
         {
             // Cache the indices of the CubemapFace enum to avoid boxing
             const int positiveX = (int)CubemapFace.PositiveX;

@@ -131,15 +131,6 @@ namespace UnityExtensions
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
 
-        //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/ArraySegmentExtensions.cs
-        #region Unity.LiveCapture.VideoStreaming.Client.Utils
-        public static ArraySegment<T> SubSegment<T>(this ArraySegment<T> arraySegment, int offset)
-        {
-            UnityEngine.Debug.Assert(arraySegment.Array != null, "arraySegment.Array != null");
-            return new ArraySegment<T>(arraySegment.Array, arraySegment.Offset + offset, arraySegment.Count - offset);
-        }
-        #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
-
         //https://github.com/needle-mirror/com.unity.addressables/blob/b9b97fefbdf24fe7f86d2f50efae7f0fd5a1bba7/Runtime/Utility/SerializationUtilities.cs
         #region UnityEngine.AddressableAssets.Utility
         public static int ReadInt32FromByteArray(this byte[] data, int offset)
