@@ -70,11 +70,13 @@ namespace UnityExtensions.Unsafe
 
 #endif
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
         static void InitNativeContainer(AtomicSafetyHandle handle)
         {
             if (UnsafeUtility.IsNativeContainerType<T>())
                 AtomicSafetyHandle.SetNestedContainer(handle, true);
         }
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
         /// <summary>
         /// The number of elements the buffer holds.

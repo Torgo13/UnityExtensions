@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -243,5 +244,220 @@ namespace UnityExtensions
             ListPool<Transform>.Release(transforms);
             return foundObject;
         }
+
+        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances)
+        {
+            int instanceID = go.GetHashCode();
+
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+
+            var instanceIDs = new NativeArray<int>(count, allocator, options);
+            var transformIDs = new NativeArray<int>(count, allocator, options);
+
+            GameObject.InstantiateGameObjects(instanceID, count, instanceIDs, transformIDs);
+            Resources.InstanceIDToObjectList(instanceIDs,
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<GameObject>, List<Object>>(ref instances));
+        }
+    }
+
+    public static class AssetDatabaseExtensions
+    {
+        public static Object LoadAssetAtPath(string path)
+        {
+#if UNITY_EDITOR
+            System.Type type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path);
+            return UnityEditor.AssetDatabase.LoadAssetAtPath(path, type);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadAssetFromGUID(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid)),
+                GetMainAssetTypeFromGUID(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static T LoadAssetFromGUID<T>(Union16 guid) where T : Object
+        {
+#if UNITY_EDITOR
+            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid)));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadAssetFromGUID(string guid)
+        {
+#if UNITY_EDITOR
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static T LoadAssetFromGUID<T>(string guid) where T : Object
+        {
+#if UNITY_EDITOR
+            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        #region UnityEditor
+        public static string GetAssetPath(Object assetObject)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GetAssetPath(assetObject);
+#else
+            return string.Empty;
+#endif // UNITY_EDITOR
+        }
+
+        public static string GetAssetPath(int instanceID)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GetAssetPath(instanceID);
+#else
+            return string.Empty;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadAssetAtPath(string path, System.Type type)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath(path, type);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static T LoadAssetAtPath<T>(string assetPath) where T : Object
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadMainAssetAtPath(string assetPath)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadMainAssetAtPath(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void InstanceIDsToGUIDs(NativeArray<int> instanceIDs, NativeArray<Union16> guidsOut)
+        {
+#if UNITY_EDITOR
+            UnityEditor.AssetDatabase.InstanceIDsToGUIDs(instanceIDs, guidsOut.Reinterpret<UnityEditor.GUID>());
+#endif // UNITY_EDITOR
+        }
+
+        public static System.Type GetMainAssetTypeAtPath(string assetPath)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static System.Type GetMainAssetTypeFromGUID(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static System.Type GetTypeFromPathAndFileID(string assetPath, long localIdentifierInFile)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GetTypeFromPathAndFileID(assetPath, localIdentifierInFile);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static bool IsMainAssetAtPathLoaded(string assetPath)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.IsMainAssetAtPathLoaded(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static string GUIDToAssetPath(string guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+#else
+            return string.Empty;
+#endif // UNITY_EDITOR
+        }
+
+        public static string GUIDToAssetPath(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.GUIDToAssetPath(
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
+#else
+            return string.Empty;
+#endif // UNITY_EDITOR
+        }
+
+        public static Union16 GUIDFromAssetPath(string path)
+        {
+#if UNITY_EDITOR
+            var guid = UnityEditor.AssetDatabase.GUIDFromAssetPath(path);
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<UnityEditor.GUID, Union16>(ref guid);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static string AssetPathToGUID(string path)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.AssetPathToGUID(path);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object[] LoadAllAssetsAtPath(string assetPath)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object[] LoadAllAssetRepresentationsAtPath(string assetPath)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+        #endregion // UnityEditor
     }
 }

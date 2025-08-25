@@ -10,7 +10,10 @@ namespace UnityExtensions.Packages
         #region UnityEditor.ShaderGraph
         public static void AppendIndentedLines(this StringBuilder sb, string lines, string indentation)
         {
-            sb.EnsureRoom(lines.Length);
+#if PACKAGE_STRINGBUILDER_EXTENSIONS
+            System.Text.StringBuilderExtensions.EnsureRoom(sb, lines.Length);
+#endif // PACKAGE_STRINGBUILDER_EXTENSIONS
+
             var charIndex = 0;
             while (charIndex < lines.Length)
             {
