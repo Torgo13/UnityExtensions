@@ -514,18 +514,28 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// Destroys a UnityObject safely.
+        /// Destroys a <see cref="UnityEngine.Object"/> safely.
+        /// Calls the proper Destroy method on an object based on if application is playing.
         /// </summary>
-        /// <param name="obj">Object to be destroyed.</param>
-        /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is false
-        /// before destroying it.</param>
-        public static void Destroy(UnityObject obj, bool skipNullCheck = false)
+        /// <remarks>
+        /// In Play mode or when running your built application,
+        /// this function calls <see cref="UnityEngine.Object.Destroy(UnityObject)"/>.
+        /// In the Editor, outside of Play mode,
+        /// this function calls <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/>.
+        /// </remarks>
+        /// <param name="obj"><see cref="UnityEngine.Object"/> to be destroyed.</param>
+        /// <param name="withUndo">Whether to record and undo operation for the destroy action.</param>
+        /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is
+        /// <see langword="false"/> before destroying it.</param>
+        public static void Destroy(this UnityObject obj, bool withUndo = false, bool skipNullCheck = false)
         {
             if (skipNullCheck || obj != null)
             {
 #if UNITY_EDITOR
                 if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
                     UnityObject.Destroy(obj);
+                else if (withUndo)
+                    UnityEditor.Undo.DestroyObjectImmediate(obj);
                 else
                     UnityObject.DestroyImmediate(obj);
 #else

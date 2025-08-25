@@ -1,6 +1,8 @@
-#if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
+
+using Debug = UnityEngine.Debug;
 
 namespace UnityExtensions
 {
@@ -17,6 +19,7 @@ namespace UnityExtensions
         /// <param name="vertices">Polygon made of a series of adjacent points in world space.</param>
         /// <param name="color">Color of the line.</param>
         /// <param name="duration">How long the line should be visible for.</param>
+        [Conditional("DEBUG")]
         public static void Polygon(List<Vector3> vertices, Color color, float duration = 10f)
         {
             var vertexCount = vertices.Count;
@@ -44,6 +47,7 @@ namespace UnityExtensions
         /// <param name="vertices">Polygon made of a series of adjacent points in world space.</param>
         /// <param name="color">Color of the line.</param>
         /// <param name="duration">How long the line should be visible for.</param>
+        [Conditional("DEBUG")]
         public static void Polygon(Vector3[] vertices, Color color, float duration = 10f)
         {
             var vertexCount = vertices.Length;
@@ -65,4 +69,3 @@ namespace UnityExtensions
         #endregion // Unity.XR.CoreUtils
     }
 }
-#endif

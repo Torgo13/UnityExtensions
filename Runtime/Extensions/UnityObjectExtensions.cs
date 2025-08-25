@@ -8,34 +8,6 @@ namespace UnityExtensions
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/UnityObjectUtils.cs
         #region Unity.XR.CoreUtils
         /// <summary>
-        /// Calls the proper Destroy method on an object based on if application is playing.
-        /// </summary>
-        /// <remarks>
-        /// In Play mode or when running your built application,
-        /// this function calls <see cref="Object.Destroy(UnityObject)"/>.
-        /// In the Editor, outside of Play mode,
-        /// this function calls <see cref="Object.DestroyImmediate(UnityObject)"/>.
-        /// </remarks>
-        /// <param name="obj">Object to be destroyed.</param>
-        /// <param name="withUndo">Whether to record and undo operation for the destroy action.</param>
-        public static void Destroy(this UnityObject obj, bool withUndo = false)
-        {
-            if (Application.isPlaying)
-            {
-                UnityObject.Destroy(obj);
-            }
-#if UNITY_EDITOR
-            else
-            {
-                if (withUndo)
-                    UnityEditor.Undo.DestroyObjectImmediate(obj);
-                else
-                    UnityObject.DestroyImmediate(obj);
-            }
-#endif
-        }
-
-        /// <summary>
         /// Returns a component of the specified type that is associated with an object, if possible.
         /// </summary>
         /// <remarks><list>
@@ -69,13 +41,5 @@ namespace UnityExtensions
             return interfaceOut;
         }
         #endregion // Unity.XR.CoreUtils
-        
-        public static void SafeDestroy(this UnityObject obj, bool withUndo = false)
-        {
-            if (obj == null)
-                return;
-
-            obj.Destroy(withUndo);
-        }
     }
 }

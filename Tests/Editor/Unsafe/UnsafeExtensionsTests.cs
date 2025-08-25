@@ -21,7 +21,6 @@ namespace UnityExtensions.Unsafe.Tests
             Assert.AreEqual(10, array[index]);
         }
 
-        /*
         [Test]
         public void UnsafeElementAt_ShouldThrowException_WhenArrayIsEmpty()
         {
@@ -31,7 +30,6 @@ namespace UnityExtensions.Unsafe.Tests
                 ref int element = ref array.UnsafeElementAtMutable(0);
             });
         }
-        */
 
         [Test]
         public void UnsafeElementAt_List_ShouldReturnCorrectReference()

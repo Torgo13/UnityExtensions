@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityObject = UnityEngine.Object;
@@ -66,6 +67,7 @@ namespace UnityExtensions
         /// Register undo operations for a newly created object.
         /// </summary>
         /// <param name="objectToUndo">The object that was created.</param>
+        [Conditional("UNITY_EDITOR")]
         public void RegisterCreatedObject(UnityObject objectToUndo)
         {
 #if UNITY_EDITOR
@@ -81,6 +83,7 @@ namespace UnityExtensions
         /// Records any changes done on the object after the RecordObject function.
         /// </summary>
         /// <param name="objectToUndo">The reference to the object that you will be modifying.</param>
+        [Conditional("UNITY_EDITOR")]
         public void RecordObject(UnityObject objectToUndo)
         {
 #if UNITY_EDITOR

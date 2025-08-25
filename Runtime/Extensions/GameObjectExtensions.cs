@@ -131,7 +131,73 @@ namespace UnityExtensions
 #endif
         }
         #endregion // Unity.XR.CoreUtils
-        
+
+        //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities.Hybrid/GameObjectConversion/UnityEngineExtensions.cs
+        #region Unity.Entities.Conversion
+        public static bool IsPrefab(this GameObject @this) =>
+            !@this.scene.IsValid();
+
+        public static bool IsAsset(this UnityEngine.Object @this) =>
+            !(@this is GameObject) && !(@this is Component);
+
+        public static bool IsActiveIgnorePrefab(this GameObject @this)
+        {
+            if (!@this.IsPrefab())
+                return @this.activeInHierarchy;
+
+            var parent = @this.transform;
+            while (parent != null)
+            {
+                if (!parent.gameObject.activeSelf)
+                    return false;
+
+                parent = parent.parent;
+            }
+
+            return true;
+        }
+
+        public static bool IsComponentDisabled(this Component @this)
+        {
+            switch (@this)
+            {
+                case Renderer r:
+                    return !r.enabled;
+                case Collider c:
+                    return !c.enabled;
+                case LODGroup l:
+                    return !l.enabled;
+                case Behaviour b:
+                    return !b.enabled;
+            }
+
+            return false;
+        }
+
+        public static bool GetComponentsBaking(this GameObject gameObject, List<Component> componentsCache)
+        {
+            int outputIndex = 0;
+            gameObject.GetComponents(componentsCache);
+
+            for (var i = 0; i != componentsCache.Count; i++)
+            {
+                var component = componentsCache[i];
+
+                if (component == null)
+                    Debug.LogWarning($"The referenced script is missing on {gameObject.name} (index {i} in components list)", gameObject);
+                else
+                {
+                    componentsCache[outputIndex] = component;
+
+                    outputIndex++;
+                }
+            }
+
+            componentsCache.RemoveRange(outputIndex, componentsCache.Count - outputIndex);
+            return true;
+        }
+        #endregion // Unity.Entities.Conversion
+
         /// <summary>
         /// Get the direct children GameObjects of this GameObject.
         /// </summary>

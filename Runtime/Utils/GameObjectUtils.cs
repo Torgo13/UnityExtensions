@@ -5,10 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Pool;
 using UnityObject = UnityEngine.Object;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace UnityExtensions
 {
     /// <summary>
@@ -129,7 +125,7 @@ namespace UnityExtensions
         /// <returns>The clone of the original Game Object</returns>
         public static GameObject ClonePrefabWithHideFlags(GameObject prefab, Transform parent = null)
         {
-            var copy = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
+            var copy = UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
             CopyHideFlagsRecursively(prefab, copy);
             return copy;
         }
@@ -186,7 +182,7 @@ namespace UnityExtensions
                 var matchingObjects = Resources.FindObjectsOfTypeAll<T>();
                 foreach (var possibleMatch in matchingObjects)
                 {
-                    if (!EditorUtility.IsPersistent(possibleMatch))
+                    if (!UnityEditor.EditorUtility.IsPersistent(possibleMatch))
                     {
                         foundObject = possibleMatch;
                         break;
@@ -257,7 +253,7 @@ namespace UnityExtensions
                 var loadedMatchingObjects = Resources.FindObjectsOfTypeAll<T>();
                 foreach (var possibleMatch in loadedMatchingObjects)
                 {
-                    if (!EditorUtility.IsPersistent(possibleMatch) && possibleMatch.gameObject.CompareTag(tag))
+                    if (!UnityEditor.EditorUtility.IsPersistent(possibleMatch) && possibleMatch.gameObject.CompareTag(tag))
                     {
                         foundObject = possibleMatch;
                         break;

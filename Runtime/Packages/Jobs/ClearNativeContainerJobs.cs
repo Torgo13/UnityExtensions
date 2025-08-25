@@ -58,6 +58,8 @@ namespace UnityExtensions.Packages
     [BurstCompile]
     public struct SetArrayJob<T> : IJobFor where T : struct
     {
+        //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
+        #region Unity.Entities
         [ReadOnly] public T src;
         [WriteOnly] public NativeArray<T> dst;
 
@@ -65,6 +67,7 @@ namespace UnityExtensions.Packages
         {
             dst[index] = src;
         }
+        #endregion // Unity.Entities
     }
 
     [BurstCompile]

@@ -7,12 +7,11 @@ namespace UnityExtensions.Unsafe
 {
     public static class ArrayExtensions
     {
+        /// <exception cref="IndexOutOfRangeException"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T UnsafeElementAtMutable<T>(this T[] array, int index) where T : struct
         {
             Assert.IsNotNull(array);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
 
             return ref array[index];
         }

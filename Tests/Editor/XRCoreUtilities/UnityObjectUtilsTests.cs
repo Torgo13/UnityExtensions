@@ -17,7 +17,7 @@ namespace UnityExtensions.Editor.Tests
         {
             Assert.IsFalse(Application.isPlaying);
             var go = new GameObject();
-            UnityObjectExtensions.Destroy(go);
+            CoreUtils.Destroy(go);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
         }
@@ -27,7 +27,7 @@ namespace UnityExtensions.Editor.Tests
         {
             var go = new GameObject();
             var list = new List<GameObject> { go };
-            UnityObjectExtensions.Destroy(go);
+            CoreUtils.Destroy(go);
             UnityObjectUtils.RemoveDestroyedObjects(list);
             Assert.Zero(list.Count);
         }
@@ -37,7 +37,7 @@ namespace UnityExtensions.Editor.Tests
         {
             var go = new GameObject();
             var dictionary = new Dictionary<GameObject, object> { { go, null } };
-            UnityObjectExtensions.Destroy(go);
+            CoreUtils.Destroy(go);
             UnityObjectUtils.RemoveDestroyedKeys(dictionary);
             Assert.Zero(dictionary.Count);
         }
@@ -47,14 +47,14 @@ namespace UnityExtensions.Editor.Tests
         public IEnumerator RemoveDestroyedObjectsWithUndoTest()
         {
             var go = new GameObject();
-            UnityObjectExtensions.Destroy(go, withUndo: true);
+            CoreUtils.Destroy(go, withUndo: true);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
 
             Undo.PerformUndo();
             Assert.IsTrue(go != null);
 
-            UnityObjectExtensions.Destroy(go);
+            CoreUtils.Destroy(go);
             yield return null; // skip frame to allow destruction to run
             Assert.IsTrue(go == null);
         }
@@ -72,7 +72,7 @@ namespace UnityExtensions.Editor.Tests
             Assert.IsAssignableFrom<Light>(UnityObjectExtensions.ConvertUnityObjectToType<Light>(light));
             Assert.IsAssignableFrom<Light>(UnityObjectExtensions.ConvertUnityObjectToType<Light>(camera));
 
-            UnityObjectExtensions.Destroy(go);
+            CoreUtils.Destroy(go);
         }
     }
 }
