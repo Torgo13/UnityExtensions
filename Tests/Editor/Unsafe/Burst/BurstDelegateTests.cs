@@ -74,7 +74,7 @@ namespace UnityExtensions.Unsafe.Tests
 #endif
         public void CompileMissingBurstCompile()
         {
-            Assert.Throws<InvalidOperationException>(() => BurstCompiler.CompileFunctionPointer<DoThingDelegate>(DoThingMissingBurstCompile));
+            _ = Assert.Throws<InvalidOperationException>(() => BurstCompiler.CompileFunctionPointer<DoThingDelegate>(DoThingMissingBurstCompile));
         }
 
         [BurstCompile]

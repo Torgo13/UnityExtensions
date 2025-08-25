@@ -95,7 +95,7 @@ namespace UnityExtensions.Tests
             // Act
             jobQueue.EnqueueJob(() => throw new InvalidOperationException("Test exception"));
 
-            Assert.Throws<Exception>(() =>
+            _ = Assert.Throws<Exception>(() =>
             {
                 IEnumerator waitFinishCoroutine = jobQueue.WaitFinish();
                 while (waitFinishCoroutine.MoveNext())
