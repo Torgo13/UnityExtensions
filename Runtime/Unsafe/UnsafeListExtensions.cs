@@ -114,12 +114,9 @@ namespace UnityExtensions.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            if (unsafeList.IsEmpty)
-                return new ReadOnlySpan<T>();
-
-            return new ReadOnlySpan<T>(unsafeList.Ptr, unsafeList.Length);
+            return unsafeList.AsSpan();
         }
     }
 }

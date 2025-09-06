@@ -538,5 +538,60 @@ namespace UnityExtensions.Tests
             Assert.GreaterOrEqual(arr.Length, 4);
         }
         #endregion // Resize
+
+        private NativeArray<int> _array;
+        private int _count;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _array = new NativeArray<int>(10, Allocator.Temp);
+            _count = 0;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_array.IsCreated)
+            {
+                _array.Dispose();
+            }
+        }
+
+        [Test]
+        public void Resize_ShouldResizeArray()
+        {
+            ArrayExtensions.Resize(ref _array, 20, Allocator.Temp);
+            Assert.AreEqual(20, _array.Length);
+
+            ArrayExtensions.Resize(ref _array, 5, Allocator.Temp);
+            Assert.AreEqual(5, _array.Length);
+        }
+
+        [Test]
+        public void GrowBy_ShouldGrowArrayBySpecifiedCount()
+        {
+            const int grow = 10;
+            int arrayLength = _array.Length;
+
+            ArrayExtensions.GrowBy(ref _array, grow, Allocator.Temp);
+            Assert.AreEqual(grow + arrayLength, _array.Length);
+        }
+
+        [Test]
+        public void AppendWithCapacity_ShouldAppendValueToArray()
+        {
+            ArrayExtensions.AppendWithCapacity(ref _array, ref _count, 10, 10, Allocator.Temp);
+            Assert.AreEqual(1, _count);
+            Assert.AreEqual(10, _array[0]);
+        }
+
+        [Test]
+        public void GrowWithCapacity_ShouldGrowArrayAndIncreaseCount()
+        {
+            var offset = ArrayExtensions.GrowWithCapacity(ref _array, ref _count, 5, 10, Allocator.Temp);
+            Assert.AreEqual(5, _count);
+            Assert.AreEqual(0, offset);
+        }
     }
 }

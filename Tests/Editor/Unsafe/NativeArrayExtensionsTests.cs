@@ -137,23 +137,6 @@ namespace UnityExtensions.Unsafe.Tests
         }
 
         [Test]
-        public void Resize_ShouldResizeArray()
-        {
-            NativeArrayExtensions.Resize(ref _array, 20, Allocator.Temp);
-            Assert.AreEqual(20, _array.Length);
-
-            NativeArrayExtensions.Resize(ref _array, 5, Allocator.Temp);
-            Assert.AreEqual(5, _array.Length);
-        }
-
-        [Test]
-        public void GrowBy_ShouldGrowArrayBySpecifiedCount()
-        {
-            NativeArrayExtensions.GrowBy(ref _array, 10, Allocator.Temp);
-            Assert.AreEqual(20, _array.Length);
-        }
-
-        [Test]
         public void EraseAtWithCapacity_ShouldEraseElementAtSpecifiedIndex()
         {
             _array[0] = 1;
@@ -165,22 +148,6 @@ namespace UnityExtensions.Unsafe.Tests
             Assert.AreEqual(2, _count);
             Assert.AreEqual(1, _array[0]);
             Assert.AreEqual(3, _array[1]);
-        }
-
-        [Test]
-        public void AppendWithCapacity_ShouldAppendValueToArray()
-        {
-            NativeArrayExtensions.AppendWithCapacity(ref _array, ref _count, 10, 10, Allocator.Temp);
-            Assert.AreEqual(1, _count);
-            Assert.AreEqual(10, _array[0]);
-        }
-
-        [Test]
-        public void GrowWithCapacity_ShouldGrowArrayAndIncreaseCount()
-        {
-            var offset = NativeArrayExtensions.GrowWithCapacity(ref _array, ref _count, 5, 10, Allocator.Temp);
-            Assert.AreEqual(5, _count);
-            Assert.AreEqual(0, offset);
         }
     }
 }

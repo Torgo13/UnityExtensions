@@ -213,54 +213,6 @@ namespace UnityExtensions.Unsafe
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
-        public static unsafe void Resize<TValue>(ref this NativeArray<TValue> array, int newSize, Allocator allocator)
-            where TValue : struct
-        {
-            var oldSize = array.Length;
-            if (oldSize == newSize)
-                return;
-
-            if (newSize == 0)
-            {
-                if (array.IsCreated)
-                    array.Dispose();
-
-                array = new NativeArray<TValue>();
-                return;
-            }
-
-            var newArray = new NativeArray<TValue>(newSize, allocator);
-            if (oldSize != 0)
-            {
-                // Copy contents from old array.
-                UnsafeUtility.MemCpy(newArray.GetUnsafePtr(), array.GetUnsafeReadOnlyPtr(),
-                    UnsafeUtility.SizeOf<TValue>() * (newSize < oldSize ? newSize : oldSize));
-                array.Dispose();
-            }
-
-            array = newArray;
-        }
-
-        public static unsafe int GrowBy<TValue>(ref this NativeArray<TValue> array, int count, Allocator allocator)
-            where TValue : struct
-        {
-            var length = array.Length;
-            if (length == 0)
-            {
-                array = new NativeArray<TValue>(count, allocator);
-                return 0;
-            }
-
-            var newArray = new NativeArray<TValue>(length + count, allocator);
-            // CopyFrom() expects length to match. Copy manually.
-            UnsafeUtility.MemCpy(newArray.GetUnsafePtr(), array.GetUnsafeReadOnlyPtr(),
-                (long)length * UnsafeUtility.SizeOf<TValue>());
-            array.Dispose();
-            array = newArray;
-
-            return length;
-        }
-
         public static unsafe void EraseAtWithCapacity<TValue>(this NativeArray<TValue> array, ref int count, int index)
             where TValue : struct
         {
@@ -280,39 +232,6 @@ namespace UnityExtensions.Unsafe
             }
 
             --count;
-        }
-
-        public static int AppendWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, TValue value,
-            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
-            where TValue : struct
-        {
-            var capacity = array.Length;
-            if (capacity == count)
-                _ = GrowBy(ref array, capacityIncrement > 1 ? capacityIncrement : 1, allocator);
-
-            var index = count;
-            array[index] = value;
-            ++count;
-
-            return index;
-        }
-
-        public static int GrowWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, int growBy,
-            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
-            where TValue : struct
-        {
-            var length = array.Length;
-            if (length < count + growBy)
-            {
-                if (capacityIncrement < growBy)
-                    capacityIncrement = growBy;
-
-                _ = GrowBy(ref array, capacityIncrement, allocator);
-            }
-
-            var offset = count;
-            count += growBy;
-            return offset;
         }
         #endregion // UnityEngine.InputSystem.Utilities
     }
