@@ -60,6 +60,16 @@ namespace UnityExtensions
         /// Store the average colour of each cubemap face.
         /// </summary>
         public NativeArray<Color32> _ambientColours;
+
+        public Color adaptiveColour;
+
+        [SerializeField] internal ComputeShader _texture2DArrayLerp;
+
+        /// <summary>
+        /// If the current platform supports Compute Shaders,
+        /// use one to blend cubemaps in a single render pass.
+        /// </summary>
+        bool supportsComputeShaders;
 #endif // BLEND_SHADER
 
         public bool skyboxOverride;
@@ -129,6 +139,8 @@ namespace UnityExtensions
                 _ = _renderTextures[i].Create();
             }
 
+            supportsComputeShaders = SystemInfo.supportsComputeShaders;
+
 #if BLEND_SHADER
             UpdateSkybox();
 #else
@@ -139,6 +151,7 @@ namespace UnityExtensions
                 dimension = TextureDimension.Cube,
                 useMipMap = true,
                 autoGenerateMips = true,
+                enableRandomWrite = supportsComputeShaders,
             };
 
             _blendedTexture = new RenderTexture(desc);
@@ -567,6 +580,23 @@ namespace UnityExtensions
             RenderSettings.ambientGroundColor = groundColour
                 ? _ambientColours[negativeY]
                 : equator;
+
+            // Forward is +Z, index 4
+            adaptiveColour = SampleCubemapBilinear(
+                _ambientColours, _mainCameraTransform.forward);
+        }
+
+        internal static Color SampleCubemapBilinear(NativeArray<Color32> colours, Vector3 forward)
+        {
+            Color sum =
+                  (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
+                + (Color)colours[(int)CubemapFace.PositiveX] * Vector3.Distance(Vector3.left, forward)
+                + (Color)colours[(int)CubemapFace.NegativeY] * Vector3.Distance(Vector3.up, forward)
+                + (Color)colours[(int)CubemapFace.PositiveY] * Vector3.Distance(Vector3.down, forward)
+                + (Color)colours[(int)CubemapFace.NegativeZ] * Vector3.Distance(Vector3.forward, forward)
+                + (Color)colours[(int)CubemapFace.PositiveZ] * Vector3.Distance(Vector3.back, forward);
+
+            return sum / 6;
         }
 #endif // BLEND_SHADER
 
