@@ -12,30 +12,30 @@ namespace UnityExtensions
     //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
     public class RuntimeReflectionSystemCamera : MonoBehaviour
     {
-        readonly int Tex = Shader.PropertyToID("_Tex");
-        readonly int MipLevel = Shader.PropertyToID("_MipLevel");
+        private readonly int Tex = Shader.PropertyToID("_Tex");
+        private readonly int MipLevel = Shader.PropertyToID("_MipLevel");
 
 #if BLEND_SHADER
-        readonly int TexB = Shader.PropertyToID("_TexB");
-        readonly int Blend = Shader.PropertyToID("_Blend");
+        private readonly int TexB = Shader.PropertyToID("_TexB");
+        private readonly int Blend = Shader.PropertyToID("_Blend");
 #endif // BLEND_SHADER
 
-        const string shaderName =
+        private const string shaderName =
 #if BLEND_SHADER
             "Skybox/CubemapBlend";
 #else
             "Skybox/CubemapSimple";
 #endif // BLEND_SHADER
 
-        [SerializeField] Shader skyboxShader;
-        public Material _skyboxMaterial;
-        bool _createdMaterial;
+        [SerializeField] private Shader skyboxShader;
+        [SerializeField] private Material _skyboxMaterial;
+        private bool _createdMaterial;
 
         [SerializeField] internal Camera reflectionCamera;
         internal Transform _reflectionCameraTransform;
-        bool _createdReflectionCamera;
+        private bool _createdReflectionCamera;
 
-        Transform _mainCameraTransform;
+        private Transform _mainCameraTransform;
 
         /// <summary>
         /// Array of three RenderTextures for reflectionCamera to render cubemaps into.
@@ -54,7 +54,7 @@ namespace UnityExtensions
         /// </summary>
         internal RenderTexture _blendedTexture;
 
-        AsyncGPUReadbackRequest _readbackRequest;
+        private AsyncGPUReadbackRequest _readbackRequest;
 
         /// <summary>
         /// Store the average colour of each cubemap face.
@@ -69,7 +69,7 @@ namespace UnityExtensions
         /// If the current platform supports Compute Shaders,
         /// use one to blend cubemaps in a single render pass.
         /// </summary>
-        bool supportsComputeShaders;
+        private bool supportsComputeShaders;
 #endif // BLEND_SHADER
 
         public bool skyboxOverride;
@@ -78,7 +78,7 @@ namespace UnityExtensions
         public bool resolutionScaleOverride;
 
         [Range(0.25f, 1.0f)]
-        [SerializeField] float resolutionScale = 1.0f;
+        [SerializeField] private float resolutionScale = 1.0f;
 
         /// <summary>When true, one cubemap face is updated per frame. Otherwise, all six are updated each frame.</summary>
         public bool timeSlice = true;
@@ -99,13 +99,13 @@ namespace UnityExtensions
         internal int _renderedFrameCount;
 
         /// <summary>Number of RenderTextures in _renderTextures.</summary>
-        const int ProbeCount = 3;
+        private const int ProbeCount = 3;
 
         /// <summary>Resolution of each face of each RenderTexture cubemap.</summary>
-        const int Resolution = 1024;
+        private const int Resolution = 1024;
 
         /// <summary>Spread the cubemap capture over six frames by rendering one face per frame.</summary>
-        const int BlendFrames = 6;
+        private const int BlendFrames = 6;
 
         #region MonoBehaviour
 
@@ -139,7 +139,8 @@ namespace UnityExtensions
                 _ = _renderTextures[i].Create();
             }
 
-            supportsComputeShaders = SystemInfo.supportsComputeShaders;
+            supportsComputeShaders = SystemInfo.supportsComputeShaders
+                & _texture2DArrayLerp != null;
 
 #if BLEND_SHADER
             UpdateSkybox();
@@ -287,10 +288,18 @@ namespace UnityExtensions
 #if BLEND_SHADER
             _skyboxMaterial.SetFloat(Blend, blend);
 #else
-            // With three RenderTextures, NextIndex() is equivalent to the index before PreviousIndex()
-            // Requires six draw calls
-            ReflectionProbe.BlendCubemap(_renderTextures[NextIndex()], _renderTextures[PreviousIndex()],
-                blend, _blendedTexture);
+            if (supportsComputeShaders)
+            {
+                CubemapBlendCompute.Blend(_texture2DArrayLerp,
+                    _renderTextures[NextIndex()], _renderTextures[PreviousIndex()], _blendedTexture, blend);
+            }
+            else
+            {
+                // With three RenderTextures, NextIndex() is equivalent to the index before PreviousIndex()
+                // Requires six draw calls
+                ReflectionProbe.BlendCubemap(_renderTextures[NextIndex()], _renderTextures[PreviousIndex()],
+                    blend, _blendedTexture);
+            }
 #endif // BLEND_SHADER
 
             return updated;
@@ -471,7 +480,7 @@ namespace UnityExtensions
         /// and if not attempt to create it.
         /// </summary>
         /// <returns>True if <paramref name="rt"/> is created.</returns>
-        static bool CreateRenderTexture(RenderTexture rt)
+        private static bool CreateRenderTexture(RenderTexture rt)
         {
             if (rt.IsCreated())
                 return true;
@@ -482,7 +491,7 @@ namespace UnityExtensions
         /// <summary>
         /// Release and destroy a <see cref="RenderTexture"/>.
         /// </summary>
-        static void DestroyRenderTexture(RenderTexture rt)
+        private static void DestroyRenderTexture(RenderTexture rt)
         {
             if (rt != null)
             {
