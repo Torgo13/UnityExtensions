@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility class for managing the cursor.

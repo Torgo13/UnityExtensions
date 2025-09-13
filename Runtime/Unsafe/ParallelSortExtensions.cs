@@ -8,7 +8,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class ParallelSortExtensions
     {

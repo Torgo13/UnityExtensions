@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.Pool;
-using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class AnimationCurveReducer
     {

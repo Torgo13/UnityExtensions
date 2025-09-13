@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityExtensions.GUI.Editor
+namespace PKGE.GUI.Editor
 {
     /// <summary>
     /// Custom property drawer that renders automatically a set of properties of a given object

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A set of extension methods for collections

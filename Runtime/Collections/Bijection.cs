@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace UnityExtensions.Collections
+namespace PKGE.Collections
 {
     /// <summary>
     /// A bidirectional one-to-one mapping between two sets of values.

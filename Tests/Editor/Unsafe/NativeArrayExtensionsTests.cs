@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class NativeArrayExtensionsTests
     {

@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// A helper class for accessing settings stored in <see cref="ScriptableObject"/> instances from `UnityEditor` code.

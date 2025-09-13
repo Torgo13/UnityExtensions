@@ -5,7 +5,7 @@ using Unity.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.Jobs;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class ArrayExtensions
     {

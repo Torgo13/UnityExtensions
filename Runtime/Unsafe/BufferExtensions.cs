@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Networking/Utilities/Extensions/BufferExtensions.cs
     #region Unity.LiveCapture.Networking

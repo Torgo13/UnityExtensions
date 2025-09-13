@@ -3,7 +3,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Bounds related utilities

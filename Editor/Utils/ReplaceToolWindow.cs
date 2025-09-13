@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Set of tools for editing and switching game objects in the scene.

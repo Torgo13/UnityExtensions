@@ -1,5 +1,5 @@
 {
-    "name": "UnityExtensions.Runtime.Tests",
+    "name": "PKGE.Runtime.Tests",
     "rootNamespace": "",
     "references": [
         "GUID:7dabed3724aa64f438f2ac84f705af03",

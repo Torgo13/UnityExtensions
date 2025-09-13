@@ -1,11 +1,15 @@
 using System;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+#else
+using float2 = UnityEngine.Vector2;
+#endif // PACKAGE_MATHEMATICS
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     /// <summary>
     /// Utility for generating lists of poisson disk sampled points
@@ -102,7 +106,9 @@ namespace UnityExtensions.Packages
             return sampleJob;
         }
 
-        [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
         struct SampleJob : IJob
         {
             public float width;
@@ -124,7 +130,9 @@ namespace UnityExtensions.Packages
         /// This job is for filtering out all super sampled Poisson points that are found outside the originally
         /// specified 2D region. This job will also shift the cropped points back to their original region.
         /// </summary>
-        [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
         struct CropJob : IJob
         {
             public float width;

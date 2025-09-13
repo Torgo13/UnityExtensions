@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public static class StringBuilderExtensions
     {

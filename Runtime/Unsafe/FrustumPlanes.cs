@@ -3,11 +3,14 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
-using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Unsafe
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+using static Unity.Mathematics.math;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// Represents frustum planes.
@@ -218,6 +221,7 @@ namespace UnityExtensions.Unsafe
             return planes;
         }
 
+#if PACKAGE_MATHEMATICS
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
         /// </summary>
@@ -291,6 +295,7 @@ namespace UnityExtensions.Unsafe
             int outCount = math.csum(masks);
             return outCount > 0 ? IntersectResult.Out : IntersectResult.In;
         }
+#endif // PACKAGE_MATHEMATICS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float4 dot4(float4 xs, float4 ys, float4 zs, float4 mx, float4 my, float4 mz)
@@ -325,6 +330,6 @@ namespace UnityExtensions.Unsafe
 
             return (inCount == planes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
-        #endregion // Unity.Rendering
+#endregion // Unity.Rendering
     }
 }

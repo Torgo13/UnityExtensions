@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public class RuntimeReflectionSystem : MonoBehaviour
     {

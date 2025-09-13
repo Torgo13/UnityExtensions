@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Collections;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class SpriteExtensions
     {

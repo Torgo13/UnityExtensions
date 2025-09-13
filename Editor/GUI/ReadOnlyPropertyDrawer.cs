@@ -1,8 +1,8 @@
 using UnityEditor;
 using UnityEngine;
-using UnityExtensions.Attributes;
+using PKGE.Attributes;
 
-namespace UnityExtensions.GUI.Editor
+namespace PKGE.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
     internal class ReadOnlyPropertyDrawer : PropertyDrawer

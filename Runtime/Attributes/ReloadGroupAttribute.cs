@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Attribute specifying that fields of this type should be inspected in depth by the <see cref="ResourceReloader"/>. 

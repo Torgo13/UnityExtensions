@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Pool;
 using Object = UnityEngine.Object;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public class TextureCombiner
     {

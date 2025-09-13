@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class TypeExtensionsTests
     {

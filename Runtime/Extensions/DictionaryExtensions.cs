@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="Dictionary{TKey, TValue}"/> objects.

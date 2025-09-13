@@ -5,7 +5,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class JobQueueTests
     {

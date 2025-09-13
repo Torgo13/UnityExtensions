@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public static class StringExtensions
     {

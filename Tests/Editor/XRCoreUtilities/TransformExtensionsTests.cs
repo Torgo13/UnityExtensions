@@ -1,9 +1,9 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-using UnityExtensions.Tests;
+using PKGE.Tests;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class TransformExtensionsTests
     {

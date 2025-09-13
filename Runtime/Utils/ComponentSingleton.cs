@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Singleton of a Component class.

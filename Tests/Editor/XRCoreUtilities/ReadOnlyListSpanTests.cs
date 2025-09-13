@@ -1,10 +1,10 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-using UnityExtensions.Collections;
+using PKGE.Collections;
 using System.Collections.Generic;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class ReadOnlyListSpanTests
     {

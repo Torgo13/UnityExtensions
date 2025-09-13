@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using UnityExtensions.Editor;
+using PKGE.Editor;
 using UnityEditor;
 using UnityEngine;
-using UnityExtensions.Attributes;
+using PKGE.Attributes;
 
-namespace UnityExtensions.GUI.Editor
+namespace PKGE.GUI.Editor
 {
     [CustomPropertyDrawer(typeof(FlagsPropertyAttribute))]
     internal sealed class FlagsPropertyDrawer : PropertyDrawer

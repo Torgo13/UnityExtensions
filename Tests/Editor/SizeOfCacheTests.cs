@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Runtime.InteropServices;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class SizeOfCacheTests
     {

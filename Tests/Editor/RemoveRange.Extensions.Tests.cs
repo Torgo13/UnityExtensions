@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class RemoveRangeExtensionsTests
     {

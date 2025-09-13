@@ -1,4 +1,4 @@
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A utility class to compute samples on the Halton sequence.

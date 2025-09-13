@@ -1,16 +1,22 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
 using static Unity.Mathematics.math;
 using Random = Unity.Mathematics.Random;
+#else
+using static PKGE.math;
+using float2 = UnityEngine.Vector2;
+using float3 = UnityEngine.Vector3;
+using quaternion = UnityEngine.Quaternion;
+#endif // PACKAGE_MATHEMATICS
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     #region Union
     /// <remarks>Use __0 to access the Union without extensions.</remarks>
@@ -18,7 +24,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union2 : System.IEquatable<Union2>
     {
-        [FieldOffset(0)] public UnityExtensions.Union2 __0;
+        [FieldOffset(0)] public PKGE.Union2 __0;
 
         [FieldOffset(0)] public half Half;
 
@@ -31,7 +37,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union4 : System.IEquatable<Union4>
     {
-        [FieldOffset(0)] public UnityExtensions.Union4 __0;
+        [FieldOffset(0)] public PKGE.Union4 __0;
 
         [FieldOffset(0)] public Random Random;
         [FieldOffset(0)] public half2 Half2;
@@ -48,7 +54,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union8 : System.IEquatable<Union8>
     {
-        [FieldOffset(0)] public UnityExtensions.Union8 __0;
+        [FieldOffset(0)] public PKGE.Union8 __0;
 
         [FieldOffset(0)] public float2 Float2;
         [FieldOffset(0)] public int2 Int2;
@@ -67,7 +73,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16 : System.IEquatable<Union16>
     {
-        [FieldOffset(0)] public UnityExtensions.Union16 __0;
+        [FieldOffset(0)] public PKGE.Union16 __0;
 
         [FieldOffset(0)] public quaternion Quaternion;
         [FieldOffset(0)] public double2 Double2;
@@ -87,7 +93,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union12 : System.IEquatable<Union12>
     {
-        [FieldOffset(0)] public UnityExtensions.Union12 __0;
+        [FieldOffset(0)] public PKGE.Union12 __0;
 
         [FieldOffset(0)] public float3 Float3;
         [FieldOffset(0)] public int3 Int3;
@@ -106,7 +112,7 @@ namespace UnityExtensions.Packages
     [StructLayout(LayoutKind.Explicit)]
     public struct Union48 : System.IEquatable<Union48>
     {
-        [FieldOffset(0)] public UnityExtensions.Union48 __0;
+        [FieldOffset(0)] public PKGE.Union48 __0;
 
         [FieldOffset(00)] public Union16 U16_00;
         [FieldOffset(16)] public Union16 U16_16;
@@ -147,22 +153,40 @@ namespace UnityExtensions.Packages
 
         internal static float3 xaxis(quaternion q)
         {
+#if PACKAGE_MATHEMATICS
             float s = 2.0f * q.value.w;
             float x2 = 2.0f * q.value.x;
             return new float3(
                 x2 * q.value.x + s * q.value.w - 1.0f,
                 x2 * q.value.y + s * q.value.z,
                 x2 * q.value.z + s * -q.value.y);
+#else
+            float s = 2.0f * q.w;
+            float x2 = 2.0f * q.x;
+            return new float3(
+                x2 * q.x + s * q.w - 1.0f,
+                x2 * q.y + s * q.z,
+                x2 * q.z + s * -q.y);
+#endif // PACKAGE_MATHEMATICS
         }
 
         internal static float3 yaxis(quaternion q)
         {
+#if PACKAGE_MATHEMATICS
             float s = 2.0f * q.value.w;
             float y2 = 2.0f * q.value.y;
             return new float3(
                 y2 * q.value.x + s * -q.value.z,
                 y2 * q.value.y + s * q.value.w - 1.0f,
                 y2 * q.value.z + s * q.value.x);
+#else
+            float s = 2.0f * q.w;
+            float y2 = 2.0f * q.y;
+            return new float3(
+                y2 * q.x + s * -q.z,
+                y2 * q.y + s * q.w - 1.0f,
+                y2 * q.z + s * q.x);
+#endif // PACKAGE_MATHEMATICS
         }
 
         public static float3 zaxis(quaternion q)
@@ -170,12 +194,21 @@ namespace UnityExtensions.Packages
             // This should be fast than math.quaternion.forward().
             // Need to make sure this doesn't get translated to
             // float-by-float operations.
+#if PACKAGE_MATHEMATICS
             float s = 2.0f * q.value.w;
             float z2 = 2.0f * q.value.z;
             return new float3(
                 q.value.x * z2 + s * q.value.y,
                 q.value.y * z2 + s * -q.value.x,
                 q.value.z * z2 + s * q.value.w - 1.0f);
+#else
+            float s = 2.0f * q.w;
+            float z2 = 2.0f * q.z;
+            return new float3(
+                q.x * z2 + s * q.y,
+                q.y * z2 + s * -q.x,
+                q.z * z2 + s * q.w - 1.0f);
+#endif // PACKAGE_MATHEMATICS
         }
 
         public static bool equalEps(float a, float b, float epsilon)
@@ -557,7 +590,7 @@ namespace UnityExtensions.Packages
                 return inverseAbs(z);
             }
         }
-        #endregion // Unity.Mathematics
+#endregion // Unity.Mathematics
 
         //https://github.com/Unity-Technologies/DOTSSample/blob/5a8230597a8c4b999b278a63844c5238dacf51b6/Assets/Unity.Sample.Core/Scripts/Utils/MathHelper.cs
         #region Unity.Sample.Core
@@ -617,7 +650,11 @@ namespace UnityExtensions.Packages
             // sqrt(a) * sqrt(b) = sqrt(a * b) -- valid for real numbers
             float denominator = math.sqrt(math.lengthsq(from) * math.lengthsq(to));
 
-            if (Hint.Unlikely(denominator < kEpsilonNormalSqrt))
+#if PACKAGE_BURST
+            if (Unity.Burst.CompilerServices.Hint.Unlikely(denominator < kEpsilonNormalSqrt))
+#else
+            if (denominator < kEpsilonNormalSqrt)
+#endif // PACKAGE_BURST
             {
                 result = 0F;
             }
@@ -772,7 +809,11 @@ namespace UnityExtensions.Packages
             float3 result;
 
             float sqrMag = math.dot(onNormal, onNormal);
-            if (Hint.Unlikely(sqrMag < kEpisilon))
+#if PACKAGE_BURST
+            if (Unity.Burst.CompilerServices.Hint.Unlikely(sqrMag < kEpisilon))
+#else
+            if (sqrMag < kEpisilon)
+#endif // PACKAGE_BURST
                 result = Unity.Mathematics.float3.zero;
             else
                 result = onNormal * math.dot(vector, onNormal) / sqrMag;
@@ -1031,7 +1072,8 @@ namespace UnityExtensions.Packages
             }
         }
         #endregion // UnityEngine.Formats.Alembic.Importer
-        
+
+#if PACKAGE_MATHEMATICS
         //https://github.com/Unity-Technologies/com.unity.demoteam.hair/blob/75a7f446209896bc1bce0da2682cfdbdf30ce447/Runtime/Utility/AffineUtility.cs
         #region Unity.DemoTeam.Hair
         public static void AffineInterpolateUpper3x3(ref this float3x3 A, float4 q, float t,
@@ -1148,6 +1190,7 @@ namespace UnityExtensions.Packages
                 a.c0 * b.c3.x + a.c1 * b.c3.y + a.c2 * b.c3.z + a.c3 * b.c3.w);
         }
         #endregion // Unity.DemoTeam.Hair
+#endif // PACKAGE_MATHEMATICS
 
         //https://github.com/Unity-Technologies/InputSystem/blob/36a93fe84a95a380be438412258a5305fcdfc740/Packages/com.unity.inputsystem/InputSystem/Utilities/NumberHelpers.cs
         #region UnityEngine.InputSystem.Utilities
@@ -1338,7 +1381,9 @@ namespace UnityExtensions.Packages
         }
         #endregion // MathUtilities
 
-        [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
         public struct AddPointsJob : IJobFor
         {
             [ReadOnly] public int initialPointsCount;
@@ -1369,7 +1414,9 @@ namespace UnityExtensions.Packages
             }
         }
 
-        [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
         public struct GenerateEquidistantPointsOnSphereJob : IJobFor
         {
             [NativeDisableParallelForRestriction]

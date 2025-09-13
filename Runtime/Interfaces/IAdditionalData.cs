@@ -1,5 +1,5 @@
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Interface to identify additional data components

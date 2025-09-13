@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public class ProcessOperationBase
     {

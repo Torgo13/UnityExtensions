@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Accessibility;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public class ColorSwatchExample : EditorWindow
     {

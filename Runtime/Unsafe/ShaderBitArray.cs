@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// A dynamic array of bits backed by a managed array of floats,

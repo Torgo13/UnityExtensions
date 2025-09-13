@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class PrefabScope : IDisposable
     {

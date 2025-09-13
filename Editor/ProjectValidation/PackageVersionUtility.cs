@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Utility methods for using <see cref="PackageVersion"/>.

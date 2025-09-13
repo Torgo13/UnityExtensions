@@ -1,11 +1,10 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="Type"/> objects.
@@ -23,15 +22,11 @@ namespace UnityExtensions
         /// Return false to ignore given type.</param>
         public static void GetAssignableTypes(this Type type, List<Type> list, Func<Type, bool> predicate = null)
         {
-            var typesPerAssembly = ReflectionUtils.GetCachedTypesPerAssembly();
-            foreach (var types in typesPerAssembly)
+            ReflectionUtils.ForEachType(t =>
             {
-                foreach (var t in types)
-                {
-                    if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
-                        list.Add(t);
-                }
-            }
+                if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
+                    list.Add(t);
+            });
         }
 
         /// <summary>
@@ -69,11 +64,10 @@ namespace UnityExtensions
         {
             foreach (var typeInterface in type.GetInterfaces())
             {
-                if (typeInterface.IsGenericType)
+                if (typeInterface.IsGenericType
+                    && typeInterface.GetGenericTypeDefinition() == genericInterface)
                 {
-                    var genericType = typeInterface.GetGenericTypeDefinition();
-                    if (genericType == genericInterface)
-                        interfaces.Add(typeInterface);
+                    interfaces.Add(typeInterface);
                 }
             }
         }
@@ -239,6 +233,7 @@ namespace UnityExtensions
                 {
                     types.Add(type);
                 }
+
                 type = type.BaseType;
             }
         }
@@ -251,19 +246,20 @@ namespace UnityExtensions
         /// <returns>The field, if found.</returns>
         public static FieldInfo GetFieldInTypeOrBaseType(this Type type, string fieldName)
         {
-            while (true)
+            while (type != null)
             {
-                if (type == null)
-                    return null;
-
                 var field = type.GetField(fieldName, BindingFlags.NonPublic
-                                                     | BindingFlags.Public | BindingFlags.FlattenHierarchy
-                                                     | BindingFlags.Instance);
+                                                   | BindingFlags.Public
+                                                   | BindingFlags.FlattenHierarchy
+                                                   | BindingFlags.Instance);
+
                 if (field != null)
                     return field;
 
                 type = type.BaseType;
             }
+
+            return null;
         }
 
         /// <summary>
@@ -276,13 +272,15 @@ namespace UnityExtensions
             var name = type.Name;
 
             // Replace + with . for subclasses
-            name = name.Replace('+', '.');
-
             if (!type.IsGenericType)
-                return name;
+                return name.Replace('+', '.');
+
+            using var _0 = StringBuilderPool.Get(out var sb);
 
             // Trim off `1
-            name = name.Split('`')[0];
+            int index = name.IndexOf('`');
+            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index));
+            _ = sb.Replace('+', '.');
 
             var arguments = type.GetGenericArguments();
             var length = arguments.Length;
@@ -292,7 +290,7 @@ namespace UnityExtensions
                 stringArguments[i] = arguments[i].GetNameWithGenericArguments();
             }
 
-            return $"{name}<{string.Join(", ", stringArguments)}>";
+            return sb.AppendJoin(", ", stringArguments).ToString();
         }
 
         /// <summary>
@@ -305,13 +303,15 @@ namespace UnityExtensions
             var name = type.Name;
 
             // Replace + with . for subclasses
-            name = name.Replace('+', '.');
-
             if (!type.IsGenericType)
-                return name;
+                return name.Replace('+', '.');
+
+            using var _0 = StringBuilderPool.Get(out var sb);
 
             // Trim off `1
-            name = name.Split('`')[0];
+            int index = name.IndexOf('`');
+            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index));
+            _ = sb.Replace('+', '.');
 
             var arguments = type.GetGenericArguments();
             var length = arguments.Length;
@@ -321,7 +321,7 @@ namespace UnityExtensions
                 stringArguments[i] = arguments[i].GetFullNameWithGenericArgumentsInternal();
             }
 
-            return $"{name}<{string.Join(", ", stringArguments)}>";
+            return sb.AppendJoin(", ", stringArguments).ToString();
         }
 
         /// <summary>
@@ -336,27 +336,24 @@ namespace UnityExtensions
             var declaringType = type.DeclaringType;
             if (declaringType != null && !type.IsGenericParameter)
             {
-                string name = type.GetNameWithFullGenericArguments();
                 var typeNames = new List<string>();
-                typeNames.Add(name);
+                typeNames.Add(type.GetNameWithFullGenericArguments());
 
                 while (true)
                 {
                     var parentDeclaringType = declaringType.DeclaringType;
                     if (parentDeclaringType == null)
                     {
-                        name = declaringType.GetFullNameWithGenericArguments();
-                        typeNames.Insert(0, name);
+                        typeNames.Add(declaringType.GetFullNameWithGenericArguments());
                         break;
                     }
 
-                    name = declaringType.GetNameWithFullGenericArguments();
-                    typeNames.Insert(0, name);
+                    typeNames.Add(declaringType.GetNameWithFullGenericArguments());
                     declaringType = parentDeclaringType;
                 }
 
-                var result = string.Join('.', typeNames);
-                return result;
+                typeNames.Reverse();
+                return string.Join('.', typeNames);
             }
 
             return type.GetFullNameWithGenericArgumentsInternal();
@@ -374,22 +371,21 @@ namespace UnityExtensions
 
             var arguments = type.GetGenericArguments();
             var length = arguments.Length;
-
-            var stringArguments = ArrayPool<string>.Shared.Rent(length);
+            var stringArguments = new string[length];
             for (var i = 0; i < length; i++)
             {
                 stringArguments[i] = arguments[i].GetFullNameWithGenericArguments();
             }
 
+            // Trim off `1
+            int index = name.IndexOf('`');
+
             using var _0 = StringBuilderPool.Get(out var sb);
-            name = sb.Append(name.Split('`')[0]) // Trim off `1
+            return sb.Append(index == -1 ? name : name.AsSpan(0, index))
                 .Append('<')
                 .AppendJoin(", ", stringArguments)
                 .Append('>')
                 .ToString();
-
-            ArrayPool<string>.Shared.Return(stringArguments);
-            return name;
         }
 
         /// <summary>
@@ -412,13 +408,13 @@ namespace UnityExtensions
         /// <returns>MethodInfo for the first matching method found. Null if no method is found.</returns>
         public static MethodInfo GetMethodRecursively(this Type type, string name, BindingFlags bindingAttr)
         {
-            var method = type.GetMethod(name, bindingAttr);
-            if (method != null)
-                return method;
+            MethodInfo method = null;
 
-            var baseType = type.BaseType;
-            if (baseType != null)
-                method = type.BaseType.GetMethodRecursively(name, bindingAttr);
+            while (method == null && type != null)
+            {
+                method = type.GetMethod(name, bindingAttr);
+                type = type.BaseType;
+            }
 
             return method;
         }

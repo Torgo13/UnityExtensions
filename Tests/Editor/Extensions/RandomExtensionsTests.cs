@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class RandomNormalTest
     {

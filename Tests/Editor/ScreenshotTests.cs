@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class ScreenshotTests
     {

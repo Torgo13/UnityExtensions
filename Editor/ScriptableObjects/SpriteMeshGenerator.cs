@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     [CreateAssetMenu(fileName = "SpriteMeshGenerator.asset", menuName = "2D/Sprite Mesh Generator", order = 1)]
     public class SpriteMeshGenerator : ScriptableObject

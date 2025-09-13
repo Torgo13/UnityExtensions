@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     [GenerateTestsForBurstCompatibility]
     internal struct Bitwise

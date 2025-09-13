@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using Unity.Collections;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class NativeArrayUtilsTests
     {

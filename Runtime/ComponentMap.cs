@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A map between components that provides a static default instance.

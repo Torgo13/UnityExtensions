@@ -1,4 +1,4 @@
 #if UNITY_EDITOR
 using System.Runtime.CompilerServices;
-[assembly: InternalsVisibleTo("UnityExtensions.Editor.Tests")]
+[assembly: InternalsVisibleTo("PKGE.Editor.Tests")]
 #endif

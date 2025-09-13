@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class UndoBlockTests
     {

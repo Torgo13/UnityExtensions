@@ -1,6 +1,10 @@
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+#endif // PACKAGE_MATHEMATICS
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public struct PositionSampler
     {

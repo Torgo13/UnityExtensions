@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     [TestFixture]
     class ObservableListTests
@@ -47,7 +47,7 @@ namespace UnityExtensions.Editor.Tests
         public void Add_On_List(Action<ObservableList<int>> modify, Comparison<int> comparison,  int[] expected)
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0, comparison: comparison);
+            var list = new PKGE.ObservableList<int>(0, comparison: comparison);
             bool itemAddedEventTriggered = false;
             list.ItemAdded += (sender, args) => itemAddedEventTriggered = true;
 
@@ -116,7 +116,7 @@ namespace UnityExtensions.Editor.Tests
         public void Remove_From_List(int[] init, Action<ObservableList<int>> modify, Comparison<int> comparison,  int[] expected)
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(init,  comparison: comparison);
+            var list = new PKGE.ObservableList<int>(init,  comparison: comparison);
             bool itemRemovedTriggered = false;
             list.ItemRemoved += (sender, args) => itemRemovedTriggered = true;
 
@@ -162,7 +162,7 @@ namespace UnityExtensions.Editor.Tests
         public void Insert_Into_List(int[] init, Action<ObservableList<int>> modify, Comparison<int> comparison,  int[] expected)
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(init,  comparison: comparison);
+            var list = new PKGE.ObservableList<int>(init,  comparison: comparison);
             bool itemRemovedTriggered = false;
             list.ItemAdded += (sender, args) => itemRemovedTriggered = true;
 
@@ -182,7 +182,7 @@ namespace UnityExtensions.Editor.Tests
         public void Clear_ClearsList_ItemRemovedEventTriggeredForEach_NoComparison()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0, comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(0, comparison: (x, y) => x.CompareTo(y));
             list.Add(5);
             list.Add(10);
             bool itemRemovedEventTriggered = false;
@@ -201,7 +201,7 @@ namespace UnityExtensions.Editor.Tests
         public void SetIndexer_SetsItem_TriggersEvents()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
             list.Add(1);
             list.Add(2);
             bool itemAddedEventTriggered = false;
@@ -224,7 +224,7 @@ namespace UnityExtensions.Editor.Tests
         public void Contains_ReturnsTrueIfItemExists()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
             list.Add(5);
 
             // Act
@@ -239,7 +239,7 @@ namespace UnityExtensions.Editor.Tests
         public void IndexOf_ReturnsCorrectIndex()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0, comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(0, comparison: (x, y) => x.CompareTo(y));
             list.Add(5);
             list.Add(10);
 
@@ -256,7 +256,7 @@ namespace UnityExtensions.Editor.Tests
         {
             // Arrange
             var collection = new List<int> { 3, 1, 2 };
-            var list = new UnityExtensions.ObservableList<int>(collection, comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(collection, comparison: (x, y) => x.CompareTo(y));
 
             // Assert
             Assert.AreEqual(3, list.Count);
@@ -270,7 +270,7 @@ namespace UnityExtensions.Editor.Tests
         public void ConstructorWithComparison_SortsItems_WhenComparisonProvided()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
+            var list = new PKGE.ObservableList<int>(0,comparison: (x, y) => x.CompareTo(y));
 
             // Act
             list.Add(10);
@@ -289,7 +289,7 @@ namespace UnityExtensions.Editor.Tests
         public void InsertsItemAtIndex_ItemAddedEventTriggered_NoComparison()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(1); // Ensure there is at least one item
             bool itemAddedEventTriggered = false;
             list.ItemAdded += (sender, args) => itemAddedEventTriggered = true;
@@ -308,7 +308,7 @@ namespace UnityExtensions.Editor.Tests
         public void InsertsItemAtBeginning_ItemAddedEventTriggered()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(10); // Ensure there is at least one item
             bool itemAddedEventTriggered = false;
             list.ItemAdded += (sender, args) => itemAddedEventTriggered = true;
@@ -327,7 +327,7 @@ namespace UnityExtensions.Editor.Tests
         public void InsertsItemAtOutOfRangeIndex_ItemAddedEventTriggered()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             Assert.Throws<ArgumentOutOfRangeException>(() => list.Insert(10, 5)); // Inserting at an index greater than the list size
         }
 
@@ -336,7 +336,7 @@ namespace UnityExtensions.Editor.Tests
         public void Remove_ItemNotInList_ReturnsFalse()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(10);
             list.Add(20);
 
@@ -352,7 +352,7 @@ namespace UnityExtensions.Editor.Tests
         [Test]
         public void RemoveAt_IndexOutOfRange_ThrowsException()
         {
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(10);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => list.RemoveAt(10)); // Trying to remove from an invalid index
@@ -363,7 +363,7 @@ namespace UnityExtensions.Editor.Tests
         public void InsertMultiple_AddsItemsAtSpecificIndex_ItemAddedEventTriggeredForEach()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(10);
             list.Add(20);
             bool itemAddedEventTriggered = false;
@@ -383,7 +383,7 @@ namespace UnityExtensions.Editor.Tests
         public void Clear_ClearsList_ItemRemovedEventTriggeredForEach()
         {
             // Arrange
-            var list = new UnityExtensions.ObservableList<int>();
+            var list = new PKGE.ObservableList<int>();
             list.Add(10);
             list.Add(20);
             bool itemRemovedEventTriggered = false;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     [ExecuteAlways]
     public class LinkDirectionalToCustomNightSky : MonoBehaviour

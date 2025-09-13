@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public class FindUnusedAssets : EditorWindow
     {

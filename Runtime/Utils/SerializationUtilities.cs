@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class SerializationUtilities
     {

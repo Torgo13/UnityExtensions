@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Set of utility functions for the Core Scriptable Render Pipeline Library

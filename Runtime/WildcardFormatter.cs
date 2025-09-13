@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public abstract class WildcardFormatter
     {

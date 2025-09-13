@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Unity.Collections;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility methods for working with <see cref="NativeArray{T}"/> objects.

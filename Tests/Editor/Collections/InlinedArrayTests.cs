@@ -2,9 +2,9 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityExtensions.Collections;
+using PKGE.Collections;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class InlinedArrayTests
     {

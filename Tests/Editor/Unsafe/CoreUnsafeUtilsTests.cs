@@ -2,9 +2,9 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
-using UnityExtensions.Unsafe;
+using PKGE.Unsafe;
 
-namespace UnityExtensions.Editor.Unsafe.Tests
+namespace PKGE.Editor.Unsafe.Tests
 {
     unsafe class CoreUnsafeUtilsTests
     {

@@ -7,7 +7,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// Static class with unsafe utility functions.

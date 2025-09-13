@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     ///     What is this : Attribute signaling that ref returned values, of a type that has this attribute, cannot intersect

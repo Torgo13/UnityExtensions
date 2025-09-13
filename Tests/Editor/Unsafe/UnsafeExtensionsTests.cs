@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Collections;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class UnsafeExtensionsTests
     {

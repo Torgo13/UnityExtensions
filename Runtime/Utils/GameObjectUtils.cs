@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Pool;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility methods for creating GameObjects.

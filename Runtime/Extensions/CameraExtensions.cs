@@ -2,7 +2,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="Camera"/> components.

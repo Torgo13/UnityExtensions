@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/master/Tests/Runtime/Scripts/PointInPolygonPerformanceTest.cs
     class PointInPolygonPerformanceTest : PerformanceTest

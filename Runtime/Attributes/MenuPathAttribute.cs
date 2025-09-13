@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// An attribute placed to describe a menu path.

@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for the <see cref="Vector3"/> type.

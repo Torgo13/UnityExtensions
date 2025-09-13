@@ -5,7 +5,7 @@ using System.Security.Principal;
 using System.Text;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class SymbolicLinkUtilities
     {

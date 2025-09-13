@@ -2,9 +2,9 @@ using System;
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
-using UnityExtensions;
+using PKGE;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     class ListExtensionTests
     {

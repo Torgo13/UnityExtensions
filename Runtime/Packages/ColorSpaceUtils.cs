@@ -1,10 +1,11 @@
 ﻿#if PACKAGE_RENDER_PIPELINES_CORE
 #else
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 // The contents of this file should be kept is sync with the ShaderLibrary\HDROutput.hlsl "Color Space transforms" section.
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     /// <summary>
     /// This class holds a collection of color space transformation matrices.
@@ -60,4 +61,5 @@ namespace UnityExtensions.Packages
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // PACKAGE_MATHEMATICS
 #endif // PACKAGE_RENDER_PIPELINES_CORE

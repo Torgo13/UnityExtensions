@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Text;
 
-namespace UnityExtensions.Packages.Tests
+namespace PKGE.Packages.Tests
 {
     class StringBuilderExtensionsTests
     {

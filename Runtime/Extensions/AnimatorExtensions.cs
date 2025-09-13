@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// This class contains useful extension methods for the Animator component.

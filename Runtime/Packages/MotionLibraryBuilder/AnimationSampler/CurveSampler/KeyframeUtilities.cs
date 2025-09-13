@@ -1,9 +1,12 @@
 using UnityEngine;
-using Unity.Mathematics;
 using System.Diagnostics;
 using Unity.Collections;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class KeyframeUtilities
     {

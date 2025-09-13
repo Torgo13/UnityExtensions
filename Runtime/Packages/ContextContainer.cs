@@ -3,9 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     /// <summary>
     /// ContextContainer is a Dictionary-like storage where the key is a generic parameter and the value is of the same type.
@@ -177,7 +180,7 @@ namespace UnityExtensions.Packages
             public string filePath;
 #endif
         }
-        #endregion // UnityEngine.Rendering
+#endregion // UnityEngine.Rendering
     }
 
     /// <summary>

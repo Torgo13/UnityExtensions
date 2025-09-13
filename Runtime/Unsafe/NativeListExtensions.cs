@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class NativeListExtensions
     {

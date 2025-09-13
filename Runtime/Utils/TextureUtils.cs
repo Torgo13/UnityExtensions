@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Ensure that an <see cref="AsyncGPUReadbackRequest"/> does not outlive

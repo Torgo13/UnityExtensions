@@ -1,4 +1,4 @@
-namespace UnityExtensions
+namespace PKGE
 {
     static class HashCodeUtil
     {

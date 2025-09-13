@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Unity.Collections;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://github.com/Unity-Technologies/com.unity.search.extensions/blob/0896c65212ba17c718719ce75e53b9e97b0d261d/package-examples/Editor/ImageIndexing/ThreadUtils.cs
     #region UnityEditor.Search
@@ -1145,10 +1145,10 @@ namespace UnityExtensions
         {
             switch (model)
             {
-                case UnityExtensions.HistogramDistance.CityBlock: return CityBlockDistance(histogramA, histogramB);
-                case UnityExtensions.HistogramDistance.Euclidean: return EuclideanDistance(histogramA, histogramB);
-                case UnityExtensions.HistogramDistance.Bhattacharyya: return BhattacharyyaDistance(histogramA, histogramB);
-                case UnityExtensions.HistogramDistance.MDPA: return MDPA(histogramA, histogramB);
+                case PKGE.HistogramDistance.CityBlock: return CityBlockDistance(histogramA, histogramB);
+                case PKGE.HistogramDistance.Euclidean: return EuclideanDistance(histogramA, histogramB);
+                case PKGE.HistogramDistance.Bhattacharyya: return BhattacharyyaDistance(histogramA, histogramB);
+                case PKGE.HistogramDistance.MDPA: return MDPA(histogramA, histogramB);
             }
 
             return 1.0f;

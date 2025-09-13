@@ -1,4 +1,4 @@
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     abstract class PerformanceTest : PerformanceTestBase
     {

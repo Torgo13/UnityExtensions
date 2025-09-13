@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class RuntimeReflectionSystemCameraTests
     {

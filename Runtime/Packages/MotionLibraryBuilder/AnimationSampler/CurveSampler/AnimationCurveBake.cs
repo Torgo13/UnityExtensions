@@ -1,11 +1,13 @@
 using System;
 using UnityEngine;
-using Unity.Burst;
 using Unity.Collections;
-using Unity.Mathematics;
 using Unity.Jobs;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class AnimationCurveBake
     {
@@ -61,8 +63,9 @@ namespace UnityExtensions.Packages
             float duration = keys[keys.Length - 1].time - keys[0].time;
             int frameCount = (int)math.ceil(frameRate * duration);
             var bakedKeys = new NativeArray<Keyframe>(frameCount, Allocator.Temp);
-
-            ThreadSafe.Bake(nativeKeys, frameRate, bakedKeys, new SampleRange() { startFrameIndex = 0, numFrames = frameCount });
+            var sampleRange = new SampleRange() { startFrameIndex = 0, numFrames = frameCount };
+            
+            ThreadSafe.Bake(ref nativeKeys, frameRate, ref bakedKeys, ref sampleRange);
 
             switch (mode)
             {
@@ -79,7 +82,6 @@ namespace UnityExtensions.Packages
                     throw new System.InvalidOperationException("Not Implemented");
             }
 
-
             keys = bakedKeys.ToArray();
             bakedKeys.Dispose();
             return frameCount;
@@ -87,46 +89,59 @@ namespace UnityExtensions.Packages
 
         public static class ThreadSafe
         {
-            [BurstCompile(CompileSynchronously = true)]
-            public struct BakeJob : IJobParallelFor, IDisposable
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile(CompileSynchronously = true)]
+#endif // PACKAGE_BURST
+            public struct BakeJob : IJobParallelFor
             {
-                public int numJobs;
-                public NativeArray<CurveData> curves;
-                public NativeArray<CurveData> outCurves;
-                public SampleRange sampleRange;
+                [ReadOnly] public NativeArray<NativeArray<Keyframe>> curves;
+                [NativeDisableParallelForRestriction]
+                public NativeArray<NativeArray<Keyframe>> outCurves;
+                [ReadOnly] public SampleRange sampleRange;
 
-                public float frameRate;
+                [ReadOnly] public float frameRate;
 
                 public void Execute(int index)
                 {
-                    Curve curve = curves[index].ToCurve();
-                    Curve outCurve = outCurves[index].ToCurve();
+                    NativeArray<Keyframe> keyframes = curves[index];
+                    NativeArray<Keyframe> bakedFrames = outCurves[index];
 
-                    Bake(curve, frameRate, outCurve, sampleRange);
-                }
+                    //Bake(ref curve, frameRate, ref outCurve, ref sampleRange);
+                    int numKeys = keyframes.Length;
+                    float start = keyframes[0].time;
+                    float end = keyframes[numKeys - 1].time;
+                    //float duration = end - start;
+                    float frame = 1 / frameRate;
+                    //int numFrames = bakedFrames.Length;
 
-                public void Dispose()
-                {
-                    curves.Dispose();
-                    outCurves.Dispose();
+                    for (int i = 0; i < sampleRange.numFrames; i++)
+                    {
+                        int frameIndex = sampleRange.startFrameIndex + i;
+                        float time = math.clamp(start + frameIndex * frame, start, end);
+
+                        CurveSampling.ThreadSafe.EvaluateWithinRange(keyframes, time, 0, numKeys - 1,
+                            out float value);
+
+                        bakedFrames[frameIndex] = new Keyframe(time, value);
+                    }
                 }
             }
 
             public static BakeJob ConfigureBake(Curve[] curves, float frameRate, Curve[] outCurves, Allocator alloc, SampleRange sampleRange)
             {
                 var job = new BakeJob();
-                job.curves = new NativeArray<CurveData>(curves.Length, alloc);
+                job.curves = new NativeArray<NativeArray<Keyframe>>(curves.Length, alloc);
                 job.frameRate = frameRate;
-                job.outCurves = new NativeArray<CurveData>(curves.Length, alloc);
+                job.outCurves = new NativeArray<NativeArray<Keyframe>>(curves.Length, alloc);
                 job.sampleRange = sampleRange;
 
                 for (int i = 0; i < curves.Length; i++)
                 {
-                    job.curves[i] = new CurveData(curves[i], alloc);
+                    job.curves[i] = new CurveData(curves[i], alloc).array;
                     //int frameCount = (int)math.ceil(frameRate * curves[i].Duration);
                     //var outCurve = new Curve(frameCount, alloc);
                     //outCurves[i] = outCurve;
-                    job.outCurves[i] = new CurveData(outCurves[i], alloc);
+                    job.outCurves[i] = new CurveData(outCurves[i], alloc).array;
                 }
 
                 return job;
@@ -143,16 +158,15 @@ namespace UnityExtensions.Packages
                 return ConfigureBake(curves, frameRate, outCurves, alloc, sampleRange);
             }
 
-            public static int Bake(Curve curve, float frameRate, Curve outCurve, SampleRange sampleRange)
+            public static void Bake(ref Curve curve, float frameRate, ref Curve outCurve, ref SampleRange sampleRange)
             {
                 NativeArray<Keyframe> keys = curve.Keys;
                 NativeArray<Keyframe> outKeys = outCurve.Keys;
-                int bakedFrames = Bake(keys, frameRate, outKeys, sampleRange);
+                Bake(ref keys, frameRate, ref outKeys, ref sampleRange);
                 //  KeyframeUtilities.AlignTangentsSmooth(outKeys, sampleRange);
-                return bakedFrames;
             }
 
-            public static int Bake(NativeArray<Keyframe> keyframes, float frameRate, NativeArray<Keyframe> bakedFrames, SampleRange sampleRange)
+            public static void Bake(ref NativeArray<Keyframe> keyframes, float frameRate, ref NativeArray<Keyframe> bakedFrames, ref SampleRange sampleRange)
             {
                 int numKeys = keyframes.Length;
                 float start = keyframes[0].time;
@@ -166,11 +180,11 @@ namespace UnityExtensions.Packages
                     int frameIndex = sampleRange.startFrameIndex + i;
                     float time = math.clamp(start + frameIndex * frame, start, end);
 
-                    float value = CurveSampling.ThreadSafe.EvaluateWithinRange(keyframes, time, 0, numKeys - 1);
+                    CurveSampling.ThreadSafe.EvaluateWithinRange(keyframes, time, 0, numKeys - 1,
+                        out float value);
+
                     bakedFrames[frameIndex] = new Keyframe(time, value);
                 }
-
-                return sampleRange.numFrames;
             }
         }
         #endregion // CurveSampler

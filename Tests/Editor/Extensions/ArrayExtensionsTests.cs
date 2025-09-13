@@ -7,7 +7,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Jobs;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     class ArrayExtensionsTests
     {

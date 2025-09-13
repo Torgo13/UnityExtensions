@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Set of utility functions for the Core Scriptable Render Pipeline Library related to Matrix operations

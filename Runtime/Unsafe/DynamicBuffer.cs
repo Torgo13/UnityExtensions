@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// An array-like data structure that can be used as a component.

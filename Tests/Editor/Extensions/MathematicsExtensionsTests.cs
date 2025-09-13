@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System.Linq;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class MathematicsExtensionsTests
     {

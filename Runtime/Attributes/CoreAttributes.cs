@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Attribute used to customize UI display.

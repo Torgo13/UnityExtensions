@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class MathematicsExtensions
     {

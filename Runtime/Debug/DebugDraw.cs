@@ -4,7 +4,7 @@ using UnityEngine;
 
 using Debug = UnityEngine.Debug;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Helpers for drawing shapes for debugging purposes.

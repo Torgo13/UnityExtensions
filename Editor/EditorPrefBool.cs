@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Bool saved in EditorPref.

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// Garbage free string formatter

@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine.Pool;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public static class TextMeshProExtensions
     {

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Collections
+namespace PKGE.Collections
 {
     /// <summary>
     /// Wraps a <see cref="List{T}"/> to provide a read-only view of its memory without copying any elements.
@@ -120,7 +120,7 @@ namespace UnityExtensions.Collections
         }
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyList{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyList{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -134,7 +134,7 @@ namespace UnityExtensions.Collections
         }
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyList{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyList{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>

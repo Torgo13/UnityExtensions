@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class ArraySegmentExtensions
     {

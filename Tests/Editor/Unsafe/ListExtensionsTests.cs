@@ -2,7 +2,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using System.Collections.Generic;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class ListExtensionsTests
     {

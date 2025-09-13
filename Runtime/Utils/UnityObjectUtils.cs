@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility methods for working with UnityEngine <see cref="Object"/> types.

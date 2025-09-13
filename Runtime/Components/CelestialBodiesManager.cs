@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     [ExecuteAlways]
     public class CelestialBodiesManager : MonoBehaviour

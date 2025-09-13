@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     [RequireComponent(typeof(Light))]
     [ExecuteInEditMode]

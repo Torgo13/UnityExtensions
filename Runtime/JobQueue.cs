@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <example>
     /// <see href="https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/TerrainHLODCreator.cs#L294"/>

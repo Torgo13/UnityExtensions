@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine.UI;
 #endif
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class MaterialUtilsTests
     {
@@ -28,7 +28,7 @@ namespace UnityExtensions.Editor.Tests
             m_Renderer.sharedMaterial = new Material(shader);
 
 #if INCLUDE_UGUI
-            m_Graphic = m_GameObject.AddComponent<UnityExtensions.Tests.TestImage>();
+            m_Graphic = m_GameObject.AddComponent<PKGE.Tests.TestImage>();
             m_Graphic.material = m_Renderer.sharedMaterial;
 #endif
         }

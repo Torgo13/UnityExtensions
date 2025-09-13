@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 #endif
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class MaterialExtensionsTests
     {

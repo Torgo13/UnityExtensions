@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A set of extension methods for collections

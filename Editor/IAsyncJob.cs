@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Interface for async jobs

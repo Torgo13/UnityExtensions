@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     public static partial class TestStrings
     {
@@ -490,7 +490,7 @@ namespace UnityExtensions.Editor.Tests
     }
 }
 
-namespace UnityExtensions.Editor.Tests.StringExtensionsOrdinalTests
+namespace PKGE.Editor.Tests.StringExtensionsOrdinalTests
 {
     #region Unity Documentation
     #region StartsWithOrdinal

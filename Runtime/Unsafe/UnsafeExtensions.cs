@@ -11,7 +11,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class UnsafeExtensions
     {

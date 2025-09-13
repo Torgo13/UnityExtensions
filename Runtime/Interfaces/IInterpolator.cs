@@ -1,4 +1,4 @@
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// An interface that provides interpolation functionality.

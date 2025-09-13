@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class EnumExtensions
     {

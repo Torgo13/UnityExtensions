@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="Transform"/> components.

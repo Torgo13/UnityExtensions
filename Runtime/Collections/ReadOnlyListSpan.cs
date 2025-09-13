@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Collections
+namespace PKGE.Collections
 {
     /// <summary>
     /// Wraps a list or array to provide a read-only view of some or all elements. Elements are not copied, so if the
@@ -162,7 +162,7 @@ namespace UnityExtensions.Collections
             => obj is ReadOnlyListSpan<T> other && Equals(other);
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -171,7 +171,7 @@ namespace UnityExtensions.Collections
         public static bool operator ==(ReadOnlyListSpan<T> lhs, ReadOnlyListSpan<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(UnityExtensions.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>

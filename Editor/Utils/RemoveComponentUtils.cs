@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class RemoveComponentUtils
     {

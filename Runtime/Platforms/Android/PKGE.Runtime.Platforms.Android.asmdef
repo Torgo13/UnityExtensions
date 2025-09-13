@@ -1,14 +1,12 @@
 {
-    "name": "UnityExtensions.Editor.Unsafe",
+    "name": "PKGE.Runtime.Platforms.Android",
     "rootNamespace": "",
-    "references": [
-        "GUID:16b707dc5319ad24facbdf7282f85fdc"
-    ],
+    "references": [],
     "includePlatforms": [
-        "Editor"
+        "Android"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

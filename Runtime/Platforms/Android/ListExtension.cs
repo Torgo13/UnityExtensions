@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions.Platforms.Android
+namespace PKGE.Platforms.Android
 {
     static class ListExtension
     {

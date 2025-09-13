@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class RectUtils
     {

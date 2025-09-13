@@ -3,7 +3,7 @@
 
 using NUnit.Framework;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     class MathematicsExtensionsTests
     {

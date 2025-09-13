@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class EnumUtilities
     {

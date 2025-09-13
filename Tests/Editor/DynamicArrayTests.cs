@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using UnityEngine.Profiling;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class DynamicArrayTests
     {

@@ -1,5 +1,5 @@
 {
-    "name": "UnityExtensions.Editor",
+    "name": "PKGE.Editor",
     "rootNamespace": "",
     "references": [
         "GUID:7dabed3724aa64f438f2ac84f705af03"

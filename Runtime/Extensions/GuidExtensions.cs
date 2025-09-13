@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extensions to the <see cref="System.Guid"/> type.

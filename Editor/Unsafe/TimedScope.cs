@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Editor.Unsafe
+namespace PKGE.Editor.Unsafe
 {
     /// <summary>
     /// Allows time measurements

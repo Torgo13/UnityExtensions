@@ -1,5 +1,5 @@
 {
-    "name": "UnityExtensions.Editor.Unsafe.Tests",
+    "name": "PKGE.Editor.Unsafe.Tests",
     "rootNamespace": "",
     "references": [
         "GUID:0a9c04c1884aa2c4e95ac7f8916fb5fc",

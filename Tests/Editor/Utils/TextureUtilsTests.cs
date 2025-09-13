@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 using AssertionException = UnityEngine.Assertions.AssertionException;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class TextureUtilsTests
     {

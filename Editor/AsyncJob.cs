@@ -1,7 +1,7 @@
 using System;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>Base implementation of <see cref="IAsyncJob"/></summary>
     public abstract class AsyncJob : IAsyncJob

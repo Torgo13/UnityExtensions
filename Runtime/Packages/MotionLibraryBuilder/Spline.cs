@@ -1,13 +1,20 @@
 using System;
 using Unity.Collections;
+
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+using quaternion = UnityEngine.Quaternion;
+using static PKGE.math;
+#endif // PACKAGE_MATHEMATICS
 
 #if USING_SNAPSHOT_DEBUGGER
 using Unity.SnapshotDebugger;
 using Buffer = Unity.SnapshotDebugger.Buffer;
 #endif // USING_SNAPSHOT_DEBUGGER
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public struct SplinePoint
     {
@@ -124,6 +131,6 @@ namespace UnityExtensions.Packages
             segments = buffer.ReadNativeArray<HermitCurve>(out allocator);
         }
 #endif // USING_SNAPSHOT_DEBUGGER
-        #endregion // Unity.Kinematica
+#endregion // Unity.Kinematica
     }
 }

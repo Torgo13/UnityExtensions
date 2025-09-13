@@ -1,7 +1,7 @@
 using System;
 using Random = System.Random;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://github.com/Unity-Technologies/ml-agents/blob/cfb26e3eaf10e4866c0835a68087de392d631e88/com.unity.ml-agents/Runtime/Inference/Utils/RandomNormal.cs
     #region Unity.MLAgents.Inference.Utils

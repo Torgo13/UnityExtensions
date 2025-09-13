@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A wrapper around <c>AnimationCurve</c> to automatically bake it into a texture.

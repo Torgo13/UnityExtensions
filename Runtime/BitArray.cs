@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// IBitArray interface.

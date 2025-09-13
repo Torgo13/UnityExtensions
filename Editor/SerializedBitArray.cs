@@ -1,7 +1,7 @@
 using System;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>Serialisation of BitArray, Utility class</summary>
     public static class SerializedBitArrayUtilities

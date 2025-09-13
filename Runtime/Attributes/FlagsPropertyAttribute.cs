@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Used to denote fields that should be represented by a custom dropdown/mask property in the inspector.

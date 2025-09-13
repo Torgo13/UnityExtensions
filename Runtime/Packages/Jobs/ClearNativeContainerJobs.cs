@@ -1,15 +1,16 @@
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Gameplay/Traffic/UtilityJobs.cs
     #region Unity.Megacity.Traffic
     /// <summary>
     /// Utility jobs to clear native containers
     /// </summary>
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ClearArrayJob<T> : IJobParallelFor where T : struct
     {
         [WriteOnly] public NativeArray<T> Data;
@@ -20,7 +21,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ClearHashJob<T> : IJob where T : unmanaged
     {
         [WriteOnly] public NativeParallelMultiHashMap<int, T> Hash;
@@ -31,7 +34,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct DisposeArrayJob<T> : IJob where T : struct
     {
         [WriteOnly] [DeallocateOnJobCompletion]
@@ -43,7 +48,9 @@ namespace UnityExtensions.Packages
     }
     #endregion // Unity.Megacity.Traffic
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct CopyArrayJob<T> : IJobFor where T : struct
     {
         [ReadOnly] public NativeArray<T> src;
@@ -55,7 +62,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct SetArrayJob<T> : IJobFor where T : struct
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
@@ -70,7 +79,9 @@ namespace UnityExtensions.Packages
         #endregion // Unity.Entities
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct SwapArrayJob<T> : IJobFor where T : struct
     {
         public NativeArray<T> src0;
@@ -82,7 +93,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct CompareArrayJob<T> : IJobFor where T : struct, System.IEquatable<T>
     {
         [ReadOnly] public NativeArray<T> src0;

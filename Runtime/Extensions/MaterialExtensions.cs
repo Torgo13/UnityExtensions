@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class MaterialExtensions
     {

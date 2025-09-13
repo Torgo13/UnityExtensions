@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class CollectionExtensionsTests
     {

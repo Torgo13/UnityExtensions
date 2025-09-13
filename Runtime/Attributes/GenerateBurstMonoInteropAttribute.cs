@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Attribute used to signal this type should be scanned for <see cref="BurstMonoInteropMethodAttribute"/> decorated methods.

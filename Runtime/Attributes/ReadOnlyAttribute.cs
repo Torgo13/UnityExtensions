@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Serialized fields marked with this ReadOnly attribute use a CustomPropertyDrawer that

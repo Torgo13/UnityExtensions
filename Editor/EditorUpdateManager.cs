@@ -1,7 +1,7 @@
 using System;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     // Call update at regular interval, even when using executeMethod on the command line
     public static class EditorUpdateManager

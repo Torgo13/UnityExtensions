@@ -9,7 +9,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using Random = Unity.Mathematics.Random;
 
-namespace UnityExtensions.Packages.Tests
+namespace PKGE.Packages.Tests
 {
     class MathematicsExtensionsTests
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Implement this interface for <see cref="Component"/> classes you want discoverable

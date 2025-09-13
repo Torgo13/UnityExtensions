@@ -1,8 +1,8 @@
 using System;
 using NUnit.Framework;
-using UnityExtensions.Collections;
+using PKGE.Collections;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class CircularBufferTests
     {

@@ -1,9 +1,13 @@
 using System;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public readonly struct Curve : IDisposable
     {
@@ -66,7 +70,8 @@ namespace UnityExtensions.Packages
 
         public float Evaluate(float time)
         {
-            return CurveSampling.ThreadSafe.Evaluate(Keys, time);
+            CurveSampling.ThreadSafe.Evaluate(Keys, time, out float result);
+            return result;
         }
 
         public int Length => Keys.Length;
@@ -117,26 +122,42 @@ namespace UnityExtensions.Packages
         #endregion // Unity.Curves
     }
 
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public static class CurveSampling
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
         #region Unity.Curves
         const float DefaultWeight = 0;
 
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
         public static class ThreadSafe
         {
-            public static float Evaluate(NativeArray<Keyframe> keys, float curveT)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            public static void Evaluate(in NativeArray<Keyframe> keys, float curveT,
+                out float result)
             {
-                return EvaluateWithinRange(keys, curveT, 0, keys.Length - 1);
+                EvaluateWithinRange(keys, curveT, 0, keys.Length - 1, out result);
             }
 
-            public static float EvaluateWithHint(NativeArray<Keyframe> keys, float curveT, ref int hintIndex)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            public static void EvaluateWithHint(in NativeArray<Keyframe> keys, float curveT, ref int hintIndex,
+                out float result)
             {
-                const
                 int startIndex = 0;
                 int endIndex = keys.Length - 1;
                 if (endIndex <= hintIndex)
-                    return keys[hintIndex].value;
+                {
+                    result = keys[hintIndex].value;
+                    return;
+                }
 
                 // wrap time
                 curveT = math.clamp(curveT, keys[hintIndex].time, keys[endIndex].time);
@@ -144,14 +165,20 @@ namespace UnityExtensions.Packages
 
                 Keyframe lhs = keys[hintIndex];
                 Keyframe rhs = keys[rhsIndex];
-                return InterpolateKeyframe(lhs, rhs, curveT);
+                InterpolateKeyframe(lhs, rhs, curveT, out result);
             }
 
-            public static float EvaluateWithinRange(NativeArray<Keyframe> keys, float curveT, int startIndex,
-                int endIndex)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            public static void EvaluateWithinRange(in NativeArray<Keyframe> keys, float curveT, int startIndex,
+                int endIndex, out float result)
             {
                 if (endIndex <= startIndex)
-                    return keys[startIndex].value;
+                {
+                    result = keys[startIndex].value;
+                    return;
+                }
 
                 // wrap time
                 curveT = math.clamp(curveT, keys[startIndex].time, keys[endIndex].time);
@@ -159,10 +186,13 @@ namespace UnityExtensions.Packages
 
                 Keyframe lhs = keys[lhsIndex];
                 Keyframe rhs = keys[rhsIndex];
-                return InterpolateKeyframe(lhs, rhs, curveT);
+                InterpolateKeyframe(lhs, rhs, curveT, out result);
             }
 
-            static private void FindIndexForSampling(NativeArray<Keyframe> keys, float curveT, int start, int end, int hint,
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            static private void FindIndexForSampling(in NativeArray<Keyframe> keys, float curveT, int start, int end, int hint,
                 out int lhs, out int rhs)
             {
                 if (hint != -1)
@@ -214,21 +244,25 @@ namespace UnityExtensions.Packages
                 rhs = math.min(end, __first);
             }
 
-            public static float InterpolateKeyframe(Keyframe lhs, Keyframe rhs, float curveT)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            public static void InterpolateKeyframe(in Keyframe lhs, in Keyframe rhs, float curveT,
+                out float output)
             {
-                float output;
-
                 if ((lhs.weightedMode & WeightedMode.Out) != 0 || (rhs.weightedMode & WeightedMode.In) != 0)
-                    output = BezierInterpolate(curveT, lhs, rhs);
+                    BezierInterpolate(curveT, lhs, rhs, out output);
                 else
-                    output = HermiteInterpolate(curveT, lhs, rhs);
+                    HermiteInterpolate(curveT, lhs, rhs, out output);
 
                 HandleSteppedCurve(lhs, rhs, ref output);
-
-                return output;
             }
 
-            static float HermiteInterpolate(float curveT, Keyframe lhs, Keyframe rhs)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            static void HermiteInterpolate(float curveT, in Keyframe lhs, in Keyframe rhs,
+                out float result)
             {
                 float dx = rhs.time - lhs.time;
                 float m1;
@@ -247,9 +281,10 @@ namespace UnityExtensions.Packages
                     m2 = 0;
                 }
 
-                return HermiteInterpolate(t, lhs.value, m1, m2, rhs.value);
+                result = HermiteInterpolate(t, lhs.value, m1, m2, rhs.value);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float HermiteInterpolate(float t, float p0, float m0, float m1, float p1)
             {
                 float t2 = t * t;
@@ -263,29 +298,36 @@ namespace UnityExtensions.Packages
                 return a * p0 + b * m0 + c * m1 + d * p1;
             }
 
-            static float BezierInterpolate(float curveT, Keyframe lhs, Keyframe rhs)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            static void BezierInterpolate(float curveT, in Keyframe lhs, in Keyframe rhs,
+                out float result)
             {
                 float lhsOutWeight = (lhs.weightedMode & WeightedMode.Out) != 0 ? lhs.outWeight : DefaultWeight;
                 float rhsInWeight = (rhs.weightedMode & WeightedMode.In) != 0 ? rhs.inWeight : DefaultWeight;
 
                 float dx = rhs.time - lhs.time;
                 if (dx == 0.0F)
-                    return lhs.value;
-
-                return BezierInterpolate((curveT - lhs.time) / dx, lhs.value, lhs.outTangent * dx, lhsOutWeight,
-                    rhs.value, rhs.inTangent * dx, rhsInWeight);
+                    result = lhs.value;
+                else
+                    result = BezierInterpolate((curveT - lhs.time) / dx, lhs.value, lhs.outTangent * dx, lhsOutWeight,
+                        rhs.value, rhs.inTangent * dx, rhsInWeight);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float FAST_CBRT_POSITIVE(float x)
             {
                 return math.exp(math.log(x) / 3.0f);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float FAST_CBRT(float x)
             {
                 return (((x) < 0) ? -math.exp(math.log(-(x)) / 3.0f) : math.exp(math.log(x) / 3.0f));
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float BezierExtractU(float t, float w1, float w2)
             {
                 float a = 3.0F * w1 - 3.0F * w2 + 1.0F;
@@ -318,8 +360,8 @@ namespace UnityExtensions.Packages
 
                         // Extract cubic roots.
                         float u1 = 2.0F * r_3 * math.cos(phi_3) + p;
-                        float u2 = 2.0F * r_3 * math.cos(phi_3 + math.PI2 / 3.0f) + p;
-                        float u3 = 2.0F * r_3 * math.cos(phi_3 - math.PI2 / 3.0f) + p;
+                        float u2 = 2.0F * r_3 * math.cos(phi_3 + 2.0F * (float)math.PI / 3.0f) + p;
+                        float u3 = 2.0F * r_3 * math.cos(phi_3 - 2.0F * (float)math.PI / 3.0f) + p;
 
                         if (u1 >= 0.0F && u1 <= 1.0F)
                             return u1;
@@ -327,6 +369,9 @@ namespace UnityExtensions.Packages
                             return u2;
                         else if (u3 >= 0.0F && u3 <= 1.0F)
                             return u3;
+
+                        // Aiming at solving numerical imprecision when u is outside [0,1].
+                        return (t < 0.5F) ? 0.0F : 1.0F;
                     }
                     else
                     {
@@ -335,10 +380,10 @@ namespace UnityExtensions.Packages
 
                         if (u >= 0.0F && u <= 1.0F)
                             return u;
-                    }
 
-                    // Aiming at solving numerical imprecision when u is outside [0,1].
-                    return (t < 0.5F) ? 0.0F : 1.0F;
+                        // Aiming at solving numerical imprecision when u is outside [0,1].
+                        return (t < 0.5F) ? 0.0F : 1.0F;
+                    }
                 }
 
                 if (math.abs(b) > 1e-3f)
@@ -366,12 +411,14 @@ namespace UnityExtensions.Packages
                 return 0.0F;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float BezierInterpolate(float t, float v1, float m1, float w1, float v2, float m2, float w2)
             {
                 float u = BezierExtractU(t, w1, 1.0F - w2);
                 return BezierInterpolate(u, v1, w1 * m1 + v1, v2 - w2 * m2, v2);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float BezierInterpolate(float t, float p0, float p1, float p2, float p3)
             {
                 float t2 = t * t;
@@ -383,7 +430,10 @@ namespace UnityExtensions.Packages
                 return omt3 * p0 + 3.0F * t * omt2 * p1 + 3.0F * t2 * omt * p2 + t3 * p3;
             }
 
-            static void HandleSteppedCurve(Keyframe lhs, Keyframe rhs, ref float value)
+#if PACKAGE_BURST
+            [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
+            static void HandleSteppedCurve(in Keyframe lhs, in Keyframe rhs, ref float value)
             {
                 if (float.IsInfinity(lhs.outTangent) || float.IsInfinity(rhs.inTangent))
                     value = lhs.value;

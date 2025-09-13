@@ -6,7 +6,7 @@ using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     #region Unity.Collections
     unsafe internal struct Memory
@@ -166,7 +166,7 @@ namespace UnityExtensions.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
-        public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip) where T : unmanaged
+        public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
         {
             return (T*)UnsafeUtility.MallocTracked(
                 UnsafeUtility.SizeOf<T>() * count,
@@ -180,7 +180,9 @@ namespace UnityExtensions.Unsafe
             UnsafeUtility.FreeTracked(p, allocator);
         }
 
-        public static T* Malloc<T>(int count, Allocator allocator) where T : unmanaged
+#pragma warning disable IDE0060 // Remove unused parameter
+        public static T* Malloc<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             return (T*)UnsafeUtility.Malloc(
                 UnsafeUtility.SizeOf<T>() * count,

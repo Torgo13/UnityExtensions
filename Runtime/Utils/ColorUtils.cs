@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     // Has to be kept in sync with PhysicalCamera.hlsl
 

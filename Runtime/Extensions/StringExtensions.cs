@@ -7,7 +7,7 @@ using Unity.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="string"/> objects.

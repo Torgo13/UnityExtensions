@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityExtensions.Collections;
+using PKGE.Collections;
 using UnityEngine;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class ReadOnlyListTests
     {

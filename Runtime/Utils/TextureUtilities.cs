@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class TextureUtilities
     {

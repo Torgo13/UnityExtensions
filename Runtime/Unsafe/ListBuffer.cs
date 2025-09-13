@@ -1,7 +1,7 @@
 using System;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     /// <summary>
     /// A list that stores value on a provided memory buffer.

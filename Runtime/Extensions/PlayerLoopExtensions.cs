@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.LowLevel;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A class that contains extension methods used to modify the player loop.

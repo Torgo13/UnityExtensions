@@ -10,7 +10,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     //https://github.com/Unity-Technologies/DynamicResolutionSample/blob/9677fbd4d890f809d95aa1c3c266966646bb23c6/DynamicResolution.cs
     public class DynamicResolution : MonoBehaviour

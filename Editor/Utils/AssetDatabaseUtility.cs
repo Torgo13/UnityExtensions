@@ -5,7 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class AssetDatabaseUtility
     {

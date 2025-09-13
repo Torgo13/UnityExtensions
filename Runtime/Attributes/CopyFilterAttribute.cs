@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// When adding a field to a component, it's easy to forget to also add it in the CopyTo method.

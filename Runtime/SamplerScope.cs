@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Profiling;
 
-namespace UnityExtensions
+namespace PKGE
 {
     // A helper to simplify profiling methods with complex flow control.
     public readonly struct CustomSamplerScope : IDisposable

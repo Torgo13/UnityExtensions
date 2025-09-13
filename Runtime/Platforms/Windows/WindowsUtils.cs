@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public class WindowsUtils
     {

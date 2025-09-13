@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Light Unit Utils contains functions and definitions to facilitate conversion between different light intensity units.

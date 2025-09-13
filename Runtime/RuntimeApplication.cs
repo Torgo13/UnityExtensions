@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine.LowLevel;
 
-namespace UnityExtensions
+namespace PKGE
 {
     internal static class RuntimeApplication
     {

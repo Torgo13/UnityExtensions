@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A mutable string with a size and capacity so you can do string manipulations wile avoiding GC allocations.

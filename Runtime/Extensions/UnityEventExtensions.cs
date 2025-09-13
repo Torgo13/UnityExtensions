@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/UnityEventExtensions.cs
     #region Unity.XR.CoreUtils

@@ -1,4 +1,4 @@
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     static class Debug
     {

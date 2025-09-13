@@ -1,10 +1,17 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+#else
+using float3 = UnityEngine.Vector3;
+using quaternion = UnityEngine.Quaternion;
+using static PKGE.math;
+#endif // PACKAGE_MATHEMATICS
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     [StructLayout(LayoutKind.Sequential)]
     [Serializable]

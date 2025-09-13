@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Contains a set of method to be able to manage Menu Items for the editor

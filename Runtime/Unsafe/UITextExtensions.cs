@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class UITextExtensions
     {

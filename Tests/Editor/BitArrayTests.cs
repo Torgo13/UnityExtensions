@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System.Linq;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class BitArrayTests
     {

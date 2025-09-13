@@ -4,7 +4,7 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class PackagesUtilities
     {

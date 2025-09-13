@@ -4,13 +4,21 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Pool;
-using static Unity.Mathematics.math;
 using IndexFormat = UnityEngine.Rendering.IndexFormat;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+using static Unity.Mathematics.math;
+#else
+using float3 = UnityEngine.Vector3;
+using int3 = UnityEngine.Vector3Int;
+using uint3 = UnityEngine.Vector3Int;
+using static PKGE.math;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class MeshExtensions
     {
@@ -598,7 +606,11 @@ namespace UnityExtensions.Packages
                         for (int i = subMesh.indexStart, count = 0; count < subMesh.indexCount; i += 3, count += 3)
                         {
                             triangles[trianglesIndex] =
+#if PACKAGE_MATHEMATICS
                                 ((int3)new uint3(indices32[i], indices32[i + 1], indices32[i + 2]));
+#else
+                                (new int3((int)indices32[i], (int)indices32[i + 1], (int)indices32[i + 2]));
+#endif // PACKAGE_MATHEMATICS
 
                             ++trianglesIndex;
                         }

@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class SwapExtensionsTests
     {

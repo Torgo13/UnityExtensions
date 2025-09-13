@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using static UnityEngine.Mathf;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// An implementation of Hable's artist-friendly tonemapping curve.

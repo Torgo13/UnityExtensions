@@ -5,7 +5,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.TestTools;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     [BurstCompile]
     public unsafe class BurstDelegateTest

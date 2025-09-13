@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public struct HermitCurve
     {

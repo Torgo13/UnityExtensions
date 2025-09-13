@@ -3,7 +3,7 @@ using System.IO;
 using NUnit.Framework;
 using UnityEditor;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     partial class CoreUtilsTests
     {

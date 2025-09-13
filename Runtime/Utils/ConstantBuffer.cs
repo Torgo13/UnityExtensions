@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Constant Buffer management class.

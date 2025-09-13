@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Reflection;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     class ReflectionUtilsTests
     {

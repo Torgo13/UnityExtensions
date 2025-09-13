@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     static class YAMLUtilities
     {

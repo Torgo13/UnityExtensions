@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility class to execute a task on multiple threads.

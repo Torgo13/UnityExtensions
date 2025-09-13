@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Represents an observable value of type T. Subscribers can be notified when the value changes.

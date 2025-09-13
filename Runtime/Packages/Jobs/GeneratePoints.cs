@@ -1,8 +1,9 @@
+#if PACKAGE_MATHEMATICS
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     /// <summary>
     /// Tools for generating random points inside of a shape of interest
@@ -103,3 +104,4 @@ namespace UnityExtensions.Packages
     }
     #endregion // Unity.Entities
 }
+#endif // PACKAGE_MATHEMATICS

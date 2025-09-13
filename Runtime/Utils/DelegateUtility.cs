@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Delegate utility class.

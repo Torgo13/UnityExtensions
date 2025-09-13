@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public static class SpriteUtilities
     {

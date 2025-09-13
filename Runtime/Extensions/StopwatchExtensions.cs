@@ -1,7 +1,7 @@
 #if !NET_4_6
 using System.Diagnostics;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for `System.Diagnostics.Stopwatch` objects.

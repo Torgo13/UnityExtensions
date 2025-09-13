@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Ensures that all scriptable settings have backing data that can be inspected and edited at compile-time.
@@ -54,9 +54,10 @@ namespace UnityExtensions.Editor
 
         static IEnumerable<Type> GetSettingsClasses(Assembly assembly)
         {
-            Func<Type, bool> filter = t => t.IsSubclassOf(typeof(ScriptableSettings<>));
-            Func<Type, bool> editorFilter = t => t.IsSubclassOf(typeof(ScriptableSettingsBase)) && !t.IsAbstract;
-            return assembly.GetTypes().Where(EditorApplication.isPlayingOrWillChangePlaymode ? filter : editorFilter);
+            return assembly.GetTypes().Where(EditorApplication.isPlayingOrWillChangePlaymode ? Filter : EditorFilter);
+            
+            bool Filter(Type t) => t.IsSubclassOf(typeof(ScriptableSettings<>));
+            bool EditorFilter(Type t) => t.IsSubclassOf(typeof(ScriptableSettingsBase)) && !t.IsAbstract;
         }
         #endregion // Unity.XR.CoreUtils.Editor
     }

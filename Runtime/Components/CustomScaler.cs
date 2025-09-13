@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.live-capture.cinematic-companion-app-core/Runtime/Scaler/CustomScaler.cs
     #region Unity.CompanionAppCommon

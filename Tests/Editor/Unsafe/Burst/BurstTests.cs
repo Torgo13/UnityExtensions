@@ -6,7 +6,7 @@ using Unity.Burst;
 using NUnit.Framework;
 using static Unity.Burst.CompilerServices.Aliasing;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class BurstTestFixture
     {

@@ -1,6 +1,6 @@
 using UnityEngine.Rendering;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Editor MaterialQuality utility class.

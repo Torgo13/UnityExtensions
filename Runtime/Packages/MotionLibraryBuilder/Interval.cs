@@ -1,7 +1,10 @@
 using UnityEngine.Assertions;
-using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     /// <summary>
     /// Structure representing a contiguous interval of frames.

@@ -1,6 +1,10 @@
+#if PACKAGE_MATHEMATICS
 using Unity.Mathematics;
+#else
+using quaternion = UnityEngine.Quaternion;
+#endif // PACKAGE_MATHEMATICS
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public struct RotationSampler
     {
@@ -17,10 +21,17 @@ namespace UnityExtensions.Packages
         {
             return new RotationSampler()
             {
+#if PACKAGE_MATHEMATICS
                 x = FloatSampler.CreateEmpty(defaultRotation.value.x),
                 y = FloatSampler.CreateEmpty(defaultRotation.value.y),
                 z = FloatSampler.CreateEmpty(defaultRotation.value.z),
-                w = FloatSampler.CreateEmpty(defaultRotation.value.w)
+                w = FloatSampler.CreateEmpty(defaultRotation.value.w),
+#else
+                x = FloatSampler.CreateEmpty(defaultRotation.x),
+                y = FloatSampler.CreateEmpty(defaultRotation.y),
+                z = FloatSampler.CreateEmpty(defaultRotation.z),
+                w = FloatSampler.CreateEmpty(defaultRotation.w),
+#endif // PACKAGE_MATHEMATICS
             };
         }
 

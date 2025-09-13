@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using UnityExtensions.Attributes;
+using PKGE.Attributes;
 
 #if !ENABLE_VR || !ENABLE_XR_MODULE
 using XRLoggingUtils = UnityEngine.Debug;
 #endif
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Base class for all scriptable settings that is easier to look up via-reflection.

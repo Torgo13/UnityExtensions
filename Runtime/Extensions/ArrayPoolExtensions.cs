@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public readonly struct DisposeArrayPool<T> : IDisposable
     {

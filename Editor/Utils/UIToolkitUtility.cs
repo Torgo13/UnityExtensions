@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine.UIElements;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class UIToolkitUtility
     {

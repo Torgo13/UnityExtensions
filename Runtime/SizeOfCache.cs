@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Stores the marshalled size of a struct.

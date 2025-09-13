@@ -1,7 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Stores a package version in a logically comparable format.

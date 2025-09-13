@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
 using UnityEngine.Scripting;
 
-namespace UnityExtensions
+namespace PKGE
 {
     // Non-allocating sorts.
     public struct Sorting

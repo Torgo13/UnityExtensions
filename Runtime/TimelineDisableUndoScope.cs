@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Linq;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class TimelineDisableUndoScope
     {

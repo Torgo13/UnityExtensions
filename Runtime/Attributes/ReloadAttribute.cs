@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// The <see cref="ReloadAttribute"/> attribute specifies paths for loading or reloading resources and has no direct action.

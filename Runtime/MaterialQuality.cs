@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Material quality flags.

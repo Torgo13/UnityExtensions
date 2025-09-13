@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class ArrayUtility
     {

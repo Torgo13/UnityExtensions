@@ -2,7 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public struct ArrayMemory : IDisposable
     {

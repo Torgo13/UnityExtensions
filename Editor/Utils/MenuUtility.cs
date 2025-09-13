@@ -4,9 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityExtensions.Attributes;
+using PKGE.Attributes;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class MenuUtility
     {

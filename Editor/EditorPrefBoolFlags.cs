@@ -1,7 +1,7 @@
 using System;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>Bool flag saved in EditorPref</summary>
     /// <typeparam name="T">Underlying enum type</typeparam>

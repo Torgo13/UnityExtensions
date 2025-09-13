@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Allows a class inheriting from <see cref="ScriptableSettings{T}"/> to specify that its instance Asset

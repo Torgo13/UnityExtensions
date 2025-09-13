@@ -1,6 +1,6 @@
 using Unity.Collections;
 
-namespace UnityExtensions.Packages
+namespace PKGE.Packages
 {
     public struct FloatSampler
     {

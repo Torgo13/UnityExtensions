@@ -1,5 +1,5 @@
 {
-    "name": "UnityExtensions.Runtime.Packages",
+    "name": "PKGE.Runtime.Packages",
     "rootNamespace": "",
     "references": [
         "GUID:2665a8d13d1b3f18800f46e256720795",
@@ -30,6 +30,31 @@
             "define": "PACKAGE_STRINGBUILDER_EXTENSIONS"
         },
         {
+            "name": "com.unity.entities.graphics",
+            "expression": "",
+            "define": "PACKAGE_ENTITIES_GRAPHICS"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "PACKAGE_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "PACKAGE_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "PACKAGE_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "PACKAGE_TEXTMESH_PRO"
+        },
+        {
             "name": "com.unity.render-pipelines.core",
             "expression": "",
             "define": "PACKAGE_RENDER_PIPELINES_CORE"
@@ -38,16 +63,6 @@
             "name": "com.unity.render-pipelines.universal",
             "expression": "",
             "define": "PACKAGE_RENDER_PIPELINES_UNIVERSAL"
-        },
-        {
-            "name": "com.unity.entities.graphics",
-            "expression": "",
-            "define": "PACKAGE_ENTITIES_GRAPHICS"
-        },
-        {
-            "name": "com.unity.textmeshpro",
-            "expression": "",
-            "define": "PACKAGE_TEXTMESH_PRO"
         }
     ],
     "noEngineReferences": false

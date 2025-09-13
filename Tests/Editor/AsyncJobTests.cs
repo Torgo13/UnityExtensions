@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     public class TestAsyncJob : AsyncJob
     {

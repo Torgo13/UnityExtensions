@@ -6,7 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 using NUnitAssert = NUnit.Framework.Assert;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class UnsafeListExtensionsTests
     {

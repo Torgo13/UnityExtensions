@@ -1,7 +1,13 @@
 using System.Xml;
-using Unity.Mathematics;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+using quaternion = UnityEngine.Quaternion;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class XmlUtility
     {

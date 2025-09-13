@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility for creating a <see cref="SerializableGuid"/>.

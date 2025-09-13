@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     /// <summary>
     /// Utilities to remove <see cref="MonoBehaviour"/> implementing <see cref="IAdditionalData"/>

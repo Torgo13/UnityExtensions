@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Extension methods for <see cref="HashSet{T}"/> objects.

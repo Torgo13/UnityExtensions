@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// A helper class for accessing settings stored in <see cref="ScriptableObject"/> instances.

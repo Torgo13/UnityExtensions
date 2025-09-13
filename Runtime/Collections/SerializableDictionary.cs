@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UnityExtensions.Collections
+namespace PKGE.Collections
 {
     /// <summary>
     /// A dictionary class that can be serialized by Unity.

@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct Color24

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public class SimpleDataCache
     {

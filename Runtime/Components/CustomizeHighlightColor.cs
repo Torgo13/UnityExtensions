@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     [RequireComponent(typeof(Renderer))]
     public class CustomizeHighlightColor : MonoBehaviour

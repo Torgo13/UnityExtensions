@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Represents a series of object actions as a single undo-operation.

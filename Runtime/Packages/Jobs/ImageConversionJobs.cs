@@ -1,20 +1,27 @@
 using System.Runtime.CompilerServices;
-using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
-using static Unity.Mathematics.math;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+using static Unity.Mathematics.math;
+#else
+using static PKGE.math;
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     public static class ImageConversionJobs
     {
         //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
         #region UnityEngine.XR.ARCore
         /// <exception cref="System.InvalidOperationException">Texture format is not supported</exception>
-        [BurstCompile]
+#if PACKAGE_BURST
+        [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
         public static JobHandle Schedule(
             NativeSlice<byte> inputImage,
             Vector2Int sizeInPixels,
@@ -100,10 +107,14 @@ namespace UnityExtensions.Packages
         /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
         /// when created with mipChain as <see langword="true"/>.
         /// </summary>
-        [return: AssumeRange(1, sizeof(ushort))]
+#if PACKAGE_BURST
+        [return: Unity.Burst.CompilerServices.AssumeRange(1, sizeof(ushort))]
         public static int MipmapCount(
-            [AssumeRange(1, ushort.MaxValue)] int width,
-            [AssumeRange(1, ushort.MaxValue)] int height)
+            [Unity.Burst.CompilerServices.AssumeRange(1, ushort.MaxValue)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(1, ushort.MaxValue)] int height)
+#else
+        public static int MipmapCount(int width, int height)
+#endif // PACKAGE_BURST
         {
             int mipmapCount = 0;
             int s = max(width, height);
@@ -258,25 +269,42 @@ namespace UnityExtensions.Packages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MaxUnlikely(int x, int y)
         {
-            return Hint.Unlikely(x > y) ? x : y;
+#if PACKAGE_BURST
+            return Unity.Burst.CompilerServices.Hint.Unlikely(x > y) ? x : y;
+#else
+            return x > y ? x : y;
+#endif // PACKAGE_BURST
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int MinUnlikely(int x, int y)
         {
-            return Hint.Unlikely(x < y) ? x : y;
+#if PACKAGE_BURST
+            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
+#else
+            return x < y ? x : y;
+#endif // PACKAGE_BURST
         }
 
         /// <remarks><see href="https://github.com/Unity-Technologies/Graphics/blob/a44ef5e6307acc343ba19066be9f82e08bf14546/Packages/com.unity.render-pipelines.core/ShaderLibrary/CommonMaterial.hlsl#L305"/></remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3 BlendNormal(in float3 n1, in float3 n2)
         {
+#if PACKAGE_MATHEMATICS
             float4 n = mad(n1.xyzz, new float4(2, 2, 2, -2), new float4(-1, -1, -1, 1));
             float3 n0 = mad(n2, 2, -1);
             float3 r;
             r.x = dot(n.zxx, n0.xyz);
             r.y = dot(n.yzy, n0.xyz);
             r.z = dot(n.xyw, -n0.xyz);
+#else
+            float4 n = mad(new float4(n1.x, n1.y, n1.z, n1.z), new float4(2, 2, 2, -2), new float4(-1, -1, -1, 1));
+            float3 n0 = mad(n2, 2, -1);
+            float3 r;
+            r.x = dot(new float3(n.z, n.x, n.x), n0);
+            r.y = dot(new float3(n.y, n.z, n.y), n0);
+            r.z = dot(new float3(n.x, n.y, n.w), -n0);
+#endif // PACKAGE_MATHEMATICS
             return normalize(r);
         }
 
@@ -389,7 +417,9 @@ namespace UnityExtensions.Packages
 
     //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
     #region UnityEngine.XR.ARCore
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct FlipVerticalJob : IJobParallelFor
     {
         public int width;
@@ -415,7 +445,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ConvertRFloatToGrayscaleJob : IJobParallelFor
     {
         public int width;
@@ -439,7 +471,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ConvertBGRA32ToGrayscaleJob : IJobParallelFor
     {
         public int width;
@@ -470,7 +504,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ConvertARGB32ToGrayscaleJob : IJobParallelFor
     {
         public int width;
@@ -502,7 +538,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile]
+#endif // PACKAGE_BURST
     public struct ConvertStridedToGrayscaleJob : IJobParallelFor
     {
         public int stride;
@@ -542,7 +580,9 @@ namespace UnityExtensions.Packages
     }
     #endregion // UnityEngine.XR.ARCore
 
-    [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
     public struct CalculateMipsJob : IJobFor
     {
         [ReadOnly] public int offset;
@@ -581,7 +621,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
     public struct LayerMipsJob : IJobFor
     {
         [ReadOnly] public int width;
@@ -612,7 +654,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
     public struct LayerMipsAverageJob : IJobFor
     {
         [ReadOnly] public int width;
@@ -643,7 +687,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
     public struct CreateNormalMapJob : IJobFor
     {
         [ReadOnly] public float3 scale;
@@ -673,7 +719,9 @@ namespace UnityExtensions.Packages
         }
     }
 
-    [BurstCompile(FloatMode = FloatMode.Fast)]
+#if PACKAGE_BURST
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+#endif // PACKAGE_BURST
     public struct CreateNormalMapWrapJob : IJobFor
     {
         [ReadOnly] public float3 scale;

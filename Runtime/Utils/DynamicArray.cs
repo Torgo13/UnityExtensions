@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Generic growable array.

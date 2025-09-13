@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class UnityObjectExtensions
     {

@@ -1,11 +1,17 @@
 #if PACKAGE_ENTITIES_GRAPHICS
 #else
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityExtensions.Packages
+#if PACKAGE_MATHEMATICS
+using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+#endif // PACKAGE_MATHEMATICS
+
+namespace PKGE.Packages
 {
     /// <summary>
     /// Provides methods that help you to work with LOD groups.

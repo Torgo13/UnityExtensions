@@ -5,9 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine.Assertions;
-using UnityEngine.Pool;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Utility methods for common reflection-based operations.
@@ -19,6 +18,7 @@ namespace UnityExtensions
         static Assembly[] _assemblies;
         static List<Type[]> _typesPerAssembly;
         static List<Dictionary<string, Type>> _assemblyTypeMaps;
+        static Dictionary<Type, string> _genericTypeNames;
 
         public static Assembly[] GetCachedAssemblies() { return _assemblies ??= AppDomain.CurrentDomain.GetAssemblies(); }
 
@@ -26,7 +26,7 @@ namespace UnityExtensions
         {
             if (_typesPerAssembly == null)
             {
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                var assemblies = GetCachedAssemblies();
                 _typesPerAssembly = new List<Type[]>(assemblies.Length);
                 foreach (var assembly in assemblies)
                 {
@@ -76,6 +76,22 @@ namespace UnityExtensions
         /// Caches type information from all currently loaded assemblies.
         /// </summary>
         public static void PreWarmTypeCache() { GetCachedAssemblyTypeMaps(); }
+
+        public static string GetGenericTypeName(Type type)
+        {
+            _genericTypeNames ??= new Dictionary<Type, string>();
+            
+            if (_genericTypeNames.TryGetValue(type, out var genericTypeName))
+                return genericTypeName;
+
+            genericTypeName = string.IsNullOrEmpty(type.Namespace)
+                ? type.Name
+                : $"{type.Namespace}.{type.Name}";
+
+            _genericTypeNames.Add(type, genericTypeName);
+
+            return genericTypeName;
+        }
 
         /// <summary>
         /// Executes a delegate function for every assembly that can be loaded.

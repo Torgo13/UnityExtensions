@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace UnityExtensions
+namespace PKGE
 {
     public static class TimeSpanExtensions
     {

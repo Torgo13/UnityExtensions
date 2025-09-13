@@ -1,5 +1,5 @@
 {
-    "name": "UnityExtensions.Runtime",
+    "name": "PKGE.Runtime",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
@@ -69,6 +69,11 @@
             "name": "com.unity.timeline",
             "expression": "1.7.0",
             "define": "TIMELINE_1_7_0_OR_NEWER"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "PACKAGE_MATHEMATICS"
         }
     ],
     "noEngineReferences": false

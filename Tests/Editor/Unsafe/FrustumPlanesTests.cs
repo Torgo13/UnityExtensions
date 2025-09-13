@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics.Tests/FrustumPlanesTests.cs
     public class FrustumPlanesTests

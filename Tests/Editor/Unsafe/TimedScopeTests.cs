@@ -1,8 +1,8 @@
 using NUnit.Framework;
 using System.Threading;
-using UnityExtensions.Editor.Unsafe;
+using PKGE.Editor.Unsafe;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     class TimedScopeTests
     {

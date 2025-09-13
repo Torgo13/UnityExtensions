@@ -1,7 +1,7 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     //https://github.com/needle-mirror/com.unity.xr.arcore/blob/master/Runtime/NativeView.cs
     #region UnityEngine.XR.ARCore

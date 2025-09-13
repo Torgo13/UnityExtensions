@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using System.Diagnostics;
 
-namespace UnityExtensions.Unsafe.Tests
+namespace PKGE.Unsafe.Tests
 {
     public class BurstSafetyTests
     {

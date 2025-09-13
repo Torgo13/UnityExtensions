@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/Editor/CreateTexture2DArrayAsset.cs
     #region BoatAttack

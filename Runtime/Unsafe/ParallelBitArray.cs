@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public struct ParallelBitArray
     {

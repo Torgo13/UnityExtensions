@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// <see cref="MonoBehaviour"/> that invokes a callback when it is destroyed.

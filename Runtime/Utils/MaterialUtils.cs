@@ -9,7 +9,7 @@ using UnityObject = UnityEngine.Object;
 using UnityEngine.UI;
 #endif
 
-namespace UnityExtensions
+namespace PKGE
 {
     /// <summary>
     /// Runtime Material utilities.

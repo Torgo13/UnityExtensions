@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     abstract class PerformanceComparisonTest : PerformanceTestBase
     {

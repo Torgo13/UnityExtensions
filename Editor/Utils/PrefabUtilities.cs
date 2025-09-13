@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace UnityExtensions.Editor
+namespace PKGE.Editor
 {
     public static class PrefabUtilities
     {

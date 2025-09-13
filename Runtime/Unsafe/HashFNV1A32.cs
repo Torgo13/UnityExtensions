@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Collections;
 
-namespace UnityExtensions.Unsafe
+namespace PKGE.Unsafe
 {
     public ref struct HashFNV1A32
     {

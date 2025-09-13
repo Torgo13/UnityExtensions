@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions.Attributes
+namespace PKGE.Attributes
 {
     /// <summary>
     /// Attribute used to make an int field display as a layer selector drop-down.

@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System.Text;
 using UnityEngine.Pool;
 
-namespace UnityExtensions.Tests
+namespace PKGE.Tests
 {
     public class StringBuilderPoolTests
     {

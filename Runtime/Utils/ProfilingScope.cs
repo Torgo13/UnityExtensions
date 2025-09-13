@@ -14,7 +14,7 @@ using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Unity.Profiling;
 
-namespace UnityExtensions
+namespace PKGE
 {
     class TProfilingSampler<TEnum> : ProfilingSampler where TEnum : Enum
     {

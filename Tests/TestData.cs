@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityExtensions.Editor.Tests
+namespace PKGE.Editor.Tests
 {
     static class TestData
     {

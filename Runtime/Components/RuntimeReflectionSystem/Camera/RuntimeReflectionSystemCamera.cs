@@ -7,7 +7,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
-namespace UnityExtensions
+namespace PKGE
 {
     //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
     public class RuntimeReflectionSystemCamera : MonoBehaviour
@@ -28,7 +28,7 @@ namespace UnityExtensions
 #endif // BLEND_SHADER
 
         [SerializeField] private Shader skyboxShader;
-        [SerializeField] private Material _skyboxMaterial;
+        [SerializeField] internal Material _skyboxMaterial;
         private bool _createdMaterial;
 
         [SerializeField] internal Camera reflectionCamera;
@@ -285,13 +285,16 @@ namespace UnityExtensions
 
             // Blend between the previous and current camera render textures
             float blend = frameCount / (float)BlendFrames;
+
 #if BLEND_SHADER
             _skyboxMaterial.SetFloat(Blend, blend);
 #else
             if (supportsComputeShaders)
             {
+                /*
                 CubemapBlendCompute.Blend(_texture2DArrayLerp,
                     _renderTextures[NextIndex()], _renderTextures[PreviousIndex()], _blendedTexture, blend);
+                */
             }
             else
             {
