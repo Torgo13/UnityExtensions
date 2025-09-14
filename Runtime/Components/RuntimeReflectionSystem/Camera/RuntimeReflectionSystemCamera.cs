@@ -61,7 +61,21 @@ namespace PKGE
         /// </summary>
         public NativeArray<Color32> _ambientColours;
 
+        /// <summary>
+        /// The weighted colour in the direction of the camera.
+        /// </summary>
         public Color adaptiveColour;
+
+        /// <summary>
+        /// The weighted colour in the direction of the sun.
+        /// </summary>
+        public Color skyColour;
+
+        /// <summary>
+        /// The ratio between the sky colour intensity in the direction of the sun
+        /// and the opposite direction.
+        /// </summary>
+        public float skyRatio;
 
         [SerializeField] internal ComputeShader _texture2DArrayLerp;
 
@@ -79,6 +93,11 @@ namespace PKGE
 
         [Range(0.25f, 1.0f)]
         [SerializeField] private float resolutionScale = 1.0f;
+        public float ResolutionScale
+        {
+            get { return resolutionScale; }
+            set { resolutionScale = System.Math.Clamp(value, 0.25f, 1.0f); }
+        }
 
         /// <summary>When true, one cubemap face is updated per frame. Otherwise, all six are updated each frame.</summary>
         public bool timeSlice = true;
@@ -520,6 +539,9 @@ namespace PKGE
         /// Sample the highest mipmap level of each cubemap face.
         /// Apply the colours to RenderSettings.
         /// </summary>
+        /// <remarks>
+        /// Instead of providing a callback function, check each frame if it has completed.
+        /// </remarks>
         internal void UpdateAmbient()
         {
             _readbackRequest = AsyncGPUReadback.Request(_blendedTexture,
@@ -533,25 +555,18 @@ namespace PKGE
         /// </summary>
         internal void GPUReadbackRequest()
         {
-            // Cache the indices of the CubemapFace enum to avoid boxing
-            const int positiveX = (int)CubemapFace.PositiveX;
-            const int negativeX = (int)CubemapFace.NegativeX;
-            const int positiveY = (int)CubemapFace.PositiveY;
-            const int negativeY = (int)CubemapFace.NegativeY;
-            const int positiveZ = (int)CubemapFace.PositiveZ;
-            const int negativeZ = (int)CubemapFace.NegativeZ;
-
             for (int i = 0; i < _ambientColours.Length; i++)
             {
                 _ambientColours[i] = _readbackRequest.GetData<Color32>(layer: i)[0];
             }
 
+            bool sunFound = LightUtils.GetDirectionalLight(out var sun, out var sunTransform);
+
             if (removeBlue)
             {
                 Color sunColour;
 
-                Light sun = RenderSettings.sun;
-                if (sun != null)
+                if (sunFound)
                 {
                     sunColour = sun.useColorTemperature
                         ? Mathf.CorrelatedColorTemperatureToRGB(sun.colorTemperature)
@@ -574,30 +589,47 @@ namespace PKGE
             Vector4 skyEquator = default;
             for (int i = 0; i < 3; i++)
             {
-                equator[i] = _ambientColours[positiveX][i]
-                    + _ambientColours[negativeX][i]
-                    + _ambientColours[positiveZ][i]
-                    + _ambientColours[negativeZ][i];
+                equator[i] = _ambientColours[(int)CubemapFace.PositiveX][i]
+                    + _ambientColours[(int)CubemapFace.NegativeX][i]
+                    + _ambientColours[(int)CubemapFace.PositiveZ][i]
+                    + _ambientColours[(int)CubemapFace.NegativeZ][i];
 
-                skyEquator[i] = equator[i] + (4 * _ambientColours[positiveY][i]);
+                skyEquator[i] = equator[i] + (4 * _ambientColours[(int)CubemapFace.PositiveY][i]);
                 skyEquator[i] /= 8 * byte.MaxValue;
 
                 equator[i] /= 4 * byte.MaxValue;
             }
 
-            RenderSettings.ambientSkyColor = _ambientColours[positiveY];
+            RenderSettings.ambientSkyColor = _ambientColours[(int)CubemapFace.PositiveY];
             RenderSettings.ambientEquatorColor = groundColour
                 ? equator
                 : skyEquator;
             RenderSettings.ambientGroundColor = groundColour
-                ? _ambientColours[negativeY]
+                ? _ambientColours[(int)CubemapFace.NegativeY]
                 : equator;
 
             // Forward is +Z, index 4
-            adaptiveColour = SampleCubemapBilinear(
-                _ambientColours, _mainCameraTransform.forward);
+            adaptiveColour = SampleCubemapBilinear(_ambientColours, _mainCameraTransform.forward);
+
+            if (!sunFound)
+            {
+                return;
+            }
+
+            Vector3 sunForward = sunTransform.forward;
+            skyColour = SampleCubemapBilinear(_ambientColours, sunForward);
+            float denominator = SampleCubemapBilinear(_ambientColours, -sunForward).grayscale;
+
+            skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
         }
 
+        /// <summary>
+        /// Sum the weighted contribution of each cubemap face.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Vector3.Distance"/> calculates the difference between two vectors.
+        /// The direction is inverted to calculate the similarity instead.
+        /// </remarks>
         internal static Color SampleCubemapBilinear(NativeArray<Color32> colours, Vector3 forward)
         {
             Color sum =

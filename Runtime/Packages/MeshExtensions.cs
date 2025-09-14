@@ -632,13 +632,33 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>(this Mesh mesh, int channel, NativeList<T> uvs) where T : unmanaged
+        public static void SetVertices(this Mesh mesh, NativeList<float3> inVertices)
+        {
+            mesh.SetVertices(inVertices.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetIndices<T>(this Mesh mesh, NativeList<T> inIndices, MeshTopology topology, int submesh)
+            where T : unmanaged
+        {
+            mesh.SetIndices(inIndices.AsArray(), topology, submesh);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetUVs<T>(this Mesh mesh, int channel, NativeList<T> uvs)
+            where T : unmanaged
         {
             mesh.SetUVs(channel, uvs.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetNormals(this Mesh mesh, NativeList<Vector3> inNormals)
+        {
+            mesh.SetNormals(inNormals.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetNormals(this Mesh mesh, NativeList<float3> inNormals)
         {
             mesh.SetNormals(inNormals.AsArray());
         }
@@ -655,5 +675,23 @@ namespace PKGE.Packages
             mesh.SetColors(inColors.AsArray());
         }
         #endregion // NativeList
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GetVertices(this Mesh mesh, List<float3> vertices)
+        {
+            mesh.GetVertices(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref vertices));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetVertices(this Mesh mesh, List<float3> inVertices)
+        {
+            mesh.SetVertices(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref inVertices));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetNormals(this Mesh mesh, List<float3> inNormals)
+        {
+            mesh.SetNormals(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref inNormals));
+        }
     }
 }

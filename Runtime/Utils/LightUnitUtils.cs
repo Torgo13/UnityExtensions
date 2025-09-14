@@ -3,6 +3,51 @@ using UnityEngine;
 
 namespace PKGE
 {
+    public static class LightUtils
+    {
+        public static bool GetDirectionalLight(out Light sun, out Transform sunTransform)
+        {
+            sun = RenderSettings.sun;
+            if (sun != null)
+            {
+                sunTransform = sun.transform;
+                return true;
+            }
+
+            sun = UnityEngine.Object.FindAnyObjectByType<Light>();
+            if (sun != null
+                && sun.type == LightType.Directional)
+            {
+                sunTransform = sun.transform;
+                return true;
+            }
+
+#if UNITY_2022_3_OR_NEWER
+            Light[] lights = UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
+#else
+            Light[] lights = UnityEngine.Object.FindObjectsOfType<Light>();
+#endif // UNITY_2022_3_OR_NEWER
+
+            if (lights == null)
+            {
+                sunTransform = null;
+                return false;
+            }
+
+            foreach (var light in lights)
+            {
+                if (light.type == LightType.Directional)
+                {
+                    sunTransform = light.transform;
+                    return true;
+                }
+            }
+
+            sunTransform = null;
+            return false;
+        }
+    }
+
     /// <summary>
     /// Light Unit Utils contains functions and definitions to facilitate conversion between different light intensity units.
     /// </summary>

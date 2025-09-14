@@ -527,7 +527,9 @@ namespace PKGE
         /// <param name="withUndo">Whether to record and undo operation for the destroy action.</param>
         /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is
         /// <see langword="false"/> before destroying it.</param>
-        public static void Destroy(this UnityObject obj, bool withUndo = false, bool skipNullCheck = false)
+        /// <param name="allowDestroyingAssets">Set to true to allow assets to be destroyed.</param>
+        public static void Destroy(this UnityObject obj, bool withUndo = false,
+            bool skipNullCheck = false, bool allowDestroyingAssets = false)
         {
             if (skipNullCheck || obj != null)
             {
@@ -537,7 +539,7 @@ namespace PKGE
                 else if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
                 else
-                    UnityObject.DestroyImmediate(obj);
+                    UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
 #else
                 UnityObject.Destroy(obj);
 #endif
