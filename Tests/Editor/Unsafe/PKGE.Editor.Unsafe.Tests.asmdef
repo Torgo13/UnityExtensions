@@ -2,6 +2,7 @@
     "name": "PKGE.Editor.Unsafe.Tests",
     "rootNamespace": "",
     "references": [
+        "GUID:7dabed3724aa64f438f2ac84f705af03",
         "GUID:0a9c04c1884aa2c4e95ac7f8916fb5fc",
         "GUID:c14471476d178cd4dbdc68358f5facb2",
         "GUID:2665a8d13d1b3f18800f46e256720795",
@@ -23,6 +24,12 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.ext.nunit",
+            "expression": "2.0.3",
+            "define": "USING_NUNIT_2_0_3_OR_NEWER"
+        }
+    ],
     "noEngineReferences": false
 }

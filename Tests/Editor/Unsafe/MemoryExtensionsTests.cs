@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using NUnit.Framework;
 using Unity.Collections;
@@ -295,3 +296,4 @@ namespace PKGE.Unsafe.Tests
         #endregion // UnityEngine.InputSystem.Utilities
     }
 }
+#endif // INCLUDE_COLLECTIONS

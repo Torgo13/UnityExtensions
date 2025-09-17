@@ -1,3 +1,4 @@
+#if INCLUDE_BURST
 using System;
 using NUnit.Framework;
 using Unity.Burst;
@@ -116,3 +117,4 @@ namespace PKGE.Unsafe.Tests
         #endregion // Unity.Entities
     }
 }
+#endif // INCLUDE_BURST

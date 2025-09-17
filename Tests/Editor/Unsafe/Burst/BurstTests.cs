@@ -1,3 +1,4 @@
+#if INCLUDE_BURST
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -427,6 +428,7 @@ namespace PKGE.Unsafe.Tests
             Assert.IsTrue(didCatch);
         }
 #endif
-        #endregion // Unity.Entities
+#endregion // Unity.Entities
     }
 }
+#endif // INCLUDE_BURST

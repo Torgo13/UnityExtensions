@@ -799,7 +799,18 @@ namespace PKGE.Tests
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
+#if USING_NUNIT_2_0_3_OR_NEWER
             yield return props.DisposeAsync();
+#else
+            System.Threading.Tasks.ValueTask disposeTask = props.DisposeAsync();
+            while (!disposeTask.IsCompletedSuccessfully)
+            {
+                Assert.IsFalse(disposeTask.IsCanceled);
+                Assert.IsFalse(disposeTask.IsFaulted);
+
+                yield return null;
+            }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
             UnityEngine.Object.DestroyImmediate(tex);
         }

@@ -43,6 +43,14 @@ namespace PKGE.Unsafe
             Partial
         };
 
+#if INCLUDE_MATHEMATICS
+        /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, Plane[])"/>
+        public static void FromCamera(Camera camera, NativeArray<Vector4> planes, Plane[] sourcePlanes)
+        {
+            FromCamera(camera, planes.Reinterpret<float4>(), sourcePlanes);
+        }
+#endif // INCLUDE_MATHEMATICS
+
         /// <summary>
         /// Populates the frustum plane array from the given camera frustum.
         /// </summary>
@@ -342,6 +350,6 @@ namespace PKGE.Unsafe
 
             return (inCount == planes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
-        #endregion // Unity.Rendering
+#endregion // Unity.Rendering
     }
 }

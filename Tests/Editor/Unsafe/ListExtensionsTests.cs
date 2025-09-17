@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using NUnit.Framework;
 using Unity.Collections;
 using System.Collections.Generic;
@@ -35,3 +36,4 @@ namespace PKGE.Unsafe.Tests
         }
     }
 }
+#endif // INCLUDE_COLLECTIONS

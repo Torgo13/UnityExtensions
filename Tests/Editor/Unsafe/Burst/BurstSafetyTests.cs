@@ -1,3 +1,4 @@
+#if INCLUDE_BURST
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using Unity.Collections;
@@ -184,3 +185,4 @@ namespace PKGE.Unsafe.Tests
         #endregion // Unity.Entities
     }
 }
+#endif // INCLUDE_BURST

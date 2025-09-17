@@ -77,6 +77,7 @@ namespace PKGE.Unsafe.Tests
             nativeArray.Dispose();
         }
 
+#if INCLUDE_COLLECTIONS
         [Test]
         public void CopyToList_FromNativeList_ShouldCopyElementsToList()
         {
@@ -94,6 +95,7 @@ namespace PKGE.Unsafe.Tests
 
             nativeList.Dispose();
         }
+#endif // INCLUDE_COLLECTIONS
 
         [Test]
         public void CopyToNativeArray_FromArray_ShouldCopyElementsToNativeArray()
@@ -127,6 +129,7 @@ namespace PKGE.Unsafe.Tests
             nativeArray.Dispose();
         }
 
+#if INCLUDE_COLLECTIONS
         [Test]
         public void CopyToNativeArray_FromNativeList_ShouldCopyElementsToNativeArray()
         {
@@ -196,5 +199,6 @@ namespace PKGE.Unsafe.Tests
             nativeArray.Dispose();
             nativeList.Dispose();
         }
+#endif // INCLUDE_COLLECTIONS
     }
 }

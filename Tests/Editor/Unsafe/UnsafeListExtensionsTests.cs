@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -484,3 +485,4 @@ namespace PKGE.Unsafe.Tests
         #endregion // Helpers
     }
 }
+#endif // INCLUDE_COLLECTIONS

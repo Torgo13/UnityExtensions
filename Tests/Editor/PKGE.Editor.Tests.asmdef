@@ -5,6 +5,9 @@
         "GUID:16b707dc5319ad24facbdf7282f85fdc",
         "GUID:7dabed3724aa64f438f2ac84f705af03",
         "GUID:1427a2291daa26248ae50ca4b4271389",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:27619889b8ba8c24980f49ee34dbb44a",
         "GUID:0acc523941302664db1f4e527237feb3"
     ],
@@ -26,6 +29,31 @@
             "name": "com.unity.ugui",
             "expression": "1.0.0",
             "define": "INCLUDE_UGUI"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "INCLUDE_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "INCLUDE_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "INCLUDE_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "INCLUDE_TEXTMESH_PRO"
+        },
+        {
+            "name": "com.xperiandri.stringbuilderextensions",
+            "expression": "1.0.0",
+            "define": "INCLUDE_STRINGBUILDER_EXTENSIONS"
         }
     ],
     "noEngineReferences": false

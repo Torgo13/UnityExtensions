@@ -1,9 +1,11 @@
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
+using UnityEngine.TestTools;
 
 namespace PKGE.Unsafe.Tests
 {
@@ -119,8 +121,13 @@ namespace PKGE.Unsafe.Tests
             Assert.AreEqual(data.Value2, 99.9f);
         }
 
+#if USING_NUNIT_2_0_3_OR_NEWER
         [Test]
         public async Task ReadExactAsync_ShouldReadExactBytes()
+#else
+        [UnityTest]
+        public IEnumerator ReadExactAsync_ShouldReadExactBytes()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             // Arrange
             var inputData = Encoding.UTF8.GetBytes("TestData");
@@ -129,12 +136,24 @@ namespace PKGE.Unsafe.Tests
             var buffer = new byte[inputData.Length];
 
             // Act
+#if USING_NUNIT_2_0_3_OR_NEWER
             await _stream.ReadExactAsync(buffer, 0, buffer.Length);
+#else
+            Task readExactAsyncTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
+            while (!readExactAsyncTask.IsCompletedSuccessfully)
+            {
+                Assert.IsFalse(readExactAsyncTask.IsCanceled);
+                Assert.IsFalse(readExactAsyncTask.IsFaulted);
+
+                yield return null;
+            }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
             // Assert
             Assert.AreEqual(inputData, buffer);
         }
 
+#if USING_NUNIT_2_0_3_OR_NEWER
         [Test]
         public void ReadExactAsync_ShouldThrowException_WhenStreamIsEmpty()
         {
@@ -144,9 +163,15 @@ namespace PKGE.Unsafe.Tests
             // Act & Assert
             Assert.ThrowsAsync<EndOfStreamException>(() => _stream.ReadExactAsync(buffer, 0, buffer.Length));
         }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
+#if USING_NUNIT_2_0_3_OR_NEWER
         [Test]
         public async Task ReadExactAsync_ShouldHandlePartialReads()
+#else
+        [UnityTest]
+        public IEnumerator ReadExactAsync_ShouldHandlePartialReads()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             // Arrange
             var inputData = new byte[] { 1, 2, 3, 4, 5 };
@@ -158,12 +183,24 @@ namespace PKGE.Unsafe.Tests
             var partialReadStream = new PartialReadStream(_stream, maxReadBytes: 2);
 
             // Act
+#if USING_NUNIT_2_0_3_OR_NEWER
             await partialReadStream.ReadExactAsync(buffer, 0, buffer.Length);
+#else
+            Task partialReadStreamTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
+            while (!partialReadStreamTask.IsCompletedSuccessfully)
+            {
+                Assert.IsFalse(partialReadStreamTask.IsCanceled);
+                Assert.IsFalse(partialReadStreamTask.IsFaulted);
+
+                yield return null;
+            }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
             // Assert
             Assert.AreEqual(inputData, buffer);
         }
 
+#if USING_NUNIT_2_0_3_OR_NEWER
         [Test]
         public void ReadExactAsync_ShouldThrowArgumentOutOfRangeException_WhenCountIsNegative()
         {
@@ -173,15 +210,32 @@ namespace PKGE.Unsafe.Tests
             // Act & Assert
             Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _stream.ReadExactAsync(buffer, 0, -1));
         }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
+#if USING_NUNIT_2_0_3_OR_NEWER
         [Test]
         public async Task ReadExactAsync_ShouldHandleZeroCountGracefully()
+#else
+        [UnityTest]
+        public IEnumerator ReadExactAsync_ShouldHandleZeroCountGracefully()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             // Arrange
             var buffer = new byte[10];
 
             // Act
+#if USING_NUNIT_2_0_3_OR_NEWER
             await _stream.ReadExactAsync(buffer, 0, 0);
+#else
+            Task zeroReadStreamTask = _stream.ReadExactAsync(buffer, 0, 0);
+            while (!zeroReadStreamTask.IsCompletedSuccessfully)
+            {
+                Assert.IsFalse(zeroReadStreamTask.IsCanceled);
+                Assert.IsFalse(zeroReadStreamTask.IsFaulted);
+
+                yield return null;
+            }
+#endif // USING_NUNIT_2_0_3_OR_NEWER
 
             // Assert
             Assert.Pass("Completed without exceptions.");

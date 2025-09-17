@@ -1,13 +1,20 @@
 using NUnit.Framework;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
+
+#if INCLUDE_MATHEMATICS
+using Unity.Mathematics;
+#else
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe.Tests
 {
     //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics.Tests/FrustumPlanesTests.cs
     public class FrustumPlanesTests
     {
+#if INCLUDE_MATHEMATICS
         static readonly Plane[] Planes =
         {
             new Plane(new Vector3(1.0f, 0.0f, 0.0f), -1.0f),
@@ -94,6 +101,7 @@ namespace PKGE.Unsafe.Tests
             temp.Dispose();
             return result;
         }
+#endif // INCLUDE_MATHEMATICS
 
         [Test]
         [TestCase(0f)]
