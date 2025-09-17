@@ -1,7 +1,15 @@
 {
     "name": "PKGE.Runtime",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:e0cd26848372d4e5c891c569017e11f1",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:e596a3212ad2f764c81bfe3555f7c877"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -61,19 +69,54 @@
             "define": "HAS_GET_POSITION_AND_ROTATION"
         },
         {
-            "name": "com.xperiandri.stringbuilderextensions",
-            "expression": "1.0.0",
-            "define": "INCLUDE_STRINGBUILDER_EXTENSIONS"
-        },
-        {
             "name": "com.unity.timeline",
             "expression": "1.7.0",
             "define": "TIMELINE_1_7_0_OR_NEWER"
         },
         {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "INCLUDE_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "INCLUDE_COLLECTIONS"
+        },
+        {
             "name": "com.unity.mathematics",
             "expression": "",
-            "define": "PACKAGE_MATHEMATICS"
+            "define": "INCLUDE_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "",
+            "define": "INCLUDE_TEXTMESH_PRO"
+        },
+        {
+            "name": "com.xperiandri.stringbuilderextensions",
+            "expression": "1.0.0",
+            "define": "INCLUDE_STRINGBUILDER_EXTENSIONS"
+        },
+        {
+            "name": "com.unity.render-pipelines.core",
+            "expression": "",
+            "define": "INCLUDE_RENDER_PIPELINES_CORE"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "INCLUDE_RENDER_PIPELINES_UNIVERSAL"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "14.0.0",
+            "define": "URP_14"
+        },
+        {
+            "name": "com.unity.entities.graphics",
+            "expression": "",
+            "define": "INCLUDE_ENTITIES_GRAPHICS"
         }
     ],
     "noEngineReferences": false

@@ -4,8 +4,14 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+
+#if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+#else
+using PKGE.Mathematics;
+using static PKGE.Mathematics.math;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe
 {
@@ -14,12 +20,6 @@ namespace PKGE.Unsafe
     /// </summary>
     public static unsafe class CoreUnsafeUtils
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T As<T>(this object from) where T : class
-        {
-            return System.Runtime.CompilerServices.Unsafe.As<T>(from);
-        }
-        
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/CoreUnsafeUtils.cs#L258
         #region UnityEngine.Rendering
         /// <summary>

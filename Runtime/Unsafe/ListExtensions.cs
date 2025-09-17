@@ -20,6 +20,7 @@ namespace PKGE.Unsafe
             return ref NoAllocHelpers.ExtractArrayFromList(list)[index];
         }
 
+#if INCLUDE_COLLECTIONS
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/ListExtensions.cs
         #region Unity.Collections
         /// <summary>
@@ -70,5 +71,6 @@ namespace PKGE.Unsafe
         {
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
+#endif // INCLUDE_COLLECTIONS
     }
 }

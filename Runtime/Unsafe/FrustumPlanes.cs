@@ -5,10 +5,13 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
-#if PACKAGE_MATHEMATICS
+#if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
-using static Unity.Mathematics.math;
-#endif // PACKAGE_MATHEMATICS
+#else
+using PKGE.Mathematics;
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe
 {
@@ -84,6 +87,7 @@ namespace PKGE.Unsafe
             }
         }
 
+#if INCLUDE_COLLECTIONS
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
         /// </summary>
@@ -139,6 +143,7 @@ namespace PKGE.Unsafe
                     * math.ceil(math.saturate(dist + radius)));
             }
         }
+#endif // INCLUDE_COLLECTIONS
 
         /// <summary>
         /// Represents four three-dimensional culling planes where all coordinate components and distances are combined.
@@ -198,6 +203,7 @@ namespace PKGE.Unsafe
             }
         }
 
+#if INCLUDE_COLLECTIONS
         internal static UnsafeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
         {
             int cullingPlaneCount = cullingPlanes.Length;
@@ -220,8 +226,9 @@ namespace PKGE.Unsafe
 
             return planes;
         }
+#endif // INCLUDE_COLLECTIONS
 
-#if PACKAGE_MATHEMATICS
+#if INCLUDE_MATHEMATICS
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
         /// </summary>
@@ -295,13 +302,13 @@ namespace PKGE.Unsafe
             int outCount = math.csum(masks);
             return outCount > 0 ? IntersectResult.Out : IntersectResult.In;
         }
-#endif // PACKAGE_MATHEMATICS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float4 dot4(float4 xs, float4 ys, float4 zs, float4 mx, float4 my, float4 mz)
         {
             return xs * mx + ys * my + zs * mz;
         }
+#endif // INCLUDE_MATHEMATICS
 
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
@@ -316,7 +323,12 @@ namespace PKGE.Unsafe
 
             for (int i = 0; i < planes.Length; i++)
             {
+#if INCLUDE_MATHEMATICS
                 var d = math.dot(planes[i].xyz, center) + planes[i].w;
+#else
+                var d = math.dot((float3)planes[i], center) + planes[i].w;
+#endif // INCLUDE_MATHEMATICS
+
                 if (d < -radius)
                 {
                     return IntersectResult.Out;
@@ -330,6 +342,6 @@ namespace PKGE.Unsafe
 
             return (inCount == planes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
-#endregion // Unity.Rendering
+        #endregion // Unity.Rendering
     }
 }

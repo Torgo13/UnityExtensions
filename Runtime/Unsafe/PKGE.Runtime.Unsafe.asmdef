@@ -24,22 +24,22 @@
         {
             "name": "com.unity.textmeshpro",
             "expression": "1.0.0",
-            "define": "PACKAGE_TEXTMESH_PRO"
+            "define": "INCLUDE_TEXTMESH_PRO"
         },
         {
             "name": "com.unity.burst",
             "expression": "",
-            "define": "PACKAGE_BURST"
+            "define": "INCLUDE_BURST"
         },
         {
             "name": "com.unity.collections",
             "expression": "",
-            "define": "PACKAGE_COLLECTIONS"
+            "define": "INCLUDE_COLLECTIONS"
         },
         {
             "name": "com.unity.mathematics",
             "expression": "",
-            "define": "PACKAGE_MATHEMATICS"
+            "define": "INCLUDE_MATHEMATICS"
         }
     ],
     "noEngineReferences": false

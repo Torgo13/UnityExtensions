@@ -480,6 +480,7 @@ namespace PKGE.Unsafe
                 nativeArray.Length * UnsafeUtility.SizeOf<T>());
         }
 
+#if INCLUDE_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
         {
@@ -494,6 +495,7 @@ namespace PKGE.Unsafe
                 nativeList.GetIntPtr(),
                 nativeList.Length * UnsafeUtility.SizeOf<T>());
         }
+#endif // INCLUDE_COLLECTIONS
         #endregion // CopyToArray
 
         #region CopyToList
@@ -516,7 +518,8 @@ namespace PKGE.Unsafe
             list.EnsureCapacity(nativeArray.Length);
             NoAllocHelpers.ResetListContents(list, nativeArray);
         }
-
+        
+#if INCLUDE_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
@@ -526,6 +529,7 @@ namespace PKGE.Unsafe
             list.EnsureCapacity(nativeList.Length);
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
+#endif // INCLUDE_COLLECTIONS
         #endregion // CopyToList
 
         #region CopyToNativeArray
@@ -555,6 +559,7 @@ namespace PKGE.Unsafe
             NativeArray<T>.Copy(NoAllocHelpers.ExtractArrayFromList(list), nativeArray, list.Count);
         }
 
+#if INCLUDE_COLLECTIONS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this NativeList<T> nativeList, ref NativeArray<T> nativeArray) where T : unmanaged
         {
@@ -567,8 +572,10 @@ namespace PKGE.Unsafe
 
             nativeArray.CopyFrom(nativeList.AsArray());
         }
+#endif // INCLUDE_COLLECTIONS
         #endregion // CopyToNativeArray
 
+#if INCLUDE_COLLECTIONS
         #region CopyToNativeList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CopyTo<T>(this T[] array, ref NativeList<T> nativeList) where T : unmanaged
@@ -602,6 +609,7 @@ namespace PKGE.Unsafe
             nativeList.CopyFrom(nativeArray);
         }
         #endregion // CopyToNativeList
+#endif // INCLUDE_COLLECTIONS
         #endregion // CopyTo
     }
 }

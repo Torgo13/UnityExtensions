@@ -26,7 +26,7 @@ namespace PKGE
         /// <param name="b">The second float to compare.</param>
         /// <returns><see langword="true"/> if the values are similar. Otherwise, <see langword="false"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Approximately(this float a, float b)
+        public static bool FastApproximately(this float a, float b)
         {
             var d = b - a;
             var absDiff = d >= 0f ? d : -d;

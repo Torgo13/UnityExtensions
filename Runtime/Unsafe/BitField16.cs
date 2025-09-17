@@ -1,7 +1,12 @@
 using System;
 using System.Diagnostics;
 using Unity.Collections;
+
+#if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
+#else
+using PKGE.Mathematics;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe
 {

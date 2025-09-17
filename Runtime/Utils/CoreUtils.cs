@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
-using UnityEngine.Pool;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityObject = UnityEngine.Object;
@@ -241,7 +240,7 @@ namespace PKGE
         static string GetTextureAutoName(int width, int height, string format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
         {
-            using var _0 = StringBuilderPool.Get(out var sb);
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
             sb.Append(string.IsNullOrEmpty(name) ? "Texture" : name);
             sb.Append('_');
 
@@ -1015,13 +1014,13 @@ namespace PKGE
             Assert.IsNotNull(outCorners);
             Assert.IsTrue(outCorners.Length >= 4);
 
-            var list = ListPool<Vector3>.Get();
+            var list = UnityEngine.Pool.ListPool<Vector3>.Get();
             CalculateViewSpaceCorners(proj, z, list);
             
             for (int i = 0; i < list.Count; i++)
                 outCorners[i] = list[i];
-            
-            ListPool<Vector3>.Release(list);
+
+            UnityEngine.Pool.ListPool<Vector3>.Release(list);
         }
         
         /// <inheritdoc cref="CalculateViewSpaceCorners(UnityEngine.Matrix4x4,float,UnityEngine.Vector3[])"/>

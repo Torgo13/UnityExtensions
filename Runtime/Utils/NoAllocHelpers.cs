@@ -176,7 +176,7 @@ namespace PKGE
 
             if (count != list.Count)
             {
-                var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+                var tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
                 tListAccess._size = count;
                 tListAccess._version++;
             }
@@ -195,7 +195,7 @@ namespace PKGE
             if (list == null)
                 return null;
 
-            var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
             return tListAccess._items;
         }
 
@@ -204,7 +204,7 @@ namespace PKGE
         {
             Assert.IsNotNull(list);
 
-            var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
 
             // Do not reallocate the _items array if it is already
             // large enough to contain all the elements of span
@@ -220,7 +220,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void ResetListSize<T>(this List<T> list, int size)
         {
-            var tListAccess = Unsafe.As<ListPrivateFieldAccess<T>>(list);
+            var tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
             tListAccess._size = size;
             tListAccess._version++;
         }

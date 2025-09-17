@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -158,3 +159,4 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // INCLUDE_COLLECTIONS

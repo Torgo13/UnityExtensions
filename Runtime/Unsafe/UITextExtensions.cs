@@ -18,7 +18,7 @@ namespace PKGE.Unsafe
             me.Set(buf, l);
         }
 
-#if PACKAGE_TEXTMESH_PRO
+#if INCLUDE_TEXTMESH_PRO
         public static void Format<T0>(this TMPro.TextMeshProUGUI me, string format, T0 arg0)
         {
             using var pooledArray = DisposeArrayPool<char>.Rent(1024);
@@ -27,7 +27,7 @@ namespace PKGE.Unsafe
             int l = StringFormatter.Write(ref buf, 0, format, arg0);
             me.Set(buf, l);
         }
-#endif // PACKAGE_TEXTMESH_PRO
+#endif // INCLUDE_TEXTMESH_PRO
 
         public static void Format<T0, T1>(this Text me, string format, T0 arg0, T1 arg1)
         {
@@ -38,7 +38,7 @@ namespace PKGE.Unsafe
             me.Set(buf, l);
         }
 
-#if PACKAGE_TEXTMESH_PRO
+#if INCLUDE_TEXTMESH_PRO
         public static void Format<T0, T1>(this TMPro.TextMeshProUGUI me, string format, T0 arg0, T1 arg1)
         {
             using var pooledArray = DisposeArrayPool<char>.Rent(1024);
@@ -47,7 +47,7 @@ namespace PKGE.Unsafe
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1);
             me.Set(buf, l);
         }
-#endif // PACKAGE_TEXTMESH_PRO
+#endif // INCLUDE_TEXTMESH_PRO
 
         public static void Format<T0, T1, T2>(this Text me, string format, T0 arg0, T1 arg1, T2 arg2)
         {
@@ -58,7 +58,7 @@ namespace PKGE.Unsafe
             me.Set(buf, l);
         }
 
-#if PACKAGE_TEXTMESH_PRO
+#if INCLUDE_TEXTMESH_PRO
         public static void Format<T0, T1, T2>(this TMPro.TextMeshProUGUI me, string format, T0 arg0, T1 arg1, T2 arg2)
         {
             using var pooledArray = DisposeArrayPool<char>.Rent(1024);
@@ -67,7 +67,7 @@ namespace PKGE.Unsafe
             int l = StringFormatter.Write(ref buf, 0, format, arg0, arg1, arg2);
             me.Set(buf, l);
         }
-#endif // PACKAGE_TEXTMESH_PRO
+#endif // INCLUDE_TEXTMESH_PRO
 
         public static void Set(this Text me, char[] text, int length)
         {
@@ -75,13 +75,13 @@ namespace PKGE.Unsafe
                 me.text = new string(text, 0, length);
         }
 
-#if PACKAGE_TEXTMESH_PRO
+#if INCLUDE_TEXTMESH_PRO
         public static void Set(this TMPro.TextMeshProUGUI me, char[] text, int length)
         {
             if (Set(me.text, text, length))
                 me.SetText(text, 0, length);
         }
-#endif // PACKAGE_TEXTMESH_PRO
+#endif // INCLUDE_TEXTMESH_PRO
 
         private static bool Set(string old, char[] text, int length)
         {

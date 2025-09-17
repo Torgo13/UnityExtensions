@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -172,3 +173,4 @@ namespace PKGE.Unsafe
         #endregion // Unity.Entities
     }
 }
+#endif // INCLUDE_COLLECTIONS

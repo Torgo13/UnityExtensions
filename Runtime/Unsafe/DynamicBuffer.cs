@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -677,3 +678,4 @@ namespace PKGE.Unsafe
         #endregion // Unity.Entities
     }
 }
+#endif // INCLUDE_COLLECTIONS

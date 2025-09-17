@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -123,3 +124,4 @@ namespace PKGE.Unsafe
         }
     }
 }
+#endif // INCLUDE_COLLECTIONS

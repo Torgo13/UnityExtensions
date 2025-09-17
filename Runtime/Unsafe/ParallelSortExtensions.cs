@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System.Threading;
 using Unity.Burst;
 using Unity.Collections;
@@ -264,3 +265,4 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // INCLUDE_COLLECTIONS

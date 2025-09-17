@@ -1,7 +1,12 @@
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+
+#if INCLUDE_MATHEMATICS
 using static Unity.Mathematics.math;
+#else
+using static PKGE.Mathematics.math;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe
 {

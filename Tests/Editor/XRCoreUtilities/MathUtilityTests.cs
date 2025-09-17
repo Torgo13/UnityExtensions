@@ -24,7 +24,7 @@ namespace PKGE.Editor.Tests
 
             foreach (var pair in testCases)
             {
-                var ourResult = MathUtility.Approximately(pair.x, pair.y);
+                var ourResult = MathUtility.FastApproximately(pair.x, pair.y);
                 var mathfResult = Mathf.Approximately(pair.x, pair.y);
                 Assert.AreEqual(mathfResult, ourResult, $"comparing {pair.x} to {pair.y} - Mathf said {mathfResult} , we said {ourResult}");
             }

@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -33,6 +34,24 @@ namespace PKGE.Unsafe
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
+
+        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
+        #region UnityEngine.Rendering.Universal
+        /// <summary>
+        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAt<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(unsafeList.Ptr, index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAtMutable<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(unsafeList.Ptr, index);
+        }
+        #endregion // UnityEngine.Rendering.Universal
 
         //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs
         #region CullingExtensions
@@ -120,3 +139,4 @@ namespace PKGE.Unsafe
         }
     }
 }
+#endif // INCLUDE_COLLECTIONS

@@ -569,7 +569,7 @@ namespace PKGE
                 // fall in the middle. So if our starting point falls in the middle of a line, it will always be skipped
                 // and our loop's end condition will never be met. So if there are multiple leftmost points, we want to
                 // use the point that has the minimum Z.
-                if (pointX < leftmostX || MathUtility.Approximately(pointX, leftmostX) && pointZ < leftmostZ)
+                if (pointX < leftmostX || MathUtility.FastApproximately(pointX, leftmostX) && pointZ < leftmostZ)
                     leftmostPointIndex = i;
             }
 

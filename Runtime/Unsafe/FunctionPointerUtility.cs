@@ -1,3 +1,4 @@
+#if INCLUDE_COLLECTIONS
 using System;
 using System.Reflection;
 using Unity.Burst;
@@ -46,3 +47,4 @@ namespace PKGE.Unsafe
         #endregion // Unity.Kinematica
     }
 }
+#endif // INCLUDE_COLLECTIONS
