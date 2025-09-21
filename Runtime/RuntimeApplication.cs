@@ -27,8 +27,37 @@ namespace PKGE
         internal static void RegisterFrameUpdateToCurrentPlayerLoop()
         {
             var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+
+#if USING_LINQ
             var playerLoopSystems = playerLoop.subSystemList.ToList();
+#else
+            bool updatePreFrame = false;
+            bool updatePostFrame = false;
+
+            using var _0 = playerLoop.subSystemList.ToListPooled(out var playerLoopSystems);
+
+            for (int i = 0, playerLoopSystemsCount = playerLoopSystems.Count;
+                i < playerLoopSystemsCount && !updatePreFrame && !updatePostFrame;
+                i++)
+            {
+                if (!updatePreFrame
+                    && playerLoopSystems[i].type == typeof(UpdatePreFrame))
+                {
+                    updatePreFrame = true;
+                }
+                else if (!updatePostFrame
+                    && playerLoopSystems[i].type == typeof(UpdatePostFrame))
+                {
+                    updatePostFrame = true;
+                }
+            }
+#endif // USING_LINQ
+
+#if USING_LINQ
             if (!playerLoopSystems.Any(s => s.type == typeof(UpdatePreFrame)))
+#else
+            if (!updatePreFrame)
+#endif // USING_LINQ
             {
                 playerLoopSystems.Insert(0, new PlayerLoopSystem
                 {
@@ -37,7 +66,11 @@ namespace PKGE
                 });
             }
 
+#if USING_LINQ
             if (!playerLoopSystems.Any(s => s.type == typeof(UpdatePostFrame)))
+#else
+            if (!updatePostFrame)
+#endif // USING_LINQ
             {
                 playerLoopSystems.Add(new PlayerLoopSystem
                 {
@@ -53,9 +86,23 @@ namespace PKGE
         internal static void UnregisterFrameUpdateToCurrentPlayerLoop()
         {
             var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+#if USING_LINQ
             var playerLoopSystems = playerLoop.subSystemList.ToList();
             playerLoopSystems.RemoveAll(s => s.type == typeof(UpdatePreFrame));
             playerLoopSystems.RemoveAll(s => s.type == typeof(UpdatePostFrame));
+#else
+            using var _0 = playerLoop.subSystemList.ToListPooled(out var temp);
+            using var _1 = UnityEngine.Pool.ListPool<PlayerLoopSystem>.Get(out var playerLoopSystems);
+            playerLoopSystems.EnsureCapacity(temp.Count);
+            for (int i = 0, tempCount = temp.Count; i < tempCount; i++)
+            {
+                if (temp[i].type != typeof(UpdatePreFrame)
+                    && temp[i].type != typeof(UpdatePostFrame))
+                {
+                    playerLoopSystems.Add(temp[i]);
+                }
+            }
+#endif // USING_LINQ
             playerLoop.subSystemList = playerLoopSystems.ToArray();
             PlayerLoop.SetPlayerLoop(playerLoop);
         }

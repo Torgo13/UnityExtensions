@@ -1,6 +1,3 @@
-using System;
-using System.Linq.Expressions;
-using System.Reflection;
 using UnityEngine;
 
 namespace PKGE
@@ -12,9 +9,10 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/6feca3f03e6a8cb62665b394599d2d17d5848c65/Packages/com.unity.render-pipelines.core/Editor/CoreEditorUtils.cs
         #region UnityEditor.Rendering
-        static readonly Func<float> GetGUIStatePixelsPerPoint = Expression.Lambda<Func<float>>(
-            Expression.Property(null, typeof(GUIUtility).GetProperty("pixelsPerPoint",
-                BindingFlags.NonPublic | BindingFlags.Static))).Compile();
+        static readonly System.Func<float> GetGUIStatePixelsPerPoint =
+            System.Linq.Expressions.Expression.Lambda<System.Func<float>>(
+                System.Linq.Expressions.Expression.Property(null, typeof(GUIUtility).GetProperty("pixelsPerPoint",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))).Compile();
         #endregion // UnityEditor.Rendering
 
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/GUI/ScreenGUIUtils.cs

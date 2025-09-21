@@ -44,6 +44,7 @@ namespace PKGE.Collections
         public InlinedArray(IEnumerable<TValue> values)
             : this()
         {
+#if USING_LINQ
             length = values.Count();
             if (length > 1)
                 additionalValues = new TValue[length - 1];
@@ -59,6 +60,21 @@ namespace PKGE.Collections
                     additionalValues[index - 1] = value;
                 ++index;
             }
+#else
+            using var _0 = values.ToListPooled(out var list);
+            length = list.Count;
+            if (length > 1)
+                additionalValues = new TValue[length - 1];
+            else
+                additionalValues = null;
+            
+            firstValue = list[0];
+
+            for (int index = length - 1; index > 0; index--)
+            {
+                additionalValues[index - 1] = list[index];
+            }
+#endif // USING_LINQ
         }
 
         public TValue this[int index]

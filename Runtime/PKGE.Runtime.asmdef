@@ -74,6 +74,11 @@
             "define": "TIMELINE_1_7_0_OR_NEWER"
         },
         {
+            "name": "com.unity.timeline",
+            "expression": "",
+            "define": "USING_TIMELINE"
+        },
+        {
             "name": "com.unity.burst",
             "expression": "",
             "define": "INCLUDE_BURST"

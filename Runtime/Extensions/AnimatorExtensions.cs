@@ -38,7 +38,19 @@ namespace PKGE
 
             if (transform == root)
             {
+#if USING_LINQ
                 path = string.Join('/', names.Reverse<string>());
+#else
+                using (UnityEngine.Pool.StringBuilderPool.Get(out var sb))
+                {
+                    for (int i = names.Count - 1; i > 0; i--)
+                    {
+                        sb.Append(names[i]).Append('/');
+                    }
+
+                    path = sb.Append(names[0]).ToString();
+                }
+#endif // USING_LINQ
                 return true;
             }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace PKGE
 {
@@ -32,6 +33,13 @@ namespace PKGE
                 else
                     False.Add(item);
             }
+        }
+
+        public static PooledObject<List<T>> ToListPooled<T>(this IEnumerable<T> collection, out List<T> pooledList)
+        {
+            var pooledObject = ListPool<T>.Get(out pooledList);
+            pooledList.AddRange(collection);
+            return pooledObject;
         }
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/EnumerableExtensions.cs
@@ -89,7 +97,13 @@ namespace PKGE
         #region UnityEngine.Purchasing
         public static IEnumerable<T> NonNull<T>(this IEnumerable<T> enumerable) where T : class
         {
+#if USING_LINQ
             return enumerable.Where(obj => obj != null);
+#else
+            var list = new List<T>(enumerable);
+            list.RemoveNull();
+            return list;
+#endif // USING_LINQ
         }
 
 #nullable enable

@@ -44,7 +44,7 @@ namespace PKGE
 
             return sb.ToString();
         }
-#endregion // Unity.XR.CoreUtils
+        #endregion // Unity.XR.CoreUtils
 
         //https://github.com/Unity-Technologies/UnityCsReference/blob/6000.1/Runtime/Export/Collections/CollectionExtensions.cs
         #region Unity.Collections

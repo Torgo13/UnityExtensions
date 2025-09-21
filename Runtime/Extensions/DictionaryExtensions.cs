@@ -80,7 +80,11 @@ namespace PKGE
 
         public static IEnumerable<T> GetList<T>(this IDictionary<string, object> dict, string key)
         {
+#if USING_LINQ
             return Get<IList>(dict, key)?.OfType<T>();
+#else
+            return Get<IList>(dict, key) as IEnumerable<T>;
+#endif // USING_LINQ
         }
 
         public static string GetString(this IDictionary<string, object> dict, string key)

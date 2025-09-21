@@ -1,3 +1,4 @@
+#if USING_TIMELINE
 using System;
 using System.Reflection;
 using System.Linq;
@@ -83,3 +84,4 @@ namespace PKGE
     }
 #endif
 }
+#endif // USING_TIMELINE

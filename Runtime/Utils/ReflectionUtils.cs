@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using UnityEngine.Assertions;
 
 namespace PKGE
@@ -17,6 +15,7 @@ namespace PKGE
         #region Unity.XR.CoreUtils
         static Assembly[] _assemblies;
         static List<Type[]> _typesPerAssembly;
+        static Dictionary<Assembly, Type[]> _typesPerAssemblyDictionary;
         static List<Dictionary<string, Type>> _assemblyTypeMaps;
         static Dictionary<Type, string> _genericTypeNames;
 
@@ -42,6 +41,28 @@ namespace PKGE
             }
 
             return _typesPerAssembly;
+        }
+
+        public static Dictionary<Assembly, Type[]> GetCachedTypesDictionary()
+        {
+            if (_typesPerAssemblyDictionary == null)
+            {
+                var assemblies = GetCachedAssemblies();
+                _typesPerAssemblyDictionary = new Dictionary<Assembly, Type[]>(assemblies.Length);
+                foreach (var assembly in assemblies)
+                {
+                    try
+                    {
+                        _typesPerAssemblyDictionary.Add(assembly, assembly.GetTypes());
+                    }
+                    catch (ReflectionTypeLoadException)
+                    {
+                        // Skip any assemblies that don't load properly -- suppress errors
+                    }
+                }
+            }
+
+            return _typesPerAssemblyDictionary;
         }
 
         public static List<Dictionary<string, Type>> GetCachedAssemblyTypeMaps()
@@ -274,9 +295,9 @@ namespace PKGE
                 name = name.Substring(1, name.Length - 1);
 
             // Insert a space before any capital letter unless it is the beginning or end of a word
-            name = Regex.Replace(name, @"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))", " $1",
-                RegexOptions.None, TimeSpan.FromSeconds(0.1));
-            name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))", " $1",
+                System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(0.1));
+            name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name);
             return name;
         }
         #endregion // Unity.XR.CoreUtils
@@ -374,10 +395,37 @@ namespace PKGE
         {
             Assert.IsTrue(target != null, "The target cannot be null");
 
+#if USING_LINQ
             return target.GetType()
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .OrderBy(t => t.MetadataToken);
+#else
+            FieldInfo[] fields = target.GetType()
+                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            orderFieldInfo ??= new OrderFieldInfo();
+
+            Array.Sort(fields, orderFieldInfo);
+            return fields;
+#endif // USING_LINQ
         }
+
+#if USING_LINQ
+#else
+        static OrderFieldInfo orderFieldInfo;
+        class OrderFieldInfo : IComparer<FieldInfo>
+        {
+            public int Compare(int x, int y)
+            {
+                return x.CompareTo(y);
+            }
+
+            public int Compare(FieldInfo x, FieldInfo y)
+            {
+                return x.MetadataToken.CompareTo(y.MetadataToken);
+            }
+        }
+#endif // USING_LINQ
         #endregion // UnityEngine.Rendering.Tests
 
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/Utility/ReflectionUtils.cs#L8

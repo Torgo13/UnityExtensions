@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
@@ -22,11 +23,14 @@ namespace PKGE
         /// Return false to ignore given type.</param>
         public static void GetAssignableTypes(this Type type, List<Type> list, Func<Type, bool> predicate = null)
         {
-            ReflectionUtils.ForEachType(t =>
+            foreach (var types in ReflectionUtils.GetCachedTypesPerAssembly())
             {
-                if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
-                    list.Add(t);
-            });
+                foreach (var t in types)
+                {
+                    if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
+                        list.Add(t);
+                }
+            }
         }
 
         /// <summary>
@@ -80,15 +84,17 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, `null`.</returns>
-        public static PropertyInfo GetPropertyRecursively(this Type type, string name, BindingFlags bindingAttr)
+        public static PropertyInfo GetPropertyRecursively(this Type type, string name,
+            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                                       | BindingFlags.DeclaredOnly)
         {
-            var property = type.GetProperty(name, bindingAttr);
-            if (property != null)
-                return property;
+            PropertyInfo property = default;
 
-            var baseType = type.BaseType;
-            if (baseType != null)
-                property = type.BaseType.GetPropertyRecursively(name, bindingAttr);
+            while (property == null && type != null)
+            {
+                property = type.GetProperty(name, bindingAttr);
+                type = type.BaseType;
+            }
 
             return property;
         }
@@ -101,15 +107,17 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, `null`.</returns>
-        public static FieldInfo GetFieldRecursively(this Type type, string name, BindingFlags bindingAttr)
+        public static FieldInfo GetFieldRecursively(this Type type, string name,
+            BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+                                       | BindingFlags.DeclaredOnly)
         {
-            var field = type.GetField(name, bindingAttr);
-            if (field != null)
-                return field;
+            FieldInfo field = default;
 
-            var baseType = type.BaseType;
-            if (baseType != null)
-                field = type.BaseType.GetFieldRecursively(name, bindingAttr);
+            while (field == null && type != null)
+            {
+                field = type.GetField(name, bindingAttr);
+                type = type.BaseType;
+            }
 
             return field;
         }
@@ -124,18 +132,10 @@ namespace PKGE
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
-            while (true)
+            while (type != null)
             {
                 fields.AddRange(type.GetFields(bindingAttr));
-
-                var baseType = type.BaseType;
-                if (baseType != null)
-                {
-                    type = baseType;
-                    continue;
-                }
-
-                break;
+                type = type.BaseType;
             }
         }
 
@@ -149,18 +149,10 @@ namespace PKGE
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
-            while (true)
+            while (type != null)
             {
                 fields.AddRange(type.GetProperties(bindingAttr));
-
-                var baseType = type.BaseType;
-                if (baseType != null)
-                {
-                    type = baseType;
-                    continue;
-                }
-
-                break;
+                type = type.BaseType;
             }
         }
 
@@ -172,6 +164,8 @@ namespace PKGE
         /// <param name="interfaceTypes">Collection of interfaceTypes to check if field type
         /// implements any interface type.</param>
         /// <param name="bindingAttr">Binding flags of fields.</param>
+        /// <exception cref="ArgumentException"><paramref name="interfaceTypes"/> contains a <see cref="Type"/> that is not an interface.</exception>
+        /// <exception cref="ArgumentException"><paramref name="classes"/> contains a <see cref="Type"/> that is not a class.</exception>
         public static void GetInterfaceFieldsFromClasses(this IEnumerable<Type> classes, List<FieldInfo> fields,
             List<Type> interfaceTypes, BindingFlags bindingAttr)
         {
@@ -191,8 +185,7 @@ namespace PKGE
                 type.GetFieldsRecursively(tempFields, bindingAttr);
                 foreach (var field in tempFields)
                 {
-                    var interfaces = field.FieldType.GetInterfaces();
-                    foreach (var @interface in interfaces)
+                    foreach (var @interface in field.FieldType.GetInterfaces())
                     {
                         if (interfaceTypes.Contains(@interface))
                         {
@@ -229,7 +222,7 @@ namespace PKGE
         {
             while (type != null)
             {
-                if (type.IsDefined(typeof(TAttribute), true))
+                if (type.IsDefined(typeof(TAttribute), inherit: true))
                 {
                     types.Add(type);
                 }
@@ -269,28 +262,34 @@ namespace PKGE
         /// <returns>The human-readable name.</returns>
         public static string GetNameWithGenericArguments(this Type type)
         {
+            using var _0 = StringBuilderPool.Get(out var sb);
+            return type.GetNameWithGenericArguments(sb).ToString();
+        }
+
+        /// <inheritdoc cref="GetNameWithGenericArguments(Type)"/>
+        public static StringBuilder GetNameWithGenericArguments(this Type type, StringBuilder sb)
+        {
             var name = type.Name;
 
             // Replace + with . for subclasses
             if (!type.IsGenericType)
-                return name.Replace('+', '.');
-
-            using var _0 = StringBuilderPool.Get(out var sb);
+                return sb.Append(name).Replace('+', '.');
 
             // Trim off `1
             int index = name.IndexOf('`');
-            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index));
-            _ = sb.Replace('+', '.');
+            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index))
+                .Replace('+', '.')
+                .Append('<');
 
             var arguments = type.GetGenericArguments();
-            var length = arguments.Length;
-            var stringArguments = new string[length];
-            for (var i = 0; i < length; i++)
+            _ = arguments[0].GetNameWithGenericArguments(sb);
+
+            for (var i = 1; i < arguments.Length; i++)
             {
-                stringArguments[i] = arguments[i].GetNameWithGenericArguments();
+                _ = arguments[i].GetNameWithGenericArguments(sb.Append(',').Append(' '));
             }
 
-            return sb.AppendJoin(", ", stringArguments).ToString();
+            return sb.Append('>');
         }
 
         /// <summary>
@@ -300,28 +299,34 @@ namespace PKGE
         /// <returns>The human-readable name.</returns>
         public static string GetNameWithFullGenericArguments(this Type type)
         {
+            using var _0 = StringBuilderPool.Get(out var sb);
+            return type.GetNameWithFullGenericArguments(sb).ToString();
+        }
+
+        /// <inheritdoc cref="GetNameWithFullGenericArguments(Type)"/>
+        public static StringBuilder GetNameWithFullGenericArguments(this Type type, StringBuilder sb)
+        {
             var name = type.Name;
 
             // Replace + with . for subclasses
             if (!type.IsGenericType)
-                return name.Replace('+', '.');
-
-            using var _0 = StringBuilderPool.Get(out var sb);
+                return sb.Append(name).Replace('+', '.');
 
             // Trim off `1
             int index = name.IndexOf('`');
-            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index));
-            _ = sb.Replace('+', '.');
+            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index))
+                .Replace('+', '.')
+                .Append('<');
 
             var arguments = type.GetGenericArguments();
-            var length = arguments.Length;
-            var stringArguments = new string[length];
-            for (var i = 0; i < length; i++)
+            _ = arguments[0].GetNameWithFullGenericArguments(sb);
+
+            for (var i = 1; i < arguments.Length; i++)
             {
-                stringArguments[i] = arguments[i].GetFullNameWithGenericArgumentsInternal();
+                _ = arguments[i].GetNameWithFullGenericArguments(sb.Append(',').Append(' '));
             }
 
-            return sb.AppendJoin(", ", stringArguments).ToString();
+            return sb.Append('>');
         }
 
         /// <summary>
@@ -332,60 +337,85 @@ namespace PKGE
         /// <returns>The human-readable name.</returns>
         public static string GetFullNameWithGenericArguments(this Type type)
         {
+            using var _0 = StringBuilderPool.Get(out var sb);
+            return type.GetFullNameWithGenericArguments(sb).ToString();
+        }
+
+        /// <inheritdoc cref="GetFullNameWithGenericArguments(Type)"/>
+        public static StringBuilder GetFullNameWithGenericArguments(this Type type, StringBuilder sb)
+        {
+            if (type.IsGenericParameter)
+                return type.GetFullNameWithGenericArgumentsInternal(sb);
+
             // Handle sub-classes
             var declaringType = type.DeclaringType;
-            if (declaringType != null && !type.IsGenericParameter)
+            if (declaringType != null)
             {
-                var typeNames = new List<string>();
-                typeNames.Add(type.GetNameWithFullGenericArguments());
+                var typeNames = ListPool<StringBuilder>.Get();
+                typeNames.Add(type.GetNameWithFullGenericArguments(StringBuilderPool.Get()));
 
                 while (true)
                 {
                     var parentDeclaringType = declaringType.DeclaringType;
                     if (parentDeclaringType == null)
                     {
-                        typeNames.Add(declaringType.GetFullNameWithGenericArguments());
+                        typeNames.Add(declaringType.GetFullNameWithGenericArguments(StringBuilderPool.Get()));
                         break;
                     }
 
-                    typeNames.Add(declaringType.GetNameWithFullGenericArguments());
+                    typeNames.Add(declaringType.GetNameWithFullGenericArguments(StringBuilderPool.Get()));
                     declaringType = parentDeclaringType;
                 }
 
-                typeNames.Reverse();
-                return string.Join('.', typeNames);
+                _ = sb.Append(typeNames[^1]);
+                StringBuilderPool.Release(typeNames[^1]);
+
+                for (int i = typeNames.Count - 2; i >= 0; i--)
+                {
+                    _ = sb.Append('.').Append(typeNames[i]);
+                    StringBuilderPool.Release(typeNames[i]);
+                }
+
+                ListPool<StringBuilder>.Release(typeNames);
+
+                return sb;
             }
 
-            return type.GetFullNameWithGenericArgumentsInternal();
+            return type.GetFullNameWithGenericArgumentsInternal(sb);
         }
 
         static string GetFullNameWithGenericArgumentsInternal(this Type type)
         {
+            using var _0 = StringBuilderPool.Get(out var sb);
+            return type.GetFullNameWithGenericArgumentsInternal(sb).ToString();
+        }
+
+        static StringBuilder GetFullNameWithGenericArgumentsInternal(this Type type, StringBuilder sb)
+        {
             var name = type.FullName;
 
             if (string.IsNullOrEmpty(name))
-                return string.Empty;
+                return sb;
 
             if (!type.IsGenericType)
-                return name;
+                return sb.Append(name);
 
-            var arguments = type.GetGenericArguments();
-            var length = arguments.Length;
-            var stringArguments = new string[length];
-            for (var i = 0; i < length; i++)
-            {
-                stringArguments[i] = arguments[i].GetFullNameWithGenericArguments();
-            }
 
             // Trim off `1
             int index = name.IndexOf('`');
 
-            using var _0 = StringBuilderPool.Get(out var sb);
-            return sb.Append(index == -1 ? name : name.AsSpan(0, index))
-                .Append('<')
-                .AppendJoin(", ", stringArguments)
-                .Append('>')
-                .ToString();
+            _ = sb.Append(index == -1 ? name : name.AsSpan(0, index))
+                .Append('<');
+
+            var arguments = type.GetGenericArguments();
+            _ = arguments[0].GetFullNameWithGenericArgumentsInternal(sb);
+
+            for (var i = 1; i < arguments.Length; i++)
+            {
+                _ = arguments[i].GetFullNameWithGenericArgumentsInternal(sb.Append(',').Append(' '));
+            }
+
+            return sb.Append('>');
         }
 
         /// <summary>

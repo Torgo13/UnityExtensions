@@ -450,10 +450,50 @@ namespace PKGE
 #endif // UNITY_EDITOR
         }
 
+        public static Object[] LoadAllAssetsFromGUID(string guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object[] LoadAllAssetsFromGUID(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
+                GUIDToAssetPath(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
         public static Object[] LoadAllAssetRepresentationsAtPath(string assetPath)
         {
 #if UNITY_EDITOR
             return UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(assetPath);
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object[] LoadAllAssetRepresentationsFromGUID(string guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(
+                UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object[] LoadAllAssetRepresentationsFromGUID(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAllAssetRepresentationsAtPath(
+                GUIDToAssetPath(guid));
 #else
             return default;
 #endif // UNITY_EDITOR
