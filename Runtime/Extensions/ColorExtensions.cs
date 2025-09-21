@@ -195,14 +195,14 @@ namespace PKGE
 
         public static string GetColorTextCode(this Color32 color)
         {
-            System.Span<char> hex = stackalloc char[8];
+            System.Span<char> hex = stackalloc char[17];
+            hex[^1] = '>';
 
-            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
-            _ = sb.Append("<color=#");
-            _ = sb.Append(color.GetColorHexSpan(hex));
-            _ = sb.Append('>');
+            System.ReadOnlySpan<char> prefix = "<color=#";
+            prefix.CopyTo(hex);
+            _ = color.GetColorHexSpan(hex.Slice(prefix.Length, 8));
 
-            return sb.ToString();
+            return hex.ToString();
         }
 
         public static (char, char) ByteToHex(byte b)
@@ -212,41 +212,25 @@ namespace PKGE
 
         public static char NibbleToHex(int nibble)
         {
-            switch (nibble)
+            return nibble switch 
             {
-                default:
-                    return '0';
-                case 1:
-                    return '1';
-                case 2:
-                    return '2';
-                case 3:
-                    return '3';
-                case 4:
-                    return '4';
-                case 5:
-                    return '5';
-                case 6:
-                    return '6';
-                case 7:
-                    return '7';
-                case 8:
-                    return '8';
-                case 9:
-                    return '9';
-                case 10:
-                    return 'A';
-                case 11:
-                    return 'B';
-                case 12:
-                    return 'C';
-                case 13:
-                    return 'D';
-                case 14:
-                    return 'E';
-                case 15:
-                    return 'F';
-            }
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                5 => '5',
+                6 => '6',
+                7 => '7',
+                8 => '8',
+                9 => '9',
+                10 => 'A',
+                11 => 'B',
+                12 => 'C',
+                13 => 'D',
+                14 => 'E',
+                15 => 'F',
+                _ => '0',
+            };
         }
 
         public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;

@@ -216,5 +216,10 @@ namespace PKGE
             list.AddRange(temp);
             return list;
         }
+
+        public static List<T> As<U, T>(this List<U> list)
+        {
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<U>, List<T>>(ref list);
+        }
     }
 }

@@ -154,6 +154,18 @@ namespace PKGE
             }
         }
 
+        public static List<Type> GetAllTypes(List<Type> types)
+        {
+            Assert.IsNotNull(types);
+
+            foreach (var t in GetCachedTypesPerAssembly())
+            {
+                types.AddRange(t);
+            }
+
+            return types;
+        }
+
         /// <summary>
         /// Search all assemblies for a type that matches a given predicate delegate.
         /// </summary>
@@ -313,11 +325,11 @@ namespace PKGE
         /// <returns>The return value from the static method invoked, or null for methods returning void.</returns>
         public static object InvokeStatic(this Type targetType, string methodName, params object[] args)
         {
-            Assert.IsTrue(targetType != null, "Invalid Type");
+            Assert.IsNotNull(targetType, "Invalid Type");
             Assert.IsFalse(string.IsNullOrEmpty(methodName), "The methodName to set cannot be null");
 
             var mi = targetType.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
-            Assert.IsTrue(mi != null, $"Could not find method `{methodName}` on type `{targetType}`");
+            Assert.IsNotNull(mi, $"Could not find method `{methodName}` on type `{targetType}`");
             return mi.Invoke(null, args);
         }
 
@@ -330,11 +342,11 @@ namespace PKGE
         /// <returns>The return value from the invoked method, or null if the method does not return a value.</returns>
         public static object Invoke(this object target, string methodName, params object[] args)
         {
-            Assert.IsTrue(target != null, "The target cannot be null");
+            Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(methodName), "The method name to set cannot be null");
 
             var mi = target.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
-            Assert.IsTrue(mi != null, $"Could not find method `{methodName}` on object `{target}`");
+            Assert.IsNotNull(mi, $"Could not find method `{methodName}` on object `{target}`");
             return mi.Invoke(target, args);
         }
 
@@ -342,17 +354,13 @@ namespace PKGE
         {
             FieldInfo fi = null;
 
-            while (type != null)
+            while (fi == null && type != null)
             {
                 fi = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-
-                if (fi != null)
-                    break;
-
                 type = type.BaseType;
             }
 
-            Assert.IsTrue(fi != null, $"Could not find method `{fieldName}` on object `{type}`");
+            Assert.IsNotNull(fi, $"Could not find method `{fieldName}` on object `{type}`");
 
             return fi;
         }
@@ -365,10 +373,10 @@ namespace PKGE
         /// <param name="value">The new value</param>
         public static void SetField(this object target, string fieldName, object value)
         {
-            Assert.IsTrue(target != null, "The target cannot be null");
+            Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(fieldName), "The field to set cannot be null");
             
-            target.GetType().FindField(fieldName).SetValue(target, value);
+            target.GetType().FindField(fieldName)?.SetValue(target, value);
         }
 
         /// <summary>
@@ -379,10 +387,10 @@ namespace PKGE
         /// <returns>The value of the specified field from the target object.</returns>
         public static object GetField(this object target, string fieldName)
         {
-            Assert.IsTrue(target != null, "The target cannot be null");
+            Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(fieldName), "The field to set cannot be null");
             
-            return target.GetType().FindField(fieldName).GetValue(target);
+            return target.GetType().FindField(fieldName)?.GetValue(target);
         }
 
         /// <summary>
@@ -393,7 +401,7 @@ namespace PKGE
         /// the typeof the target object.</returns>
         public static IEnumerable<FieldInfo> GetFields(this object target)
         {
-            Assert.IsTrue(target != null, "The target cannot be null");
+            Assert.IsNotNull(target, "The target cannot be null");
 
 #if USING_LINQ
             return target.GetType()
@@ -403,23 +411,16 @@ namespace PKGE
             FieldInfo[] fields = target.GetType()
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            orderFieldInfo ??= new OrderFieldInfo();
-
-            Array.Sort(fields, orderFieldInfo);
+            Array.Sort(fields, fieldInfoComparer ??= new FieldInfoComparer());
             return fields;
 #endif // USING_LINQ
         }
 
 #if USING_LINQ
 #else
-        static OrderFieldInfo orderFieldInfo;
-        class OrderFieldInfo : IComparer<FieldInfo>
+        static FieldInfoComparer fieldInfoComparer;
+        class FieldInfoComparer : IComparer<FieldInfo>
         {
-            public int Compare(int x, int y)
-            {
-                return x.CompareTo(y);
-            }
-
             public int Compare(FieldInfo x, FieldInfo y)
             {
                 return x.MetadataToken.CompareTo(y.MetadataToken);

@@ -11,12 +11,13 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Editor/Core/Utilities/UniqueNameFormatter.cs
         #region Unity.LiveCapture.Editor
-        readonly HashSet<string> _names = new HashSet<string>();
+        HashSet<string> _names;
+        HashSet<string> Names => _names ??= new HashSet<string>(System.StringComparer.Ordinal);
 
         public string Format(string text)
         {
-            var name = ObjectNames.GetUniqueName(_names.ToArray(), text);
-            _names.Add(name);
+            var name = ObjectNames.GetUniqueName(Names.ToArray(), text);
+            _ = Names.Add(name);
             return name;
         }
         #endregion // Unity.LiveCapture.Editor

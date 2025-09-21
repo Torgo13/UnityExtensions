@@ -20,6 +20,7 @@ namespace PKGE.Unsafe
         #region Blittable
         public static bool IsBlittableValueType(Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
 
+#if USING_REFLECTION
         public static string GetReasonForTypeNonBlittableImpl(Type t, string name)
         {
             if (!t.IsValueType)
@@ -37,6 +38,7 @@ namespace PKGE.Unsafe
 
             return ret.ToString();
         }
+#endif // USING_REFLECTION
 
         // while it would make sense to have functions like ThrowIfArgumentIsNonBlittable
         // currently we insist on including part of call stack into exception message in these cases
@@ -56,6 +58,7 @@ namespace PKGE.Unsafe
             return UnsafeUtility.IsBlittable(typeof(T));
         }
 
+#if USING_REFLECTION
         public static string GetReasonForArrayNonBlittable(Array arr)
         {
             Type t = arr.GetType().GetElementType();
@@ -78,6 +81,7 @@ namespace PKGE.Unsafe
             Type t = typeof(T);
             return GetReasonForTypeNonBlittableImpl(t, t.Name);
         }
+#endif // USING_REFLECTION
         #endregion // Blittable
 
         #region IntPtr
@@ -235,7 +239,7 @@ namespace PKGE.Unsafe
             return ref UnsafeUtility.ArrayElementAsRef<T>((void*)ptr, index);
         }
         #endregion // IntPtr
-        #endregion // Unity.Collections.LowLevel.Unsafe
+#endregion // Unity.Collections.LowLevel.Unsafe
 
         #region Unmanaged
         #region ArrayToIntPtr
@@ -496,7 +500,7 @@ namespace PKGE.Unsafe
                 nativeList.Length * UnsafeUtility.SizeOf<T>());
         }
 #endif // INCLUDE_COLLECTIONS
-        #endregion // CopyToArray
+#endregion // CopyToArray
 
         #region CopyToList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -530,7 +534,7 @@ namespace PKGE.Unsafe
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
 #endif // INCLUDE_COLLECTIONS
-        #endregion // CopyToList
+#endregion // CopyToList
 
         #region CopyToNativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -573,7 +577,7 @@ namespace PKGE.Unsafe
             nativeArray.CopyFrom(nativeList.AsArray());
         }
 #endif // INCLUDE_COLLECTIONS
-        #endregion // CopyToNativeArray
+#endregion // CopyToNativeArray
 
 #if INCLUDE_COLLECTIONS
         #region CopyToNativeList
@@ -610,6 +614,6 @@ namespace PKGE.Unsafe
         }
         #endregion // CopyToNativeList
 #endif // INCLUDE_COLLECTIONS
-        #endregion // CopyTo
+#endregion // CopyTo
     }
 }

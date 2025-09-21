@@ -244,5 +244,19 @@ namespace PKGE.Editor.Tests
             Assert.AreEqual("FloatList", result.Name);
             Assert.AreEqual(typeof(float), type);
         }
+
+        [Test]
+        public void GetPointWidth()
+        {
+            float pointWidth = ScreenGUIUtils.PointWidth;
+            Assert.IsFalse(pointWidth <= 0);
+        }
+
+        [Test]
+        public void GetPointHeight()
+        {
+            float pointHeight = ScreenGUIUtils.PointHeight;
+            Assert.IsFalse(pointHeight <= 0);
+        }
     }
 }

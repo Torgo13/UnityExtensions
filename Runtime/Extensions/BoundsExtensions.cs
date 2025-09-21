@@ -56,7 +56,22 @@ namespace PKGE
             Vector3 max = bounds.max;
             Matrix4x4 matrix = transform.worldToLocalMatrix;
 
-            var points = new Unity.Collections.NativeArray<Vector3>(8, Unity.Collections.Allocator.Temp);
+#if INCLUDE_BURST
+            var newBoundsResult = new Unity.Collections.NativeArray<Bounds>(1,
+                Unity.Collections.Allocator.TempJob, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+            var calculateLocalBoundsJob = new CalculateLocalBoundsJob
+            {
+                matrix = matrix,
+                min = min,
+                max = max,
+                newBounds = newBoundsResult,
+            };
+            Unity.Jobs.IJobExtensions.Run(calculateLocalBoundsJob);
+            var newBounds = newBoundsResult[0];
+            newBoundsResult.Dispose();
+#else
+            var points = new Unity.Collections.NativeArray<Vector3>(8,
+                Unity.Collections.Allocator.Temp, Unity.Collections.NativeArrayOptions.UninitializedMemory);
             points[0] = new Vector3(min.x, min.y, min.z);
             points[1] = new Vector3(max.x, min.y, min.z);
             points[2] = new Vector3(min.x, min.y, max.z);
@@ -94,10 +109,69 @@ namespace PKGE
 
             Bounds newBounds = new Bounds();
             newBounds.SetMinMax(newMin, newMax);
+#endif // INCLUDE_BURST
             return newBounds;
         }
         #endregion // Unity.HLODSystem.Utils
-        
+
+#if INCLUDE_BURST
+        [Unity.Burst.BurstCompile]
+        struct CalculateLocalBoundsJob : Unity.Jobs.IJob
+        {
+            [Unity.Collections.ReadOnly] public Matrix4x4 matrix;
+            [Unity.Collections.ReadOnly] public Vector3 min;
+            [Unity.Collections.ReadOnly] public Vector3 max;
+            [Unity.Collections.WriteOnly] public Unity.Collections.NativeArray<Bounds> newBounds;
+
+            public void Execute()
+            {
+                var points = new Unity.Collections.NativeArray<Vector3>(8,
+                    Unity.Collections.Allocator.Temp, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+                points[0] = new Vector3(min.x, min.y, min.z);
+                points[1] = new Vector3(max.x, min.y, min.z);
+                points[2] = new Vector3(min.x, min.y, max.z);
+                points[3] = new Vector3(max.x, min.y, max.z);
+                points[4] = new Vector3(min.x, max.y, min.z);
+                points[5] = new Vector3(max.x, max.y, min.z);
+                points[6] = new Vector3(min.x, max.y, max.z);
+                points[7] = new Vector3(max.x, max.y, max.z);
+
+                for (int i = 0; i < points.Length; ++i)
+                {
+                    points[i] = matrix.MultiplyPoint(points[i]);
+                }
+
+                Vector3 newMin = points[0];
+                Vector3 newMax = points[0];
+
+                for (int i = 1; i < points.Length; ++i)
+                {
+                    if (newMin.x > points[i].x)
+                        newMin.x = points[i].x;
+                    if (newMax.x < points[i].x)
+                        newMax.x = points[i].x;
+
+                    if (newMin.y > points[i].y)
+                        newMin.y = points[i].y;
+                    if (newMax.y < points[i].y)
+                        newMax.y = points[i].y;
+
+                    if (newMin.z > points[i].z)
+                        newMin.z = points[i].z;
+                    if (newMax.z < points[i].z)
+                        newMax.z = points[i].z;
+                }
+
+                var extents = (newMax - newMin) * 0.5f;
+                newBounds[0] = new Bounds
+                {
+                    extents = extents,
+                    center = newMin + extents,
+                };
+            }
+        }
+#endif // INCLUDE_BURST
+
         //https://github.com/Unity-Technologies/HLODSystem/blob/04be7e86357c5f3e11726b6ac9c33bd4fe1c3040/com.unity.hlod/Runtime/HLOD.cs
         #region Unity.HLODSystem
         public static Bounds GetBounds(List<Renderer> renderers, Transform transform)
@@ -110,11 +184,7 @@ namespace PKGE
                 return ret;
             }
 
-            Bounds bounds = CalculateLocalBounds(renderers[0], transform);
-            for (int i = 1; i < renderers.Count; ++i)
-            {
-                bounds.Encapsulate(CalculateLocalBounds(renderers[i], transform));
-            }
+            Bounds bounds = CalculateLocalBounds(renderers, transform);
 
             ret.center = bounds.center;
             float max = System.Math.Max(bounds.size.x, System.Math.Max(bounds.size.y, bounds.size.z));
@@ -136,6 +206,13 @@ namespace PKGE
                 return null;
             }
 
+            return CalculateLocalBounds(renderers.As<MeshRenderer, Renderer>(), transform);
+        }
+#nullable restore
+        #endregion // Unity.HLODSystem.SpaceManager
+
+        public static Bounds CalculateLocalBounds(List<Renderer> renderers, Transform transform)
+        {
             Bounds result = CalculateLocalBounds(renderers[0], transform);
             for (int i = 1; i < renderers.Count; ++i)
             {
@@ -144,7 +221,5 @@ namespace PKGE
 
             return result;
         }
-#nullable restore
-        #endregion // Unity.HLODSystem.SpaceManager
     }
 }

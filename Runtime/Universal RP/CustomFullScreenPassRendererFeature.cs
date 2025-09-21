@@ -72,18 +72,18 @@ namespace PKGE.Packages
 
 #if CUSTOM_URP
 #else
-            private const System.Reflection.BindingFlags bindingAttr
-                = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-
-            private static readonly System.Linq.Expressions.ParameterExpression param
-                = System.Linq.Expressions.Expression.Parameter(typeof(object), "instance");
-
-            private static readonly System.Func<object, CommandBuffer> getCommandBufferDelegate =
-                System.Linq.Expressions.Expression.Lambda<System.Func<object, CommandBuffer>>(
+            private static readonly System.Func<object, CommandBuffer> GetCommandBuffer = GetCommandBufferDelegate();
+            private static System.Func<object, CommandBuffer> GetCommandBufferDelegate()
+            {
+                const System.Reflection.BindingFlags bindingAttr
+                    = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+                var param = System.Linq.Expressions.Expression.Parameter(typeof(object), "instance");
+                return System.Linq.Expressions.Expression.Lambda<System.Func<object, CommandBuffer>>(
                     System.Linq.Expressions.Expression.Convert(System.Linq.Expressions.Expression.Field(
                     System.Linq.Expressions.Expression.Convert(param, typeof(RenderingData)),
                     typeof(RenderingData).GetField("commandBuffer", bindingAttr)),
                     typeof(CommandBuffer)), param).Compile();
+            }
 #endif // CUSTOM_URP
 
             public FullScreenRenderPass(string passName)
@@ -145,7 +145,7 @@ namespace PKGE.Packages
 #if CUSTOM_URP // RenderingData is a struct so it still must be boxed in the compiled lambda function
                 var cmd = renderingData.cmd;
 #else
-                var cmd = getCommandBufferDelegate(renderingData);
+                var cmd = GetCommandBuffer(renderingData);
 #endif // CUSTOM_URP
 
                 using (new ProfilingScope(cmd, profilingSampler))

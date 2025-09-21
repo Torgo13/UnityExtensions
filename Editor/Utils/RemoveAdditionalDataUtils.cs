@@ -2,7 +2,6 @@ using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEditor;
@@ -103,9 +102,9 @@ namespace PKGE.Editor
         internal static bool TryGetComponentsToRemove([DisallowNull] IAdditionalData additionalData, [DisallowNull] List<Type> componentsToRemove, [NotNullWhen(false)] out Exception error)
         {
             var type = additionalData.GetType();
-            var requiredComponents = type.GetCustomAttributes(typeof(RequireComponent), true).Cast<RequireComponent>();
+            var requiredComponents = type.GetCustomAttributes(typeof(RequireComponent), inherit: true) as RequireComponent[];
 
-            if (!requiredComponents.Any())
+            if (requiredComponents == null || requiredComponents.Length == 0)
             {
                 error = new Exception($"Missing attribute {typeof(RequireComponent).FullName} on type {type.FullName}");
                 return false;

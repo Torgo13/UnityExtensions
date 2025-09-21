@@ -18,7 +18,7 @@ namespace PKGE.Editor
             var componentType = component.GetType();
             foreach (var c in component.gameObject.GetComponents<Component>())
             {
-                foreach (var rc in c.GetType().GetCustomAttributes(typeof(RequireComponent), true).Cast<RequireComponent>())
+                foreach (var rc in (RequireComponent[])c.GetType().GetCustomAttributes(typeof(RequireComponent), inherit: true))
                 {
                     if (rc.m_Type0 == componentType || rc.m_Type1 == componentType || rc.m_Type2 == componentType)
                     {
@@ -42,11 +42,21 @@ namespace PKGE.Editor
 
         public static bool RemoveComponent([DisallowNull] Component component, IEnumerable<Component> dependencies)
         {
-            var additionalData = dependencies
-                    .Where(c => c != component && c is IAdditionalData)
-                    .ToList();
+            using var _0 = UnityEngine.Pool.ListPool<Component>.Get(out var additionalData);
+            foreach (var c in dependencies)
+            {
+                if (c != component && c is IAdditionalData)
+                    additionalData.Add(c);
+            }
 
-            if (!CanRemoveComponent(component, dependencies.Where(c => !additionalData.Contains(c))))
+            using var _1 = UnityEngine.Pool.ListPool<Component>.Get(out var remove);
+            foreach (var c in dependencies)
+            {
+                if (!additionalData.Contains(c))
+                    remove.Add(c);
+            }
+
+            if (!CanRemoveComponent(component, remove))
                 return false;
 
             bool removed = true;

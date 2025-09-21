@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -24,7 +23,7 @@ namespace PKGE.Editor
         public static Attribute[] GetMemberAttributes(SerializedProperty property)
         {
             var fi = GetFieldInfoFromProperty(property);
-            return fi.GetCustomAttributes(false).Cast<Attribute>().ToArray();
+            return fi.GetCustomAttributes(inherit: false) as Attribute[];
         }
 
         /// <summary>

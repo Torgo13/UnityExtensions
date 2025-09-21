@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace PKGE.Editor
 {
@@ -12,7 +11,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Utils/Editor/Toolbox.cs
         #region Unity.Megacity.EditorTools
-        private List<GameObject> currentSelection = new List<GameObject>(); // The selected GameObjects.
+        private List<GameObject> currentSelection; // The selected GameObjects.
         public GameObject replacementObject; // GameObject to replace selection with.
 
         public static bool preserveChildren = true;
@@ -39,9 +38,19 @@ namespace PKGE.Editor
 
         private void OnGUI()
         {
+            if (currentSelection == null)
+                currentSelection = new List<GameObject>();
+            else
+                currentSelection.Clear();
+
             if (Selection.objects.Length > 0)
             {
-                currentSelection = Selection.objects.OfType<GameObject>().ToList();
+                foreach (var obj in Selection.objects)
+                {
+                    if (obj is GameObject go)
+                        currentSelection.Add(go);
+                }
+
                 foreach (var go in Selection.gameObjects)
                 {
                     if (AssetDatabase.Contains(go))
@@ -50,10 +59,6 @@ namespace PKGE.Editor
                         break;
                     }
                 }
-            }
-            else
-            {
-                currentSelection.Clear();
             }
 
             // Check that a selection has been made.
@@ -228,7 +233,7 @@ namespace PKGE.Editor
                     ErrorGO.Add(go);
             }
 
-            if (ErrorGO.Any())
+            if (ErrorGO.Count > 0)
             {
                 bool haserror = false;
                 foreach (var go in ErrorGO)

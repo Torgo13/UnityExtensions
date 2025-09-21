@@ -45,7 +45,8 @@ namespace PKGE
                 {
                     updatePreFrame = true;
                 }
-                else if (!updatePostFrame
+                
+                if (!updatePostFrame
                     && playerLoopSystems[i].type == typeof(UpdatePostFrame))
                 {
                     updatePostFrame = true;

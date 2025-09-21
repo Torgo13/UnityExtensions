@@ -821,21 +821,19 @@ namespace PKGE
                 System.Linq.Expressions.Expression.Convert(renderModeAccessor, typeof(int)));
             return internalRenderModeLambda.Compile();
         }
+#endif
 
         /// <summary>
         /// Returns true if the currently opened prefab stage context is set to Hidden.
         /// </summary>
         /// <returns>True if the currently opened prefab stage context is set to Hidden.</returns>
+#if UNITY_EDITOR
         public static bool IsSceneViewPrefabStageContextHidden()
         {
             _getSceneViewPrefabStageContextFunc ??= LoadSceneViewMethods();
             return _getSceneViewPrefabStageContextFunc() == 2; // 2 is hidden, see ContextRenderMode enum
         }
 #else
-        /// <summary>
-        /// Returns true if the currently opened prefab stage context is set to Hidden.
-        /// </summary>
-        /// <returns>True if the currently opened prefab stage context is set to Hidden.</returns>
         public static bool IsSceneViewPrefabStageContextHidden() => false;
 #endif
 

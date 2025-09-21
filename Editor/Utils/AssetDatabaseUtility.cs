@@ -18,16 +18,16 @@ namespace PKGE.Editor
         /// <param name="directory">Path of the assets to load.</param>
         /// <param name="includeSubDirectories">Whether to include child directories in the search or not.</param>
         /// <returns>The list of assets.</returns>
-        public static List<T> GetAssetsAtPath<T>(string directory, bool includeSubDirectories = true) where T : UnityObject
+        public static T[] GetAssetsAtPathArray<T>(string directory, bool includeSubDirectories = true) where T : UnityObject
         {
             if (string.IsNullOrEmpty(directory))
             {
-                return new List<T>();
+                return Array.Empty<T>();
             }
 
             if (!Directory.Exists(Path.GetDirectoryName($"{directory}/")))
             {
-                return new List<T>();
+                return Array.Empty<T>();
             }
 
             var guids = AssetDatabase.FindAssets($"t:{typeof(T).Name}", new[] { directory });
@@ -39,7 +39,13 @@ namespace PKGE.Editor
                 paths = paths.Where(p => Path.GetDirectoryName(p) == directoryOS).ToArray();
             }
 
-            return paths.Select(AssetDatabase.LoadAssetAtPath<T>).ToList();
+            return paths.Select(AssetDatabase.LoadAssetAtPath<T>);
+        }
+
+        /// <inheritdoc cref="GetAssetsAtPathArray{T}(string, bool)"/>
+        public static List<T> GetAssetsAtPath<T>(string directory, bool includeSubDirectories = true) where T : UnityObject
+        {
+            return new List<T>(GetAssetsAtPathArray<T>(directory, includeSubDirectories));
         }
 
         /// <summary>
@@ -124,9 +130,11 @@ namespace PKGE.Editor
 
             if (!string.IsNullOrEmpty(path))
             {
-                var enumerable = AssetDatabase.LoadAllAssetsAtPath(path).Where(a => a is T).Cast<T>();
-
-                assets.AddRange(enumerable);
+                foreach (var a in AssetDatabase.LoadAllAssetsAtPath(path))
+                {
+                    if (a is T subasset)
+                        assets.Add(subasset);
+                }
             }
 
             return assets;

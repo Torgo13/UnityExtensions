@@ -226,16 +226,20 @@ namespace PKGE.Tests
         {
             int w = 4, h = 4;
 
+            var active = RenderTexture.active;
+
             // Create a red source RenderTexture
             var rt = new RenderTexture(w, h, 0, RenderTextureFormat.ARGB32);
             rt.Create();
+            RenderTexture.active = rt;
 
             // Fill it with red using a temp Texture2D & Blit
-            var fillTex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-            var fillPixels = new Color[w * h];
+            var fillTex = new Texture2D(w, h, TextureFormat.RGBA32, mipChain: false,
+                linear: false, createUninitialized: true);
+            var fillPixels = fillTex.GetRawTextureData<Color32>();
+            Color32 red = Color.red;
             for (int i = 0; i < fillPixels.Length; i++)
-                fillPixels[i] = Color.red;
-            fillTex.SetPixels(fillPixels);
+                fillPixels[i] = red;
             fillTex.Apply();
 
             Graphics.Blit(fillTex, rt);
@@ -247,11 +251,14 @@ namespace PKGE.Tests
             rt.RenderTextureToTexture2D(tex2D);
 
             // Assert all pixels are red
-            foreach (var c in tex2D.GetPixels())
+            foreach (var c in tex2D.GetPixels32())
             {
-                Assert.AreEqual(Color.red, c);
+                Assert.AreEqual(red, c);
             }
 
+            RenderTexture.active = active;
+
+            rt.Release();
             UnityEngine.Object.DestroyImmediate(rt);
             UnityEngine.Object.DestroyImmediate(fillTex);
             UnityEngine.Object.DestroyImmediate(tex2D);

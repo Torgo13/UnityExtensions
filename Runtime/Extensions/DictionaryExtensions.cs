@@ -47,6 +47,7 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Modules/PackageManagerUI/Editor/Services/Common/DictionaryExtensions.cs
         #region UnityEditor.PackageManager.UI.Internal
+        /// <exception cref="FieldAccessException"></exception>
         public static T Get<T>(this IDictionary<string, object> dict, string key, T fallbackValue = default)
         {
             if (key == null)
