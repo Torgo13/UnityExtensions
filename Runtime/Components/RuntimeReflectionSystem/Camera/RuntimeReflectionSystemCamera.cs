@@ -155,13 +155,13 @@ namespace PKGE
         /// and the opposite direction.
         /// </summary>
         public float skyRatio;
+#endif // BLEND_SHADER
 
         /// <summary>
         /// If the current platform supports Compute Shaders,
         /// use one to blend cubemaps in a single render pass.
         /// </summary>
         private bool supportsComputeShaders;
-#endif // BLEND_SHADER
 
         internal ComputeShader _texture2DArrayLerp;
 
