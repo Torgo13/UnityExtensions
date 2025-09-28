@@ -9,14 +9,15 @@ namespace PKGE.Tests
     public class RuntimeReflectionSystemCameraTests
     {
         private GameObject go;
-        private RuntimeReflectionSystemCamera sysCam;
+        private RuntimeReflectionSystemCamera sysCamComponent;
+        private ReflectionSystem sysCam => sysCamComponent.Reflection;
 
         [SetUp]
         public void SetUp()
         {
             go = new GameObject("RuntimeReflectionSystemCamera");
-            sysCam = go.AddComponent<RuntimeReflectionSystemCamera>();
-            sysCam._skyboxMaterial = new Material(Shader.Find("Skybox/Procedural"));
+            sysCamComponent = go.AddComponent<RuntimeReflectionSystemCamera>();
+            sysCamComponent.Reflection = new ReflectionSystem(skyboxMaterial: new Material(Shader.Find("Skybox/Procedural")));
         }
 
         [TearDown]
@@ -120,8 +121,8 @@ namespace PKGE.Tests
 
             sysCam._renderTextures = rts;
             sysCam._index = 0;
-            sysCam.reflectionCamera = new GameObject("RefCam").AddComponent<Camera>();
-            sysCam._reflectionCameraTransform = sysCam.reflectionCamera.transform;
+            sysCam._reflectionCamera = new GameObject("RefCam").AddComponent<Camera>();
+            sysCam._reflectionCameraTransform = sysCam._reflectionCamera.transform;
             sysCam._renderedFrameCount = Time.frameCount - 10;
             sysCam._blendedTexture = RenderTexture.GetTemporary(desc);
 

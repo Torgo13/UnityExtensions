@@ -9,8 +9,87 @@ using UnityEngine.SceneManagement;
 
 namespace PKGE
 {
-    //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
     public class RuntimeReflectionSystemCamera : MonoBehaviour
+    {
+        public ReflectionSystem Reflection { get; internal set; }
+
+        [SerializeField] private Shader skyboxShader;
+        [SerializeField] internal Material skyboxMaterial;
+        [SerializeField] internal Camera reflectionCamera;
+        [SerializeField] internal ComputeShader texture2DArrayLerp;
+        [SerializeField, Range(0.25f, 1.0f)] private float resolutionScale = 0.5f;
+
+#if BLEND_SHADER
+#else
+        public NativeArray<Color32> AmbientColours => Reflection.ambientColours;
+        public Color AdaptiveColour => Reflection.adaptiveColour;
+        public Color SkyColour => Reflection.skyColour;
+        public float SkyRatio => Reflection.skyRatio;
+#endif // BLEND_SHADER
+
+        [SerializeField] private bool skyboxOverride;
+        [SerializeField] private bool cameraSkyboxOverride;
+        [SerializeField] private bool resolutionScaleOverride;
+        [SerializeField] private bool timeSlice = true;
+        [SerializeField] private bool noiseReduction = true;
+        [SerializeField] private bool groundColour;
+        [SerializeField] private bool removeBlue;
+
+        #region MonoBehaviour
+
+        private void Awake()
+        {
+            Reflection ??= new ReflectionSystem(skyboxShader, skyboxMaterial, reflectionCamera, texture2DArrayLerp);
+
+            if (!Reflection.InitialiseMaterial())
+            {
+                CoreUtils.Destroy(this);
+                return;
+            }
+
+            GetReflectionCamera();
+            Reflection.Awake();
+        }
+
+        private void LateUpdate()
+        {
+            Reflection.ResolutionScale = resolutionScale;
+            Reflection.skyboxOverride = skyboxOverride;
+            Reflection.cameraSkyboxOverride = cameraSkyboxOverride;
+            Reflection.resolutionScaleOverride = resolutionScaleOverride;
+            Reflection.timeSlice = timeSlice;
+            Reflection.noiseReduction = noiseReduction;
+            Reflection.groundColour = groundColour;
+            Reflection.removeBlue = removeBlue;
+
+            Reflection.LateUpdate();
+        }
+
+        private void OnDestroy()
+        {
+            Reflection?.OnDestroy();
+        }
+
+        #endregion // MonoBehaviour
+
+        internal void GetReflectionCamera()
+        {
+            // Check if the field has already been assigned
+            if (Reflection._reflectionCamera != null)
+                return;
+
+            // Check if it is on a child GameObject
+            // It should be on a child because it will update its position to match the camera
+            Reflection._reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
+            if (Reflection._reflectionCamera != null)
+                return;
+
+            Reflection.CreateReflectionCamera(transform);
+        }
+    }
+
+    //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
+    public class ReflectionSystem
     {
         private readonly int Tex = Shader.PropertyToID("_Tex");
         private readonly int MipLevel = Shader.PropertyToID("_MipLevel");
@@ -27,11 +106,11 @@ namespace PKGE
             "Skybox/CubemapSimple";
 #endif // BLEND_SHADER
 
-        [SerializeField] private Shader skyboxShader;
-        [SerializeField] internal Material _skyboxMaterial;
+        private Shader _skyboxShader;
+        internal Material _skyboxMaterial;
         private bool _createdMaterial;
 
-        [SerializeField] internal Camera reflectionCamera;
+        internal Camera _reflectionCamera;
         internal Transform _reflectionCameraTransform;
         private bool _createdReflectionCamera;
 
@@ -59,7 +138,7 @@ namespace PKGE
         /// <summary>
         /// Store the average colour of each cubemap face.
         /// </summary>
-        public NativeArray<Color32> _ambientColours;
+        public NativeArray<Color32> ambientColours;
 
         /// <summary>
         /// The weighted colour in the direction of the camera.
@@ -77,8 +156,6 @@ namespace PKGE
         /// </summary>
         public float skyRatio;
 
-        [SerializeField] internal ComputeShader _texture2DArrayLerp;
-
         /// <summary>
         /// If the current platform supports Compute Shaders,
         /// use one to blend cubemaps in a single render pass.
@@ -86,13 +163,14 @@ namespace PKGE
         private bool supportsComputeShaders;
 #endif // BLEND_SHADER
 
+        internal ComputeShader _texture2DArrayLerp;
+
         public bool skyboxOverride;
         public bool cameraSkyboxOverride;
 
         public bool resolutionScaleOverride;
 
-        [Range(0.25f, 1.0f)]
-        [SerializeField] private float resolutionScale = 1.0f;
+        private float resolutionScale = 0.5f;
         public float ResolutionScale
         {
             get { return resolutionScale; }
@@ -126,18 +204,19 @@ namespace PKGE
         /// <summary>Spread the cubemap capture over six frames by rendering one face per frame.</summary>
         private const int BlendFrames = 6;
 
+        public ReflectionSystem(Shader skyboxShader = null, Material skyboxMaterial = null, Camera reflectionCamera = null, ComputeShader texture2DArrayLerp = null)
+        {
+            _skyboxShader = skyboxShader;
+            _skyboxMaterial = skyboxMaterial;
+            _reflectionCamera = reflectionCamera;
+            _texture2DArrayLerp = texture2DArrayLerp;
+        }
+
         #region MonoBehaviour
 
-        void Awake()
+        public void Awake()
         {
-            if (!InitialiseMaterial())
-            {
-                CoreUtils.Destroy(this);
-                return;
-            }
-
-            GetReflectionCamera();
-            _reflectionCameraTransform = reflectionCamera.transform;
+            _reflectionCameraTransform = _reflectionCamera.transform;
             PrepareNextCubemap();
 
             var desc = new RenderTextureDescriptor(Resolution, Resolution,
@@ -179,7 +258,7 @@ namespace PKGE
             _ = _blendedTexture.Create();
 
             // Take a full capture before applying it to the skybox
-            _ = reflectionCamera.RenderToCubemap(_blendedTexture);
+            _ = _reflectionCamera.RenderToCubemap(_blendedTexture);
             UpdateAmbient();
 
             // Usually sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
@@ -191,16 +270,16 @@ namespace PKGE
 
             _skyboxMaterial.SetTexture(Tex, _blendedTexture);
 
-            _ambientColours = new NativeArray<Color32>(6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            ambientColours = new NativeArray<Color32>(6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 #endif // BLEND_SHADER
         }
 
-        void LateUpdate()
+        public void LateUpdate()
         {
             Render(timeSlice, resolutionScaleOverride, resolutionScale);
         }
 
-        void OnDestroy()
+        public void OnDestroy()
         {
 #if BLEND_SHADER
 #else
@@ -208,14 +287,14 @@ namespace PKGE
 
             DestroyRenderTexture(_blendedTexture);
 
-            _ambientColours.Dispose();
+            ambientColours.Dispose();
 #endif // BLEND_SHADER
 
             if (_createdMaterial)
                 CoreUtils.Destroy(_skyboxMaterial);
 
             if (_createdReflectionCamera)
-                CoreUtils.Destroy(reflectionCamera.gameObject);
+                CoreUtils.Destroy(_reflectionCamera.gameObject);
 
             if (_renderTextures != null)
             {
@@ -256,7 +335,7 @@ namespace PKGE
             if (!timeSlice)
             {
                 UpdateReflectionCameraPosition();
-                _ = reflectionCamera.RenderToCubemap(_blendedTexture);
+                _ = _reflectionCamera.RenderToCubemap(_blendedTexture);
                 UpdateAmbient();
                 return;
             }
@@ -300,7 +379,7 @@ namespace PKGE
             }
 
             // Render a single cubemap face
-            _ = reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
+            _ = _reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
 
             // Blend between the previous and current camera render textures
             float blend = frameCount / (float)BlendFrames;
@@ -332,10 +411,10 @@ namespace PKGE
             if (_skyboxMaterial != null)
                 return true;
 
-            if (skyboxShader == null)
-                skyboxShader = Shader.Find(shaderName);
+            if (_skyboxShader == null)
+                _skyboxShader = Shader.Find(shaderName);
 
-            _skyboxMaterial = CoreUtils.CreateEngineMaterial(skyboxShader);
+            _skyboxMaterial = CoreUtils.CreateEngineMaterial(_skyboxShader);
 
             if (_skyboxMaterial == null)
                 return false;
@@ -351,21 +430,11 @@ namespace PKGE
             _index = NextIndex();
         }
 
-        internal void GetReflectionCamera()
+        public void CreateReflectionCamera(Transform transform)
         {
-            // Check if the field has already been assigned
-            if (reflectionCamera != null)
-                return;
-
-            // Check if it is on a child GameObject
-            // It should be on a child because it will update its position to match the camera
-            reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
-            if (reflectionCamera != null)
-                return;
-
             var reflectionCameraGO = new GameObject();
             reflectionCameraGO.transform.parent = transform;
-            reflectionCamera = reflectionCameraGO.AddComponent<Camera>();
+            _reflectionCamera = reflectionCameraGO.AddComponent<Camera>();
             _createdReflectionCamera = true;
         }
 
@@ -555,9 +624,9 @@ namespace PKGE
         /// </summary>
         internal void GPUReadbackRequest()
         {
-            for (int i = 0; i < _ambientColours.Length; i++)
+            for (int i = 0; i < ambientColours.Length; i++)
             {
-                _ambientColours[i] = _readbackRequest.GetData<Color32>(layer: i)[0];
+                ambientColours[i] = _readbackRequest.GetData<Color32>(layer: i)[0];
             }
 
             bool sunFound = LightUtils.GetDirectionalLight(out var sun, out var sunTransform);
@@ -577,9 +646,9 @@ namespace PKGE
                     sunColour = Mathf.CorrelatedColorTemperatureToRGB(5000f);
                 }
 
-                for (int i = 0; i < _ambientColours.Length; i++)
+                for (int i = 0; i < ambientColours.Length; i++)
                 {
-                    _ambientColours[i] = sunColour * ((Color)_ambientColours[i]).grayscale;
+                    ambientColours[i] = sunColour * ((Color)ambientColours[i]).grayscale;
                 }
             }
 
@@ -589,27 +658,30 @@ namespace PKGE
             Vector4 skyEquator = default;
             for (int i = 0; i < 3; i++)
             {
-                equator[i] = _ambientColours[(int)CubemapFace.PositiveX][i]
-                    + _ambientColours[(int)CubemapFace.NegativeX][i]
-                    + _ambientColours[(int)CubemapFace.PositiveZ][i]
-                    + _ambientColours[(int)CubemapFace.NegativeZ][i];
+                equator[i] = ambientColours[(int)CubemapFace.PositiveX][i]
+                    + ambientColours[(int)CubemapFace.NegativeX][i]
+                    + ambientColours[(int)CubemapFace.PositiveZ][i]
+                    + ambientColours[(int)CubemapFace.NegativeZ][i];
 
-                skyEquator[i] = equator[i] + (4 * _ambientColours[(int)CubemapFace.PositiveY][i]);
+                skyEquator[i] = equator[i] + (4 * ambientColours[(int)CubemapFace.PositiveY][i]);
                 skyEquator[i] /= 8 * byte.MaxValue;
 
                 equator[i] /= 4 * byte.MaxValue;
             }
 
-            RenderSettings.ambientSkyColor = _ambientColours[(int)CubemapFace.PositiveY];
+            RenderSettings.ambientSkyColor = ambientColours[(int)CubemapFace.PositiveY];
             RenderSettings.ambientEquatorColor = groundColour
                 ? equator
                 : skyEquator;
             RenderSettings.ambientGroundColor = groundColour
-                ? _ambientColours[(int)CubemapFace.NegativeY]
+                ? ambientColours[(int)CubemapFace.NegativeY]
                 : equator;
 
             // Forward is +Z, index 4
-            adaptiveColour = SampleCubemapBilinear(_ambientColours, _mainCameraTransform.forward);
+            if (FindMainCamera())
+            {
+                adaptiveColour = SampleCubemapBilinear(ambientColours, _mainCameraTransform.forward);
+            }
 
             if (!sunFound)
             {
@@ -617,8 +689,8 @@ namespace PKGE
             }
 
             Vector3 sunForward = sunTransform.forward;
-            skyColour = SampleCubemapBilinear(_ambientColours, sunForward);
-            float denominator = SampleCubemapBilinear(_ambientColours, -sunForward).grayscale;
+            skyColour = SampleCubemapBilinear(ambientColours, sunForward);
+            float denominator = SampleCubemapBilinear(ambientColours, -sunForward).grayscale;
 
             skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
         }
