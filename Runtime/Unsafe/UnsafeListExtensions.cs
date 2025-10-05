@@ -66,6 +66,10 @@ namespace PKGE.Unsafe
             return array;
         }
 
+        /// <exception cref="System.ArgumentOutOfRangeException">start must be >= 0</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">Length must be >= 0</exception>
+        /// <exception cref="System.ArgumentOutOfRangeException">sub array range {start}-{start + length - 1} is outside the range of the native array 0-{Length - 1}</exception>
+        /// <exception cref="System.ArgumentException">sub array range {start}-{start + length - 1} caused an integer overflow and is outside the range of the native array 0-{Length - 1}</exception>
         public static NativeArray<T> GetSubNativeArray<T>(ref this UnsafeList<T> unsafeList, int start, int length)
             where T : unmanaged =>
             unsafeList.AsNativeArray().GetSubArray(start, length);

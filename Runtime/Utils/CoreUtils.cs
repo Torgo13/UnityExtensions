@@ -101,9 +101,9 @@ namespace PKGE
                     _magentaCubeTextureArray = new CubemapArray(1, 1, GraphicsFormat.R32G32B32A32_SFloat,
                         TextureCreationFlags.DontInitializePixels);
                     var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                    colors[0] = Color.magenta;
                     for (int i = 0; i < 6; ++i)
                     {
-                        colors[0] = Color.magenta;
                         _magentaCubeTextureArray.SetPixelData(colors, mipLevel: 0, (CubemapFace)i, element: 0);
                     }
 
@@ -574,7 +574,6 @@ namespace PKGE
         public static Mesh CreateCubeMesh(Vector3 min, Vector3 max)
         {
             Mesh mesh = new Mesh();
-            mesh.indexFormat = IndexFormat.UInt16;
 
             var vertices = new NativeArray<Vector3>(8, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             vertices[0] = new Vector3(min.x, min.y, min.z);

@@ -16,6 +16,7 @@ namespace PKGE
         private string _statsLabel;
         private GUIStyle _style;
 
+        private const int _frameTimeCount = 4096;
         private NativeArray<float> _frameTimes;
         private int _totalFrames;
         private float _minFrameTime = 1000f;
@@ -50,7 +51,7 @@ namespace PKGE
 
         void Awake()
         {
-            _frameTimes = new NativeArray<float>(4096, Allocator.Persistent,
+            _frameTimes = new NativeArray<float>(_frameTimeCount, Allocator.Persistent,
                 NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < _recordersList.Length; i++)
@@ -96,9 +97,9 @@ namespace PKGE
                 _accDeltaTime += Time.unscaledDeltaTime;
                 _frameCount++;
 
-                _frameTimes[(int)Mathf.Repeat(_totalFrames, 5000)] = Time.unscaledDeltaTime;
+                _frameTimes[(int)Mathf.Repeat(_totalFrames, _frameTimeCount)] = Time.unscaledDeltaTime;
 
-                int frameFactor = Mathf.Clamp(_totalFrames, 0, 5000);
+                int frameFactor = Mathf.Clamp(_totalFrames, 0, _frameTimeCount);
 
                 float averageFrameTime = 0f;
                 

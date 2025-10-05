@@ -54,7 +54,7 @@ namespace PKGE
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
-        public static async Task<IEnumerable<TOutput>> RunTasksAsync<TInput, TOutput>(
+        public static async ValueTask<IEnumerable<TOutput>> RunTasksAsync<TInput, TOutput>(
             List<TInput> items,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
@@ -65,7 +65,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
-        public static async Task RunTasksAsync<TInput, TOutput>(
+        public static async ValueTask RunTasksAsync<TInput, TOutput>(
             List<TInput> items,
             ConcurrentBag<TOutput> cb,
             Action<TInput, ConcurrentBag<TOutput>> action,

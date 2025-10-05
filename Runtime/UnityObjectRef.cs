@@ -55,6 +55,14 @@ namespace PKGE.Packages
             return index;
         }
         #endregion // Unity.Entities
+
+        public List<UnityEngine.Object> Get(List<UnityEngine.Object> objects)
+        {
+            if (IsCreated && InstanceIDs.Length > 0)
+                Resources.InstanceIDToObjectList(InstanceIDs.AsArray(), objects);
+
+            return objects;
+        }
     }
 #endif // INCLUDE_COLLECTIONS
 
@@ -108,6 +116,7 @@ namespace PKGE.Packages
         #region Unity.Entities
         [SerializeField]
         internal UntypedUnityObjectRef Id;
+
         /// <summary>
         /// Implicitly converts an <see cref="UnityEngine.Object"/> to an <see cref="UnityObjectRef{T}"/>.
         /// </summary>
@@ -135,7 +144,8 @@ namespace PKGE.Packages
         {
             if (unityObjectRef.Id.instanceId == 0)
                 return null;
-            return (T) Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
+
+            return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
         }
 
         /// <summary>

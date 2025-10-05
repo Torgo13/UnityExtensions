@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
 namespace PKGE
@@ -245,17 +246,22 @@ namespace PKGE
             return foundObject;
         }
 
-        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances)
+        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,
+            UnityEngine.SceneManagement.Scene destinationScene = default)
         {
-            int instanceID = go.GetHashCode();
+            Assert.IsTrue(count > 0);
+            Assert.IsNotNull(go);
+            Assert.IsNotNull(instances);
 
-            const Allocator allocator = Allocator.Temp;
-            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+            var ids = new NativeArray<int>(2 * count,
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
-            var instanceIDs = new NativeArray<int>(count, allocator, options);
-            var transformIDs = new NativeArray<int>(count, allocator, options);
+            var instanceIDs = ids.GetSubArray(start: 0, length: count);
+            var transformIDs = ids.GetSubArray(start: count, length: count);
 
-            GameObject.InstantiateGameObjects(instanceID, count, instanceIDs, transformIDs);
+            GameObject.InstantiateGameObjects(go.GetInstanceID(),
+                count, instanceIDs, transformIDs, destinationScene);
+
             Resources.InstanceIDToObjectList(instanceIDs,
                 Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<GameObject>, List<Object>>(ref instances));
         }

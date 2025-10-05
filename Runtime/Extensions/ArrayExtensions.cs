@@ -20,13 +20,18 @@ namespace PKGE
         /// <param name="allocator">NativeArray allocator type</param>
         public static void ResizeArray<T>(this ref NativeArray<T> array, int capacity, Allocator allocator = Allocator.Temp) where T : struct
         {
-            var newArray = new NativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
+            Assert.IsTrue(capacity >= 0);
+
             if (array.IsCreated)
             {
-                NativeArray<T>.Copy(array, newArray, array.Length);
+                var newArray = new NativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
+                NativeArray<T>.Copy(array, newArray, Math.Min(array.Length, capacity));
                 array.Dispose();
+                array = newArray;
+                return;
             }
-            array = newArray;
+
+            array = new NativeArray<T>(capacity, allocator, NativeArrayOptions.ClearMemory);
         }
 
         /// <summary>
@@ -36,14 +41,20 @@ namespace PKGE
         /// <param name="capacity">New size of transform access array to resize</param>
         public static void ResizeArray(this ref TransformAccessArray array, int capacity)
         {
+            Assert.IsTrue(capacity >= 0);
+
             var newArray = new TransformAccessArray(capacity);
             if (array.isCreated)
             {
-                for (int i = 0; i < array.length; ++i)
+                int length = Math.Min(array.length, capacity);
+                for (int i = 0; i < length; ++i)
+                {
                     newArray.Add(array[i]);
+                }
 
                 array.Dispose();
             }
+
             array = newArray;
         }
 

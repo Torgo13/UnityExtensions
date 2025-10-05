@@ -188,7 +188,7 @@ namespace PKGE
 
         #region Async
         /// <inheritdoc cref="WriteTextureToDisk(Texture,string,string)"/>
-        public static async Task WriteTextureToDiskAsync(this Texture target, string filePath)
+        public static async ValueTask WriteTextureToDiskAsync(this Texture target, string filePath)
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -234,7 +234,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="CopyRenderTextureToTexture2D(RenderTexture)"/>
-        public static async Task<Texture2D> CopyRenderTextureToTexture2DAsync(this RenderTexture source)
+        public static async ValueTask<Texture2D> CopyRenderTextureToTexture2DAsync(this RenderTexture source)
         {
             Assert.IsTrue(source.dimension is TextureDimension.Tex2D or TextureDimension.Cube);
 
@@ -242,7 +242,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="RenderTextureToTexture(RenderTexture)"/>
-        private static async Task<Texture> RenderTextureToTextureAsync(this RenderTexture source)
+        private static async ValueTask<Texture> RenderTextureToTextureAsync(this RenderTexture source)
         {
             GraphicsFormat format = source.graphicsFormat;
 

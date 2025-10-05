@@ -60,7 +60,7 @@ namespace PKGE
         }
         #endregion // Unity.LiveCapture
 
-        public static async Task<string> SaveAsPNGAsync(this Texture2D texture, string filename, string directory)
+        public static async ValueTask<string> SaveAsPNGAsync(this Texture2D texture, string filename, string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -98,7 +98,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async Task<string> SaveAsEXRAsync(this Texture2D texture, string filename, string directory,
+        public static async ValueTask<string> SaveAsEXRAsync(this Texture2D texture, string filename, string directory,
             Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -133,7 +133,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async Task<string> SaveAsync(this Texture2D texture, string filename, string directory,
+        public static async ValueTask<string> SaveAsync(this Texture2D texture, string filename, string directory,
             TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)

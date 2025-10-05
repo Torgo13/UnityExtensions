@@ -179,10 +179,9 @@ namespace PKGE.Unsafe
             return bitStates * 3 + arrayLength;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "arrayLength is unused.")]
         private static void CalculateRadixSortSupportArrays(
-#pragma warning disable IDE0060 // Remove unused parameter
             int bitStates, int arrayLength, uint* supportArray,
-#pragma warning restore IDE0060 // Remove unused parameter
             out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
         {
             bucketIndices = supportArray;

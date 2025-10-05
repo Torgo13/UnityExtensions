@@ -12,6 +12,8 @@ namespace PKGE.Packages
         {
 #if INCLUDE_STRINGBUILDER_EXTENSIONS
             System.Text.StringBuilderExtensions.EnsureRoom(sb, lines.Length);
+#else
+            _ = sb.EnsureCapacity(sb.Length + lines.Length);
 #endif // INCLUDE_STRINGBUILDER_EXTENSIONS
 
             var charIndex = 0;

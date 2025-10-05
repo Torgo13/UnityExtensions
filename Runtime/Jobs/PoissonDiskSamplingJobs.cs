@@ -211,7 +211,7 @@ namespace PKGE.Packages
             var samplingArc = PI2 / samplingResolution;
             var halfSamplingArc = samplingArc / 2;
 
-            // Initialize a hash array that maps a sample's grid position to it's index
+            // Initialize a hash array that maps a sample's grid position to its index
             var gridToSampleIndex = new NativeArray<int>(gridSize, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             for (var i = 0; i < gridSize; i++)
                 gridToSampleIndex[i] = -1;

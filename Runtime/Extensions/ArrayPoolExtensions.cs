@@ -24,7 +24,7 @@ namespace PKGE
         #region IDisposable
         public void Dispose()
         {
-            ArrayPool<T>.Shared.Return(PooledArray, clearArray: true);
+            ArrayPool<T>.Shared.Return(PooledArray, clearArray: !typeof(T).IsValueType);
         }
         #endregion // IDisposable
     }
@@ -58,7 +58,7 @@ namespace PKGE
         #region IDisposable
         public readonly void Dispose()
         {
-            ArrayPool<T>.Shared.Return(PooledArray, clearArray: true);
+            ArrayPool<T>.Shared.Return(PooledArray, clearArray: !typeof(T).IsValueType);
         }
         #endregion // IDisposable
     }
