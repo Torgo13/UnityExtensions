@@ -25,7 +25,7 @@ namespace PKGE
             get
             {
                 if (BaseInstance == null)
-                    CreateAndLoad();
+                    BaseInstance = CreateAndLoad();
 
                 return BaseInstance;
             }

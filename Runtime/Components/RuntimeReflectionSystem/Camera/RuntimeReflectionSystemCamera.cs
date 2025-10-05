@@ -183,7 +183,7 @@ namespace PKGE
         /// <summary>Increase the mip level of the skybox cubemap by one to filter out high frequency noise.</summary>
         public bool noiseReduction = true;
 
-        /// <summary>Set to false to use the equator colour for the ground colour.</summary>
+        /// <summary>When <see langword="false"/>, uses the equator colour for the ground colour.</summary>
         public bool groundColour;
 
         /// <summary>Remove the blue tint from the ambient colour.</summary>

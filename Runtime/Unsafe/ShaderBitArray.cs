@@ -53,7 +53,7 @@ namespace PKGE.Unsafe
                 _data[i] = 0;
         }
 
-        private readonly void GetElementIndexAndBitOffset(int index, out int elemIndex, out int bitOffset)
+        private static void GetElementIndexAndBitOffset(int index, out int elemIndex, out int bitOffset)
         {
             elemIndex = index >> ElementShift;
             bitOffset = index & ElementMask;

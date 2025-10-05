@@ -157,7 +157,7 @@ namespace PKGE.Packages
                 curveT = math.clamp(curveT, keys[hintIndex].time, keys[endIndex].time);
                 FindIndexForSampling(keys, curveT, startIndex, endIndex, hintIndex, out int lhsIndex, out int rhsIndex);
 
-                Keyframe lhs = keys[hintIndex];
+                Keyframe lhs = keys[lhsIndex];
                 Keyframe rhs = keys[rhsIndex];
                 InterpolateKeyframe(lhs, rhs, curveT, out result);
             }

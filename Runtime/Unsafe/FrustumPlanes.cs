@@ -41,7 +41,7 @@ namespace PKGE.Unsafe
             /// The object is partially intersecting the planes.
             /// </summary>
             Partial
-        };
+        }
 
 #if INCLUDE_MATHEMATICS
         /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, Plane[])"/>
@@ -105,7 +105,6 @@ namespace PKGE.Unsafe
         /// <returns>Intersection result</returns>
         public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
         {
-            int inCount;
             var inCountRef = new NativeReference<int>(Allocator.TempJob);
             var intersectResultRef = new NativeReference<bool>(Allocator.TempJob);
 
@@ -120,10 +119,10 @@ namespace PKGE.Unsafe
 
             intersectJob.Run(cullingPlanes.Length);
 
-            inCount = inCountRef.Value;
+            int inCount = inCountRef.Value;
             inCountRef.Dispose();
 
-            var intersectResult = intersectResultRef.Value;
+            bool intersectResult = intersectResultRef.Value;
             intersectResultRef.Dispose();
 
             if (intersectResult)

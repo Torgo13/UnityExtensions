@@ -169,6 +169,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj) => obj is BitArray8 ba8 && ba8.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
@@ -297,6 +298,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj) => obj is BitArray16 ba16 && ba16.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
@@ -427,6 +429,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj) => obj is BitArray32 ba32 && ba32.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
@@ -561,6 +564,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj) => obj is BitArray64 ba64 && ba64.data == data;
         /// <summary>
         /// Get the hashcode of the bit array.
@@ -714,6 +718,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj) => obj is BitArray128 ba128 && data1.Equals(ba128.data1) && data2.Equals(ba128.data2);
         /// <summary>
         /// Get the hashcode of the bit array.
@@ -884,6 +889,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">Bit array to compare to.</param>
         /// <returns>True if the provided bit array is equal to this.</returns>
+        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj)
             => obj is BitArray256 ba256
             && data1.Equals(ba256.data1)

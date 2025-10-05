@@ -314,9 +314,8 @@ namespace PKGE
         #region FPSSample
         public static Vector3 GetClosestPointOnCollider(this Collider c, Vector3 p)
         {
-            if (c is SphereCollider)
+            if (c is SphereCollider csc)
             {
-                var csc = c as SphereCollider;
                 var cscTransform = csc.transform;
 
                 var scale = cscTransform.localScale;
@@ -325,9 +324,9 @@ namespace PKGE
                     * Mathf.Max(Mathf.Abs(scale.x), Mathf.Max(Mathf.Abs(scale.y), Mathf.Abs(scale.z)))
                     * (p - cPosition).normalized;
             }
-            else if (c is BoxCollider)
+            
+            if (c is BoxCollider cbc)
             {
-                var cbc = c as BoxCollider;
                 var cbcTransform = cbc.transform;
                 Vector3 local_p = cbcTransform.InverseTransformPoint(p);
 
@@ -344,10 +343,10 @@ namespace PKGE
 
                 return cbcTransform.TransformPoint(local_p);
             }
-            else if (c is CapsuleCollider)
+            
+            if (c is CapsuleCollider ccc)
             {
                 // Only supports Y axis based capsules
-                var ccc = c as CapsuleCollider;
                 var cccTransform = ccc.transform;
                 Vector3 local_p = cccTransform.InverseTransformPoint(p);
                 local_p -= ccc.center;

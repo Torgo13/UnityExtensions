@@ -68,7 +68,7 @@ namespace PKGE
             UnityEditor.AssetDatabase.CreateAsset(array, "Assets/CubemapArray.asset");
         }
 
-        bool Validate(Texture[] textures)
+        static bool Validate(Texture[] textures)
         {
             if (textures == null || textures.Length == 0)
                 return false;

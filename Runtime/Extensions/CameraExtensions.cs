@@ -147,5 +147,20 @@ namespace PKGE
 
             return default;
         }
+
+        public static Camera GetMainOrFirstCamera()
+        {
+            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
+            if (!GetAllCameras(cameras))
+                return default;
+
+            foreach (var cam in cameras)
+            {
+                if (cam.CompareTag("MainCamera"))
+                    return cam;
+            }
+
+            return cameras[0];
+        }
     }
 }

@@ -1106,7 +1106,8 @@ namespace PKGE
             const uint intEq = '=';
             const uint intSpace = ' ';
 
-            Assert.IsTrue(0 <= input.Length);
+            Assert.IsNotNull(input);
+            Assert.IsTrue(0 < input.Length);
 
             int usefulInputLength = input.Length;
             int padding = 0;

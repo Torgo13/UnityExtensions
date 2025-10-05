@@ -100,12 +100,12 @@ namespace PKGE
 
 		public static bool Compare(this Color a, Color b)
         {
-            return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+            return Mathf.Approximately(a.r, b.r) && Mathf.Approximately(a.g, b.g) && Mathf.Approximately(a.b, b.b) && Mathf.Approximately(a.a, b.a);
         }
 
 		public static bool CompareRGB(this Color a, Color b)
 		{
-			return a.r == b.r && a.g == b.g && a.b == b.b;
+			return Mathf.Approximately(a.r, b.r) && Mathf.Approximately(a.g, b.g) && Mathf.Approximately(a.b, b.b);
 		}
 
         public static Color32 Tint(this Color32 c1, Color32 c2)
@@ -141,7 +141,7 @@ namespace PKGE
             if (v < 1.0f)
                 return (float)System.Math.Pow((v + 0.055f) / 1.055f, 2.4f);
 
-            if (v == 1.0f)
+            if (Mathf.Approximately(v, 1.0f))
                 return 1.0f;
 
             return (float)System.Math.Pow(v, 2.2f);
@@ -162,7 +162,7 @@ namespace PKGE
             if (v < 1.0f)
                 return (byte)(Mathf.Pow((v + 0.055f) / 1.055f, 2.4f) * 255);
 
-            if (v == 1.0f)
+            if (Mathf.Approximately(v, 1.0f))
                 return 255;
 
             return (byte)(Mathf.Pow(v, 2.2f) * 255);

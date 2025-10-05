@@ -182,6 +182,7 @@ namespace PKGE.Unsafe
         }
 
 #pragma warning disable IDE0060 // Remove unused parameter
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static T* Malloc<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
 #pragma warning restore IDE0060 // Remove unused parameter
         {

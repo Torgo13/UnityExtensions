@@ -119,7 +119,7 @@ namespace PKGE
         /// Clones the Prefab Game Object <paramref name="prefab"/> and copies the hide flags of each Game Object
         /// in its hierarchy to the corresponding Game Object in the copy's hierarchy.
         /// </summary>
-        /// <seealso cref="PrefabUtility.InstantiatePrefab(UnityObject, Transform)"/>
+        /// <seealso cref="UnityEditor.PrefabUtility.InstantiatePrefab(UnityObject, Transform)"/>
         /// <param name="prefab">The Prefab Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>

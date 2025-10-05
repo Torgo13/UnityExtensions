@@ -13,12 +13,12 @@ namespace PKGE.Attributes
         /// <summary>
         /// The names of the enum values used to initialize this attribute.
         /// </summary>
-        public string[] Names;
+        public readonly string[] Names;
 
         /// <summary>
         /// The int values of the enum values used to initialize this attribute.
         /// </summary>
-        public int[] Values;
+        public readonly int[] Values;
 
         /// <summary>
         /// Initialize a new EnumDisplayAttribute.

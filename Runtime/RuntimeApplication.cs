@@ -40,14 +40,12 @@ namespace PKGE
                 i < playerLoopSystemsCount && !updatePreFrame && !updatePostFrame;
                 i++)
             {
-                if (!updatePreFrame
-                    && playerLoopSystems[i].type == typeof(UpdatePreFrame))
+                if (playerLoopSystems[i].type == typeof(UpdatePreFrame))
                 {
                     updatePreFrame = true;
                 }
                 
-                if (!updatePostFrame
-                    && playerLoopSystems[i].type == typeof(UpdatePostFrame))
+                if (playerLoopSystems[i].type == typeof(UpdatePostFrame))
                 {
                     updatePostFrame = true;
                 }

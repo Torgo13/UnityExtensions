@@ -601,7 +601,7 @@ namespace PKGE
 
     static class XYZReferences
     {
-        static Vector3[,] _references;
+        static readonly Vector3[,] _references;
 
         static XYZReferences()
         {
@@ -697,7 +697,7 @@ namespace PKGE
         const int AxisDivisions = 8;
         const int BucketSize = 256 / AxisDivisions;
 
-        List<ColorCluster> _clusters;
+        readonly List<ColorCluster> _clusters;
 
         public RGBClusters()
         {

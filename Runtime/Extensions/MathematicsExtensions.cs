@@ -101,6 +101,7 @@ namespace PKGE
         [FieldOffset(0)] public BitArray8 BitArray8;
 
         public readonly bool Equals(Union1 other) => Byte == other.Byte;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union1 other && Equals(other);
         public readonly override int GetHashCode() => Byte;
     }
@@ -119,6 +120,7 @@ namespace PKGE
         [FieldOffset(1)] public Union1 _1;
 
         public readonly bool Equals(Union2 other) => Short == other.Short;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
         public readonly override int GetHashCode() => Short;
     }
@@ -140,6 +142,7 @@ namespace PKGE
         [FieldOffset(2)] public Union2 _2;
 
         public readonly bool Equals(Union4 other) => Int == other.Int;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
         public readonly override int GetHashCode() => Int;
     }
@@ -162,6 +165,7 @@ namespace PKGE
         [FieldOffset(4)] public Union4 _4;
 
         public readonly bool Equals(Union8 other) => Long == other.Long;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
         public readonly override int GetHashCode() => Long.GetHashCode();
     }
@@ -187,6 +191,7 @@ namespace PKGE
         [FieldOffset(8)] public Union8 _8;
 
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
     }
@@ -203,6 +208,7 @@ namespace PKGE
         [FieldOffset(8)] public Union4 Union4_8;
 
         public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union12 other && Equals(other);
         public readonly override int GetHashCode() => Vector3Int.GetHashCode();
     }
@@ -221,6 +227,7 @@ namespace PKGE
         [FieldOffset(36)] public Union12 U12_36;
 
         public readonly bool Equals(Union48 other) => U16_00.Equals(other.U16_00) && U16_16.Equals(other.U16_16) && U16_32.Equals(other.U16_32);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union48 other && Equals(other);
         public readonly override int GetHashCode() => U16_00.GetHashCode() ^ (U16_16.GetHashCode() << 2) ^ (U16_32.GetHashCode() >> 2);
     }
@@ -459,7 +466,7 @@ namespace PKGE
 #endif // INCLUDE_MATHEMATICS
         }
 
-        public static bool equalEps(float a, float b, float epsilon)
+        public static bool equalEps(float a, float b, float epsilon = epsilon)
         {
             Assert.IsTrue(epsilon >= 0.0f);
 
@@ -470,7 +477,7 @@ namespace PKGE
             return abs(a - b) <= epsilon;
         }
 
-        public static bool equalEps(float3 lhs, float3 rhs, float epsilon)
+        public static bool equalEps(float3 lhs, float3 rhs, float epsilon = epsilon)
         {
             Assert.IsTrue(epsilon >= 0.0f);
             return
@@ -479,12 +486,12 @@ namespace PKGE
                 equalEps(lhs.z, rhs.z, epsilon);
         }
 
-        internal static bool equalEps(quaternion lhs, quaternion rhs, float epsilon)
+        internal static bool equalEps(quaternion lhs, quaternion rhs, float epsilon = epsilon)
         {
             return abs(dot(lhs, rhs)) > 1.0f - epsilon;
         }
 
-        internal static bool equalEps(AffineTransform lhs, AffineTransform rhs, float epsilon)
+        internal static bool equalEps(AffineTransform lhs, AffineTransform rhs, float epsilon = epsilon)
         {
             return equalEps(lhs.q, rhs.q, epsilon) && equalEps(lhs.t, rhs.t, epsilon);
         }
@@ -1772,6 +1779,7 @@ namespace PKGE.Packages
         [FieldOffset(0)] public half Half;
 
         public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
         public readonly override int GetHashCode() => __0.Short;
     }
@@ -1789,6 +1797,7 @@ namespace PKGE.Packages
         [FieldOffset(2)] public Union2 _2;
 
         public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
         public readonly override int GetHashCode() => __0.Int;
     }
@@ -1808,6 +1817,7 @@ namespace PKGE.Packages
         [FieldOffset(4)] public Union4 _4;
 
         public readonly bool Equals(Union8 other) => __0.Equals(other.__0);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }
@@ -1828,6 +1838,7 @@ namespace PKGE.Packages
         [FieldOffset(8)] public Union8 _8;
 
         public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => UInt4.GetHashCode();
     }
@@ -1847,6 +1858,7 @@ namespace PKGE.Packages
         [FieldOffset(8)] public Union4 Union4_8;
 
         public readonly bool Equals(Union12 other) => __0.Equals(other.__0);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union12 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }
@@ -1867,6 +1879,7 @@ namespace PKGE.Packages
         [FieldOffset(36)] public Union12 U12_36;
 
         public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
+        [Unity.Burst.BurstDiscard]
         public readonly override bool Equals(object obj) => obj is Union48 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }

@@ -14,6 +14,7 @@ namespace PKGE
         /// <summary>
         /// The size of the struct in bytes.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "StaticMemberInGenericType")]
         public static int Size { get; }
 
         static SizeOfCache()

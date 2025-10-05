@@ -335,7 +335,6 @@ namespace PKGE
         /// the returned <see cref="Texture2D"/> should be destroyed when no longer needed.
         /// </remarks>
         /// <param name="tex">Input <see cref="Texture2D"/>.</param>
-        /// <param name="dispose">True if a copy of <paramref name="tex"/> has been created.</param>
         /// <param name="mipChain">Whether to create mipmaps on the created <see cref="Texture2D"/>.</param>
         /// <returns>The original <paramref name="tex"/> if it is already readable,
         /// otherwise returns a readable copy.</returns>

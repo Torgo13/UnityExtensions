@@ -411,14 +411,14 @@ namespace PKGE
             FieldInfo[] fields = target.GetType()
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            Array.Sort(fields, fieldInfoComparer ??= new FieldInfoComparer());
+            Array.Sort(fields, _fieldInfoComparer ??= new FieldInfoComparer());
             return fields;
 #endif // USING_LINQ
         }
 
 #if USING_LINQ
 #else
-        static FieldInfoComparer fieldInfoComparer;
+        static FieldInfoComparer _fieldInfoComparer;
         class FieldInfoComparer : IComparer<FieldInfo>
         {
             public int Compare(FieldInfo x, FieldInfo y)

@@ -13,7 +13,7 @@ namespace PKGE
     /// <summary>
     /// Extension methods for <see cref="ICollection{T}"/> objects.
     /// </summary>
-    public static partial class CollectionExtensions
+    public static class CollectionExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/CollectionExtensions.cs
         #region Unity.XR.CoreUtils
@@ -200,7 +200,6 @@ namespace PKGE
         #endregion // Unity.Collections
         
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
-
         #region UnityEngine.Formats.Alembic.Importer
         public static void DisposeIfPossible<T>(this ref NativeArray<T> array) where T : struct
         {

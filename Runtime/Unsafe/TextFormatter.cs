@@ -97,7 +97,7 @@ namespace PKGE.Unsafe
                     *dst++ = ' ';
             }
 
-            unsafe void ConvertInt(ref char* dst, char* end, int value, int argWidth, int integerWidth, bool leadingZero)
+            static unsafe void ConvertInt(ref char* dst, char* end, int value, int argWidth, int integerWidth, bool leadingZero)
             {
                 // Dryrun to calculate size
                 int numberWidth = 0;
@@ -178,7 +178,7 @@ namespace PKGE.Unsafe
 
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/DebugOverlay/TextFormatter.cs
         #region FPSSample
-        private class NoArg { };
+        private class NoArg { }
 
         public static int Write(ref char[] dst, int destIdx, string format)
         {
