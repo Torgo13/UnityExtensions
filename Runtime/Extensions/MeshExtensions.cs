@@ -676,6 +676,13 @@ namespace PKGE.Packages
         {
             mesh.SetColors(inColors.AsArray());
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles<T>(this Mesh mesh, NativeList<T> triangles, int submesh = 0)
+            where T : unmanaged
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh);
+        }
         #endregion // NativeList
 #endif // INCLUDE_COLLECTIONS
 
@@ -695,6 +702,13 @@ namespace PKGE.Packages
         public static void SetNormals(this Mesh mesh, List<float3> inNormals)
         {
             mesh.SetNormals(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref inNormals));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles<T>(this Mesh mesh, NativeArray<T> triangles, int submesh = 0, bool calculateBounds = true)
+            where T : unmanaged
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds);
         }
     }
 }
