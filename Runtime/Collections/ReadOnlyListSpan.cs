@@ -186,7 +186,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
-            => HashCode.Combine(_enumerator.List, _enumerator.start, _enumerator.end);
+            => HashCodeUtil.Combine(_enumerator.List.GetHashCode(), _enumerator.start, _enumerator.end);
 
         /// <summary>
         /// Returns a string that represents the current object.

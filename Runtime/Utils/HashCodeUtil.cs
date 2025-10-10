@@ -1,6 +1,6 @@
 namespace PKGE
 {
-    static class HashCodeUtil
+    public static class HashCodeUtil
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/HashCodeUtil.cs
         #region Unity.XR.CoreUtils

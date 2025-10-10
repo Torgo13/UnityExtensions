@@ -69,7 +69,11 @@ namespace PKGE.Packages
             /// <inheritdoc/>
             public readonly int GetHashCode(LODParams obj)
             {
-                return System.HashCode.Combine(distanceScale, cameraPos.x, cameraPos.y, cameraPos.z, isOrtho, orthoSize);
+                return HashCodeUtil.Combine(
+                    math.asint(distanceScale),
+                    cameraPos.GetHashCode(),
+                    isOrtho ? 1 : 0,
+                    math.asint(orthoSize));
             }
         }
 
