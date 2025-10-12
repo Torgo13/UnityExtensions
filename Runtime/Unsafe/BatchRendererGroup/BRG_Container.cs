@@ -1,11 +1,18 @@
+#if INCLUDE_RENDER_PIPELINE_CORE
 using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst;
-using Unity.Mathematics;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Rendering;
+
+#if INCLUDE_MATHEMATICS
+using Unity.Mathematics;
+#else
+using PKGE.Mathematics;
+using float4 = UnityEngine.Vector4;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE.Unsafe
 {
@@ -305,6 +312,7 @@ namespace PKGE.Unsafe
 
             return new JobHandle();
         }
+        #endregion // brg-shooter
     }
-    #endregion // brg-shooter
 }
+#endif // INCLUDE_RENDER_PIPELINE_CORE

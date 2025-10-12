@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -7,11 +6,22 @@ using Unity.Profiling;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+#if INCLUDE_MATHEMATICS
+using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
+#else
+using PKGE.Mathematics;
+using Random = System.Random;
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+#endif // INCLUDE_MATHEMATICS
+
 namespace PKGE.Unsafe
 {
     [BurstCompile]
     public class BRG_Background : MonoBehaviour
     {
+#if INCLUDE_RENDER_PIPELINE_CORE
         //https://github.com/Unity-Technologies/brg-shooter/blob/f55f6e985bf73b0a3c23b95030e890874e552c45/Assets/Scripts/BRG_Background.cs
         #region brg-shooter
         public static BRG_Background gBackgroundManager;
@@ -100,10 +110,15 @@ namespace PKGE.Unsafe
         private static void InjectNewSlice(ref uint m_slicePos, int m_backgroundH, int m_backgroundW,
             ref NativeArray<BackgroundItem> m_backgroundItems)
         {
-            var Random = new Unity.Mathematics.Random(
+#if INCLUDE_MATHEMATICS
+            var Random = new Random(
                 math.max(1, new NativeReference<uint>(Allocator.Temp,
                     NativeArrayOptions.UninitializedMemory).Value));
-            
+#else
+            var Random = new Random(new NativeArray<int>(1, Allocator.Temp,
+                NativeArrayOptions.UninitializedMemory)[0]);
+#endif // INCLUDE_MATHEMATICS
+
             m_slicePos++;
 
             int sPos0 = (int)((m_slicePos + m_backgroundH - 1) % m_backgroundH);
@@ -211,7 +226,7 @@ namespace PKGE.Unsafe
                     float4 color = backgroundItems[itemId].color;
                     if (item.flashTime > 0.0f)
                     {
-                        color = math.lerp(color, new float4(1), item.flashTime);
+                        color = math.lerp(color, new float4(1, 1, 1, 1), item.flashTime);
                     }
 
                     float waveY = item.hInitial + 0.5f + math.sin(item.phase) * 0.5f;
@@ -322,15 +337,23 @@ namespace PKGE.Unsafe
                 if (m_debrisDebugTest
                     && m_burstTimer <= 0.0f)
                 {
+#if INCLUDE_MATHEMATICS
+                    var Random = new Random(
+                        math.max(1, new NativeReference<uint>(Allocator.Temp,
+                            NativeArrayOptions.UninitializedMemory).Value));
+#else
+                    var Random = new Random(new NativeArray<int>(1, Allocator.Temp,
+                        NativeArrayOptions.UninitializedMemory)[0]);
+#endif // INCLUDE_MATHEMATICS
 #if true
                     for (int e = 0; e < 8; e++)
                     {
-                        var pos = new float3(m_backgroundW / 2 + UnityEngine.Random.Range(-8.0f, 8.0f), 16.0f,
-                            m_backgroundH / 2 + UnityEngine.Random.Range(-20.0f, 20.0f));
-                        BRG_Debris.gDebrisManager.GenerateBurstOfDebris(pos, 512, UnityEngine.Random.Range(0.0f, 1.0f));
+                        var pos = new float3(m_backgroundW / 2 + Random.Range(-8.0f, 8.0f), 16.0f,
+                            m_backgroundH / 2 + Random.Range(-20.0f, 20.0f));
+                        BRG_Debris.gDebrisManager.GenerateBurstOfDebris(pos, 512, Random.Range(0.0f, 1.0f));
                     }
 #else
-                    BRG_Debris.gDebrisManager.GenerateBurstOfDebris(new Vector3(m_backgroundW / 2, 16.0f, m_backgroundH / 2), 512*8, UnityEngine.Random.Range(0.0f, 1.0f));
+                    BRG_Debris.gDebrisManager.GenerateBurstOfDebris(new Vector3(m_backgroundW / 2, 16.0f, m_backgroundH / 2), 512*8, Random.Range(0.0f, 1.0f));
 #endif
                     m_burstTimer = 3.0f;
                 }
@@ -364,6 +387,7 @@ namespace PKGE.Unsafe
 
             m_backgroundItems.Dispose();
         }
+        #endregion // brg-shooter
+#endif // INCLUDE_RENDER_PIPELINE_CORE
     }
-    #endregion // brg-shooter
 }

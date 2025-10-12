@@ -40,6 +40,11 @@
             "name": "com.unity.mathematics",
             "expression": "",
             "define": "INCLUDE_MATHEMATICS"
+        },
+        {
+            "name": "com.unity.render-pipelines.core",
+            "expression": "",
+            "define": "INCLUDE_RENDER_PIPELINE_CORE"
         }
     ],
     "noEngineReferences": false

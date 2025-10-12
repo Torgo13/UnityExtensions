@@ -1,17 +1,27 @@
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst;
-using Unity.Mathematics;
 using Unity.Jobs;
 using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+#if INCLUDE_MATHEMATICS
+using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
+#else
+using PKGE.Mathematics;
+using Random = System.Random;
+using float3 = UnityEngine.Vector3;
+using float4 = UnityEngine.Vector4;
+using float3x3 = UnityEngine.Matrix4x4;
+#endif // INCLUDE_MATHEMATICS
+
 namespace PKGE.Unsafe
 {
     public class BRG_Debris : MonoBehaviour
     {
+#if INCLUDE_RENDER_PIPELINE_CORE
         //https://github.com/Unity-Technologies/brg-shooter/blob/f55f6e985bf73b0a3c23b95030e890874e552c45/Assets/Scripts/BRG_Debris.cs
         #region brg-shooter
         public Mesh m_mesh;
@@ -37,7 +47,7 @@ namespace PKGE.Unsafe
         private const int kJustDeadCounter = 3;
         private const int kTotalCounters = 4;
 
-        private Unity.Mathematics.Random m_rndGen;
+        private Random m_rndGen;
 
         [StructLayout(LayoutKind.Sequential)]
         struct GfxItem
@@ -73,7 +83,7 @@ namespace PKGE.Unsafe
 
         void Start()
         {
-            m_rndGen = new Unity.Mathematics.Random(0x22112003);
+            m_rndGen = new Random(0x22112003);
 
             m_brgContainer = new BRG_Container();
             m_brgContainer.Init(m_mesh, m_material, kMaxDebris, kDebrisGpuSize, m_castShadows);
@@ -106,7 +116,7 @@ namespace PKGE.Unsafe
             public NativeArray<int> _inOutCounters;
             [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<DebrisSpawnDesc> _inSpawnInfos;
             [ReadOnly] public int _spawnCount;
-            public Unity.Mathematics.Random _rnd;
+            public Random _rnd;
 
             public void Execute()
             {
@@ -132,8 +142,13 @@ namespace PKGE.Unsafe
                         float rndI = _rnd.NextFloat(0.5f, 1.5f);
                         item.color = new float3(burstColor.r * rndI, burstColor.g * rndI, burstColor.b * rndI);
 
+#if INCLUDE_MATHEMATICS
                         item.mat = math.mul(float3x3.RotateY(_rnd.NextFloat(0.0f, 2.0f * 3.1415926f)),
                             float3x3.Scale(kDebrisScale));
+#else
+                        item.mat = math.mul(math.RotateY(_rnd.NextFloat(0.0f, 2.0f * 3.1415926f)),
+                            float3x3.Scale(new float3(kDebrisScale, kDebrisScale, kDebrisScale)));
+#endif // INCLUDE_MATHEMATICS
 
                         float3 rndSpeed;
                         rndSpeed.x = _rnd.NextFloat(-1.0f, 1.0f);
@@ -249,7 +264,7 @@ namespace PKGE.Unsafe
             public float _zDisplacement;
             public int _maxInstancePerWindow;
             public int _windowSizeInFloat4;
-            public Unity.Mathematics.Random _rnd;
+            public Random _rnd;
 
             private void updateGpuSysmemBuffer(int index, in GfxItem item)
             {
@@ -259,6 +274,7 @@ namespace PKGE.Unsafe
                 float3 bpos = item.pos;
                 float3x3 rot = item.mat;
 
+#if INCLUDE_MATHEMATICS
                 // Compute the new current frame matrix
                 _sysmemBuffer[(windowOffsetInFloat4 + i * 3 + 0)] = new float4(rot.c0, rot.c1.x);
                 _sysmemBuffer[(windowOffsetInFloat4 + i * 3 + 1)] = new float4(rot.c1.y, rot.c1.z, rot.c2.x, rot.c2.y);
@@ -274,6 +290,23 @@ namespace PKGE.Unsafe
 
                 // Update colors
                 _sysmemBuffer[windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 2 + i] = new float4(item.color, 1);
+#else
+                // Compute the new current frame matrix
+                _sysmemBuffer[(windowOffsetInFloat4 + i * 3 + 0)] = new float4(rot.m00, rot.m01, rot.m02, rot.m10);
+                _sysmemBuffer[(windowOffsetInFloat4 + i * 3 + 1)] = new float4(rot.m11, rot.m12, rot.m20, rot.m21);
+                _sysmemBuffer[(windowOffsetInFloat4 + i * 3 + 2)] = new float4(rot.m22, bpos.x, bpos.y, bpos.z);
+
+                // Compute the new inverse matrix
+                _sysmemBuffer[(windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 1 + i * 3 + 0)] =
+                    new float4(rot.m00, rot.m10, rot.m20, rot.m01);
+                _sysmemBuffer[(windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 1 + i * 3 + 1)] =
+                    new float4(rot.m11, rot.m21, rot.m00, rot.m12);
+                _sysmemBuffer[(windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 1 + i * 3 + 2)] =
+                    new float4(rot.m22, -bpos.x, -bpos.y, -bpos.z);
+
+                // Update colors
+                _sysmemBuffer[windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 2 + i] = new float4(item.color.x, item.color.y, item.color.z, 1);
+#endif // INCLUDE_MATHEMATICS
             }
 
             public void Execute(int index)
@@ -377,7 +410,9 @@ namespace PKGE.Unsafe
                 _sysmemBuffer = sysmemBuffer,
                 _maxInstancePerWindow = alignedWindowSize / kDebrisGpuSize,
                 _windowSizeInFloat4 = alignedWindowSize / 16,
+#if INCLUDE_MATHEMATICS
                 _rnd = m_rndGen
+#endif // INCLUDE_MATHEMATICS
             };
 
             jobFence = myJob.ScheduleParallel(m_inOutCounters[kDebrisCounter], 256, jobFence); // 256 debris per Execute
@@ -442,6 +477,7 @@ namespace PKGE.Unsafe
             m_justLandedList.Dispose();
             m_justDeadList.Dispose();
         }
+        #endregion // brg-shooter
+#endif // INCLUDE_RENDER_PIPELINE_CORE
     }
-    #endregion // brg-shooter
 }

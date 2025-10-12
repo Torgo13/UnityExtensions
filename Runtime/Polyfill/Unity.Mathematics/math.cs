@@ -1,8 +1,10 @@
 #if INCLUDE_MATHEMATICS
 #else
+using System.Runtime.CompilerServices;
 using PKGE;
 using float2 = UnityEngine.Vector2;
 using float3 = UnityEngine.Vector3;
+using float3x3 = UnityEngine.Matrix4x4;
 using float4 = UnityEngine.Vector4;
 using quaternion = UnityEngine.Quaternion;
 
@@ -15,6 +17,9 @@ namespace PKGE.Mathematics
         public const float FLT_MIN_NORMAL = 1.175494351e-38F;
         public const float PI = (float)System.Math.PI;
         public const float PI2 = (float)(System.Math.PI * 2);
+
+        public static int asint(float f) => new Union4 { Float = f }.Int;
+        public static float asfloat(int i) => new Union4 { Int = i }.Float;
 
         public static uint ceilpow2(uint x)
         {
@@ -122,6 +127,7 @@ namespace PKGE.Mathematics
 
         public static float4 mul(float4 a, quaternion b) => new float4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
         public static float4 mul(float4 a, float4 b) => new float4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+        public static float3x3 mul(float3x3 a, float3x3 b) => a * b;
 
         public static quaternion mul(quaternion a, quaternion b)
         {
@@ -178,6 +184,18 @@ namespace PKGE.Mathematics
         public static quaternion conjugate(quaternion q)
         {
             return new quaternion(-q.x, -q.y, -q.z, q.w);
+        }
+
+        /// <summary>Returns a float3x3 matrix that rotates around the y-axis by a given number of radians.</summary>
+        /// <param name="angle">The clockwise rotation angle when looking along the y-axis towards the origin in radians.</param>
+        /// <returns>The float3x3 rotation matrix representing a rotation around the y-axis.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x3 RotateY(float angle)
+        {
+            // {{c_1, 0, s_1}, {0, 1, 0}, {-s_1, 0, c_1}}
+            float s, c;
+            sincos(angle, out s, out c);
+            return new float3x3(new float4(c, 0, -s), new float4(0, 1, 0), new float4(s, 0, c), default);
         }
     }
 #pragma warning restore IDE1006 // Naming Styles
