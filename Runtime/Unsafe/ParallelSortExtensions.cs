@@ -140,7 +140,7 @@ namespace PKGE.Unsafe
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Counter;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
+            [WriteOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
             private static unsafe int AtomicIncrement(NativeArray<int> counter)
             {
@@ -215,7 +215,7 @@ namespace PKGE.Unsafe
         {
             [ReadOnly] public int JobsCount;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
+            [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
             public void Execute(int index)
@@ -244,7 +244,7 @@ namespace PKGE.Unsafe
             [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> ArraySorted;
+            [WriteOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> ArraySorted;
 
             public void Execute(int index)
             {
