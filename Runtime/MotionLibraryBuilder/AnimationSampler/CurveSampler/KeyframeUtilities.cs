@@ -14,20 +14,6 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/KeyframeUtilities.cs
         #region CurveSampler
-#if UNITY_EDITOR
-        static System.Reflection.PropertyInfo keyframeTangentMode;
-        static System.Reflection.PropertyInfo KeyframeTangentMode()
-        {
-            if (keyframeTangentMode == null)
-            {
-                keyframeTangentMode = typeof(Keyframe).GetProperty("tangentMode");
-            }
-
-            return keyframeTangentMode;
-        }
-#endif
-
-        const int kBrokenMask = 1 << 0;
         const int kLeftTangentMask = 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4;
         const int kRightTangentMask = 1 << 5 | 1 << 6 | 1 << 7 | 1 << 8;
         const int kLeftTangentOffset = 1;
@@ -59,7 +45,7 @@ namespace PKGE.Packages
             #pragma warning restore CS0618
         }
 
-        public enum InterpolationMode
+        public enum InterpolationMode : byte
         {
             Free,
             Auto,
@@ -72,13 +58,28 @@ namespace PKGE.Packages
         {
             return frames[0].time;
         }
+        
+        public static float StartTime(in NativeArray<Keyframe> frames)
+        {
+            return frames[0].time;
+        }
 
         public static float EndTime(Keyframe[] frames)
         {
             return frames[frames.Length - 1].time;
         }
+        
+        public static float EndTime(in NativeArray<Keyframe> frames)
+        {
+            return frames[frames.Length - 1].time;
+        }
 
         public static int Seek(float time, int index, Keyframe[] keyframes)
+        {
+            return Seek(time, index, new NativeArray<Keyframe>(keyframes, Allocator.Temp));
+        }
+        
+        public static int Seek(float time, int index, in NativeArray<Keyframe> keyframes)
         {
             int numKeys = keyframes.Length;
             index = math.clamp(index, 0, numKeys - 1);
@@ -93,6 +94,11 @@ namespace PKGE.Packages
 
         static public float Evaluate(float time, ref int index, Keyframe[] keyframes)
         {
+            return Evaluate(time, ref index, new NativeArray<Keyframe>(keyframes, Allocator.Temp));
+        }
+        
+        static public float Evaluate(float time, ref int index, in NativeArray<Keyframe> keyframes)
+        {
             int numKeys = keyframes.Length;
             index = Seek(time, index, keyframes);
             Keyframe left = keyframes[index];
@@ -101,7 +107,7 @@ namespace PKGE.Packages
             return Evaluate(math.clamp(time, left.time, right.time), left, right);
         }
 
-        public static float Evaluate(float time, Keyframe lhs, Keyframe rhs)
+        public static float Evaluate(float time, in Keyframe lhs, in Keyframe rhs)
         {
             float dx = rhs.time - lhs.time;
             float m0;
@@ -123,7 +129,7 @@ namespace PKGE.Packages
             return HermitCurve.Evaluate(t, lhs.value, m0, m1, rhs.value);
         }
 
-        public static void AlignWithNext(ref Keyframe key, Keyframe next, bool broken)
+        public static void AlignWithNext(ref Keyframe key, in Keyframe next, bool broken)
         {
             float delta = (next.value - key.value) / (next.time - key.time);
             key.outTangent = delta;
@@ -133,7 +139,7 @@ namespace PKGE.Packages
             }
         }
 
-        public static void AlignWithPrevious(ref Keyframe key, Keyframe previous, bool broken)
+        public static void AlignWithPrevious(ref Keyframe key, in Keyframe previous, bool broken)
         {
             float delta = (key.value - previous.value) / (key.time - previous.time);
             key.inTangent = delta;
@@ -143,7 +149,7 @@ namespace PKGE.Packages
             }
         }
 
-        public static void AlignWithNeighborsClamped(ref Keyframe key, Keyframe previous, Keyframe next)
+        public static void AlignWithNeighborsClamped(ref Keyframe key, in Keyframe previous, Keyframe next)
         {
             const float bias = 0.5f;
             float min = math.min(previous.value, next.value);
@@ -161,7 +167,7 @@ namespace PKGE.Packages
             key.outTangent = smoothedSlope;
         }
 
-        public static void AlignWithNeighbors(ref Keyframe key, Keyframe previous, Keyframe next)
+        public static void AlignWithNeighbors(ref Keyframe key, in Keyframe previous, Keyframe next)
         {
             float pre = (key.value - previous.value) / (key.time - previous.time);
             float post = (next.value - key.value) / (next.time - key.time);
@@ -182,7 +188,7 @@ namespace PKGE.Packages
             }
         }
 
-        public static void AlignTangentsLinear(NativeArray<Keyframe> keyframes)
+        public static void AlignTangentsLinear(ref NativeArray<Keyframe> keyframes)
         {
             int numFrames = keyframes.Length;
 
@@ -232,7 +238,7 @@ namespace PKGE.Packages
             }
         }
 
-        public static void AlignTangentsSmooth(NativeArray<Keyframe> keyframes)
+        public static void AlignTangentsSmooth(ref NativeArray<Keyframe> keyframes)
         {
             int numFrames = keyframes.Length;
             if (numFrames == 2)
@@ -283,7 +289,7 @@ namespace PKGE.Packages
             }
         }
 
-        public static void AlignTangentsClamped(NativeArray<Keyframe> keyframes)
+        public static void AlignTangentsClamped(ref NativeArray<Keyframe> keyframes)
         {
             int numFrames = keyframes.Length;
             if (numFrames == 2)

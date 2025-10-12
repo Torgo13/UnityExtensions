@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
@@ -11,11 +10,12 @@ using PKGE.Mathematics;
 
 namespace PKGE.Packages
 {
+    [Unity.Burst.BurstCompile]
     public static class AnimationCurveBake
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/AnimationCurveBake.cs
         #region CurveSampler
-        public enum InterpolationMode
+        public enum InterpolationMode : byte
         {
             ConstantPre,
             ConstantPost,
@@ -24,71 +24,63 @@ namespace PKGE.Packages
             ClampedAuto
         };
 
-        public struct SampleRange
+        public readonly struct SampleRange
         {
-            public int startFrameIndex;
-            public int numFrames;
+            public readonly int startFrameIndex;
+            public readonly int numFrames;
+
+            public SampleRange(int startFrameIndex, int numFrames)
+            {
+                this.startFrameIndex = startFrameIndex;
+                this.numFrames = numFrames;
+            }
         }
 
-        public static int Bake(AnimationCurve curve, float frameRate, InterpolationMode mode)
+        public static int Bake(AnimationCurve curve, float frameRate, InterpolationMode mode = InterpolationMode.Auto)
         {
             var keys = new NativeArray<Keyframe>(curve.keys, Allocator.Temp);
-
-            float duration = keys[keys.Length - 1].time - keys[0].time;
-            int frameCount = (int)math.ceil(frameRate * duration);
-            var bakedKeys = new NativeArray<Keyframe>(frameCount, Allocator.Temp);
-
-            switch (mode)
-            {
-                case InterpolationMode.Linear:
-                    KeyframeUtilities.AlignTangentsLinear(bakedKeys);
-                    break;
-                case InterpolationMode.Auto:
-                    KeyframeUtilities.AlignTangentsSmooth(bakedKeys);
-                    break;
-                case InterpolationMode.ClampedAuto:
-                    KeyframeUtilities.AlignTangentsClamped(bakedKeys);
-                    break;
-                default:
-                    throw new System.InvalidOperationException("Not Implemented");
-            }
-
-            curve.keys = bakedKeys.ToArray();
-            keys.Dispose();
-            bakedKeys.Dispose();
-            return frameCount;
+            return Bake(ref keys, frameRate, mode);
         }
 
         public static int Bake(ref Keyframe[] keys, float frameRate, InterpolationMode mode = InterpolationMode.Auto)
         {
             var nativeKeys = new NativeArray<Keyframe>(keys, Allocator.Temp);
+            int frameCount = Bake(ref nativeKeys, frameRate, mode);
+            nativeKeys.CopyTo(keys);
+            return frameCount;
+        }
+        
+        [Unity.Burst.BurstCompile]
+        public static int Bake(ref NativeArray<Keyframe> keys, float frameRate, in InterpolationMode mode = InterpolationMode.Auto)
+        {
             float duration = keys[keys.Length - 1].time - keys[0].time;
             int frameCount = (int)math.ceil(frameRate * duration);
             var bakedKeys = new NativeArray<Keyframe>(frameCount, Allocator.Temp);
-            var sampleRange = new SampleRange() { startFrameIndex = 0, numFrames = frameCount };
+            var sampleRange = new SampleRange(startFrameIndex: 0, numFrames: frameCount);
             
-            ThreadSafe.Bake(ref nativeKeys, frameRate, ref bakedKeys, ref sampleRange);
+            ThreadSafe.Bake(keys, frameRate, ref bakedKeys, sampleRange);
 
             switch (mode)
             {
                 case InterpolationMode.Linear:
-                    KeyframeUtilities.AlignTangentsLinear(bakedKeys);
+                    KeyframeUtilities.AlignTangentsLinear(ref bakedKeys);
                     break;
                 case InterpolationMode.Auto:
-                    KeyframeUtilities.AlignTangentsSmooth(bakedKeys);
+                    KeyframeUtilities.AlignTangentsSmooth(ref bakedKeys);
                     break;
                 case InterpolationMode.ClampedAuto:
-                    KeyframeUtilities.AlignTangentsClamped(bakedKeys);
+                    KeyframeUtilities.AlignTangentsClamped(ref bakedKeys);
                     break;
                 default:
                     throw new System.InvalidOperationException("Not Implemented");
             }
 
-            keys = bakedKeys.ToArray();
+            keys.CopyFrom(bakedKeys);
             bakedKeys.Dispose();
             return frameCount;
         }
 
+        [Unity.Burst.BurstCompile]
         public static class ThreadSafe
         {
             [Unity.Burst.BurstCompile(CompileSynchronously = true)]
@@ -127,7 +119,13 @@ namespace PKGE.Packages
                 }
             }
 
-            public static BakeJob ConfigureBake(Curve[] curves, float frameRate, Curve[] outCurves, Allocator alloc, SampleRange sampleRange)
+            public static BakeJob ConfigureBake(Curve[] curves, float frameRate, Curve[] outCurves, Allocator alloc, in SampleRange sampleRange)
+            {
+                return ConfigureBake(new NativeArray<Curve>(curves, Allocator.Temp), frameRate,
+                    new NativeArray<Curve>(outCurves, Allocator.Temp), alloc, sampleRange);
+            }
+            
+            public static BakeJob ConfigureBake(in NativeArray<Curve> curves, float frameRate, in NativeArray<Curve> outCurves, Allocator alloc, in SampleRange sampleRange)
             {
                 var job = new BakeJob();
                 job.curves = new NativeArray<NativeArray<Keyframe>>(curves.Length, alloc);
@@ -137,11 +135,11 @@ namespace PKGE.Packages
 
                 for (int i = 0; i < curves.Length; i++)
                 {
-                    job.curves[i] = new CurveData(curves[i], alloc).array;
+                    job.curves[i] = curves[i].Keys;
                     //int frameCount = (int)math.ceil(frameRate * curves[i].Duration);
                     //var outCurve = new Curve(frameCount, alloc);
                     //outCurves[i] = outCurve;
-                    job.outCurves[i] = new CurveData(outCurves[i], alloc).array;
+                    job.outCurves[i] = outCurves[i].Keys;
                 }
 
                 return job;
@@ -149,24 +147,26 @@ namespace PKGE.Packages
 
             public static BakeJob ConfigureBake(Curve[] curves, float frameRate, Curve[] outCurves, Allocator alloc)
             {
-                SampleRange sampleRange = new SampleRange()
-                {
-                    startFrameIndex = 0,
-                    numFrames = curves[0].Length
-                };
-
+                return ConfigureBake(new NativeArray<Curve>(curves, Allocator.Temp), frameRate,
+                    new NativeArray<Curve>(outCurves, Allocator.Temp), alloc);
+            }
+            
+            public static BakeJob ConfigureBake(NativeArray<Curve> curves, float frameRate, NativeArray<Curve> outCurves, Allocator alloc)
+            {
+                SampleRange sampleRange = new SampleRange(startFrameIndex: 0, numFrames: curves[0].Length);
                 return ConfigureBake(curves, frameRate, outCurves, alloc, sampleRange);
             }
 
-            public static void Bake(ref Curve curve, float frameRate, ref Curve outCurve, ref SampleRange sampleRange)
+            [Unity.Burst.BurstCompile]
+            public static void Bake(ref Curve curve, float frameRate, ref Curve outCurve, in SampleRange sampleRange)
             {
                 NativeArray<Keyframe> keys = curve.Keys;
                 NativeArray<Keyframe> outKeys = outCurve.Keys;
-                Bake(ref keys, frameRate, ref outKeys, ref sampleRange);
+                Bake(keys, frameRate, ref outKeys, sampleRange);
                 //  KeyframeUtilities.AlignTangentsSmooth(outKeys, sampleRange);
             }
 
-            public static void Bake(ref NativeArray<Keyframe> keyframes, float frameRate, ref NativeArray<Keyframe> bakedFrames, ref SampleRange sampleRange)
+            public static void Bake(in NativeArray<Keyframe> keyframes, float frameRate, ref NativeArray<Keyframe> bakedFrames, in SampleRange sampleRange)
             {
                 int numKeys = keyframes.Length;
                 float start = keyframes[0].time;

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 
@@ -15,56 +16,55 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
         #region Unity.Curves
-        private const int TRUE = 1;
-        private const int FALSE = 1;
         public readonly NativeArray<Keyframe> Keys;
-        private readonly int owner;
+        [MarshalAs(UnmanagedType.U1)]
+        private readonly bool owner;
 
         public Curve(AnimationCurve c, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(c.keys, alloc);
-            owner = TRUE;
+            owner = true;
         }
 
         public Curve(int size, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(size, alloc);
-            owner = TRUE;
+            owner = true;
         }
 
         public Curve(Keyframe[] keyframes, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(keyframes, alloc);
-            owner = TRUE;
+            owner = true;
         }
 
         public Curve(NativeArray<Keyframe> keyframes, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(keyframes, alloc);
-            owner = TRUE;
+            owner = true;
         }
 
         public Curve(NativeArray<Keyframe> keyframes)
         {
             Keys = keyframes;
-            owner = FALSE;
+            owner = false;
         }
 
         public Curve(Curve other)
         {
             Keys = other.Keys;
-            owner = FALSE;
+            owner = false;
         }
 
         public Curve(Curve other, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(other.Keys, alloc);
-            owner = TRUE;
+            owner = true;
         }
 
         public void Dispose()
         {
-            if (owner != 0)
+            if (owner)
             {
                 Keys.Dispose();
             }
@@ -75,55 +75,17 @@ namespace PKGE.Packages
             CurveSampling.ThreadSafe.Evaluate(Keys, time, out float result);
             return result;
         }
+        
+        public void Evaluate(float time, out float result)
+        {
+            CurveSampling.ThreadSafe.Evaluate(Keys, time, out result);
+        }
 
         public int Length => Keys.Length;
         public float Duration => Keys[Length - 1].time - Keys[0].time;
         #endregion // Unity.Curves
     }
-
-    public struct CurveData
-    {
-        //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
-        #region Unity.Curves
-        public CurveData(Curve curve, Allocator alloc)
-        {
-            array = curve.Keys;
-            size = curve.Length;
-            allocatorLabel = alloc;
-        }
-
-        public static CurveData CreateInvalid()
-        {
-            return new CurveData()
-            {
-                array = default,
-                size = 0,
-                allocatorLabel = Allocator.Invalid
-            };
-        }
-
-        public bool IsValid => array.IsCreated;
-
-        public Keyframe this[int index] => array[index];
-
-        public readonly Curve ToCurve()
-        {
-            NativeArray<Keyframe> keys = array;
-
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.SetAtomicSafetyHandle(
-                ref keys, Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle.Create());
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
-
-            return new Curve(keys);
-        }
-
-        public NativeArray<Keyframe> array;
-        public int size;
-        public Allocator allocatorLabel;
-        #endregion // Unity.Curves
-    }
-
+    
     [Unity.Burst.BurstCompile]
     public static class CurveSampling
     {
@@ -134,18 +96,18 @@ namespace PKGE.Packages
         [Unity.Burst.BurstCompile]
         public static class ThreadSafe
         {
-            [Unity.Burst.BurstCompile]
+            [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
             public static void Evaluate(in NativeArray<Keyframe> keys, float curveT,
                 out float result)
             {
                 EvaluateWithinRange(keys, curveT, 0, keys.Length - 1, out result);
             }
 
-            [Unity.Burst.BurstCompile]
+            [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
             public static void EvaluateWithHint(in NativeArray<Keyframe> keys, float curveT, ref int hintIndex,
                 out float result)
             {
-                int startIndex = 0;
+                const int startIndex = 0;
                 int endIndex = keys.Length - 1;
                 if (endIndex <= hintIndex)
                 {
@@ -157,12 +119,11 @@ namespace PKGE.Packages
                 curveT = math.clamp(curveT, keys[hintIndex].time, keys[endIndex].time);
                 FindIndexForSampling(keys, curveT, startIndex, endIndex, hintIndex, out int lhsIndex, out int rhsIndex);
 
-                Keyframe lhs = keys[lhsIndex];
+                Keyframe lhs = keys[hintIndex];
                 Keyframe rhs = keys[rhsIndex];
                 InterpolateKeyframe(lhs, rhs, curveT, out result);
             }
 
-            [Unity.Burst.BurstCompile]
             public static void EvaluateWithinRange(in NativeArray<Keyframe> keys, float curveT, int startIndex,
                 int endIndex, out float result)
             {
@@ -174,14 +135,13 @@ namespace PKGE.Packages
 
                 // wrap time
                 curveT = math.clamp(curveT, keys[startIndex].time, keys[endIndex].time);
-                FindIndexForSampling(keys, curveT, startIndex, endIndex, -1, out int lhsIndex, out int rhsIndex);
+                FindIndexForSampling(keys, curveT, startIndex, endIndex, out int lhsIndex, out int rhsIndex);
 
                 Keyframe lhs = keys[lhsIndex];
                 Keyframe rhs = keys[rhsIndex];
                 InterpolateKeyframe(lhs, rhs, curveT, out result);
             }
 
-            [Unity.Burst.BurstCompile]
             static private void FindIndexForSampling(in NativeArray<Keyframe> keys, float curveT, int start, int end, int hint,
                 out int lhs, out int rhs)
             {
@@ -208,6 +168,12 @@ namespace PKGE.Packages
                 }
 
                 // Fall back to using binary search
+                FindIndexForSampling(keys, curveT, start, end, out lhs, out rhs);
+            }
+            
+            static private void FindIndexForSampling(in NativeArray<Keyframe> keys, float curveT, int start, int end,
+                out int lhs, out int rhs)
+            {
                 // upper bound (first value larger than curveT)
                 int __len = end - start;
                 int __half;
@@ -234,7 +200,6 @@ namespace PKGE.Packages
                 rhs = math.min(end, __first);
             }
 
-            [Unity.Burst.BurstCompile]
             public static void InterpolateKeyframe(in Keyframe lhs, in Keyframe rhs, float curveT,
                 out float output)
             {
@@ -246,7 +211,6 @@ namespace PKGE.Packages
                 HandleSteppedCurve(lhs, rhs, ref output);
             }
 
-            [Unity.Burst.BurstCompile]
             static void HermiteInterpolate(float curveT, in Keyframe lhs, in Keyframe rhs,
                 out float result)
             {
@@ -284,7 +248,6 @@ namespace PKGE.Packages
                 return a * p0 + b * m0 + c * m1 + d * p1;
             }
 
-            [Unity.Burst.BurstCompile]
             static void BezierInterpolate(float curveT, in Keyframe lhs, in Keyframe rhs,
                 out float result)
             {
@@ -308,54 +271,44 @@ namespace PKGE.Packages
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float FAST_CBRT(float x)
             {
-                return (((x) < 0) ? -math.exp(math.log(-(x)) / 3.0f) : math.exp(math.log(x) / 3.0f));
+                return x < 0 ? -FAST_CBRT_POSITIVE(-x) : FAST_CBRT_POSITIVE(x);
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float BezierExtractU(float t, float w1, float w2)
             {
                 float a = 3.0F * w1 - 3.0F * w2 + 1.0F;
                 float b = -6.0F * w1 + 3.0F * w2;
                 float c = 3.0F * w1;
-                float d = -t;
 
                 if (math.abs(a) > 1e-3f)
                 {
                     float p = -b / (3.0F * a);
                     float p2 = p * p;
-                    float p3 = p2 * p;
 
-                    float q = p3 + (b * c - 3.0F * a * d) / (6.0F * a * a);
+                    float q = p2 * p + (b * c + 3.0F * a * t) / (6.0F * a * a);
                     float q2 = q * q;
 
-                    float r = c / (3.0F * a);
-                    float rmp2 = r - p2;
+                    float rmp2 = (c / (3.0F * a)) - p2;
 
                     float s = q2 + rmp2 * rmp2 * rmp2;
 
                     if (s < 0.0F)
                     {
-                        float ssi = math.sqrt(-s);
-                        float r_1 = math.sqrt(-s + q2);
-                        float phi = math.atan2(ssi, q);
-
-                        float r_3 = FAST_CBRT_POSITIVE(r_1);
-                        float phi_3 = phi / 3.0F;
+                        float r_3 = FAST_CBRT_POSITIVE(math.sqrt(-s + q2));
+                        float phi_3 = (math.atan2(math.sqrt(-s), q)) / 3.0F;
 
                         // Extract cubic roots.
                         float u1 = 2.0F * r_3 * math.cos(phi_3) + p;
-                        float u2 = 2.0F * r_3 * math.cos(phi_3 + 2.0F * (float)math.PI / 3.0f) + p;
-                        float u3 = 2.0F * r_3 * math.cos(phi_3 - 2.0F * (float)math.PI / 3.0f) + p;
-
                         if (u1 >= 0.0F && u1 <= 1.0F)
                             return u1;
-                        else if (u2 >= 0.0F && u2 <= 1.0F)
+                        
+                        float u2 = 2.0F * r_3 * math.cos(phi_3 + 2.0F * (float)math.PI / 3.0f) + p;
+                        if (u2 >= 0.0F && u2 <= 1.0F)
                             return u2;
-                        else if (u3 >= 0.0F && u3 <= 1.0F)
+                        
+                        float u3 = 2.0F * r_3 * math.cos(phi_3 - 2.0F * (float)math.PI / 3.0f) + p;
+                        if (u3 >= 0.0F && u3 <= 1.0F)
                             return u3;
-
-                        // Aiming at solving numerical imprecision when u is outside [0,1].
-                        return (t < 0.5F) ? 0.0F : 1.0F;
                     }
                     else
                     {
@@ -364,23 +317,23 @@ namespace PKGE.Packages
 
                         if (u >= 0.0F && u <= 1.0F)
                             return u;
-
-                        // Aiming at solving numerical imprecision when u is outside [0,1].
-                        return (t < 0.5F) ? 0.0F : 1.0F;
                     }
+
+                    // Aiming at solving numerical imprecision when u is outside [0,1].
+                    return (t < 0.5F) ? 0.0F : 1.0F;
                 }
 
                 if (math.abs(b) > 1e-3f)
                 {
-                    float s = c * c - 4.0F * b * d;
+                    float s = c * c + 4.0F * b * t;
                     float ss = math.sqrt(s);
 
                     float u1 = (-c - ss) / (2.0F * b);
-                    float u2 = (-c + ss) / (2.0F * b);
-
                     if (u1 >= 0.0F && u1 <= 1.0F)
                         return u1;
-                    else if (u2 >= 0.0F && u2 <= 1.0F)
+                    
+                    float u2 = (-c + ss) / (2.0F * b);
+                    if (u2 >= 0.0F && u2 <= 1.0F)
                         return u2;
 
                     // Aiming at solving numerical imprecision when u is outside [0,1].
@@ -389,13 +342,12 @@ namespace PKGE.Packages
 
                 if (math.abs(c) > 1e-3f)
                 {
-                    return (-d / c);
+                    return t / c;
                 }
 
                 return 0.0F;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float BezierInterpolate(float t, float v1, float m1, float w1, float v2, float m2, float w2)
             {
                 float u = BezierExtractU(t, w1, 1.0F - w2);
@@ -414,7 +366,6 @@ namespace PKGE.Packages
                 return omt3 * p0 + 3.0F * t * omt2 * p1 + 3.0F * t2 * omt * p2 + t3 * p3;
             }
 
-            [Unity.Burst.BurstCompile]
             static void HandleSteppedCurve(in Keyframe lhs, in Keyframe rhs, ref float value)
             {
                 if (float.IsInfinity(lhs.outTangent) || float.IsInfinity(rhs.inTangent))

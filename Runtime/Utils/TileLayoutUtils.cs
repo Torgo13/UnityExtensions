@@ -15,7 +15,7 @@ namespace PKGE
         /// <param name="topRight">Computed top right corner area</param>
         /// <returns>If true, the tiles decomposition is a success</returns>
         public static bool TryLayoutByTiles(
-            RectInt src,
+            in RectInt src,
             uint tileSize,
             out RectInt main,
             out RectInt topRow,
@@ -78,7 +78,7 @@ namespace PKGE
         /// <param name="other">Computed other area</param>
         /// <returns>If true, the tiles decomposition is a success</returns>
         public static bool TryLayoutByRow(
-            RectInt src,
+            in RectInt src,
             uint tileSize,
             out RectInt main,
             out RectInt other)
@@ -119,7 +119,7 @@ namespace PKGE
         /// <param name="other">Computed other area</param>
         /// <returns>If true, the tiles decomposition is a success</returns>
         public static bool TryLayoutByCol(
-            RectInt src,
+            in RectInt src,
             uint tileSize,
             out RectInt main,
             out RectInt other)

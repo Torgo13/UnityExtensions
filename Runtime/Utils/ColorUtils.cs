@@ -31,7 +31,7 @@ namespace PKGE
         /// </summary>
         public static float lensImperfectionExposureScale
         {
-            get => (78.0f / (100.0f * LensAttenuation));
+            get => 0.78f / LensAttenuation;
         }
 
         /// <summary>
@@ -52,15 +52,14 @@ namespace PKGE
         /// <returns>Vector3 representing the conversion from CIE xy chromaticity to CAT02 LMS color space.</returns>
         public static Vector3 CIExyToLMS(float x, float y)
         {
-            float Y = 1f;
-            float X = Y * x / y;
-            float Z = Y * (1f - x - y) / y;
+            double X = x / y;
+            double Z = (1 - x - y) / y;
 
-            float L = 0.7328f * X + 0.4296f * Y - 0.1624f * Z;
-            float M = -0.7036f * X + 1.6975f * Y + 0.0061f * Z;
-            float S = 0.0030f * X + 0.0136f * Y + 0.9834f * Z;
+            double L = 0.7328 * X + 0.4296 - 0.1624 * Z;
+            double M = -0.7036 * X + 1.6975 + 0.0061 * Z;
+            double S = 0.0030 * X + 0.0136 + 0.9834 * Z;
 
-            return new Vector3(L, M, S);
+            return new Vector3((float)L, (float)M, (float)S);
         }
 
         /// <summary>
@@ -73,12 +72,12 @@ namespace PKGE
         {
             // Range ~[-1.5;1.5] works best
             float t1 = temperature / 65f;
-            float t2 = tint / 65f;
+            float t2 = tint * 0.05f / 65f;
 
             // Get the CIE xy chromaticity of the reference white point.
             // Note: 0.31271 = x value on the D65 white point
             float x = 0.31271f - t1 * (t1 < 0f ? 0.1f : 0.05f);
-            float y = StandardIlluminantY(x) + t2 * 0.05f;
+            float y = StandardIlluminantY(x) + t2;
 
             // Calculate the coefficients in the LMS space.
             var w1 = new Vector3(0.949237f, 1.03542f, 1.08728f); // D65 white point
@@ -101,7 +100,7 @@ namespace PKGE
             shadows.x = Mathf.GammaToLinearSpace(shadows.x);
             shadows.y = Mathf.GammaToLinearSpace(shadows.y);
             shadows.z = Mathf.GammaToLinearSpace(shadows.z);
-            weight = shadows.w * (Mathf.Sign(shadows.w) < 0f ? 1f : 4f);
+            weight = shadows.w * (shadows.w <= 0f ? 1f : 4f);
             shadows.x = Mathf.Max(shadows.x + weight, 0f);
             shadows.y = Mathf.Max(shadows.y + weight, 0f);
             shadows.z = Mathf.Max(shadows.z + weight, 0f);
@@ -111,7 +110,7 @@ namespace PKGE
             midtones.x = Mathf.GammaToLinearSpace(midtones.x);
             midtones.y = Mathf.GammaToLinearSpace(midtones.y);
             midtones.z = Mathf.GammaToLinearSpace(midtones.z);
-            weight = midtones.w * (Mathf.Sign(midtones.w) < 0f ? 1f : 4f);
+            weight = midtones.w * (midtones.w <= 0f ? 1f : 4f);
             midtones.x = Mathf.Max(midtones.x + weight, 0f);
             midtones.y = Mathf.Max(midtones.y + weight, 0f);
             midtones.z = Mathf.Max(midtones.z + weight, 0f);
@@ -121,7 +120,7 @@ namespace PKGE
             highlights.x = Mathf.GammaToLinearSpace(highlights.x);
             highlights.y = Mathf.GammaToLinearSpace(highlights.y);
             highlights.z = Mathf.GammaToLinearSpace(highlights.z);
-            weight = highlights.w * (Mathf.Sign(highlights.w) < 0f ? 1f : 4f);
+            weight = highlights.w * (highlights.w <= 0f ? 1f : 4f);
             highlights.x = Mathf.Max(highlights.x + weight, 0f);
             highlights.y = Mathf.Max(highlights.y + weight, 0f);
             highlights.z = Mathf.Max(highlights.z + weight, 0f);
@@ -235,7 +234,7 @@ namespace PKGE
         /// <returns>An exposure value, in EV100.</returns>
         public static float ComputeEV100(float aperture, float shutterSpeed, float ISO)
         {
-            return Mathf.Log((aperture * aperture) / shutterSpeed * 100f / ISO, 2f);
+            return (float)System.Math.Log((aperture * aperture) / shutterSpeed * 100 / ISO, 2);
         }
 
         /// <summary>
@@ -251,8 +250,8 @@ namespace PKGE
             //        = 78 / (100 * LensAttenuation) * 2^ EV_100
             //        = lensImperfectionExposureScale * 2^ EV
             // Reference: http://en.wikipedia.org/wiki/Film_speed
-            float maxLuminance = lensImperfectionExposureScale * Mathf.Pow(2.0f, EV100);
-            return 1.0f / maxLuminance;
+            double maxLuminance = lensImperfectionExposureScale * System.Math.Pow(2.0, EV100);
+            return (float)(1.0 / maxLuminance);
         }
 
         /// <summary>
@@ -267,7 +266,7 @@ namespace PKGE
             //        = log2( 100 * LensAttenuation / (78 * exposure) )
             //        = log2(    1.0f    / (lensImperfectionExposureScale * exposure) )
             // Reference: http://en.wikipedia.org/wiki/Film_speed
-            return Mathf.Log(1.0f / (lensImperfectionExposureScale * exposure), 2.0f);
+            return (float)System.Math.Log(1.0 / (lensImperfectionExposureScale * exposure), 2.0);
         }
 
         /// <summary>
@@ -284,8 +283,8 @@ namespace PKGE
             // a middle gray at 18% with a sqrt(2) room for specular highlights
             // Note that this gives equivalent results as using an incident light meter
             // with a calibration constant of C=314.
-            float K = LightMeterCalibrationConstant;
-            return Mathf.Log(avgLuminance * 100f / K, 2f);
+            double K = LightMeterCalibrationConstant;
+            return (float)System.Math.Log(avgLuminance * 100 / K, 2);
         }
 
         /// <summary>
@@ -295,7 +294,7 @@ namespace PKGE
         /// <param name="shutterSpeed">The camera exposure time.</param>
         /// <param name="targetEV100">The target exposure value (EV100) to reach.</param>
         /// <returns>The required sensor sensitivity (ISO).</returns>
-        public static float ComputeISO(float aperture, float shutterSpeed, float targetEV100) => ((aperture * aperture) * 100f) / (shutterSpeed * Mathf.Pow(2f, targetEV100));
+        public static float ComputeISO(float aperture, float shutterSpeed, float targetEV100) => (float)(((aperture * aperture) * 100.0) / (shutterSpeed * System.Math.Pow(2, targetEV100)));
 
         /// <summary>
         /// Converts a color value to its 32-bit hexadecimal representation.

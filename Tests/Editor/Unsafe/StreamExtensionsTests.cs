@@ -137,9 +137,9 @@ namespace PKGE.Unsafe.Tests
 
             // Act
 #if USING_NUNIT_2_0_3_OR_NEWER
-            await _stream.ReadExactAsync(buffer, 0, buffer.Length);
+            await _stream.ReadExactAsync(buffer, 0, buffer.Length).AsTask();
 #else
-            Task readExactAsyncTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
+            var readExactAsyncTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
             while (!readExactAsyncTask.IsCompletedSuccessfully)
             {
                 Assert.IsFalse(readExactAsyncTask.IsCanceled);
@@ -161,7 +161,7 @@ namespace PKGE.Unsafe.Tests
             var buffer = new byte[10];
 
             // Act & Assert
-            Assert.ThrowsAsync<EndOfStreamException>(() => _stream.ReadExactAsync(buffer, 0, buffer.Length));
+            Assert.ThrowsAsync<EndOfStreamException>(() => _stream.ReadExactAsync(buffer, 0, buffer.Length).AsTask());
         }
 #endif // USING_NUNIT_2_0_3_OR_NEWER
 
@@ -184,9 +184,9 @@ namespace PKGE.Unsafe.Tests
 
             // Act
 #if USING_NUNIT_2_0_3_OR_NEWER
-            await partialReadStream.ReadExactAsync(buffer, 0, buffer.Length);
+            await partialReadStream.ReadExactAsync(buffer, 0, buffer.Length).AsTask();
 #else
-            Task partialReadStreamTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
+            var partialReadStreamTask = _stream.ReadExactAsync(buffer, 0, buffer.Length);
             while (!partialReadStreamTask.IsCompletedSuccessfully)
             {
                 Assert.IsFalse(partialReadStreamTask.IsCanceled);
@@ -208,7 +208,7 @@ namespace PKGE.Unsafe.Tests
             var buffer = new byte[10];
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _stream.ReadExactAsync(buffer, 0, -1));
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _stream.ReadExactAsync(buffer, 0, -1).AsTask());
         }
 #endif // USING_NUNIT_2_0_3_OR_NEWER
 
@@ -225,9 +225,9 @@ namespace PKGE.Unsafe.Tests
 
             // Act
 #if USING_NUNIT_2_0_3_OR_NEWER
-            await _stream.ReadExactAsync(buffer, 0, 0);
+            await _stream.ReadExactAsync(buffer, 0, 0).AsTask();
 #else
-            Task zeroReadStreamTask = _stream.ReadExactAsync(buffer, 0, 0);
+            var zeroReadStreamTask = _stream.ReadExactAsync(buffer, 0, 0);
             while (!zeroReadStreamTask.IsCompletedSuccessfully)
             {
                 Assert.IsFalse(zeroReadStreamTask.IsCanceled);

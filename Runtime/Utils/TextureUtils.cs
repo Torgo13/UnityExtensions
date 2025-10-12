@@ -826,7 +826,7 @@ namespace PKGE
     }
     
     /// <inheritdoc cref="ReadbackAsyncDispose"/>
-    public readonly struct ReadbackMipsAsyncDispose : IValueTaskSource, IDisposable
+    public readonly struct ReadbackMipsAsyncDispose : IValueTaskSource, IDisposable, IAsyncDisposable
     {
         private readonly NativeArray<AsyncGPUReadbackRequest> _readbackRequests;
 
@@ -986,6 +986,23 @@ namespace PKGE
             // ReSharper restore PossiblyImpureMethodCallOnReadonlyVariable
         }
         #endregion // IDisposable
+
+        #region IAsyncDisposable
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var request in _readbackRequests)
+            {
+                if (!request.done)
+                {
+                    await Task.Yield();
+                }
+            }
+
+            // ReSharper disable PossiblyImpureMethodCallOnReadonlyVariable
+            _readbackRequests.Dispose();
+            // ReSharper restore PossiblyImpureMethodCallOnReadonlyVariable
+        }
+        #endregion // IAsyncDisposable
 
         #region IValueTaskSource
         public void GetResult(short token)

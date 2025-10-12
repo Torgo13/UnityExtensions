@@ -74,6 +74,7 @@ namespace PKGE
             transform.localRotation = Quaternion.Euler(angles);
         }
 
+        static
         private void CalculateSunPosition(int dayOfYear, float latRad, float localSolarTime,
             out float azimuth, out float altitude)
         {

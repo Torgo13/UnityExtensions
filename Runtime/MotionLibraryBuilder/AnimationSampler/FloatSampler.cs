@@ -6,36 +6,38 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/FloatSampler.cs
         #region Unity.Kinematica.Editor
-        CurveData curveData;
-        float defaultValue;
+        Curve curve;
+        readonly float defaultValue;
 
-        public bool HasCurve => curveData.IsValid;
+        public FloatSampler(Curve curve, float defaultValue)
+        {
+            this.curve = curve;
+            this.defaultValue = defaultValue;
+        }
 
-        public readonly int Length => curveData.size;
+        public bool HasCurve => curve.Keys.IsCreated;
+
+        public readonly int Length => curve.Length;
 
         public readonly float DefaultValue => defaultValue;
 
         public float this[int index]
         {
-            get => HasCurve ? curveData[index].value : defaultValue;
+            get => HasCurve ? curve.Keys[index].value : defaultValue;
         }
 
         public float Evaluate(float time)
         {
-            return HasCurve ? curveData.ToCurve().Evaluate(time) : defaultValue;
+            return HasCurve ? curve.Evaluate(time) : defaultValue;
         }
 
         public Curve SetCurve(Curve curve)
         {
-            curveData = new CurveData(curve, Allocator.Persistent);
-            return curve;
+            this.curve = curve;
+            return this.curve;
         }
 
-        public static FloatSampler CreateEmpty(float defaultValue) => new FloatSampler()
-        {
-            curveData = CurveData.CreateInvalid(),
-            defaultValue = defaultValue
-        };
+        public static FloatSampler CreateEmpty(float defaultValue) => new FloatSampler(default, defaultValue);
         #endregion // Unity.Kinematica.Editor
     }
 }

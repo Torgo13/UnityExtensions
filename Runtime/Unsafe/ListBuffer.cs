@@ -22,17 +22,17 @@ namespace PKGE.Unsafe
         /// <summary>
         /// The pointer to the memory storage.
         /// </summary>
-        internal readonly T* BufferPtr => _bufferPtr;
+        internal T* BufferPtr => _bufferPtr;
 
         /// <summary>
         /// The number of item in the list.
         /// </summary>
-        public readonly int Count => *_countPtr;
+        public int Count => *_countPtr;
 
         /// <summary>
         /// The maximum number of item stored in this list.
         /// </summary>
-        public readonly int Capacity => _capacity;
+        public int Capacity => _capacity;
 
         /// <summary>
         /// Instantiate a new list.
@@ -53,7 +53,7 @@ namespace PKGE.Unsafe
         /// <param name="index">The index of the item to get.</param>
         /// <value>A reference to the item.</value>
         /// <exception cref="IndexOutOfRangeException">If the index is invalid.</exception>
-        public readonly ref T this[in int index]
+        public ref T this[in int index]
         {
             get
             {
@@ -71,7 +71,7 @@ namespace PKGE.Unsafe
         /// </summary>
         /// <param name="index">The index of the item to get.</param>
         /// <returns>A reference to the item.</returns>
-        public readonly ref T GetUnchecked(in int index) => ref _bufferPtr[index];
+        public ref T GetUnchecked(in int index) => ref _bufferPtr[index];
 
         /// <summary>
         /// Try to add a value in the list.
@@ -81,7 +81,7 @@ namespace PKGE.Unsafe
         ///   <c>true</c> when the value was added,
         ///   <c>false</c> when the value was not added because the capacity was reached.
         /// </returns>
-        public readonly bool TryAdd(in T value)
+        public bool TryAdd(in T value)
         {
             if (Count >= _capacity)
                 return false;
@@ -100,7 +100,7 @@ namespace PKGE.Unsafe
         /// <param name="dstBuffer">The destination buffer of the copy operation.</param>
         /// <param name="startDstIndex">The index of the first element that will be copied in the destination buffer.</param>
         /// <param name="copyCount">The number of item to copy.</param>
-        public readonly void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
+        public void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
         {
             UnsafeUtility.MemCpy(dstBuffer + startDstIndex, _bufferPtr,
                 UnsafeUtility.SizeOf<T>() * copyCount);
@@ -114,7 +114,7 @@ namespace PKGE.Unsafe
         ///   * <c>true</c> when the copy was performed.
         ///   * <c>false</c> when the copy was aborted because the destination have a capacity too small.
         /// </returns>
-        public readonly bool TryCopyTo(ListBuffer<T> other)
+        public bool TryCopyTo(ListBuffer<T> other)
         {
             if (other.Count + Count >= other._capacity)
                 return false;
@@ -133,7 +133,7 @@ namespace PKGE.Unsafe
         ///   * <c>true</c> when the copy was performed.
         ///   * <c>false</c> when the copy was aborted because the capacity of this list is too small.
         /// </returns>
-        public readonly bool TryCopyFrom(T* srcPtr, int count)
+        public bool TryCopyFrom(T* srcPtr, int count)
         {
             if (count + Count > _capacity)
                 return false;

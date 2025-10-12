@@ -54,6 +54,11 @@
             "name": "com.xperiandri.stringbuilderextensions",
             "expression": "1.0.0",
             "define": "INCLUDE_STRINGBUILDER_EXTENSIONS"
+        },
+        {
+            "name": "com.unity.ext.nunit",
+            "expression": "2.0.3",
+            "define": "USING_NUNIT_2_0_3_OR_NEWER"
         }
     ],
     "noEngineReferences": false

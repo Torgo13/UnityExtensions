@@ -253,6 +253,7 @@ namespace PKGE
             return new DateTime(2021, 03, 23, hour, minute, 0);
         }
 
+        static
         float TimeToGradient(float t)
         {
             return Mathf.Abs(t * 2f - 1f);

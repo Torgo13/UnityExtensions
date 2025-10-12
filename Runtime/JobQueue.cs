@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace PKGE
@@ -113,7 +114,46 @@ namespace PKGE
 
                 if (isFinish == false)
                     yield return null;
-            }            
+            }
+        }
+
+        public async ValueTask WaitFinishAsync()
+        {
+            bool isFinish = false;
+            while (isFinish == false)
+            {
+                while (true)
+                {
+                    Action mainThreadJob = DequeueMainThreadJob();
+                    if (mainThreadJob == null)
+                        break;
+
+                    mainThreadJob.Invoke();
+                }
+
+                if (_jobs.Count > 0)
+                {
+                    await Task.Yield();
+                    continue;
+                }
+
+                isFinish = true;
+                for (int i = 0; i < _workers.Length; ++i)
+                {
+                    if (_workers[i].IsException())
+                    {
+                        throw new Exception("Exception from worker thread.");
+                    }
+
+                    if (_workers[i].IsWorking())
+                    {
+                        isFinish = false;
+                    }
+                }
+
+                if (isFinish == false)
+                    await Task.Yield();
+            }
         }
 
         public void Dispose()

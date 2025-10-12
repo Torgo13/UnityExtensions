@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
 using NUnit.Framework;
 using Unity.Collections;
@@ -245,7 +246,7 @@ namespace PKGE.Tests
             Graphics.Blit(fillTex, rt);
 
             // Destination texture
-            var tex2D = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            var tex2D = new Texture2D(w, h, TextureFormat.RGBA32, mipChain: false);
 
             // Act
             rt.RenderTextureToTexture2D(tex2D);
@@ -388,7 +389,7 @@ namespace PKGE.Tests
         public void Constructor_Asserts_WhenNativeArrayNotCreated()
         {
             var arr = new NativeArray<byte>();
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
 
             Assert.Throws<AssertionException>(() =>
             {
@@ -413,7 +414,7 @@ namespace PKGE.Tests
         public void ReadbackAsyncDispose_CompletesAndReturnsSucceeded()
         {
             var arr = new NativeArray<byte>(4 * 4 * 4, Allocator.Persistent); // 4x4 RGBA
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
 
             var readback = new ReadbackAsyncDispose(ref arr, tex);
@@ -450,11 +451,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetCompleted_AllMips_ReturnsTrueAfterWait()
+#else
         public void GetCompleted_AllMips_ReturnsTrueAfterWait()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 readback.WaitForCompletionAll();
@@ -465,11 +473,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetData_NegativeIndex_ReturnsFullMipChain()
+#else
         public void GetData_NegativeIndex_ReturnsFullMipChain()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 var data = readback.GetData(-1, Allocator.Temp);
@@ -481,11 +496,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetData_ValidIndex_ReturnsMipData()
+#else
         public void GetData_ValidIndex_ReturnsMipData()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 var data = readback.GetData(0, Allocator.Temp);
@@ -497,11 +519,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetData_Asserts_WhenIndexOutOfRange()
+#else
         public void GetData_Asserts_WhenIndexOutOfRange()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 Assert.Throws<AssertionException>(() => readback.GetData(999));
@@ -511,11 +540,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetData_WithRefAndMips_CopiesCorrectly()
+#else
         public void GetData_WithRefAndMips_CopiesCorrectly()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 var mips = new NativeArray<MipLevelParameters>(tex.mipmapCount, Allocator.Temp);
@@ -541,11 +577,18 @@ namespace PKGE.Tests
         }
 
         [Test]
+#if USING_NUNIT_2_0_3_OR_NEWER
+        public async Task GetStatus_ReturnsSucceededOrPending()
+#else
         public void GetStatus_ReturnsSucceededOrPending()
+#endif // USING_NUNIT_2_0_3_OR_NEWER
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             tex.Apply();
 
+#if USING_NUNIT_2_0_3_OR_NEWER
+            await
+#endif // USING_NUNIT_2_0_3_OR_NEWER
             using (var readback = new ReadbackMipsAsyncDispose(tex))
             {
                 readback.WaitForCompletionAll();
@@ -579,7 +622,7 @@ namespace PKGE.Tests
         [Test]
         public void Constructor_FromTexture_SetsFlagsCorrectly()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             var readable = new Texture2DReadable(tex);
 
             Assert.AreEqual(tex.isReadable, readable.isReadable);
@@ -618,7 +661,7 @@ namespace PKGE.Tests
         [Test]
         public void Constructor_FromTextureAndTexture2D_Consistent()
         {
-            var tex = new Texture2D(8, 8, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(8, 8, TextureFormat.RGBA32, mipChain: false);
             var p1 = new Texture2DParameters((Texture)tex);
             var p2 = new Texture2DParameters(tex);
 
@@ -724,7 +767,7 @@ namespace PKGE.Tests
         [Test]
         public void UncompressedReadable_Path_UsesRawTextureData()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
@@ -742,7 +785,7 @@ namespace PKGE.Tests
         public void Compressed_Path_PerformsBlit()
         {
             // ETC2_RGBA8 is a compressed format generally available on desktop/mobile
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             // Force logic into "Compressed" branch by faking compressed flags
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
@@ -756,11 +799,11 @@ namespace PKGE.Tests
         [UnityTest]
         public IEnumerator Apply32_ReturnsTextureWithSameDims()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
-            var applied = props.Apply32();
+            Texture2D applied = props.Apply32();
             Assert.IsNotNull(applied);
             Assert.AreEqual(tex.width, applied.width);
             Assert.AreEqual(tex.height, applied.height);
@@ -774,11 +817,11 @@ namespace PKGE.Tests
         [Test]
         public void GetData32_WithInvalidFormat_ReturnsDefault()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGB24, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGB24, mipChain: false);
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
-            var data = props.GetData32();
+            NativeArray<Color32> data = props.GetData32();
             Assert.AreEqual(default(NativeArray<Color32>), data);
 
             props.Dispose();
@@ -788,7 +831,7 @@ namespace PKGE.Tests
         [Test]
         public void Enumerator_Interface_Works()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
@@ -802,14 +845,14 @@ namespace PKGE.Tests
         [UnityTest]
         public IEnumerator DisposeAsync_CompletesWithoutError()
         {
-            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+            var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
 
 #if USING_NUNIT_2_0_3_OR_NEWER
             yield return props.DisposeAsync();
 #else
-            System.Threading.Tasks.ValueTask disposeTask = props.DisposeAsync();
+            var disposeTask = props.DisposeAsync();
             while (!disposeTask.IsCompletedSuccessfully)
             {
                 Assert.IsFalse(disposeTask.IsCanceled);

@@ -37,12 +37,9 @@ namespace PKGE
                 int i1 = i;
                 tasks[i] = Task.Run(() =>
                 {
-                    for (int j = 0; j < itemsPerTask; j++)
+                    for (int j = 0; j < itemsPerTask && j + itemsPerTask * i1 < items.Count; j++)
                     {
                         int index = j + itemsPerTask * i1;
-                        if (index >= items.Count)
-                            break;
-
                         action.Invoke(items[index], cb);
                     }
                 },
@@ -80,18 +77,43 @@ namespace PKGE
             for (int i = 0; i < count; i++)
             {
                 int i1 = i;
-                tasks[i] = Task.Run(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    for (int j = 0; j < itemsPerTask; j++)
+                    for (int j = 0; j < itemsPerTask && j + itemsPerTask * i1 < items.Count; j++)
                     {
                         int index = j + itemsPerTask * i1;
-                        if (index >= items.Count)
-                            break;
-
                         action.Invoke(items[index], cb);
                     }
                 },
-                cancellationToken: ct);
+                cancellationToken: ct));
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: true);
+        }
+        
+        /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
+        public static async ValueTask RunTasksAsync<TInput, TOutput>(
+            List<TInput> items,
+            Action<TInput> action,
+            CancellationToken ct = default)
+        {
+            var count = Environment.ProcessorCount;
+            using var _0 = UnityEngine.Pool.ListPool<Task>.Get(out var tasks);
+            tasks.EnsureCapacity(count);
+            int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
+
+            for (int i = 0; i < count; i++)
+            {
+                int i1 = i;
+                tasks.Add(Task.Run(() =>
+                {
+                    for (int j = 0; j < itemsPerTask && j + itemsPerTask * i1 < items.Count; j++)
+                    {
+                        int index = j + itemsPerTask * i1;
+                        action.Invoke(items[index]);
+                    }
+                },
+                cancellationToken: ct));
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: true);
