@@ -257,8 +257,7 @@ namespace PKGE.Unsafe
         [BurstCompile]
         JobHandle UpdatePositions(float smoothScroll, float dt, JobHandle jobFence)
         {
-            NativeArray<float4> sysmemBuffer =
-                m_brgContainer.GetSysmemBuffer(out _, out int alignedWindowSize);
+            NativeArray<float4> sysmemBuffer = m_brgContainer.GetSysmemBuffer(out _, out int alignedWindowSize);
 
             UpdatePositionsJob myJob = new UpdatePositionsJob()
             {
@@ -331,7 +330,7 @@ namespace PKGE.Unsafe
                         BRG_Debris.gDebrisManager.GenerateBurstOfDebris(pos, 512, UnityEngine.Random.Range(0.0f, 1.0f));
                     }
 #else
-                BRG_Debris.gDebrisManager.GenerateBurstOfDebris(new Vector3(m_backgroundW / 2, 16.0f, m_backgroundH / 2), 512*8, UnityEngine.Random.Range(0.0f, 1.0f));
+                    BRG_Debris.gDebrisManager.GenerateBurstOfDebris(new Vector3(m_backgroundW / 2, 16.0f, m_backgroundH / 2), 512*8, UnityEngine.Random.Range(0.0f, 1.0f));
 #endif
                     m_burstTimer = 3.0f;
                 }

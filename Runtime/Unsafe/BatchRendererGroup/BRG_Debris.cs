@@ -253,11 +253,10 @@ namespace PKGE.Unsafe
 
             private void updateGpuSysmemBuffer(int index, in GfxItem item)
             {
-                int i;
-                int windowId = System.Math.DivRem(index, _maxInstancePerWindow, out i);
+                int windowId = System.Math.DivRem(index, _maxInstancePerWindow, out int i);
 
                 int windowOffsetInFloat4 = windowId * _windowSizeInFloat4;
-                var bpos = item.pos;
+                float3 bpos = item.pos;
                 float3x3 rot = item.mat;
 
                 // Compute the new current frame matrix
@@ -277,10 +276,8 @@ namespace PKGE.Unsafe
                 _sysmemBuffer[windowOffsetInFloat4 + _maxInstancePerWindow * 3 * 2 + i] = new float4(item.color, 1);
             }
 
-            public unsafe void Execute(int index)
+            public void Execute(int index)
             {
-                int* pCounter = (int*)NativeArrayUnsafeUtility.GetUnsafePtr(_inOutCounters);
-
                 float3 acc = new float3(0, -_dt * 16.0f, 0);
                 GfxItem item = _gfxItems[index];
 
@@ -323,7 +320,7 @@ namespace PKGE.Unsafe
                                 item.color *= 0.5f;
                                 // add it to the "just landed list"
                                 int outIndex =
-                                    Interlocked.Increment(ref pCounter[kJustLandedCounter]) -
+                                    Interlocked.Increment(ref _inOutCounters.UnsafeElementAt(kJustLandedCounter)) -
                                     1; // return incremented value (after increment)
                                 if (outIndex < kMaxJustLandedPerFrame)
                                 {
@@ -340,7 +337,7 @@ namespace PKGE.Unsafe
                 if ((item.pos.z < 0.0f) || (item.pos.y < -5.0f))
                 {
                     int outIndex =
-                        Interlocked.Increment(ref pCounter[kJustDeadCounter]) -
+                        Interlocked.Increment(ref _inOutCounters.UnsafeElementAt(kJustDeadCounter)) -
                         1; // return incremented value (after increment)
                     if (outIndex < kMaxDeadPerFrame)
                     {

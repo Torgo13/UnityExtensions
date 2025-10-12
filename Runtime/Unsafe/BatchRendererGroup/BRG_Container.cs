@@ -45,7 +45,7 @@ namespace PKGE.Unsafe
         /// <summary>Item size, in bytes</summary>
         private int m_instanceSize;
         /// <summary>One batchID per window</summary>
-        private BatchID[] m_batchIDs;
+        private NativeArray<BatchID> m_batchIDs;
         private BatchMaterialID m_materialID;
         private BatchMeshID m_meshID;
         /// <summary>BRG object</summary>
@@ -103,7 +103,8 @@ namespace PKGE.Unsafe
                 NativeArrayOptions.ClearMemory);
 
             // Register one kind of batch per "window" in the large BRG raw buffer
-            m_batchIDs = new BatchID[m_windowCount];
+            m_batchIDs = new NativeArray<BatchID>(m_windowCount, Allocator.Persistent,
+                NativeArrayOptions.UninitializedMemory);
             for (int b = 0; b < m_windowCount; b++)
             {
                 batchMetadata[0] = CreateMetadataValue(objectToWorldID, 0, true); // matrices
@@ -179,8 +180,10 @@ namespace PKGE.Unsafe
         {
             if (m_initialized)
             {
-                for (uint b = 0; b < m_windowCount; b++)
+                for (int b = 0; b < m_windowCount; b++)
                     m_BatchRendererGroup.RemoveBatch(m_batchIDs[b]);
+                
+                m_batchIDs.Dispose();
 
                 m_BatchRendererGroup.UnregisterMaterial(m_materialID);
                 m_BatchRendererGroup.UnregisterMesh(m_meshID);
@@ -188,6 +191,8 @@ namespace PKGE.Unsafe
                 m_GPUPersistentInstanceData.Dispose();
                 m_sysmemBuffer.Dispose();
             }
+            
+            m_initialized = false;
         }
 
         /// <summary>
@@ -216,22 +221,10 @@ namespace PKGE.Unsafe
         }
 
         /// <summary>
-        /// Helper function to allocate BRG buffers during the BRG callback function.
-        /// </summary>
-        private static unsafe T* Malloc<T>(uint count) where T : unmanaged
-        {
-            return (T*)UnsafeUtility.Malloc(
-                UnsafeUtility.SizeOf<T>() * count,
-                UnsafeUtility.AlignOf<T>(),
-                Allocator.TempJob);
-        }
-
-        /// <summary>
         /// Main BRG entry point per frame. In this sample we won't use BatchCullingContext as we don't need culling.
         /// This callback is responsible to fill cullingOutput with all draw commands we need to render all the items.
         /// </summary>
-        [BurstCompile]
-        public unsafe JobHandle OnPerformCulling(BatchRendererGroup rendererGroup, BatchCullingContext cullingContext,
+        private unsafe JobHandle OnPerformCulling(BatchRendererGroup rendererGroup, BatchCullingContext cullingContext,
             BatchCullingOutput cullingOutput, IntPtr userContext)
         {
             if (!m_initialized)
@@ -292,7 +285,7 @@ namespace PKGE.Unsafe
                     int inBatchCount = left > maxInstancePerDrawCommand ? maxInstancePerDrawCommand : left;
                     drawCommands.drawCommands[b] = new BatchDrawCommand
                     {
-                        visibleOffset = (uint)0, // all draw command is using the same {0,1,2,3...} visibility int array
+                        visibleOffset = 0, // all draw command is using the same {0,1,2,3...} visibility int array
                         visibleCount = (uint)inBatchCount,
                         batchID = m_batchIDs[b],
                         materialID = m_materialID,
