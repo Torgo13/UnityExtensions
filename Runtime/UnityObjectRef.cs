@@ -125,7 +125,21 @@ namespace PKGE.Packages
         /// <returns>A UnityObjectRef referencing instance</returns>
         public static implicit operator UnityObjectRef<T>(T instance)
         {
-            var instanceId = instance == null ? 0 : instance.GetInstanceID();
+            int instanceId;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            try
+            {
+                instanceId = instance == null ? 0 : instance.GetInstanceID();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Debug.LogError(ex.Message);
+                instanceId = instance == null ? 0 : instance.GetHashCode();
+            }
+#else
+            instanceId = instance == null ? 0 : instance.GetHashCode();
+#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
 
             return FromInstanceID(instanceId);
         }
