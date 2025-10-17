@@ -70,14 +70,14 @@ namespace PKGE.Unsafe
         /// <exception cref="System.ArgumentOutOfRangeException">Length must be >= 0</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">sub array range {start}-{start + length - 1} is outside the range of the native array 0-{Length - 1}</exception>
         /// <exception cref="System.ArgumentException">sub array range {start}-{start + length - 1} caused an integer overflow and is outside the range of the native array 0-{Length - 1}</exception>
-        public static NativeArray<T> GetSubNativeArray<T>(ref this UnsafeList<T> unsafeList, int start, int length)
+        public static NativeArray<T> GetSubNativeArray<T>(this UnsafeList<T> unsafeList, int start, int length)
             where T : unmanaged =>
             unsafeList.AsNativeArray().GetSubArray(start, length);
         #endregion // CullingExtensions
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
+        public static unsafe void AddRange<T>(this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsNotNull(array);
@@ -91,7 +91,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
 
@@ -99,7 +99,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
+        public static void AddRange<T>(this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
         {
             Assert.IsNotNull(list);
 
@@ -107,7 +107,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureCapacity<T>(ref this UnsafeList<T> unsafeList, int capacity) where T : unmanaged
+        public static void EnsureCapacity<T>(this UnsafeList<T> unsafeList, int capacity) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsTrue(capacity > 0);
@@ -117,7 +117,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureRoom<T>(ref this UnsafeList<T> unsafeList, int room) where T : unmanaged
+        public static void EnsureRoom<T>(this UnsafeList<T> unsafeList, int room) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsTrue(room > 0);

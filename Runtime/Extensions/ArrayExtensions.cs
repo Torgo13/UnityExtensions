@@ -857,7 +857,7 @@ namespace PKGE
             Swap(ref array[index1], ref array[index2]);
         }
 
-        public static void SwapElements<TValue>(ref this NativeArray<TValue> array, int index1, int index2)
+        public static void SwapElements<TValue>(this NativeArray<TValue> array, int index1, int index2)
             where TValue : struct
         {
             var temp = array[index1];

@@ -55,7 +55,7 @@ namespace PKGE.Unsafe
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        public static unsafe void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsNotNull(array);
@@ -69,7 +69,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this NativeList<T> nativeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
 
@@ -77,7 +77,7 @@ namespace PKGE.Unsafe
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this NativeList<T> nativeList, List<T> list) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
         {
             Assert.IsNotNull(list);
 
@@ -85,7 +85,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureCapacity<T>(ref this NativeList<T> nativeList, int capacity) where T : unmanaged
+        public static void EnsureCapacity<T>(this NativeList<T> nativeList, int capacity) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsTrue(capacity > 0);
@@ -95,7 +95,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureRoom<T>(ref this NativeList<T> nativeList, int room) where T : unmanaged
+        public static void EnsureRoom<T>(this NativeList<T> nativeList, int room) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsTrue(room > 0);

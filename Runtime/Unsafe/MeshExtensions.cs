@@ -59,6 +59,31 @@ namespace PKGE.Unsafe
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
                 submesh, calculateBounds, baseVertex);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles<T>(this Mesh mesh, UnsafeList<T> indices,
+            int submesh, bool calculateBounds = true, int baseVertex = 0)
+            where T : unmanaged
+        {
+            mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, MeshTopology.Triangles,
+                submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, UnsafeList<int> indices,
+            int submesh, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, MeshTopology.Triangles,
+                submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, UnsafeList<ushort> indices,
+            int submesh, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, MeshTopology.Triangles,
+                submesh, calculateBounds, baseVertex);
+        }
         #endregion // UnsafeList
     }
 }

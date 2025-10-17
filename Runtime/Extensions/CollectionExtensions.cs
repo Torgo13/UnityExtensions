@@ -201,7 +201,7 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        public static void DisposeIfPossible<T>(this ref NativeArray<T> array) where T : struct
+        public static void DisposeIfPossible<T>(this NativeArray<T> array) where T : struct
         {
             if (array.IsCreated)
             {

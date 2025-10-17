@@ -171,7 +171,7 @@ namespace PKGE.Unsafe
         /// <param name="value">Value to fill</param>
         /// <param name="startIndex">Start index to fill</param>
         /// <param name="length">The number of entries to write, or -1 to fill until the end of the array</param>
-        public static void FillArray<T>(ref this NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
+        public static void FillArray<T>(this NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
             where T : unmanaged
         {
             if (!array.IsCreated)

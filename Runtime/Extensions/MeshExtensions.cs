@@ -678,10 +678,25 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>(this Mesh mesh, NativeList<T> triangles, int submesh = 0)
+        public static void SetTriangles<T>(this Mesh mesh, NativeList<T> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
             where T : unmanaged
         {
-            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh);
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, NativeList<int> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, NativeList<ushort> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
         }
         #endregion // NativeList
 #endif // INCLUDE_COLLECTIONS
@@ -705,10 +720,25 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>(this Mesh mesh, NativeArray<T> triangles, int submesh = 0, bool calculateBounds = true)
+        public static void SetTriangles<T>(this Mesh mesh, NativeArray<T> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
             where T : unmanaged
         {
-            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds);
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, NativeArray<int> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles(this Mesh mesh, NativeArray<ushort> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
         }
     }
 }

@@ -1429,7 +1429,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/com.unity.demoteam.hair/blob/75a7f446209896bc1bce0da2682cfdbdf30ce447/Runtime/Utility/AffineUtility.cs
         #region Unity.DemoTeam.Hair
-        public static void AffineInterpolateUpper3x3(ref this float3x3 A, float4 q, float t,
+        public static void AffineInterpolateUpper3x3(ref this float3x3 A, in float4 q, float t,
             out float3x3 affineInterpolateUpper3x3)
         {
             static float3x3 lerp(float3x3 a, float3x3 b, float t) => float3x3(
@@ -1452,7 +1452,7 @@ namespace PKGE
             affineInterpolateUpper3x3 = math.mul(Q_t, R_t); // A_t
         }
 
-        public static void AffineInterpolate3x4(ref this float3x4 M, float4 q, float t,
+        public static void AffineInterpolate3x4(ref this float3x4 M, in float4 q, float t,
             out float3x4 affineInterpolate3x4)
         {
             // M = | A T |
@@ -1467,7 +1467,7 @@ namespace PKGE
                 A_t.c0.z, A_t.c1.z, A_t.c2.z, T_t.z);
         }
 
-        public static void AffineInterpolate4x4(ref this float4x4 M, float4 q, float t,
+        public static void AffineInterpolate4x4(ref this float4x4 M, in float4 q, float t,
             out float4x4 affineInterpolate4x4)
         {
             // M = | A T |
@@ -1877,6 +1877,9 @@ namespace PKGE.Packages
         [FieldOffset(12)] public Union12 U12_12;
         [FieldOffset(24)] public Union12 U12_24;
         [FieldOffset(36)] public Union12 U12_36;
+
+        [FieldOffset(00)] public float3x4 Float3x4_00;
+        [FieldOffset(00)] public float4x3 Float4x3_00;
 
         public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
         [Unity.Burst.BurstDiscard]
