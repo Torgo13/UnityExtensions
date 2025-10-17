@@ -17,15 +17,14 @@ using float4 = UnityEngine.Vector4;
 namespace PKGE.Unsafe
 {
     /// <summary>
-    /// This class handle rendering of ground cells & debris using BRG.
-    /// Both ground cells & debris could be rendered using the same GPU data layout:
+    /// This class handle rendering of ground cells and debris using BRG.
+    /// Both ground cells and debris could be rendered using the same GPU data layout:
     /// - obj2world matrix (3 * float4)
     /// - world2obj matrix (3 * float4)
     /// - color (1 * float4)
     /// so 7 float4 per mesh.
     /// </summary>
     /// <remarks>Do not forget data is stored in SoA.</remarks>
-    [BurstCompile]
     public class BRG_Container
     {
         //https://github.com/Unity-Technologies/brg-shooter/blob/f55f6e985bf73b0a3c23b95030e890874e552c45/Assets/Scripts/BRG_Container.cs
@@ -141,9 +140,8 @@ namespace PKGE.Unsafe
         /// <summary>
         /// Upload minimal GPU data according to "instanceCount".
         /// Because of SoA and this class is managing 3 BRG properties
-        /// (2 matrices & 1 color), the last window could use up to 3 SetData.
+        /// (2 matrices and 1 color), the last window could use up to 3 SetData.
         /// </summary>
-        [BurstCompile]
         public bool UploadGpuData(int instanceCount)
         {
             if ((uint)instanceCount > (uint)m_maxInstances)

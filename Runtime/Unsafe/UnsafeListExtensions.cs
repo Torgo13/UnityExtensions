@@ -107,27 +107,6 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureCapacity<T>(this UnsafeList<T> unsafeList, int capacity) where T : unmanaged
-        {
-            Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsTrue(capacity > 0);
-
-            if (unsafeList.Capacity < capacity)
-                unsafeList.Capacity = capacity;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void EnsureRoom<T>(this UnsafeList<T> unsafeList, int room) where T : unmanaged
-        {
-            Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsTrue(room > 0);
-
-            var capacity = unsafeList.Length + room;
-            if (unsafeList.Capacity < capacity)
-                unsafeList.Capacity = capacity;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
             if (unsafeList.IsEmpty)

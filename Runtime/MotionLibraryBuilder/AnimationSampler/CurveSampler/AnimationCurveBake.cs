@@ -80,7 +80,6 @@ namespace PKGE.Packages
             return frameCount;
         }
 
-        [Unity.Burst.BurstCompile]
         public static class ThreadSafe
         {
             [Unity.Burst.BurstCompile(CompileSynchronously = true)]
@@ -157,7 +156,6 @@ namespace PKGE.Packages
                 return ConfigureBake(curves, frameRate, outCurves, alloc, sampleRange);
             }
 
-            [Unity.Burst.BurstCompile]
             public static void Bake(ref Curve curve, float frameRate, ref Curve outCurve, in SampleRange sampleRange)
             {
                 NativeArray<Keyframe> keys = curve.Keys;

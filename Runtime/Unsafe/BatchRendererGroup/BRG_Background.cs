@@ -223,7 +223,7 @@ namespace PKGE.Unsafe
                     int itemId = slice * backgroundW + x;
                     BackgroundItem item = backgroundItems[itemId];
 
-                    float4 color = backgroundItems[itemId].color;
+                    float4 color = item.color;
                     if (item.flashTime > 0.0f)
                     {
                         color = math.lerp(color, new float4(1, 1, 1, 1), item.flashTime);
@@ -269,7 +269,6 @@ namespace PKGE.Unsafe
             }
         }
 
-        [BurstCompile]
         JobHandle UpdatePositions(float smoothScroll, float dt, JobHandle jobFence)
         {
             NativeArray<float4> sysmemBuffer = m_brgContainer.GetSysmemBuffer(out _, out int alignedWindowSize);
@@ -306,9 +305,9 @@ namespace PKGE.Unsafe
 
             if (Input.touchCount == 3)
             {
-                if ((Input.touches[0].phase == TouchPhase.Began) &&
-                    (Input.touches[1].phase == TouchPhase.Began) &&
-                    (Input.touches[2].phase == TouchPhase.Began))
+                if ((Input.GetTouch(0).phase == TouchPhase.Began) &&
+                    (Input.GetTouch(1).phase == TouchPhase.Began) &&
+                    (Input.GetTouch(2).phase == TouchPhase.Began))
                     m_debrisDebugTest = !m_debrisDebugTest;
             }
 
