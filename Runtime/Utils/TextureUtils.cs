@@ -18,6 +18,7 @@ namespace PKGE
     /// <remarks>
     /// Assumes that textures either have a single mip level or a full mip chain.
     /// </remarks>
+    [StructLayout(LayoutKind.Sequential)]
     public struct Texture2DProperties : IEnumerator, IDisposable, IAsyncDisposable
     {
         /// <summary>Only used to store a reference to the original <see cref="Texture"/>.</summary>
@@ -38,6 +39,7 @@ namespace PKGE
 
         /// <summary>Ensure that only either <see cref="Dispose"/> or <see cref="DisposeAsync"/>
         /// is called once total on disposal.</summary>
+        [MarshalAs(UnmanagedType.U1)]
         private bool disposed;
 
         /// <param name="tex">The original <see cref="Texture"/> to be kept but not modified.</param>
@@ -381,15 +383,19 @@ namespace PKGE
         #region Fields
         /// <summary><see langword="true"/> if the <see cref="Texture"/> is marked readable
         /// and contains a CPU copy.</summary>
+        [MarshalAs(UnmanagedType.U1)]
         public readonly bool isReadable;
         /// <summary><see langword="true"/> if the <see cref="Texture"/> uses a compressed format
         /// so colour values cannot be individually accessed on the CPU.</summary>
+        [MarshalAs(UnmanagedType.U1)]
         public readonly bool isCompressed;
         /// <summary><see langword="true"/> if the <see cref="Texture"/> uses a linear colour format,
         /// typically used when it does not store colour data.</summary>
+        [MarshalAs(UnmanagedType.U1)]
         public readonly bool isLinear;
         /// <summary><see langword="true"/> if the <see cref="Texture"/> is a <see cref="Texture2D"/>
         /// rather than a <see cref="RenderTexture"/>.</summary>
+        [MarshalAs(UnmanagedType.U1)]
         public readonly bool isTexture2D;
         #endregion // Fields
         

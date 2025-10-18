@@ -24,6 +24,7 @@ namespace PKGE.Packages
         /// <summary>
         /// Represents LOD parameters.
         /// </summary>
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public struct LODParams : IEqualityComparer<LODParams>, System.IEquatable<LODParams>
         {
             /// <summary>
@@ -39,6 +40,7 @@ namespace PKGE.Packages
             /// <summary>
             /// Indicates whether the camera is in orthographic mode.
             /// </summary>
+            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.U1)]
             public bool   isOrtho;
 
             /// <summary>

@@ -172,9 +172,11 @@ namespace PKGE.Packages
             public static uint Value = _typeCount++;
         }
 
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
         struct Item
         {
             public ContextItem Storage;
+            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.U1)]
             public bool IsSet;
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
             public int lineNumber;

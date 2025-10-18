@@ -239,11 +239,13 @@ namespace PKGE
     /// Scoped Profiling markers
     /// </summary>
     [IgnoredByDeepProfiler]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct ProfilingScope : IDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Debugging/ProfilingScope.cs
         #region UnityEngine.Rendering
         readonly CommandBuffer _cmd;
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.U1)]
         bool _disposed;
         readonly ProfilingSampler _sampler;
 

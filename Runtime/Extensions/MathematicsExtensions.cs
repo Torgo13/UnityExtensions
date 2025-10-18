@@ -53,6 +53,7 @@ namespace PKGE
     [StructLayout(LayoutKind.Explicit)]
     public struct ByteBool
     {
+        [MarshalAs(UnmanagedType.U1)]
         [FieldOffset(0)] public bool BoolValue;
         [FieldOffset(0)] public byte ByteValue;
 
@@ -94,6 +95,7 @@ namespace PKGE
     {
         [FieldOffset(0)] public byte Byte;
         [FieldOffset(0)] public sbyte SByte;
+        [MarshalAs(UnmanagedType.U1)]
         [FieldOffset(0)] public bool Bool;
 
         [FieldOffset(0)] public ByteBool ByteBool;

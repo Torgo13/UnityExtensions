@@ -12,6 +12,7 @@ using PKGE.Mathematics;
 
 namespace PKGE.Packages
 {
+    [StructLayout(LayoutKind.Sequential)]
     public readonly struct Curve : IDisposable
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
