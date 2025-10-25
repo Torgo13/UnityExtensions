@@ -44,7 +44,7 @@ namespace PKGE.Unsafe
             // Then overwrite with the source data, which may have a different size
             UnsafeUtility.MemCpyStride(
                 destination: array.GetUnsafePtr(),
-                destinationStride: UnsafeUtility.SizeOf<T>(),
+                destinationStride: SizeOfCache<T>.Size,
                 source: source,
                 sourceStride: sourceElementSize,
                 elementSize: sourceElementSize,
@@ -80,7 +80,7 @@ namespace PKGE.Unsafe
             UnsafeUtility.MemCpyReplicate(
                 array.GetUnsafePtr(),
                 UnsafeUtility.AddressOf(ref value),
-                UnsafeUtility.SizeOf<T>(),
+                SizeOfCache<T>.Size,
                 array.Length);
         }
 
@@ -260,7 +260,7 @@ namespace PKGE.Unsafe
             // the array contents down from after the index.
             if (index < count - 1)
             {
-                var elementSize = UnsafeUtility.SizeOf<TValue>();
+                var elementSize = SizeOfCache<TValue>.Size;
                 var arrayPtr = (byte*)array.GetUnsafePtr();
 
                 UnsafeUtility.MemCpy(arrayPtr + elementSize * index, arrayPtr + elementSize * (index + 1),

@@ -534,13 +534,27 @@ namespace PKGE
             {
 #if UNITY_EDITOR
                 if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
+                {
+#if UNITY_6000_4_OR_NEWER
+#else
+                    if (obj is Transform transform)
+                    {
+                        transform.SetActiveRecursively(active: false);
+                    }
+                    else if (obj is GameObject go)
+                    {
+                        go.SetActiveRecursively(active: false);
+                    }
+#endif // UNITY_6000_4_OR_NEWER
+
                     UnityObject.Destroy(obj);
+                }
                 else if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
                 else
                     UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
 #else
-                UnityObject.Destroy(obj);
+                    UnityObject.Destroy(obj);
 #endif
             }
         }

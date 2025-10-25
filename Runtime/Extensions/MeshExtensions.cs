@@ -704,19 +704,19 @@ namespace PKGE.Packages
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetVertices(this Mesh mesh, List<float3> vertices)
         {
-            mesh.GetVertices(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref vertices));
+            mesh.GetVertices(vertices.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetVertices(this Mesh mesh, List<float3> inVertices)
         {
-            mesh.SetVertices(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref inVertices));
+            mesh.SetVertices(inVertices.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetNormals(this Mesh mesh, List<float3> inNormals)
         {
-            mesh.SetNormals(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<float3>, List<Vector3>>(ref inNormals));
+            mesh.SetNormals(inNormals.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

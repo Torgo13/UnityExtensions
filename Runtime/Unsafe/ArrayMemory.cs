@@ -1,6 +1,5 @@
 using System;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
@@ -29,7 +28,7 @@ namespace PKGE.Unsafe
 
         public void Reserve<T>(int numElements) where T : struct
         {
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             requiredSize += numElements * elemSize;
         }
 
@@ -46,7 +45,7 @@ namespace PKGE.Unsafe
                 throw new Exception("ArraMemory must be allocated before it can create native slices");
             }
 
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             int sliceSize = length * elemSize;
             int availableSize = bytes.Length - usedSize;
 

@@ -25,7 +25,7 @@ namespace PKGE.Unsafe
             var texture = new Texture2D(d, d, DefaultFormat.LDR, TextureCreationFlags.None);
             var colours = texture.GetRawTextureData<Color32>();
             var coloursPtr = (Color32*)colours.GetUnsafePtr();
-            UnsafeUtility.MemSet(coloursPtr, 0, colours.Length * UnsafeUtility.SizeOf<Color32>());
+            UnsafeUtility.MemSet(coloursPtr, 0, colours.Length * SizeOfCache<Color32>.Size);
 
             // pack the colour into a ulong so we can write two pixels at a time to the texture data
             var colorPtr = (uint*)UnsafeUtility.AddressOf(ref colour);

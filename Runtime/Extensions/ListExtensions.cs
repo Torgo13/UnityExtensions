@@ -165,8 +165,8 @@ namespace PKGE
             where TTo : struct
         {
             UnityEngine.Assertions.Assert.IsTrue(
-                list.Count * Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TFrom))
-                % Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TTo)) == 0);
+                list.Count * SizeOfCache<TFrom>.Size
+                % SizeOfCache<TTo>.Size == 0);
 
             return MemoryMarshal.Cast<TFrom, TTo>(list.AsSpan());
         }

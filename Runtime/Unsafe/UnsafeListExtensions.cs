@@ -14,23 +14,23 @@ namespace PKGE.Unsafe
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.IsEmpty ? null : unsafeList.Ptr;
+            return unsafeList.Ptr;
         }
 
         public static unsafe void* GetReadOnlyPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.IsEmpty ? null : unsafeList.AsReadOnly().Ptr;
+            return unsafeList.IsCreated ? unsafeList.AsReadOnly().Ptr : null;
         }
 
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.IsEmpty ? IntPtr.Zero : (IntPtr)unsafeList.Ptr;
+            return unsafeList.IsCreated ? (IntPtr)unsafeList.Ptr : IntPtr.Zero;
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.IsEmpty ? IntPtr.Zero : (IntPtr)unsafeList.AsReadOnly().Ptr;
+            return unsafeList.IsCreated ? (IntPtr)unsafeList.AsReadOnly().Ptr : IntPtr.Zero;
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer

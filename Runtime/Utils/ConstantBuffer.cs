@@ -242,7 +242,7 @@ namespace PKGE
         public ConstantBuffer()
         {
             _gpuConstantBuffer = new ComputeBuffer(1,
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<CBType>(), ComputeBufferType.Constant);
+                SizeOfCache<CBType>.Size, ComputeBufferType.Constant);
         }
 
         /// <summary>

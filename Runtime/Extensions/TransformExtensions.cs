@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -88,7 +87,7 @@ namespace PKGE
         public static Pose InverseTransformPose(this Transform transform, Pose pose)
         {
             if (transform == null)
-                throw new ArgumentNullException(nameof(transform));
+                throw new System.ArgumentNullException(nameof(transform));
 
             return new Pose
             {
@@ -107,7 +106,7 @@ namespace PKGE
         public static Ray InverseTransformRay(this Transform transform, Ray ray)
         {
             if (transform == null)
-                throw new ArgumentNullException(nameof(transform));
+                throw new System.ArgumentNullException(nameof(transform));
 
             return new Ray(
                 transform.InverseTransformPoint(ray.origin),
@@ -156,15 +155,15 @@ namespace PKGE
                 const float tolerance = 0.0001f;
                 t.GetLocalPositionAndRotation(out var p, out var r);
 
-                if (Math.Abs(p.x - pos.x) < tolerance
-                    && Math.Abs(p.y - pos.y) < tolerance
-                    && Math.Abs(p.z - pos.z) < tolerance)
+                if (System.Math.Abs(p.x - pos.x) < tolerance
+                    && System.Math.Abs(p.y - pos.y) < tolerance
+                    && System.Math.Abs(p.z - pos.z) < tolerance)
                     pos = p;
 
-                if (Math.Abs(r.x - rot.x) < tolerance
-                    && Math.Abs(r.y - rot.y) < tolerance
-                    && Math.Abs(r.z - rot.z) < tolerance
-                    && Math.Abs(r.w - rot.w) < tolerance)
+                if (System.Math.Abs(r.x - rot.x) < tolerance
+                    && System.Math.Abs(r.y - rot.y) < tolerance
+                    && System.Math.Abs(r.z - rot.z) < tolerance
+                    && System.Math.Abs(r.w - rot.w) < tolerance)
                     rot = r;
 
                 t.SetLocalPositionAndRotation(pos, rot);
@@ -320,6 +319,88 @@ namespace PKGE
 
                 transform.GetComponentsInParent(type, results, includeInactive);
             }
+        }
+
+        /// <summary>
+        /// Get the direct children Transforms of this Transform.
+        /// </summary>
+        /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
+        /// <param name="childTransforms">The direct children of a Transform.</param>
+        /// <param name="recursive">Set to <see langword="true"/> to also get the descendents.</param>
+        public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms,
+            bool recursive = false)
+        {
+            var childCount = transform.childCount;
+            if (childCount == 0)
+                return;
+
+            childTransforms.EnsureCapacity(childCount);
+            for (var i = 0; i < childCount; i++)
+            {
+                childTransforms.Add(transform.GetChild(i));
+                if (recursive)
+                {
+                    transform.GetChildTransforms(childTransforms, recursive: true);
+                }
+            }
+        }
+
+        public static void GetChildInstanceIDs(this Transform transform, List<int> childInstanceIDs,
+            bool recursive = false)
+        {
+            var childCount = transform.childCount;
+            if (childCount == 0)
+                return;
+
+            childInstanceIDs.EnsureCapacity(childCount);
+            for (var i = 0; i < childCount; i++)
+            {
+                childInstanceIDs.Add(transform.GetChild(i).GetInstanceID());
+                if (recursive)
+                {
+                    transform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+                }
+            }
+        }
+
+        public static void SetActiveRecursively(this Transform go, bool active)
+        {
+            var childInstanceIDs = ListPool<int>.Get();
+            go.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+
+            if (childInstanceIDs.Count > 0)
+            {
+                GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+            }
+
+            ListPool<int>.Release(childInstanceIDs);
+        }
+
+        /// <summary>
+        /// Gets a descendant Transform with a specific name
+        /// </summary>
+        /// <param name="go">The parent object that is searched for a named child.</param>
+        /// <param name="name">Name of child to be found.</param>
+        /// <param name="found">True if a descendant Transform with the specified name was found.</param>
+        /// <returns>The returned child Transform or null if no child is found.</returns>
+        public static Transform GetNamedChild(this Transform go, string name, out bool found)
+        {
+            found = false;
+            var transforms = ListPool<Transform>.Get();
+            go.GetComponentsInChildren(transforms);
+            Transform foundObject = null;
+            for (var i = 0; i < transforms.Count; i++)
+            {
+                if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
+                {
+                    found = true;
+                    foundObject = transforms[i];
+                    break;
+                }
+            }
+
+            ListPool<Transform>.Release(transforms);
+            return foundObject;
         }
     }
 }

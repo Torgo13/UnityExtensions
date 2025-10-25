@@ -103,7 +103,7 @@ namespace PKGE.Unsafe
         public void CopyTo(T* dstBuffer, int startDstIndex, int copyCount)
         {
             UnsafeUtility.MemCpy(dstBuffer + startDstIndex, _bufferPtr,
-                UnsafeUtility.SizeOf<T>() * copyCount);
+                SizeOfCache<T>.Size * copyCount);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace PKGE.Unsafe
             if (other.Count + Count >= other._capacity)
                 return false;
 
-            UnsafeUtility.MemCpy(other._bufferPtr + other.Count, _bufferPtr, UnsafeUtility.SizeOf<T>() * Count);
+            UnsafeUtility.MemCpy(other._bufferPtr + other.Count, _bufferPtr, SizeOfCache<T>.Size * Count);
             *other._countPtr += Count;
             return true;
         }
@@ -138,7 +138,7 @@ namespace PKGE.Unsafe
             if (count + Count > _capacity)
                 return false;
 
-            UnsafeUtility.MemCpy(_bufferPtr + Count, srcPtr, UnsafeUtility.SizeOf<T>() * count);
+            UnsafeUtility.MemCpy(_bufferPtr + Count, srcPtr, SizeOfCache<T>.Size * count);
             *_countPtr += count;
             return true;
         }

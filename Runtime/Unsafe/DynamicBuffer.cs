@@ -124,9 +124,9 @@ namespace PKGE.Unsafe
 #endif
                 CheckWriteAccessAndInvalidateArrayAliases();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                BufferHeader.SetCapacity(m_Buffer, value, UnsafeUtility.SizeOf<T>(), UnsafeUtility.AlignOf<T>(), BufferHeader.TrashMode.RetainOldData, m_useMemoryInitPattern == 1, m_memoryInitPattern, m_InternalCapacity);
+                BufferHeader.SetCapacity(m_Buffer, value, SizeOfCache<T>.Size, AlignOfCache<T>.Alignment, BufferHeader.TrashMode.RetainOldData, m_useMemoryInitPattern == 1, m_memoryInitPattern, m_InternalCapacity);
 #else
-                BufferHeader.SetCapacity(m_Buffer, value, UnsafeUtility.SizeOf<T>(), UnsafeUtility.AlignOf<T>(), BufferHeader.TrashMode.RetainOldData, false, 0, m_InternalCapacity);
+                BufferHeader.SetCapacity(m_Buffer, value, SizeOfCache<T>.Size, AlignOfCache<T>.Alignment, BufferHeader.TrashMode.RetainOldData, false, 0, m_InternalCapacity);
 #endif
             }
         }
@@ -251,7 +251,7 @@ namespace PKGE.Unsafe
             {
                 var num = length - oldLength;
                 byte* ptr = BufferHeader.GetElementPointer(m_Buffer);
-                var sizeOf = UnsafeUtility.SizeOf<T>();
+                var sizeOf = SizeOfCache<T>.Size;
                 UnsafeUtility.MemClear(ptr + oldLength * sizeOf, num * sizeOf);
             }
         }
@@ -272,9 +272,9 @@ namespace PKGE.Unsafe
         {
             CheckWriteAccessAndInvalidateArrayAliases();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            BufferHeader.EnsureCapacity(m_Buffer, length, UnsafeUtility.SizeOf<T>(), UnsafeUtility.AlignOf<T>(), BufferHeader.TrashMode.RetainOldData, m_useMemoryInitPattern == 1, m_memoryInitPattern);
+            BufferHeader.EnsureCapacity(m_Buffer, length, SizeOfCache<T>.Size, AlignOfCache<T>.Alignment, BufferHeader.TrashMode.RetainOldData, m_useMemoryInitPattern == 1, m_memoryInitPattern);
 #else
-            BufferHeader.EnsureCapacity(m_Buffer, length, UnsafeUtility.SizeOf<T>(), UnsafeUtility.AlignOf<T>(), BufferHeader.TrashMode.RetainOldData, false, 0);
+            BufferHeader.EnsureCapacity(m_Buffer, length, SizeOfCache<T>.Size, AlignOfCache<T>.Alignment, BufferHeader.TrashMode.RetainOldData, false, 0);
 #endif
         }
 
@@ -315,8 +315,8 @@ namespace PKGE.Unsafe
             if (length == Capacity || oldPtr == null)
                 return;
 
-            int elemSize = UnsafeUtility.SizeOf<T>();
-            int elemAlign = UnsafeUtility.AlignOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
+            int elemAlign = AlignOfCache<T>.Alignment;
 
             bool isInternal;
             byte* newPtr;
@@ -374,7 +374,7 @@ namespace PKGE.Unsafe
             int length = Length;
             ResizeUninitialized(length + 1);
             CheckBounds(index); //CheckBounds after ResizeUninitialized since index == length is allowed
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             byte* basePtr = BufferHeader.GetElementPointer(m_Buffer);
             UnsafeUtility.MemMove(basePtr + (index + 1) * elemSize, basePtr + index * elemSize, (long)elemSize * (length - index));
             this[index] = elem;
@@ -392,7 +392,7 @@ namespace PKGE.Unsafe
         public void AddRange(NativeArray<T> newElems)
         {
             CheckWriteAccess();
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             int oldLength = Length;
             ResizeUninitialized(oldLength + newElems.Length);
 
@@ -417,7 +417,7 @@ namespace PKGE.Unsafe
                 return;
             CheckBounds(index + count - 1);
 
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             byte* basePtr = BufferHeader.GetElementPointer(m_Buffer);
 
             UnsafeUtility.MemMove(basePtr + index * elemSize, basePtr + (index + count) * elemSize, (long)elemSize * (Length - count - index));
@@ -443,7 +443,7 @@ namespace PKGE.Unsafe
 
             ref var l = ref m_Buffer->Length;
             byte* basePtr = BufferHeader.GetElementPointer(m_Buffer);
-            int elemSize = UnsafeUtility.SizeOf<T>();
+            int elemSize = SizeOfCache<T>.Size;
             int copyFrom = math.max(l - count, index + count);
             void* dst = basePtr + index * elemSize;
             void* src = basePtr + copyFrom * elemSize;
@@ -636,7 +636,7 @@ namespace PKGE.Unsafe
             CheckWriteAccess();
 
             UnsafeUtility.MemCpy(BufferHeader.GetElementPointer(m_Buffer),
-                BufferHeader.GetElementPointer(v.m_Buffer), Length * UnsafeUtility.SizeOf<T>());
+                BufferHeader.GetElementPointer(v.m_Buffer), Length * SizeOfCache<T>.Size);
         }
 
         /// <summary>
@@ -658,7 +658,7 @@ namespace PKGE.Unsafe
             GCHandle gcHandle = GCHandle.Alloc((object)v, GCHandleType.Pinned);
             IntPtr num = gcHandle.AddrOfPinnedObject();
 
-            UnsafeUtility.MemCpy(BufferHeader.GetElementPointer(m_Buffer), (void*)num, Length * UnsafeUtility.SizeOf<T>());
+            UnsafeUtility.MemCpy(BufferHeader.GetElementPointer(m_Buffer), (void*)num, Length * SizeOfCache<T>.Size);
             gcHandle.Free();
         }
         #endregion // Unity.Entities

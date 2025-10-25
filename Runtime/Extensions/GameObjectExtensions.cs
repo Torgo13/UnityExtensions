@@ -205,7 +205,9 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent GameObject that we will want to get the child GameObjects on.</param>
         /// <param name="childGameObjects">The direct children of a GameObject.</param>
-        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects)
+        /// <param name="recursive">Set to <see langword="true"/> to also get the descendents.</param>
+        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects,
+            bool recursive = false)
         {
             var goTransform = go.transform;
             var childCount = goTransform.childCount;
@@ -216,7 +218,22 @@ namespace PKGE
             for (var i = 0; i < childCount; i++)
             {
                 childGameObjects.Add(goTransform.GetChild(i).gameObject);
+                if (recursive)
+                {
+                    go.GetChildGameObjects(childGameObjects, recursive: true);
+                }
             }
+        }
+
+        public static void GetChildInstanceIDs(this GameObject go, List<int> childInstanceIDs,
+            bool recursive = false)
+        {
+            go.transform.GetChildInstanceIDs(childInstanceIDs, recursive);
+        }
+
+        public static void SetActiveRecursively(this GameObject go, bool active)
+        {
+            go.transform.SetActiveRecursively(active);
         }
 
         /// <summary>
@@ -262,8 +279,7 @@ namespace PKGE
             GameObject.InstantiateGameObjects(go.GetInstanceID(),
                 count, instanceIDs, transformIDs, destinationScene);
 
-            Resources.InstanceIDToObjectList(instanceIDs,
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<GameObject>, List<Object>>(ref instances));
+            Resources.InstanceIDToObjectList(instanceIDs, instances.As<GameObject, Object>());
         }
     }
 
@@ -272,7 +288,7 @@ namespace PKGE
         public static Object LoadAssetAtPath(string path)
         {
 #if UNITY_EDITOR
-            System.Type type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path);
+            var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path);
             return UnityEditor.AssetDatabase.LoadAssetAtPath(path, type);
 #else
             return default;

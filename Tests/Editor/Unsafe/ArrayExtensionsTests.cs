@@ -112,6 +112,26 @@ namespace PKGE.Unsafe.Tests
             array.Dispose();
         }
 
+        /// <inheritdoc cref="FillArray_ShouldFillArrayWithSpecifiedValue"/>
+        [Test]
+        public void FillArrayJob_ShouldFillArrayWithSpecifiedValue()
+        {
+            // Arrange
+            var array = new NativeArray<int>(5, Allocator.TempJob);
+            const int fillValue = 42;
+
+            // Act
+            PKGE.ArrayExtensions.FillArray(array, fillValue);
+
+            // Assert
+            foreach (var item in array)
+            {
+                Assert.AreEqual(fillValue, item);
+            }
+
+            array.Dispose();
+        }
+
         /// <summary>
         /// Correctness: Validates partial filling with a start index and length
         /// </summary>
@@ -141,6 +161,33 @@ namespace PKGE.Unsafe.Tests
             array.Dispose();
         }
 
+        /// <inheritdoc cref="FillArray_ShouldFillArrayPartially_WithSpecifiedValue"/>
+        [Test]
+        public void FillArrayJob_ShouldFillArrayPartially_WithSpecifiedValue()
+        {
+            // Arrange
+            var array = new NativeArray<int>(5, Allocator.TempJob);
+            const int fillValue = 99;
+
+            // Act
+            PKGE.ArrayExtensions.FillArray(array, fillValue, startIndex: 2, length: 2);
+
+            // Assert
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i >= 2 && i < 4)
+                {
+                    Assert.AreEqual(fillValue, array[i]);
+                }
+                else
+                {
+                    Assert.AreEqual(0, array[i]);
+                }
+            }
+
+            array.Dispose();
+        }
+
         /// <summary>
         /// Edge Cases: Handles negative lengths gracefully, filling until the array's end
         /// </summary>
@@ -153,6 +200,33 @@ namespace PKGE.Unsafe.Tests
 
             // Act
             array.FillArray(fillValue, startIndex: 1, length: -1);
+
+            // Assert
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i >= 1)
+                {
+                    Assert.AreEqual(fillValue, array[i]);
+                }
+                else
+                {
+                    Assert.AreEqual(0, array[i]);
+                }
+            }
+
+            array.Dispose();
+        }
+
+        /// <inheritdoc cref="FillArray_ShouldFillFromStartIndexUntilEnd_WhenLengthIsNegative"/>
+        [Test]
+        public void FillArrayJob_ShouldFillFromStartIndexUntilEnd_WhenLengthIsNegative()
+        {
+            // Arrange
+            var array = new NativeArray<int>(5, Allocator.TempJob);
+            const int fillValue = 7;
+
+            // Act
+            PKGE.ArrayExtensions.FillArray(array, fillValue, startIndex: 1, length: -1);
 
             // Assert
             for (int i = 0; i < array.Length; i++)

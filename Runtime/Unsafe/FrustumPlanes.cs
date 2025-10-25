@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -211,14 +210,14 @@ namespace PKGE.Unsafe
         }
 
 #if INCLUDE_COLLECTIONS
-        internal static UnsafeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
+        internal static NativeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
         {
             int cullingPlaneCount = cullingPlanes.Length;
             int packetCount = (cullingPlaneCount + 3) >> 2;
-            var planes = new UnsafeList<PlanePacket4>(packetCount, allocator, NativeArrayOptions.UninitializedMemory);
-            planes.Resize(packetCount);
+            var planes = new NativeList<PlanePacket4>(packetCount, allocator);
+            planes.ResizeUninitialized(packetCount);
 
-            InitializeSOAPlanePackets(planes.AsNativeArray(), cullingPlanes);
+            InitializeSOAPlanePackets(planes.AsArray(), cullingPlanes);
 
             return planes;
         }

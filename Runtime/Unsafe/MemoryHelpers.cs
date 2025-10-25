@@ -95,7 +95,7 @@ namespace PKGE.Unsafe
                 [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
                 internal static T* Resize<T>(T* oldPointer, long oldCount, long newCount, AllocatorManager.AllocatorHandle allocator) where T : unmanaged
                 {
-                    return (T*)Resize((byte*)oldPointer, oldCount, newCount, allocator, UnsafeUtility.SizeOf<T>(), UnsafeUtility.AlignOf<T>());
+                    return (T*)Resize((byte*)oldPointer, oldCount, newCount, allocator, SizeOfCache<T>.Size, AlignOfCache<T>.Alignment);
                 }
 
                 [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
@@ -122,7 +122,7 @@ namespace PKGE.Unsafe
             [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
             internal static void Set<T>(T* pointer, long count, T t = default) where T : unmanaged
             {
-                long bytesToSet = count * UnsafeUtility.SizeOf<T>();
+                long bytesToSet = count * SizeOfCache<T>.Size;
                 CheckByteCountIsReasonable(bytesToSet);
                 for (var i = 0; i < count; ++i)
                     pointer[i] = t;
@@ -131,7 +131,7 @@ namespace PKGE.Unsafe
             [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
             internal static void Clear<T>(T* pointer, long count) where T : unmanaged
             {
-                long bytesToClear = count * UnsafeUtility.SizeOf<T>();
+                long bytesToClear = count * SizeOfCache<T>.Size;
                 CheckByteCountIsReasonable(bytesToClear);
                 UnsafeUtility.MemClear(pointer, bytesToClear);
             }
@@ -139,7 +139,7 @@ namespace PKGE.Unsafe
             [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
             internal static void Copy<T>(T* dest, T* src, long count) where T : unmanaged
             {
-                long bytesToCopy = count * UnsafeUtility.SizeOf<T>();
+                long bytesToCopy = count * SizeOfCache<T>.Size;
                 CheckByteCountIsReasonable(bytesToCopy);
                 UnsafeUtility.MemCpy(dest, src, bytesToCopy);
             }
@@ -170,8 +170,8 @@ namespace PKGE.Unsafe
         public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
         {
             return (T*)UnsafeUtility.MallocTracked(
-                UnsafeUtility.SizeOf<T>() * count,
-                UnsafeUtility.AlignOf<T>(),
+                SizeOfCache<T>.Size * count,
+                AlignOfCache<T>.Alignment,
                 allocator,
                 callstacksToSkip);
         }
@@ -181,14 +181,13 @@ namespace PKGE.Unsafe
             UnsafeUtility.FreeTracked(p, allocator);
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Compatibility")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "UnusedParameter.Global")]
         public static T* Malloc<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
-#pragma warning restore IDE0060 // Remove unused parameter
         {
             return (T*)UnsafeUtility.Malloc(
-                UnsafeUtility.SizeOf<T>() * count,
-                UnsafeUtility.AlignOf<T>(),
+                SizeOfCache<T>.Size * count,
+                AlignOfCache<T>.Alignment,
                 allocator);
         }
 

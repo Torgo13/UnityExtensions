@@ -14,23 +14,23 @@ namespace PKGE.Unsafe
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.IsEmpty ? null : nativeList.GetUnsafePtr();
+            return nativeList.GetUnsafePtr();
         }
 
         public static unsafe void* GetReadOnlyPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.IsEmpty ? null : nativeList.GetUnsafeReadOnlyPtr();
+            return nativeList.GetUnsafeReadOnlyPtr();
         }
 
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.IsEmpty ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafePtr();
+            return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafePtr() : IntPtr.Zero;
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            return nativeList.IsEmpty ? IntPtr.Zero : (IntPtr)nativeList.GetUnsafeReadOnlyPtr();
+            return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafeReadOnlyPtr() : IntPtr.Zero;
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
@@ -44,7 +44,6 @@ namespace PKGE.Unsafe
         public static unsafe ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsFalse(nativeList.IsEmpty);
 
             return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafeReadOnlyPtr(), index);
         }
@@ -53,7 +52,6 @@ namespace PKGE.Unsafe
         public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsFalse(nativeList.IsEmpty);
 
             return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafePtr(), index);
         }
@@ -94,18 +92,6 @@ namespace PKGE.Unsafe
         public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
         {
             nativeList.AddRangeNoResize(nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
-        {
-            return nativeList.AsArray().AsSpan();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
-        {
-            return nativeList.AsReadOnly().AsReadOnlySpan();
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityEngine.Assertions;
+using PKGE.Packages;
 
 namespace PKGE.Unsafe
 {

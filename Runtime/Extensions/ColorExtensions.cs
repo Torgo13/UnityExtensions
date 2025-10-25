@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 namespace PKGE
@@ -154,18 +155,18 @@ namespace PKGE
 
         static byte GammaToLinear(byte value)
         {
-            float v = value / 255f;
+            float v = value / (float)byte.MaxValue;
 
             if (v <= 0.04045f)
-                return (byte)(v / 12.92f * 255f);
+                return (byte)(v / 12.92 * byte.MaxValue);
 
             if (v < 1.0f)
-                return (byte)(Mathf.Pow((v + 0.055f) / 1.055f, 2.4f) * 255);
+                return (byte)(System.Math.Pow((v + 0.055) / 1.055, 2.4) * byte.MaxValue);
 
             if (Mathf.Approximately(v, 1.0f))
-                return 255;
+                return byte.MaxValue;
 
-            return (byte)(Mathf.Pow(v, 2.2f) * 255);
+            return (byte)(System.Math.Pow(v, 2.2) * byte.MaxValue);
         }
 
         public static Color MinAlpha(this Color c1, Color c2)
@@ -175,6 +176,147 @@ namespace PKGE
             return new Color(c1.r, c1.g, c1.b, a);
         }
         #endregion // TMPro
+
+        //https://github.com/Unity-Technologies/com.unity.search.extensions/blob/main/package-examples/Editor/ImageIndexing/ImageUtils.cs
+        #region com.unity.search.extensions
+        public static void RGBToXYZ(in Color rgb, out Vector3 xyz)
+        {
+            Vector3 scaledColors = default;
+            for (var i = 0; i < 3; ++i)
+            {
+                if (rgb[i] > 0.04045f)
+                    scaledColors[i] = (float)System.Math.Pow((rgb[i] + 0.055) / 1.055, 2.4);
+                else
+                    scaledColors[i] = rgb[i] / 12.92f;
+
+                scaledColors[i] *= 100f;
+            }
+
+            xyz = new Vector3(
+                scaledColors[0] * 0.4124f + scaledColors[1] * 0.3576f + scaledColors[2] * 0.1805f,
+                scaledColors[0] * 0.2126f + scaledColors[1] * 0.7152f + scaledColors[2] * 0.0722f,
+                scaledColors[0] * 0.0193f + scaledColors[1] * 0.1192f + scaledColors[2] * 0.9505f);
+        }
+
+        public static void XYZToCIELab(in Vector3 xyz, out Vector3 lab, in Vector3 reference)
+        {
+            Vector3 scaledXYZ = default;
+            for (var i = 0; i < 3; ++i)
+            {
+                scaledXYZ[i] = xyz[i] / reference[i];
+                if (scaledXYZ[i] > 0.008856f)
+                    scaledXYZ[i] = (float)System.Math.Pow(scaledXYZ[i], 1 / 3.0);
+                else
+                    scaledXYZ[i] = (7.787f * scaledXYZ[i]) + (16f / 116f);
+            }
+
+            lab = new Vector3(
+                (116f * scaledXYZ[1]) - 16f,
+                500f * (scaledXYZ[0] - scaledXYZ[1]),
+                200f * (scaledXYZ[1] - scaledXYZ[2]));
+        }
+
+        public static void RGBToYUV(in Color rgb, out Vector3 yuv)
+        {
+            yuv = new Vector3(
+                0.299f * rgb.r + 0.587f * rgb.g + 0.114f * rgb.b,
+                -0.14713f * rgb.r + -0.28886f * rgb.g + 0.436f * rgb.b,
+                0.615f * rgb.r + -0.51499f * rgb.g + -0.10001f * rgb.b);
+        }
+
+        public static float DeltaECIE(Vector3 lab1, Vector3 lab2)
+        {
+            var diffs = new Vector3(lab1[0] - lab2[0], lab1[0] - lab2[0], lab1[0] - lab2[0]);
+            return Mathf.Sqrt((diffs[0] * diffs[0]) + (diffs[1] * diffs[1]) + (diffs[2] * diffs[2]));
+        }
+
+        public static float DeltaE1994(Vector3 lab1, Vector3 lab2)
+        {
+            const float WHTL = 1.0f;
+            const float WHTC = 1.0f;
+            const float WHTH = 1.0f;
+
+            var xC1 = Mathf.Sqrt((lab1[1] * lab1[1]) + (lab1[2] * lab1[2]));
+            var xC2 = Mathf.Sqrt((lab2[1] * lab2[1]) + (lab2[2] * lab2[2]));
+            var xDL = lab2[0] - lab1[0];
+            var xDC = xC2 - xC1;
+
+            var sum = 0f;
+            for (var i = 0; i < 3; ++i)
+            {
+                var diff = lab1[0] - lab2[0];
+                sum += diff * diff;
+            }
+
+            var xDE = Mathf.Sqrt(sum);
+
+            var xDH = (xDE * xDE) - (xDL * xDL) - (xDC * xDC);
+            if (xDH > 0)
+            {
+                xDH = Mathf.Sqrt(xDH);
+            }
+            else
+            {
+                xDH = 0;
+            }
+
+            var xSC = 1f + (0.045f * xC1);
+            var xSH = 1f + (0.015f * xC1);
+            xDL /= WHTL;
+            xDC /= WHTC * xSC;
+            xDH /= WHTH * xSH;
+
+            return Mathf.Sqrt(xDL * xDL + xDC * xDC + xDH * xDH);
+        }
+
+        public static (Color, Color) GetMinMax(Texture2D image)
+        {
+            return GetMinMax(image.GetPixelData<Color>(mipLevel: 0));
+        }
+
+        public static (Color, Color) GetMinMax(NativeArray<Color> pixels)
+        {
+            var min = new Color(float.MaxValue, float.MaxValue, float.MaxValue);
+            var max = new Color(float.MinValue, float.MinValue, float.MinValue);
+            foreach (var pixel in pixels)
+            {
+                for (var c = 0; c < 3; ++c)
+                {
+                    if (pixel[c] > max[c])
+                        max[c] = pixel[c];
+
+                    if (pixel[c] < min[c])
+                        min[c] = pixel[c];
+                }
+            }
+
+            return (min, max);
+        }
+
+        public static (Color32, Color32) GetMinMax32(Texture2D image)
+        {
+            return GetMinMax32(image.GetPixelData<Color32>(mipLevel: 0));
+        }
+
+        public static (Color32, Color32) GetMinMax32(NativeArray<Color32> pixels)
+        {
+            var min = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+            var max = new Color32(byte.MinValue, byte.MinValue, byte.MinValue, byte.MaxValue);
+            foreach (var pixel in pixels)
+            {
+                for (var c = 0; c < 3; ++c)
+                {
+                    if (pixel[c] > max[c])
+                        max[c] = pixel[c];
+
+                    if (pixel[c] < min[c])
+                        min[c] = pixel[c];
+                }
+            }
+
+            return (min, max);
+        }
+        #endregion // com.unity.search.extensions
 
         public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
         {

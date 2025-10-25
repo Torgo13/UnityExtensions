@@ -964,10 +964,64 @@ namespace PKGE
             where TTo : struct
         {
             Assert.IsTrue(
-                array.Length * Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TFrom))
-                % Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf(typeof(TTo)) == 0);
+                array.Length * SizeOfCache<TFrom>.Size
+                % SizeOfCache<TTo>.Size == 0);
 
             return MemoryMarshal.Cast<TFrom, TTo>(array.AsSpan());
+        }
+
+        //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
+        #region UnityEngine.Rendering
+        /// <summary>
+        /// Fills an array with the same value.
+        /// </summary>
+        /// <typeparam name="T">The type of the array</typeparam>
+        /// <param name="array">Target array to fill</param>
+        /// <param name="value">Value to fill</param>
+        /// <param name="startIndex">Start index to fill</param>
+        /// <param name="length">The number of entries to write, or -1 to fill until the end of the array</param>
+        public static void FillArray<T>(this NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
+            where T : unmanaged
+        {
+            if (!array.IsCreated)
+                throw new InvalidOperationException(nameof(array));
+            if (startIndex < 0)
+                throw new IndexOutOfRangeException(nameof(startIndex));
+            if (startIndex + length >= array.Length)
+                throw new IndexOutOfRangeException(nameof(length));
+
+            int endIndex = length == -1 ? array.Length : startIndex + length;
+
+            var setArrayJob = new Packages.SetArrayJob<T>
+            {
+                src = value,
+                dst = array.GetSubArray(startIndex, endIndex - startIndex),
+            };
+
+            Unity.Jobs.IJobForExtensions.Run(setArrayJob, endIndex - startIndex);
+        }
+        #endregion // UnityEngine.Rendering
+
+        public static Unity.Jobs.JobHandle FillArrayJob<T>(this NativeArray<T> array, in T value, int startIndex = 0, int length = -1,
+            Unity.Jobs.JobHandle dependency = default)
+            where T : unmanaged
+        {
+            if (!array.IsCreated)
+                throw new InvalidOperationException(nameof(array));
+            if (startIndex < 0)
+                throw new IndexOutOfRangeException(nameof(startIndex));
+            if (startIndex + length >= array.Length)
+                throw new IndexOutOfRangeException(nameof(length));
+
+            int endIndex = length == -1 ? array.Length : startIndex + length;
+
+            var setArrayJob = new Packages.SetArrayJob<T>
+            {
+                src = value,
+                dst = array.GetSubArray(startIndex, endIndex - startIndex),
+            };
+
+            return Unity.Jobs.IJobForExtensions.Schedule(setArrayJob, endIndex - startIndex, dependency);
         }
     }
 }

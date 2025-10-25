@@ -10,6 +10,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
+using PKGE.Packages;
 
 namespace PKGE.Unsafe
 {
@@ -466,7 +467,7 @@ namespace PKGE.Unsafe
             MemCpyStruct(
                 array,
                 NoAllocHelpers.ExtractArrayFromList(list),
-                list.Count * UnsafeUtility.SizeOf<T>());
+                list.Count * SizeOfCache<T>.Size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -481,7 +482,7 @@ namespace PKGE.Unsafe
             MemCpyStruct(
                 array,
                 nativeArray.GetIntPtr(),
-                nativeArray.Length * UnsafeUtility.SizeOf<T>());
+                nativeArray.Length * SizeOfCache<T>.Size);
         }
 
 #if INCLUDE_COLLECTIONS
@@ -497,7 +498,7 @@ namespace PKGE.Unsafe
             MemCpy(
                 array,
                 nativeList.GetIntPtr(),
-                nativeList.Length * UnsafeUtility.SizeOf<T>());
+                nativeList.Length * SizeOfCache<T>.Size);
         }
 #endif // INCLUDE_COLLECTIONS
 #endregion // CopyToArray

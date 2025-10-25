@@ -1,7 +1,8 @@
 #if INCLUDE_COLLECTIONS
+using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Assertions;
 using Unity.Collections;
+using UnityEngine.Assertions;
 
 namespace PKGE.Packages
 {
@@ -26,6 +27,18 @@ namespace PKGE.Packages
             var capacity = nativeList.Length + room;
             if (nativeList.Capacity < capacity)
                 nativeList.Capacity = capacity;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return nativeList.AsArray().AsSpan();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return nativeList.AsReadOnly().AsReadOnlySpan();
         }
     }
 }
