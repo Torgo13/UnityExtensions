@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
@@ -157,22 +156,12 @@ namespace PKGE.Unsafe
         /// <returns><see langword="true"/> if the array was successfully written into the stream; otherwise, <see langword="false"/>.</returns>
         public static bool WriteArray<T>(this MemoryStream stream, NativeArray<T> array) where T : struct
         {
-            stream.SetLength(stream.Length + array.Length);
-
             if (!stream.TryGetBuffer(out var buffer) || buffer.Array == null)
             {
                 return false;
             }
 
-            unsafe
-            {
-                fixed (void* streamPtr = &buffer.Array[buffer.Offset + stream.Position])
-                {
-                    UnsafeUtility.MemCpy(streamPtr, array.GetUnsafePtr(), array.Length);
-                }
-            }
-
-            stream.Position += array.Length;
+            stream.Write(array.Reinterpret<byte>(SizeOfCache<T>.Size));
             return true;
         }
         #endregion // Unity.LiveCapture.Networking

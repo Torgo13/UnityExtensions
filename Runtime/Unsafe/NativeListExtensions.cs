@@ -43,12 +43,18 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsFalse(nativeList.IsEmpty);
+
             return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafeReadOnlyPtr(), index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsFalse(nativeList.IsEmpty);
+
             return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafePtr(), index);
         }
         #endregion // UnityEngine.Rendering.Universal
@@ -85,21 +91,21 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
         {
-            if (nativeList.IsEmpty)
-                return new Span<T>();
-
-            return new Span<T>(nativeList.GetUnsafePtr(), nativeList.Length);
+            nativeList.AddRangeNoResize(nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static Span<T> AsSpan<T>(this NativeList<T> nativeList) where T : unmanaged
         {
-            if (nativeList.IsEmpty)
-                return new ReadOnlySpan<T>();
+            return nativeList.AsArray().AsSpan();
+        }
 
-            return new ReadOnlySpan<T>(nativeList.GetUnsafeReadOnlyPtr(), nativeList.Length);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return nativeList.AsReadOnly().AsReadOnlySpan();
         }
     }
 }

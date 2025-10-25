@@ -156,7 +156,7 @@ namespace PKGE.Unsafe
                         rndSpeed.z = _rnd.NextFloat(-1.0f, 1.0f);
                         rndSpeed = math.normalizesafe(rndSpeed);
                         rndSpeed += new float3(0, 1, 1); // initial speed a bit up backward
-                        item.speed = rndSpeed * rndImpulse * _rnd.NextFloat(1.0f, 2.0f);
+                        item.speed = _rnd.NextFloat(1.0f, 2.0f) * rndImpulse * rndSpeed;
 
                         item.groundCell = -1;
                         item.antiZFight = 0.0f;

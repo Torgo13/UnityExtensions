@@ -107,18 +107,15 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        public static Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            if (unsafeList.IsEmpty)
-                return new Span<T>();
-
-            return new Span<T>(unsafeList.Ptr, unsafeList.Length);
+            return unsafeList.AsNativeArray().AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            return unsafeList.AsSpan();
+            return unsafeList.AsNativeArray().AsReadOnlySpan();
         }
     }
 }

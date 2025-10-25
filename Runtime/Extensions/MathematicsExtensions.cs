@@ -1661,7 +1661,7 @@ namespace PKGE
                 totalPointsCount = totalPointsCount,
                 angleIncrement = angleIncrement,
                 radius = radius,
-                points = points.AsArray(),
+                points = points.AsArray().GetSubArray(initialPointsCount, totalPointsCount - initialPointsCount),
             };
 
             var jobHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
@@ -1691,7 +1691,6 @@ namespace PKGE
             [ReadOnly] public float angleIncrement;
             [ReadOnly] public float radius;
 
-            [NativeDisableParallelForRestriction]
             [WriteOnly] public NativeArray<float3> points;
 
             public void Execute(int index)
@@ -1710,7 +1709,7 @@ namespace PKGE
                 point.y = sinAzimuth * (sinIncline * radius);
                 point.z = cosIncline * radius;
 
-                points[i] = point;
+                points[index] = point;
             }
         }
 

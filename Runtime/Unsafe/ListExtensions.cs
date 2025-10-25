@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using UnityEngine.Assertions;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Assertions;
 
 namespace PKGE.Unsafe
 {
@@ -24,43 +21,38 @@ namespace PKGE.Unsafe
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/ListExtensions.cs
         #region Unity.Collections
         /// <summary>
-        /// Returns a NativeList that is a copy of this list.
+        /// Returns a <see cref="Unity.Collections.NativeList{T}"/> that is a copy of this <see cref="System.Collections.Generic.List{T}"/>.
         /// </summary>
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>A copy of this list.</returns>
-        public static unsafe NativeList<T> ToNativeList<T>(this List<T> list,
+        public static NativeList<T> ToNativeList<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             Assert.IsNotNull(list);
 
             var container = new NativeList<T>(list.Count, allocator);
-            fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
-            {
-                container.AddRangeNoResize(p, list.Count);
-            }
+            container.ResizeUninitialized(container.Capacity);
+            list.AsSpan().CopyTo(container.AsSpan());
 
             return container;
         }
 
         /// <summary>
-        /// Returns a NativeArray that is a copy of this list.
+        /// Returns a <see cref="Unity.Collections.NativeArray{T}"/> that is a copy of this <see cref="System.Collections.Generic.List{T}"/>.
         /// </summary>
         /// <typeparam name="T">The type of elements in the list.</typeparam>
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>An array that is a copy of this list.</returns>
-        public static unsafe NativeArray<T> ToNativeArray<T>(this List<T> list,
+        public static NativeArray<T> ToNativeArray<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             Assert.IsNotNull(list);
 
             var container = CollectionHelper.CreateNativeArray<T>(list.Count, allocator, NativeArrayOptions.UninitializedMemory);
-            fixed (T* p = NoAllocHelpers.ExtractArrayFromList(list))
-            {
-                UnsafeUtility.MemCpy(container.GetUnsafePtr(), p, list.Count * sizeof(T));
-            }
+            list.AsSpan().CopyTo(container.AsSpan());
 
             return container;
         }
@@ -69,7 +61,7 @@ namespace PKGE.Unsafe
         public static void ResetListContents<T>(this List<T> list, NativeList<T> nativeList)
             where T : unmanaged
         {
-            NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
+            NoAllocHelpers.ResetListContents(list, nativeList.AsReadOnlySpan());
         }
 #endif // INCLUDE_COLLECTIONS
     }

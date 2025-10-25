@@ -31,12 +31,8 @@ namespace PKGE.Packages
 
         public UnityEngine.Object[] ToObjectArray()
         {
-            var objects = new List<UnityEngine.Object>();
-
-            if (IsCreated && InstanceIDs.Length > 0)
-                Resources.InstanceIDToObjectList(InstanceIDs.AsArray(), objects);
-
-            return objects.ToArray();
+            using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Object>.Get(out var objects);
+            return Get(objects).ToArray();
         }
 
         public int Add(int instanceId)

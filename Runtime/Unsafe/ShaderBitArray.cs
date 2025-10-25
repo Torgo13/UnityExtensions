@@ -65,31 +65,20 @@ namespace PKGE.Unsafe
             {
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
 
-                unsafe
-                {
-                    fixed (float* floatData = _data)
-                    {
-                        uint* uintElem = (uint*)&floatData[elemIndex];
-                        bool val = ((*uintElem) & (1u << bitOffset)) != 0u;
-                        return val;
-                    }
-                }
+                var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
+                return (uintElem & (1u << bitOffset)) != 0u;
             }
             set
             {
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
 
-                unsafe
-                {
-                    fixed (float* floatData = _data)
-                    {
-                        uint* uintElem = (uint*)&floatData[elemIndex];
-                        if (value)
-                            (*uintElem) |= 1u << bitOffset;
-                        else
-                            (*uintElem) &= ~(1u << bitOffset);
-                    }
-                }
+                var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
+                if (value)
+                    uintElem |= 1u << bitOffset;
+                else
+                    uintElem &= ~(1u << bitOffset);
+
+                _data[elemIndex] = new Union4 { UInt = uintElem }.Float;
             }
         }
 

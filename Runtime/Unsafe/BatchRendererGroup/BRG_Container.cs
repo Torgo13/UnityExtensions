@@ -244,7 +244,6 @@ namespace PKGE.Unsafe
 
             // Allocate a single BatchDrawRange. All draw commands will refer to this BatchDrawRange.
             drawCommands.drawRangeCount = 1;
-            //drawCommands.drawRanges = Malloc<BatchDrawRange>(1);
             drawCommands.drawRanges = (BatchDrawRange*)new NativeArray<BatchDrawRange>(1,
                 Allocator.TempJob, NativeArrayOptions.UninitializedMemory).GetUnsafePtr();
             drawCommands.drawRanges[0] = new BatchDrawRange
@@ -271,7 +270,6 @@ namespace PKGE.Unsafe
                 if (m_instanceCount < visibilityArraySize)
                     visibilityArraySize = m_instanceCount;
 
-                //drawCommands.visibleInstances = Malloc<int>((uint)visibilityArraySize);
                 drawCommands.visibleInstances = (int*)new NativeArray<int>(visibilityArraySize,
                     Allocator.TempJob, NativeArrayOptions.UninitializedMemory).GetUnsafePtr();
 
@@ -281,7 +279,6 @@ namespace PKGE.Unsafe
 
                 // Allocate the BatchDrawCommand array (drawCommandCount entries)
                 // In SSBO mode, drawCommandCount will be 1
-                //drawCommands.drawCommands = Malloc<BatchDrawCommand>((uint)drawCommandCount);
                 drawCommands.drawCommands = (BatchDrawCommand*)new NativeArray<BatchDrawCommand>(drawCommandCount,
                     Allocator.TempJob, NativeArrayOptions.UninitializedMemory).GetUnsafePtr();
                 int left = m_instanceCount;

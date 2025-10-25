@@ -1,11 +1,9 @@
 using NUnit.Framework;
 using System;
-using System.Collections;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
-using UnityEngine.TestTools;
 
 namespace PKGE.Unsafe.Tests
 {
@@ -38,7 +36,7 @@ namespace PKGE.Unsafe.Tests
             Assert.AreEqual(nativeArray.Length, _stream.Length);
 
             // Assert
-            _stream.Seek(0, SeekOrigin.Begin);
+            _ = _stream.Seek(0, SeekOrigin.Begin);
             var buffer = new byte[nativeArray.Length];
             var byteCount = _stream.Read(buffer, 0, buffer.Length);
             Assert.AreEqual(nativeArray.Length, byteCount);
@@ -88,7 +86,7 @@ namespace PKGE.Unsafe.Tests
             var invalidLength = -1;
 
             // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => _stream.Read(invalidLength));
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => _stream.Read(invalidLength));
         }
 
         [Test]
@@ -102,7 +100,15 @@ namespace PKGE.Unsafe.Tests
 
             // Assert
             Assert.IsTrue(success);
-            Assert.AreEqual(_stream.Length, nativeArray.Length);
+
+            ((MemoryStream)_stream).TryGetBuffer(out var buffer);
+            var nativeArrayByte = nativeArray.Reinterpret<byte>(sizeof(int));
+
+            for (int i = 0; i < nativeArrayByte.Length; i++)
+            {
+                Assert.AreEqual(nativeArrayByte[i], buffer.Array[i]);
+            }
+
             nativeArray.Dispose();
         }
 
@@ -161,7 +167,7 @@ namespace PKGE.Unsafe.Tests
             var buffer = new byte[10];
 
             // Act & Assert
-            Assert.ThrowsAsync<EndOfStreamException>(() => _stream.ReadExactAsync(buffer, 0, buffer.Length).AsTask());
+            _ = Assert.ThrowsAsync<EndOfStreamException>(() => _stream.ReadExactAsync(buffer, 0, buffer.Length).AsTask());
         }
 #endif // USING_NUNIT_2_0_3_OR_NEWER
 
@@ -208,7 +214,7 @@ namespace PKGE.Unsafe.Tests
             var buffer = new byte[10];
 
             // Act & Assert
-            Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _stream.ReadExactAsync(buffer, 0, -1).AsTask());
+            _ = Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _stream.ReadExactAsync(buffer, 0, -1).AsTask());
         }
 #endif // USING_NUNIT_2_0_3_OR_NEWER
 
@@ -276,7 +282,7 @@ namespace PKGE.Unsafe.Tests
             _stream.Dispose();
 
             // Act & Assert
-            Assert.Throws<ObjectDisposedException>(() => _stream.Write(nativeArray));
+            _ = Assert.Throws<ObjectDisposedException>(() => _stream.Write(nativeArray));
 
             nativeArray.Dispose();
         }

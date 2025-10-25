@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
 using Unity.Collections;
@@ -70,7 +71,7 @@ namespace PKGE.Unsafe
         /// <typeparam name="T">The type of the <c>NativeArray</c>. Must be a <c>struct</c>.</typeparam>
         /// <param name="array">The array to fill.</param>
         /// <param name="value">The value with which to fill the array.</param>
-        public static unsafe void FillArrayWithValue<T>(NativeArray<T> array, T value) where T : struct
+        public static unsafe void FillArrayWithValue<T>(this NativeArray<T> array, T value) where T : struct
         {
             // Early out if array is zero, or iOS will crash in MemCpyReplicate.
             if (array.Length == 0)
@@ -108,14 +109,18 @@ namespace PKGE.Unsafe
         #region IntPtr
         /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
         /// <remarks>The caller is still the owner of the data.</remarks>
-        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(IntPtr dataPointer, int length, Allocator allocator) where T : struct
+        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(IntPtr dataPointer, int length,
+            Allocator allocator = Allocator.None) where T : struct
         {
+            Assert.AreNotEqual(IntPtr.Zero, dataPointer);
+
             return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)dataPointer, length, allocator);
         }
         #endregion // IntPtr
 
         /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(IntPtr, int, Allocator)"/>
-        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data, Allocator allocator) where T : unmanaged
+        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data,
+            Allocator allocator = Allocator.None) where T : unmanaged
         {
             fixed (T* addr = data)
             {
@@ -124,16 +129,47 @@ namespace PKGE.Unsafe
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(IntPtr, int, Allocator)"/>
         public static unsafe NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
         {
-            Assert.IsFalse(span.IsEmpty);
-
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+            var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
                 UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
-            return array;
+            return nativeArray;
+        }
+
+        /// <param name="gcHandle">
+        /// Use <see cref="UnsafeUtility.ReleaseGCObject(ulong)"/> with <paramref name="gcHandle"/>
+        /// when finished with the returned <see cref="NativeArray{T}"/>.
+        /// </param>
+        public static unsafe NativeArray<T> AsNativeArray<T>(this T[] array, int length, out ulong gcHandle) where T : struct
+        {
+            Assert.IsNotNull(array);
+            Assert.IsTrue(length > 0);
+            Assert.IsTrue(length <= array.Length);
+
+            var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out gcHandle), length, Allocator.None);
+
+            return nativeArray;
+        }
+
+        /// <inheritdoc cref="AsNativeArray{T}(T[], int, out ulong)"/>
+        public static unsafe NativeArray<T> AsNativeArray<T>(this T[] array, out ulong gcHandle) where T : struct
+        {
+            Assert.IsNotNull(array);
+
+            return array.AsNativeArray(array.Length, out gcHandle);
+        }
+
+        /// <inheritdoc cref="AsNativeArray{T}(T[], int, out ulong)"/>
+        public static unsafe NativeArray<T> AsNativeArray<T>(this List<T> list, out ulong gcHandle) where T : struct
+        {
+            Assert.IsNotNull(list);
+
+            return list.ExtractArrayFromList().AsNativeArray(list.Count, out gcHandle);
         }
 
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs

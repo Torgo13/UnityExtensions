@@ -142,9 +142,9 @@ namespace PKGE.Unsafe
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
             [WriteOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
-            private static unsafe int AtomicIncrement(NativeArray<int> counter)
+            private static int AtomicIncrement(NativeArray<int> counter)
             {
-                return Interlocked.Increment(ref UnsafeUtility.AsRef<int>(counter.GetUnsafePtr()));
+                return Interlocked.Increment(ref counter.UnsafeElementAtMutable(0));
             }
 
             private int JobIndexPrefixSum(int sum, int i)

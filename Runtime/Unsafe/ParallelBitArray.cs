@@ -124,10 +124,9 @@ namespace PKGE.Unsafe
             _bits[chunkIndex] = (long)chunkBits;
         }
 
-        public readonly unsafe ulong InterlockedReadChunk(int chunkIndex)
+        public readonly ulong InterlockedReadChunk(int chunkIndex)
         {
-            long* entries = (long*)_bits.GetUnsafeReadOnlyPtr();
-            return (ulong)Interlocked.Read(ref entries[chunkIndex]);
+            return (ulong)Interlocked.Read(ref _bits.UnsafeElementAt(chunkIndex));
         }
 
         public readonly unsafe void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
