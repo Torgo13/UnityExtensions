@@ -527,8 +527,9 @@ namespace PKGE
         /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is
         /// <see langword="false"/> before destroying it.</param>
         /// <param name="allowDestroyingAssets">Set to true to allow assets to be destroyed.</param>
+        /// <param name="delay">Delay in seconds before the object is destroyed.</param>
         public static void Destroy(this UnityObject obj, bool withUndo = false,
-            bool skipNullCheck = false, bool allowDestroyingAssets = false)
+            bool skipNullCheck = false, bool allowDestroyingAssets = false, float delay = 0f)
         {
             if (skipNullCheck || obj != null)
             {
@@ -547,13 +548,19 @@ namespace PKGE
                     }
 #endif // UNITY_6000_4_OR_NEWER
 
-                    UnityObject.Destroy(obj);
+                    if (delay > 0f)
+                        UnityObject.Destroy(obj, delay);
+                    else
+                        UnityObject.Destroy(obj);
                 }
                 else if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
                 else
                     UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
 #else
+                if (delay > 0f)
+                    UnityObject.Destroy(obj, delay);
+                else
                     UnityObject.Destroy(obj);
 #endif
             }

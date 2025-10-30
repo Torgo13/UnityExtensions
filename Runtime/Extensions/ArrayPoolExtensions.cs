@@ -76,6 +76,7 @@ namespace PKGE
         /// <param name="array">The rented <typeparamref name="T"/> array to resize, or <see langword="null"/> to create a new array.</param>
         /// <param name="newSize">The size of the new array.</param>
         /// <param name="clearArray">Indicates whether the contents of the array should be cleared before reuse.</param>
+        /// <param name="copyArray">Indicates whether the contents of the array should be copied to the resized array.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="newSize"/> is less than 0.</exception>
         /// <remarks>When this method returns, the caller must not use any references to the old array anymore.</remarks>
         public static void Resize<T>(this ArrayPool<T> pool, [NotNull] ref T[]? array, int newSize, bool clearArray = false,
