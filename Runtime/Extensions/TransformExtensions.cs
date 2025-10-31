@@ -363,10 +363,31 @@ namespace PKGE
             }
         }
 
-        public static void SetActiveRecursively(this Transform go, bool active)
+        public static void SetActiveRecursively(this Transform transform, bool active)
         {
             var childInstanceIDs = ListPool<int>.Get();
-            go.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+            transform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+
+            if (childInstanceIDs.Count > 0)
+            {
+                GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+            }
+
+            ListPool<int>.Release(childInstanceIDs);
+        }
+
+        public static void SetGrandchildrenActiveRecursively(this Transform transform, bool active)
+        {
+            var childTransforms = ListPool<Transform>.Get();
+            transform.GetChildTransforms(childTransforms, recursive: false);
+            
+            var childInstanceIDs = ListPool<int>.Get();
+            foreach (var childTransform in childTransforms)
+            {
+                childTransform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+            }
+            
+            ListPool<Transform>.Release(childTransforms);
 
             if (childInstanceIDs.Count > 0)
             {
@@ -379,15 +400,15 @@ namespace PKGE
         /// <summary>
         /// Gets a descendant Transform with a specific name
         /// </summary>
-        /// <param name="go">The parent object that is searched for a named child.</param>
+        /// <param name="transform">The parent Transform that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
         /// <param name="found">True if a descendant Transform with the specified name was found.</param>
         /// <returns>The returned child Transform or null if no child is found.</returns>
-        public static Transform GetNamedChild(this Transform go, string name, out bool found)
+        public static Transform GetNamedChild(this Transform transform, string name, out bool found)
         {
             found = false;
             var transforms = ListPool<Transform>.Get();
-            go.GetComponentsInChildren(transforms);
+            transform.GetComponentsInChildren(transforms);
             Transform foundObject = null;
             for (var i = 0; i < transforms.Count; i++)
             {
