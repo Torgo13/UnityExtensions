@@ -540,11 +540,11 @@ namespace PKGE
 #else
                     if (obj is Transform transform)
                     {
-                        transform.SetGrandchildrenActiveRecursively(active: false);
+                        transform.gameObject.SetActive(false);
                     }
                     else if (obj is GameObject go)
                     {
-                        go.transform.SetGrandchildrenActiveRecursively(active: false);
+                        go.SetActive(false);
                     }
 #endif // UNITY_6000_4_OR_NEWER
 
