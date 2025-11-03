@@ -399,8 +399,7 @@ namespace PKGE
 
             if (!type.IsGenericType)
                 return sb.Append(name);
-
-
+            
             // Trim off `1
             int index = name.IndexOf('`');
 

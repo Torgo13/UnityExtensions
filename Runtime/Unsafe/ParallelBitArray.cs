@@ -79,39 +79,32 @@ namespace PKGE.Unsafe
 
         public readonly void Set(int index, bool value)
         {
-            unsafe
+            Assert.IsTrue(0 <= index && index < _length);
+
+            int entryIndex = index >> 6;
+            ref long entry = ref _bits.UnsafeElementAtMutable(entryIndex);
+
+            ulong bit = 1ul << (index & 0x3f);
+            long andMask = (long)(~bit);
+            long orMask = value ? (long)bit : 0;
+
+            long oldEntry, newEntry;
+            do
             {
-                Assert.IsTrue(0 <= index && index < _length);
-
-                int entryIndex = index >> 6;
-                long* entries = (long*)_bits.GetUnsafePtr();
-
-                ulong bit = 1ul << (index & 0x3f);
-                long andMask = (long)(~bit);
-                long orMask = value ? (long)bit : 0;
-
-                long oldEntry, newEntry;
-                do
-                {
-                    oldEntry = Interlocked.Read(ref entries[entryIndex]);
-                    newEntry = (oldEntry & andMask) | orMask;
-                } while (Interlocked.CompareExchange(ref entries[entryIndex], newEntry, oldEntry) != oldEntry);
-            }
+                oldEntry = Interlocked.Read(ref entry);
+                newEntry = (oldEntry & andMask) | orMask;
+            } while (Interlocked.CompareExchange(ref entry, newEntry, oldEntry) != oldEntry);
         }
 
         public readonly bool Get(int index)
         {
-            unsafe
-            {
-                Assert.IsTrue(0 <= index && index < _length);
+            Assert.IsTrue(0 <= index && index < _length);
 
-                int entryIndex = index >> 6;
-                long* entries = (long*)_bits.GetUnsafeReadOnlyPtr();
+            int entryIndex = index >> 6;
 
-                ulong bit = 1ul << (index & 0x3f);
-                long checkMask = (long)bit;
-                return (entries[entryIndex] & checkMask) != 0;
-            }
+            ulong bit = 1ul << (index & 0x3f);
+            long checkMask = (long)bit;
+            return (_bits[entryIndex] & checkMask) != 0;
         }
 
         public ulong GetChunk(int chunkIndex)
@@ -129,16 +122,16 @@ namespace PKGE.Unsafe
             return (ulong)Interlocked.Read(ref _bits.UnsafeElementAt(chunkIndex));
         }
 
-        public readonly unsafe void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
+        public readonly void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
         {
-            long* entries = (long*)_bits.GetUnsafePtr();
+            ref long entry = ref _bits.UnsafeElementAtMutable(chunkIndex);
 
             long oldEntry, newEntry;
             do
             {
-                oldEntry = Interlocked.Read(ref entries[chunkIndex]);
+                oldEntry = Interlocked.Read(ref entry);
                 newEntry = oldEntry | (long)chunkBits;
-            } while (Interlocked.CompareExchange(ref entries[chunkIndex], newEntry, oldEntry) != oldEntry);
+            } while (Interlocked.CompareExchange(ref entry, newEntry, oldEntry) != oldEntry);
         }
 
         public int ChunkCount()

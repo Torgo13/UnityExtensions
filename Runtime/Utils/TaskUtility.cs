@@ -92,7 +92,7 @@ namespace PKGE
         }
         
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
-        public static async ValueTask RunTasksAsync<TInput, TOutput>(
+        public static async ValueTask RunTasksAsync<TInput>(
             List<TInput> items,
             Action<TInput> action,
             CancellationToken ct = default)

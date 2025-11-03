@@ -487,7 +487,7 @@ namespace PKGE
 
     public class EdgeHistogram : Histogram
     {
-        public static readonly int EdgeDirections = Enum.GetNames(typeof(EdgeDirection)).Length;
+        public static readonly int EdgeDirections = EnumValues<EdgeDirection>.Length;
 
         public override int bins => EdgeDirections;
 
@@ -605,7 +605,7 @@ namespace PKGE
 
         static XYZReferences()
         {
-            _references = new Vector3[Enum.GetNames(typeof(XYZObserver)).Length, Enum.GetNames(typeof(XYZIlluminant)).Length];
+            _references = new Vector3[EnumValues<XYZObserver>.Length, EnumValues<XYZIlluminant>.Length];
 
             SetReference(XYZObserver.TwoDeg, XYZIlluminant.A, new Vector3(109.850f, 100.000f, 35.585f));
             SetReference(XYZObserver.TwoDeg, XYZIlluminant.B, new Vector3(99.0927f, 100.000f, 85.313f));

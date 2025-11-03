@@ -27,10 +27,10 @@ namespace PKGE
 #endif
         static TProfilingSampler()
         {
-            var names = Enum.GetNames(typeof(TEnum));
+            var names = EnumValues<TEnum>.Names;
 #if USE_UNSAFE
-            var enumValues = Enum.GetValues(typeof(TEnum));
-            var values = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Array, int[]>(ref enumValues);
+            var enumValues = EnumValues<TEnum>.Values;
+            var values = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum[], int[]>(ref enumValues);
             Samples = new TProfilingSampler<TEnum>[values.Max() + 1];
 #else
             var values = Enum.GetValues(typeof(TEnum));

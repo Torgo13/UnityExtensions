@@ -73,7 +73,7 @@ namespace PKGE.Unsafe
     public static class ByteExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe byte ToByte(this bool b) => *(byte*)&b;
+        public static byte ToByte(this bool b) => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<bool, byte>(ref b);
     }
     #endregion // Unity.Netcode
 }

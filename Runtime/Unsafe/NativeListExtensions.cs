@@ -45,15 +45,15 @@ namespace PKGE.Unsafe
         {
             Assert.IsTrue(nativeList.IsCreated);
 
-            return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafeReadOnlyPtr(), index);
+            return ref UnsafeUtility.AsRef<T>(nativeList.GetUnsafeReadOnlyPtr() + index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-
-            return ref UnsafeUtility.ArrayElementAsRef<T>(nativeList.GetUnsafePtr(), index);
+            
+            return ref UnsafeUtility.AsRef<T>(nativeList.GetUnsafePtr() + index);
         }
         #endregion // UnityEngine.Rendering.Universal
 
@@ -65,7 +65,7 @@ namespace PKGE.Unsafe
             Assert.IsNotNull(array);
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
-
+            
             fixed (T* p = array)
             {
                 nativeList.AddRange(p, count);

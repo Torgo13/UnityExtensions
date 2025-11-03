@@ -124,7 +124,11 @@ namespace PKGE.Unsafe
         {
             fixed (T* addr = data)
             {
-                return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(addr, data.Length, allocator);
+                var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(addr, data.Length, allocator);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
+                return nativeArray;
             }
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
@@ -152,12 +156,14 @@ namespace PKGE.Unsafe
 
             var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
                 UnsafeUtility.PinGCArrayAndGetDataAddress(array, out gcHandle), length, Allocator.None);
-
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
             return nativeArray;
         }
 
         /// <inheritdoc cref="AsNativeArray{T}(T[], int, out ulong)"/>
-        public static unsafe NativeArray<T> AsNativeArray<T>(this T[] array, out ulong gcHandle) where T : struct
+        public static NativeArray<T> AsNativeArray<T>(this T[] array, out ulong gcHandle) where T : struct
         {
             Assert.IsNotNull(array);
 
@@ -165,7 +171,7 @@ namespace PKGE.Unsafe
         }
 
         /// <inheritdoc cref="AsNativeArray{T}(T[], int, out ulong)"/>
-        public static unsafe NativeArray<T> AsNativeArray<T>(this List<T> list, out ulong gcHandle) where T : struct
+        public static NativeArray<T> AsNativeArray<T>(this List<T> list, out ulong gcHandle) where T : struct
         {
             Assert.IsNotNull(list);
 

@@ -39,7 +39,7 @@ namespace PKGE
         /// <summary>
         /// String representation of the MaterialQuality enum.
         /// </summary>
-        public static string[] EnumNames = Enum.GetNames(typeof(MaterialQuality));
+        public static string[] EnumNames => EnumValues<MaterialQuality>.Names;
 
         /// <summary>
         /// Keywords for Material Quality levels.
