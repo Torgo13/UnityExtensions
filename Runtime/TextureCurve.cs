@@ -26,6 +26,7 @@ namespace PKGE
         /// The number of keys in the curve.
         /// </summary>
         [field: SerializeField]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles")]
         int length { get; set; } // Calling AnimationCurve.length is very slow, so it is cached
 
         public int Length { get { if (_isCurveDirty) { length = curve.length; } return length; } set { length = value; } }
@@ -115,12 +116,18 @@ namespace PKGE
 
         static GraphicsFormat GetTextureFormat()
         {
+#if UNITY_6000_3_OR_NEWER
+            const GraphicsFormatUsage formatUsage = GraphicsFormatUsage.SetPixels;
+#else
+            const FormatUsage formatUsage = FormatUsage.SetPixels;
+#endif // UNITY_6000_3_OR_NEWER
+
             // UUM-41070: We require `Sample | SetPixels` but with the deprecated FormatUsage this was checking `SetPixels`
             // For now, we keep checking for `SetPixels` until the performance hit of doing the correct checks is evaluated
-            if (SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, FormatUsage.SetPixels))
+            if (SystemInfo.IsFormatSupported(GraphicsFormat.R16_SFloat, formatUsage))
                 return GraphicsFormat.R16_SFloat;
 
-            if (SystemInfo.IsFormatSupported(GraphicsFormat.R8_UNorm, FormatUsage.SetPixels))
+            if (SystemInfo.IsFormatSupported(GraphicsFormat.R8_UNorm, formatUsage))
                 return GraphicsFormat.R8_UNorm;
 
             return GraphicsFormat.R8G8B8A8_UNorm;

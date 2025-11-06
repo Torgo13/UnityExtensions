@@ -9,7 +9,7 @@ namespace PKGE.Unsafe
     {
         /// <exception cref="IndexOutOfRangeException"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAtMutable<T>(this T[] array, int index) where T : struct
+        public static ref T AsRef<T>(this T[] array, int index) where T : struct
         {
             Assert.IsNotNull(array);
 

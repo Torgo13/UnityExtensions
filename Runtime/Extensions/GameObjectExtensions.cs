@@ -270,16 +270,27 @@ namespace PKGE
             Assert.IsNotNull(go);
             Assert.IsNotNull(instances);
 
+#if UNITY_6000_3_OR_NEWER
+            var id = go.GetEntityId();
+            var ids = new NativeArray<EntityId>(2 * count,
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+#else
+            var id = go.GetInstanceID();
             var ids = new NativeArray<int>(2 * count,
                 Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+#endif // UNITY_6000_3_OR_NEWER
 
             var instanceIDs = ids.GetSubArray(start: 0, length: count);
             var transformIDs = ids.GetSubArray(start: count, length: count);
 
-            GameObject.InstantiateGameObjects(go.GetInstanceID(),
+            GameObject.InstantiateGameObjects(id,
                 count, instanceIDs, transformIDs, destinationScene);
 
+#if UNITY_6000_3_OR_NEWER
+            Resources.EntityIdsToObjectList(instanceIDs, instances.As<GameObject, Object>());
+#else
             Resources.InstanceIDToObjectList(instanceIDs, instances.As<GameObject, Object>());
+#endif // UNITY_6000_3_OR_NEWER
         }
     }
 
@@ -347,7 +358,11 @@ namespace PKGE
         public static string GetAssetPath(int instanceID)
         {
 #if UNITY_EDITOR
+#if UNITY_6000_3_OR_NEWER
+            return UnityEditor.AssetDatabase.GetAssetPath((EntityId)instanceID);
+#else
             return UnityEditor.AssetDatabase.GetAssetPath(instanceID);
+#endif // UNITY_6000_3_OR_NEWER
 #else
             return string.Empty;
 #endif // UNITY_EDITOR
@@ -384,7 +399,11 @@ namespace PKGE
         public static void InstanceIDsToGUIDs(NativeArray<int> instanceIDs, NativeArray<Union16> guidsOut)
         {
 #if UNITY_EDITOR
+#if UNITY_6000_3_OR_NEWER
+            UnityEditor.AssetDatabase.EntityIdsToGUIDs(instanceIDs.Reinterpret<EntityId>(), guidsOut.Reinterpret<UnityEditor.GUID>());
+#else
             UnityEditor.AssetDatabase.InstanceIDsToGUIDs(instanceIDs, guidsOut.Reinterpret<UnityEditor.GUID>());
+#endif // UNITY_6000_3_OR_NEWER
 #endif // UNITY_EDITOR
         }
 

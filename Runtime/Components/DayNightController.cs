@@ -66,7 +66,11 @@ namespace PKGE
         {
             if (sun == null)
             {
+#if UNITY_6000_3_OR_NEWER
+                var lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+#else
                 var lights = FindObjectsOfType<Light>();
+#endif // UNITY_6000_3_OR_NEWER
                 foreach (var l in lights)
                 {
                     if (l != null
@@ -267,5 +271,5 @@ namespace PKGE
             _instance.SetTimeOfDay(_instance._presets[_instance._currentPreset], true);
         }
     }
-    #endregion // BoatAttack
+#endregion // BoatAttack
 }

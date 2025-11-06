@@ -9,7 +9,7 @@ namespace PKGE.Unsafe
     public static class ListExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAtMutable<T>(this List<T> list, int index) where T : struct
+        public static ref T AsRef<T>(this List<T> list, int index) where T : struct
         {
             Assert.IsNotNull(list);
             Assert.IsTrue(index >= 0);

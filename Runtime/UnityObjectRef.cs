@@ -13,14 +13,22 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Serialization/UnityObjectRef.cs
         #region Unity.Entities
         public NativeHashMap<int, int> InstanceIDMap;
+#if UNITY_6000_3_OR_NEWER
+        public NativeList<EntityId> InstanceIDs;
+#else
         public NativeList<int> InstanceIDs;
+#endif // UNITY_6000_3_OR_NEWER
 
         public readonly bool IsCreated => InstanceIDs.IsCreated && InstanceIDMap.IsCreated;
 
         public UnityObjectRefMap(Allocator allocator)
         {
             InstanceIDMap = new NativeHashMap<int, int>(0, allocator);
+#if UNITY_6000_3_OR_NEWER
+            InstanceIDs = new NativeList<EntityId>(0, allocator);
+#else
             InstanceIDs = new NativeList<int>(0, allocator);
+#endif // UNITY_6000_3_OR_NEWER
         }
 
         public void Dispose()
@@ -55,7 +63,11 @@ namespace PKGE.Packages
         public List<UnityEngine.Object> Get(List<UnityEngine.Object> objects)
         {
             if (IsCreated && InstanceIDs.Length > 0)
+#if UNITY_6000_3_OR_NEWER
+                Resources.EntityIdsToObjectList(InstanceIDs.AsArray(), objects);
+#else
                 Resources.InstanceIDToObjectList(InstanceIDs.AsArray(), objects);
+#endif // UNITY_6000_3_OR_NEWER
 
             return objects;
         }
@@ -130,7 +142,7 @@ namespace PKGE.Packages
             }
             catch (InvalidOperationException ex)
             {
-                Debug.LogError(ex.Message);
+                Debug.LogWarning(ex.Message);
                 instanceId = instance == null ? 0 : instance.GetHashCode();
             }
 #else
@@ -156,7 +168,11 @@ namespace PKGE.Packages
             if (unityObjectRef.Id.instanceId == 0)
                 return null;
 
+#if UNITY_6000_3_OR_NEWER
+            return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
+#else
             return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
+#endif // UNITY_6000_3_OR_NEWER
         }
 
         /// <summary>
@@ -217,7 +233,11 @@ namespace PKGE.Packages
         /// <returns>Valid state.</returns>
         public readonly bool IsValid()
         {
+#if UNITY_6000_3_OR_NEWER
+            return Resources.EntityIdIsValid(Id.instanceId);
+#else
             return Resources.InstanceIDIsValid(Id.instanceId);
+#endif // UNITY_6000_3_OR_NEWER
         }
 
         /// <summary>

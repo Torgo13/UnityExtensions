@@ -43,13 +43,13 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAt<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
-            return ref UnsafeUtility.ArrayElementAsRef<T>(unsafeList.Ptr, index);
+            return ref UnsafeUtility.AsRef<T>(unsafeList.Ptr + index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAtMutable<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
-            return ref UnsafeUtility.ArrayElementAsRef<T>(unsafeList.Ptr, index);
+            return ref UnsafeUtility.AsRef<T>(unsafeList.Ptr + index);
         }
         #endregion // UnityEngine.Rendering.Universal
 

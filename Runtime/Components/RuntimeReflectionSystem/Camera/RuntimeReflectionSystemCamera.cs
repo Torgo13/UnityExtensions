@@ -219,9 +219,11 @@ namespace PKGE
             _reflectionCameraTransform = _reflectionCamera.transform;
             PrepareNextCubemap();
 
+            const RenderTextureFormat format = RenderTextureFormat.DefaultHDR;
+            const RenderTextureReadWrite readWrite = RenderTextureReadWrite.Linear;
+
             var desc = new RenderTextureDescriptor(Resolution, Resolution,
-                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: 0,
-                RenderTextureReadWrite.Default)
+                format, depthBufferBits: 0, mipCount: 0, readWrite)
             {
                 dimension = TextureDimension.Cube,
                 autoGenerateMips = false,
@@ -244,8 +246,7 @@ namespace PKGE
             UpdateSkybox();
 #else
             desc = new RenderTextureDescriptor(Resolution, Resolution,
-                RenderTextureFormat.DefaultHDR, depthBufferBits: 0, mipCount: -1,
-                RenderTextureReadWrite.Default)
+                format, depthBufferBits: 0, mipCount: -1, readWrite)
             {
                 dimension = TextureDimension.Cube,
                 useMipMap = true,
@@ -387,14 +388,14 @@ namespace PKGE
 #if BLEND_SHADER
             _skyboxMaterial.SetFloat(Blend, blend);
 #else
+            /*
             if (supportsComputeShaders)
             {
-                /*
                 CubemapBlendCompute.Blend(_texture2DArrayLerp,
                     _renderTextures[NextIndex()], _renderTextures[PreviousIndex()], _blendedTexture, blend);
-                */
             }
             else
+            */
             {
                 // With three RenderTextures, NextIndex() is equivalent to the index before PreviousIndex()
                 // Requires six draw calls

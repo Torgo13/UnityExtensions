@@ -32,7 +32,11 @@ namespace PKGE
             if (mainLight == null)
             {
                 //Find a directional light
+#if UNITY_6000_3_OR_NEWER
+                var lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+#else
                 var lights = FindObjectsOfType<Light>();
+#endif // UNITY_6000_3_OR_NEWER
                 foreach (var l in lights)
                 {
                     if (l.type == LightType.Directional)

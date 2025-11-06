@@ -353,7 +353,7 @@ namespace PKGE.Unsafe
                                 item.color *= 0.5f;
                                 // add it to the "just landed list"
                                 int outIndex =
-                                    Interlocked.Increment(ref _inOutCounters.UnsafeElementAt(kJustLandedCounter)) -
+                                    Interlocked.Increment(ref _inOutCounters.UnsafeElementAtMutable(kJustLandedCounter)) -
                                     1; // return incremented value (after increment)
                                 if (outIndex < kMaxJustLandedPerFrame)
                                 {
@@ -370,7 +370,7 @@ namespace PKGE.Unsafe
                 if ((item.pos.z < 0.0f) || (item.pos.y < -5.0f))
                 {
                     int outIndex =
-                        Interlocked.Increment(ref _inOutCounters.UnsafeElementAt(kJustDeadCounter)) -
+                        Interlocked.Increment(ref _inOutCounters.UnsafeElementAtMutable(kJustDeadCounter)) -
                         1; // return incremented value (after increment)
                     if (outIndex < kMaxDeadPerFrame)
                     {

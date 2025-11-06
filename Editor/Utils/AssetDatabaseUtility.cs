@@ -67,7 +67,11 @@ namespace PKGE.Editor
         /// <returns>The string representation of the GUID of the asset.</returns>
         public static string GetAssetGUID(int instanceID)
         {
+#if UNITY_6000_3_OR_NEWER
+            var path = AssetDatabase.GetAssetPath((UnityEngine.EntityId)instanceID);
+#else
             var path = AssetDatabase.GetAssetPath(instanceID);
+#endif // UNITY_6000_3_OR_NEWER
 
             return AssetDatabase.AssetPathToGUID(path);
         }
@@ -139,7 +143,7 @@ namespace PKGE.Editor
 
             return assets;
         }
-        #endregion // Unity.LiveCapture
+#endregion // Unity.LiveCapture
         
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/AssetDatabaseHelper.cs
         #region UnityEditor.Rendering
