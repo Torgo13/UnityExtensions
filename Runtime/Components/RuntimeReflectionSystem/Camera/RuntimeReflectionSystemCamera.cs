@@ -3,7 +3,6 @@
 
 using Unity.Collections;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
@@ -89,6 +88,7 @@ namespace PKGE
     }
 
     //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
+    [Unity.Burst.BurstCompile]
     public class ReflectionSystem
     {
         private readonly int Tex = Shader.PropertyToID("_Tex");
@@ -617,7 +617,7 @@ namespace PKGE
             _readbackRequest = AsyncGPUReadback.Request(_blendedTexture,
                 mipIndex: _blendedTexture.mipmapCount - 1,
                 x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
-                GraphicsFormat.R8G8B8A8_UNorm);
+                TextureFormat.RGBA32);
         }
 
         /// <summary>
@@ -653,22 +653,7 @@ namespace PKGE
                 }
             }
 
-            // Get the average of the four colours at the horizon
-            // Use a Vector4 to avoid colours being clamped to 1
-            Vector4 equator = default;
-            Vector4 skyEquator = default;
-            for (int i = 0; i < 3; i++)
-            {
-                equator[i] = ambientColours[(int)CubemapFace.PositiveX][i]
-                    + ambientColours[(int)CubemapFace.NegativeX][i]
-                    + ambientColours[(int)CubemapFace.PositiveZ][i]
-                    + ambientColours[(int)CubemapFace.NegativeZ][i];
-
-                skyEquator[i] = equator[i] + (4 * ambientColours[(int)CubemapFace.PositiveY][i]);
-                skyEquator[i] /= 8 * byte.MaxValue;
-
-                equator[i] /= 4 * byte.MaxValue;
-            }
+            AverageColours(ref ambientColours, out var equator, out var skyEquator);
 
             RenderSettings.ambientSkyColor = ambientColours[(int)CubemapFace.PositiveY];
             RenderSettings.ambientEquatorColor = groundColour
@@ -681,7 +666,7 @@ namespace PKGE
             // Forward is +Z, index 4
             if (FindMainCamera())
             {
-                adaptiveColour = SampleCubemapBilinear(ambientColours, _mainCameraTransform.forward);
+                SampleCubemapBilinear(ambientColours, _mainCameraTransform.forward, out adaptiveColour);
             }
 
             if (!sunFound)
@@ -690,10 +675,42 @@ namespace PKGE
             }
 
             Vector3 sunForward = sunTransform.forward;
-            skyColour = SampleCubemapBilinear(ambientColours, sunForward);
-            float denominator = SampleCubemapBilinear(ambientColours, -sunForward).grayscale;
+            SampleCubemapBilinear(ambientColours, sunForward, out skyColour);
+            SampleCubemapBilinear(ambientColours, -sunForward, out var invSkyColor);
+            float denominator = invSkyColor.grayscale;
 
             skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
+        }
+        
+        /// <summary>
+        /// Calculate the average of the four colours at the horizon.
+        /// </summary>
+        /// <remarks>
+        /// Use <see cref="Vector4"/> instead of <see cref="Color"/> to avoid colour values being clamped to 1.
+        /// </remarks>
+        /// <param name="ambientColours">Input colours.</param>
+        /// <param name="equator">Average colour at the horizon.</param>
+        /// <param name="skyEquator">Average colour above the horizon.</param>
+        [Unity.Burst.BurstCompile]
+        internal static void AverageColours(ref NativeArray<Color32> ambientColours,
+            out Vector4 equator, out Vector4 skyEquator)
+        {
+            const float equatorScale = 1f / (4 * byte.MaxValue);
+            const float skyEquatorScale = 1f / (6 * byte.MaxValue);
+            
+            equator = default;
+            skyEquator = default;
+            
+            for (int i = 0; i < 4; i++)
+            {
+                var temp = ambientColours[(int)CubemapFace.PositiveX][i]
+                          + ambientColours[(int)CubemapFace.NegativeX][i]
+                          + ambientColours[(int)CubemapFace.PositiveZ][i]
+                          + ambientColours[(int)CubemapFace.NegativeZ][i];
+
+                equator[i] = equatorScale * temp;
+                skyEquator[i] = skyEquatorScale * (temp + (0.5f * ambientColours[(int)CubemapFace.PositiveY][i]));
+            }
         }
 
         /// <summary>
@@ -703,17 +720,19 @@ namespace PKGE
         /// <see cref="Vector3.Distance"/> calculates the difference between two vectors.
         /// The direction is inverted to calculate the similarity instead.
         /// </remarks>
-        internal static Color SampleCubemapBilinear(NativeArray<Color32> colours, Vector3 forward)
+        [Unity.Burst.BurstCompile]
+        internal static void SampleCubemapBilinear(in NativeArray<Color32> colours, in Vector3 forward,
+            out Color sum)
         {
-            Color sum =
-                  (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
+            const float scale = 1f / 6;
+            sum = (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
                 + (Color)colours[(int)CubemapFace.PositiveX] * Vector3.Distance(Vector3.left, forward)
                 + (Color)colours[(int)CubemapFace.NegativeY] * Vector3.Distance(Vector3.up, forward)
                 + (Color)colours[(int)CubemapFace.PositiveY] * Vector3.Distance(Vector3.down, forward)
                 + (Color)colours[(int)CubemapFace.NegativeZ] * Vector3.Distance(Vector3.forward, forward)
                 + (Color)colours[(int)CubemapFace.PositiveZ] * Vector3.Distance(Vector3.back, forward);
 
-            return sum / 6;
+            sum *= scale;
         }
 #endif // BLEND_SHADER
 

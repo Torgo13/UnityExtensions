@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 namespace PKGE
 {
@@ -170,9 +169,9 @@ namespace PKGE
             _isTextureDirty = true;
         }
 
-        static GraphicsFormat GetTextureFormat()
+        static UnityEngine.Experimental.Rendering.GraphicsFormat GetTextureFormat()
         {
-            return GraphicsFormat.R8G8B8A8_UNorm;
+            return UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm;
         }
 
         /// <summary>
@@ -192,7 +191,7 @@ namespace PKGE
             if (_texture == null)
             {
                 _texture = new Texture2D(textureSize, 1, GetTextureFormat(),
-                    TextureCreationFlags.DontInitializePixels);
+                    UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels);
                 _texture.name = "GradientTexture";
                 _texture.hideFlags = HideFlags.HideAndDontSave;
                 _texture.filterMode = FilterMode.Bilinear;

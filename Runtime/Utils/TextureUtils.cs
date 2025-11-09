@@ -254,7 +254,7 @@ namespace PKGE
             bool mipChain = texParams.mipCount != 1;
 
             Texture2D output = new Texture2D(texParams.width, texParams.height,
-                texParams.format, texParams.mipCount != 1, texReadable.isLinear, createUninitialized: true);
+                texParams.format, mipChain, texReadable.isLinear, createUninitialized: true);
 
             // ReSharper disable PossiblyImpureMethodCallOnReadonlyVariable
             var rawTextureData = data.Reinterpret<Color24>(sizeof(byte));

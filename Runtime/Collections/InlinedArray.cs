@@ -151,6 +151,8 @@ namespace PKGE.Collections
         {
             if (length == 0)
                 return null;
+            
+            UnityEngine.Assertions.Assert.IsNotNull(mapFunction);
 
             var result = new TOther[length];
             for (var i = 0; i < length; ++i)

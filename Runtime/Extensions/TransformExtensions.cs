@@ -396,7 +396,7 @@ namespace PKGE
             if (childInstanceIDs.Count > 0)
             {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(System.Runtime.InteropServices.MemoryMarshal.Cast<int, EntityId>(childInstanceIDs.AsSpan()), active);
+                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<int, EntityId>(), active);
 #else
                 GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
 #endif // UNITY_6000_3_OR_NEWER

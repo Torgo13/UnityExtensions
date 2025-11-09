@@ -29,9 +29,10 @@ namespace PKGE
             RenderTexture.active = camera.targetTexture;
 
             var texture = new Texture2D(width, height, 
-                hdr ? TextureFormat.RGBAFloat : TextureFormat.RGB24, mipChain: false);
+                hdr ? TextureFormat.RGBAFloat : TextureFormat.RGB24, mipChain: false,
+                linear: hdr, createUninitialized: true);
 
-            texture.ReadPixels(new Rect(0, 0, width, height), 0, 0, recalculateMipMaps: false);
+            texture.ReadPixels(new Rect(0, 0, width, height), destX: 0, destY: 0, recalculateMipMaps: false);
             texture.Apply();
 
             camera.targetTexture = prevCameraRenderTexture;

@@ -181,12 +181,11 @@ namespace PKGE
             {
                 if (_blackVolumeTexture == null)
                 {
-                    var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                    colors[0] = Color.black;
                     _blackVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB,
                         TextureCreationFlags.DontInitializePixels);
-                    _blackVolumeTexture.SetPixelData(colors, mipLevel: 0);
-                    _blackVolumeTexture.Apply();
+                    var colors = _blackVolumeTexture.GetPixelData<Color32>(mipLevel: 0);
+                    colors[0] = Color.black;
+                    _whiteVolumeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _blackVolumeTexture;
@@ -204,12 +203,11 @@ namespace PKGE
             {
                 if (_whiteVolumeTexture == null)
                 {
-                    var colors = new NativeArray<Color32>(1, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                    colors[0] = Color.white;
                     _whiteVolumeTexture = new Texture3D(1, 1, 1, GraphicsFormat.R8G8B8A8_SRGB,
                         TextureCreationFlags.DontInitializePixels);
-                    _whiteVolumeTexture.SetPixelData(colors, mipLevel: 0);
-                    _whiteVolumeTexture.Apply();
+                    var colors = _whiteVolumeTexture.GetPixelData<Color32>(mipLevel: 0);
+                    colors[0] = Color.white;
+                    _whiteVolumeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _whiteVolumeTexture;

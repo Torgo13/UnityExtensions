@@ -112,7 +112,7 @@ namespace PKGE.Unsafe
         {
 #if INCLUDE_MATHEMATICS
             var Random = new Random(
-                math.max(1, new NativeReference<uint>(Allocator.Temp,
+                math.max(1, new NativeReference<uint>(AllocatorManager.Temp,
                     NativeArrayOptions.UninitializedMemory).Value));
 #else
             var Random = new Random(new NativeArray<int>(1, Allocator.Temp,

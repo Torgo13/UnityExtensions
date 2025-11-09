@@ -45,20 +45,18 @@ namespace PKGE.Editor
             if (_singleColorTextures == null)
                 _singleColorTextures = new Dictionary<Color, Texture2D>();
 
-            bool makeTexture = !_singleColorTextures.ContainsKey(color);
-            if (!makeTexture)
-                makeTexture = _singleColorTextures[color] == null;
-
-            if (makeTexture)
+            if (!_singleColorTextures.TryGetValue(color, out Texture2D tex))
             {
-                Texture2D tex = new Texture2D(1, 1, GraphicsFormat.R8G8B8A8_UNorm, TextureCreationFlags.None);
-                tex.SetPixel(0, 0, color);
-                tex.Apply();
+                tex = new Texture2D(1, 1, GraphicsFormat.R8G8B8A8_UNorm,
+                    TextureCreationFlags.DontInitializePixels);
+                var data = tex.GetRawTextureData<Color32>();
+                data[0] = color;
+                tex.Apply(updateMipmaps: false, makeNoLongerReadable: true);
 
                 _singleColorTextures[color] = tex;
             }
 
-            return _singleColorTextures[color];
+            return tex;
         }
 
         /// <summary>
@@ -196,7 +194,8 @@ namespace PKGE.Editor
             if (_aSource.height > 4 && _aSource.height < yMin) yMin = _aSource.height;
             if (yMin == int.MaxValue) yMin = 4;
 
-            Texture2D combined = new Texture2D(xMin, yMin, GraphicsFormat.R32G32B32A32_SFloat, TextureCreationFlags.MipChain);
+            Texture2D combined = new Texture2D(xMin, yMin, GraphicsFormat.R32G32B32A32_SFloat,
+                TextureCreationFlags.DontInitializePixels);
             combined.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             Material combinerMaterial = new Material(Shader.Find("Hidden/SRP_Core/TextureCombiner"));
@@ -232,11 +231,12 @@ namespace PKGE.Editor
 
             byte[] bytes = Array.Empty<byte>();
 
-            if (savePath.EndsWith("png", System.StringComparison.OrdinalIgnoreCase))
+            if (savePath.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToPNG();
-            else if (savePath.EndsWith("exr", System.StringComparison.OrdinalIgnoreCase))
+            else if (savePath.EndsWith(".exr", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToEXR();
-            else if (savePath.EndsWith("jpg", System.StringComparison.OrdinalIgnoreCase))
+            else if (savePath.EndsWith(".jpg", System.StringComparison.OrdinalIgnoreCase)
+                || savePath.EndsWith(".jpeg", System.StringComparison.OrdinalIgnoreCase))
                 bytes = combined.EncodeToJPG();
 
             string systemPath = Path.Combine(Application.dataPath.Remove(Application.dataPath.Length - 6), savePath);

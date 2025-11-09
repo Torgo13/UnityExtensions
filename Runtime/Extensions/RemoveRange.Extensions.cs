@@ -39,7 +39,7 @@ namespace PKGE
                     if (list.Count - index < count) throw new ArgumentException("index and count do not denote a valid range of elements in the list");
 #endif
 
-                    for (var i = count; i > 0; --i)
+                    for (var i = 0; i < count; i++)
                         list.RemoveAt(index);
                 }
             }

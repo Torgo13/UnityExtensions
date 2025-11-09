@@ -154,7 +154,7 @@ namespace PKGE
             if (_isTextureDirty)
             {
                 // Cannot use GetPixelData without access to half
-                var pixels = _texture.GetPixels();
+                Color[] pixels = _texture.GetPixels();
 
                 for (int i = 0; i < pixels.Length; i++)
                     pixels[i] = new Color(Evaluate(i * Step), pixels[i].g, pixels[i].b, pixels[i].a);

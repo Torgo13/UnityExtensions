@@ -61,8 +61,10 @@ namespace PKGE
             ListPool<Vector3>.Release(vertices);
             
             // Texture
-            var result = new Texture2D(resolution, slicesY.Count);
-            var data = result.GetPixelData<Color>(mipLevel: 0);
+            var result = new Texture2D(resolution, slicesY.Count,
+                UnityEngine.Experimental.Rendering.DefaultFormat.HDR,
+                UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels);
+            var data = result.GetPixelData<Vector4>(mipLevel: 0);
 
             List<PointWithUV> slice = ListPool<PointWithUV>.Get();
 
@@ -93,35 +95,46 @@ namespace PKGE
 
                     var color = Mathf.Lerp(slice[j - 1].color.r, slice[j].color.r, lerpFactor);
 
-                    displacement = new Vector3(
+                    data[idx * resolution + i] = new Vector4(
                         displacement.x / (2.0f * bounds.size.x) + 0.5f,
                         displacement.y / bounds.size.y,
-                        color);
-
-                    data[idx * resolution + i] = new Color(displacement.x, displacement.y, displacement.z);
+                        color,
+                        1f);
                 }
             }
 
             ListPool<PointWithUV>.Release(slice);
 
             result.Apply();
-            var bytes = result.EncodeToPNG();
-            CoreUtils.Destroy(result);
-            string path = Application.dataPath + "/Artifacts/" + mesh.name + ".png";
-            File.WriteAllBytesAsync(path, bytes);
-            
-#if DEBUG
-            Debug.Log("Texture file written at " + path);
-#endif // DEBUG
+
+            try
+            {
+                var bytes = result.EncodeToPNG();
+                string path = Application.dataPath + "/Artifacts/" + mesh.name + ".png";
+                var task = File.WriteAllBytesAsync(path, bytes, destroyCancellationToken);
+
+#if UNITY_EDITOR
+                task.Wait(destroyCancellationToken);
+                Debug.Log("Texture file written at " + path);
+#endif // UNITY_EDITOR
+            }
+            catch (System.Exception e) when (e is not System.Threading.Tasks.TaskCanceledException)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                CoreUtils.Destroy(result);
+            }
         }
 
-        [StructLayout(LayoutKind.Auto)]
+        [StructLayout(LayoutKind.Sequential)]
         struct PointWithUV
         {
-            public Vector3 pos;
-            public Vector2 uv;
             public Color color;
+            public Vector3 pos;
             public float dist;
+            public Vector2 uv;
         }
 
         void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
@@ -180,6 +193,7 @@ namespace PKGE
         {
             if (slicesY == null)
                 return;
+            
             sliceIndex = Mathf.Min(sliceIndex, slicesY.Count - 1);
 
             var position = transform.position;
@@ -227,9 +241,12 @@ namespace PKGE
         #region UnityEngine.Rendering
         public override void OnInspectorGUI()
         {
-            DrawDefaultInspector();
+            _ = DrawDefaultInspector();
 
             var baker = target as MeshBaker;
+            if (ReferenceEquals(baker, null))
+                return;
+            
             if (GUILayout.Button("Bake"))
                 baker.Bake();
 

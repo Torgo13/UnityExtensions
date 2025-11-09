@@ -75,6 +75,9 @@ namespace PKGE
             BoolValue = b;
             return Collapse();
         }
+        
+        public static bool AsBool(byte @byte) => new ByteBool { ByteValue = @byte }.BoolValue;
+        public static byte AsByte(bool @bool) => new ByteBool { BoolValue = @bool }.ByteValue;
     }
     #endregion // Unity.Netcode
 

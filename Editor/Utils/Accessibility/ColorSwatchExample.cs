@@ -116,7 +116,8 @@ namespace PKGE.Editor
         // create a white texture with some pixels discarded to make a pattern
         private Texture2D CreateSwatchBackground(int size, int discardPixelCount, int discardPixelStep)
         {
-            var swatchBackground = new Texture2D(size, size);
+            var swatchBackground = new Texture2D(size, size,
+                TextureFormat.RGBA32, Texture.GenerateAllMips, linear: false, createUninitialized: true);
             swatchBackground.hideFlags = HideFlags.HideAndDontSave;
             swatchBackground.filterMode = FilterMode.Point;
 

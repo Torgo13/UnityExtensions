@@ -1,6 +1,5 @@
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 #if INCLUDE_MATHEMATICS
 using static Unity.Mathematics.math;
@@ -22,7 +21,8 @@ namespace PKGE.Unsafe
             // cache the diameter
             var d = radius * 2;
 
-            var texture = new Texture2D(d, d, DefaultFormat.LDR, TextureCreationFlags.None);
+            var texture = new Texture2D(d, d, TextureFormat.RGBA32,
+                mipChain: false, linear: false, createUninitialized: true);
             var colours = texture.GetRawTextureData<Color32>();
             var coloursPtr = (Color32*)colours.GetUnsafePtr();
             UnsafeUtility.MemSet(coloursPtr, 0, colours.Length * SizeOfCache<Color32>.Size);

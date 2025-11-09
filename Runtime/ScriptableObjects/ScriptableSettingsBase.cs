@@ -58,9 +58,11 @@ namespace PKGE
             return (ScriptableSettingsBase)instanceProperty!.GetValue(null, null);
         }
 
+#if UNUSED
         // Awake and OnEnable can potentially have bad behavior in the editor during asset import, so we
         // don't allow implementors of ScriptableSettings to use these functions at all
         void Awake() { }
+#endif // UNUSED
 
         void OnEnable()
         {

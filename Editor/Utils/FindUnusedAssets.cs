@@ -90,7 +90,7 @@ namespace PKGE.Editor
                     AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(subscenePath), typeof(SceneAsset)) as
                         SceneAsset;
 
-                var sceneObject = SceneManager.GetSceneByName(subscene?.name);
+                var sceneObject = SceneManager.GetSceneByName(subscene != null ? subscene.name : null);
                 if (!sceneObject.IsValid())
                     continue;
 

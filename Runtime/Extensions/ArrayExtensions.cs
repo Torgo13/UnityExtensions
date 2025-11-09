@@ -992,36 +992,9 @@ namespace PKGE
 
             int endIndex = length == -1 ? array.Length : startIndex + length;
 
-            var setArrayJob = new Packages.SetArrayJob<T>
-            {
-                src = value,
-                dst = array.GetSubArray(startIndex, endIndex - startIndex),
-            };
-
-            Unity.Jobs.IJobForExtensions.Run(setArrayJob, endIndex - startIndex);
+            for (int i = endIndex - 1; i >= startIndex; --i)
+                array[i] = value;
         }
         #endregion // UnityEngine.Rendering
-
-        public static Unity.Jobs.JobHandle FillArrayJob<T>(this NativeArray<T> array, in T value, int startIndex = 0, int length = -1,
-            Unity.Jobs.JobHandle dependency = default)
-            where T : unmanaged
-        {
-            if (!array.IsCreated)
-                throw new InvalidOperationException(nameof(array));
-            if (startIndex < 0)
-                throw new IndexOutOfRangeException(nameof(startIndex));
-            if (startIndex + length >= array.Length)
-                throw new IndexOutOfRangeException(nameof(length));
-
-            int endIndex = length == -1 ? array.Length : startIndex + length;
-
-            var setArrayJob = new Packages.SetArrayJob<T>
-            {
-                src = value,
-                dst = array.GetSubArray(startIndex, endIndex - startIndex),
-            };
-
-            return Unity.Jobs.IJobForExtensions.Schedule(setArrayJob, endIndex - startIndex, dependency);
-        }
     }
 }

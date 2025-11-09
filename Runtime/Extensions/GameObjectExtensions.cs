@@ -181,7 +181,7 @@ namespace PKGE
             int outputIndex = 0;
             gameObject.GetComponents(componentsCache);
 
-            for (var i = 0; i != componentsCache.Count; i++)
+            for (var i = 0; i < componentsCache.Count; i++)
             {
                 var component = componentsCache[i];
 
@@ -270,14 +270,15 @@ namespace PKGE
             Assert.IsNotNull(go);
             Assert.IsNotNull(instances);
 
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+
 #if UNITY_6000_3_OR_NEWER
             var id = go.GetEntityId();
-            var ids = new NativeArray<EntityId>(2 * count,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var ids = new NativeArray<EntityId>(2 * count, allocator, options);
 #else
             var id = go.GetInstanceID();
-            var ids = new NativeArray<int>(2 * count,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var ids = new NativeArray<int>(2 * count, allocator, options);
 #endif // UNITY_6000_3_OR_NEWER
 
             var instanceIDs = ids.GetSubArray(start: 0, length: count);

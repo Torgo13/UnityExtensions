@@ -13,7 +13,7 @@ namespace PKGE.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             int index = 2;
 
-            ref int element = ref array.UnsafeElementAtMutable(index);
+            ref int element = ref array.AsRef(index);
 
             Assert.AreEqual(array[index], element);
 
@@ -27,7 +27,7 @@ namespace PKGE.Unsafe.Tests
             int[] array = new int[0];
             Assert.Throws<IndexOutOfRangeException>(() =>
             {
-                ref int element = ref array.UnsafeElementAtMutable(0);
+                ref int element = ref array.AsRef(0);
             });
         }
 
@@ -37,7 +37,7 @@ namespace PKGE.Unsafe.Tests
             List <int> list = new() { 1, 2, 3, 4, 5 };
             int index = 2;
 
-            ref int element = ref list.UnsafeElementAtMutable(index);
+            ref int element = ref list.AsRef(index);
 
             Assert.AreEqual(list[index], element);
 

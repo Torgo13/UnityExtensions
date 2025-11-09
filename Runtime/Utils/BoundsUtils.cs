@@ -8,6 +8,7 @@ namespace PKGE
     /// <summary>
     /// Bounds related utilities
     /// </summary>
+    [Unity.Burst.BurstCompile]
     public static class BoundsUtils
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/BoundsUtils.cs
@@ -37,19 +38,9 @@ namespace PKGE
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
         public static Bounds GetBounds(GameObject[] gameObjects)
         {
-            Bounds? bounds = null;
-            foreach (var gameObject in gameObjects)
-            {
-                var goBounds = GetBounds(gameObject.transform);
-                if (bounds.HasValue)
-                {
-                    goBounds.Encapsulate(bounds.Value);
-                }
-
-                bounds = goBounds;
-            }
-
-            return bounds ?? new Bounds();
+            using var _0 = ListPool<GameObject>.Get(out var list);
+            list.AddRange(gameObjects);
+            return GetBounds(list);
         }
 
         /// <summary>
@@ -77,19 +68,9 @@ namespace PKGE
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
         public static Bounds GetBounds(Transform[] transforms)
         {
-            Bounds? bounds = null;
-            foreach (var t in transforms)
-            {
-                var goBounds = GetBounds(t);
-                if (bounds.HasValue)
-                {
-                    goBounds.Encapsulate(bounds.Value);
-                }
-
-                bounds = goBounds;
-            }
-
-            return bounds ?? new Bounds();
+            using var _0 = ListPool<Transform>.Get(out var list);
+            list.AddRange(transforms);
+            return GetBounds(list);
         }
 
         /// <summary>
@@ -217,14 +198,40 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/Utils/BoundsUtils.cs
         #region Unity.HLODSystem.Utils
+        public static void CalcLocalBounds(Renderer renderer, Transform transform,
+            out Bounds newBounds)
+        {
+            Bounds bounds = renderer.bounds;
+            Matrix4x4 matrix = transform.worldToLocalMatrix;
+            CalcLocalBounds(bounds.min, bounds.max, ref matrix, out newBounds);
+        }
+        
         public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
         {
             Bounds bounds = renderer.bounds;
-            Vector3 min = bounds.min;
-            Vector3 max = bounds.max;
             Matrix4x4 matrix = transform.worldToLocalMatrix;
-
-            var points = new NativeArray<Vector3>(8, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            var newBoundsResult = new NativeArray<Bounds>(1,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            var calculateLocalBoundsJob = new CalculateLocalBoundsJob
+            {
+                matrix = matrix,
+                min = bounds.min,
+                max = bounds.max,
+                newBounds = newBoundsResult,
+            };
+            Unity.Jobs.IJobExtensions.Schedule(calculateLocalBoundsJob);
+            var newBounds = newBoundsResult[0];
+            newBoundsResult.Dispose();
+            return newBounds;
+        }
+        #endregion // Unity.HLODSystem.Utils
+        
+        [Unity.Burst.BurstCompile]
+        public static void CalcLocalBounds(in Vector3 min, in Vector3 max, ref Matrix4x4 matrix,
+            out Bounds newBounds)
+        {
+            var points = new NativeArray<Vector3>(8,
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             points[0] = new Vector3(min.x, min.y, min.z);
             points[1] = new Vector3(max.x, min.y, min.z);
             points[2] = new Vector3(min.x, min.y, max.z);
@@ -234,6 +241,9 @@ namespace PKGE
             points[6] = new Vector3(min.x, max.y, max.z);
             points[7] = new Vector3(max.x, max.y, max.z);
 
+            // loop not vectorized: runtime pointer checks needed.
+            // Enable vectorization of this loop with '#pragma clang loop vectorize(enable)'
+            // when compiling with -Os/-Oz
             for (int i = 0; i < points.Length; ++i)
             {
                 points[i] = matrix.MultiplyPoint(points[i]);
@@ -253,14 +263,68 @@ namespace PKGE
                 if (newMin.z > points[i].z) newMin.z = points[i].z;
                 if (newMax.z < points[i].z) newMax.z = points[i].z;
             }
-
+            
             points.Dispose();
 
-            Bounds newBounds = new Bounds();
-            newBounds.SetMinMax(newMin, newMax);
-            return newBounds;
+            var extents = (newMax - newMin) * 0.5f;
+            newBounds = new Bounds
+            {
+                extents = extents,
+                center = newMin + extents,
+            };
         }
-        #endregion // Unity.HLODSystem.Utils
+        
+        [Unity.Burst.BurstCompile]
+        struct CalculateLocalBoundsJob : Unity.Jobs.IJob
+        {
+            [ReadOnly] public Matrix4x4 matrix;
+            [ReadOnly] public Vector3 min;
+            [ReadOnly] public Vector3 max;
+            [WriteOnly] public NativeArray<Bounds> newBounds;
+
+            public void Execute()
+            {
+                var points = new NativeArray<Vector3>(8,
+                    Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                points[0] = new Vector3(min.x, min.y, min.z);
+                points[1] = new Vector3(max.x, min.y, min.z);
+                points[2] = new Vector3(min.x, min.y, max.z);
+                points[3] = new Vector3(max.x, min.y, max.z);
+                points[4] = new Vector3(min.x, max.y, min.z);
+                points[5] = new Vector3(max.x, max.y, min.z);
+                points[6] = new Vector3(min.x, max.y, max.z);
+                points[7] = new Vector3(max.x, max.y, max.z);
+
+                for (int i = 0; i < points.Length; ++i)
+                {
+                    points[i] = matrix.MultiplyPoint(points[i]);
+                }
+
+                Vector3 newMin = points[0];
+                Vector3 newMax = points[0];
+
+                for (int i = 1; i < points.Length; ++i)
+                {
+                    if (newMin.x > points[i].x) newMin.x = points[i].x;
+                    if (newMax.x < points[i].x) newMax.x = points[i].x;
+
+                    if (newMin.y > points[i].y) newMin.y = points[i].y;
+                    if (newMax.y < points[i].y) newMax.y = points[i].y;
+
+                    if (newMin.z > points[i].z) newMin.z = points[i].z;
+                    if (newMax.z < points[i].z) newMax.z = points[i].z;
+                }
+                
+                points.Dispose();
+
+                var extents = (newMax - newMin) * 0.5f;
+                newBounds[0] = new Bounds
+                {
+                    extents = extents,
+                    center = newMin + extents,
+                };
+            }
+        }
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
         #region Unity.HLODSystem
@@ -274,10 +338,11 @@ namespace PKGE
                 return ret;
             }
 
-            Bounds bounds = CalcLocalBounds(renderers[0], transform);
+            CalcLocalBounds(renderers[0], transform, out var bounds);
             for (int i = 1; i < renderers.Count; ++i)
             {
-                bounds.Encapsulate(CalcLocalBounds(renderers[i], transform));
+                CalcLocalBounds(renderers[i], transform, out var temp);
+                bounds.Encapsulate(temp);
             }
 
             ret.center = bounds.center;
@@ -300,10 +365,11 @@ namespace PKGE
                 return false;
             }
 
-            result = CalcLocalBounds(renderers[0], transform);
+            CalcLocalBounds(renderers[0], transform, out result);
             for (int i = 1; i < renderers.Count; ++i)
             {
-                result.Encapsulate(CalcLocalBounds(renderers[i], transform));
+                CalcLocalBounds(renderers[i], transform, out var temp);
+                result.Encapsulate(temp);
             }
 
             return true;
@@ -349,33 +415,38 @@ namespace PKGE
                 // Only supports Y axis based capsules
                 var cccTransform = ccc.transform;
                 Vector3 local_p = cccTransform.InverseTransformPoint(p);
-                local_p -= ccc.center;
-
-                // Clamp inside outer cylinder top/bot
-                local_p.y = Mathf.Clamp(local_p.y, -ccc.height * 0.5f, ccc.height * 0.5f);
-
-                // Clamp to cylinder edge
-                var h = new Vector2(local_p.x, local_p.z);
-                h = h.normalized * ccc.radius;
-                local_p.x = h.x;
-                local_p.z = h.y;
-
-                // Capsule ends
-                float dist_to_top = ccc.height * 0.5f - Mathf.Abs(local_p.y);
-                if (dist_to_top < ccc.radius)
-                {
-                    float f = (ccc.radius - dist_to_top) / ccc.radius;
-                    float scaledown = (float)System.Math.Sqrt(1.0 - f * f);
-                    local_p.x *= scaledown;
-                    local_p.z *= scaledown;
-                }
-
-                local_p += ccc.center;
+                GetClosestPointOnCapsuleCollider(ref local_p, ccc.height, ccc.center, ccc.radius);
                 return cccTransform.TransformPoint(local_p);
             }
 
             return c.ClosestPointOnBounds(p);
         }
         #endregion // FPSSample
+
+        [Unity.Burst.BurstCompile]
+        internal static void GetClosestPointOnCapsuleCollider(ref Vector3 local_p, float height,
+            in Vector3 center, float radius)
+        {
+            // Clamp inside outer cylinder top/bot
+            local_p.y = Mathf.Clamp(local_p.y, -height * 0.5f, height * 0.5f);
+
+            // Clamp to cylinder edge
+            var h = new Vector2(local_p.x, local_p.z);
+            h = h.normalized * radius;
+            local_p.x = h.x;
+            local_p.z = h.y;
+
+            // Capsule ends
+            float dist_to_top = height * 0.5f - Mathf.Abs(local_p.y);
+            if (dist_to_top < radius)
+            {
+                float f = (radius - dist_to_top) / radius;
+                float scaledown = (float)System.Math.Sqrt(1.0 - f * f);
+                local_p.x *= scaledown;
+                local_p.z *= scaledown;
+            }
+
+            local_p += center;
+        }
     }
 }

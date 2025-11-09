@@ -139,7 +139,8 @@ namespace PKGE
         static void CopyHideFlagsRecursively(Transform copyFrom, Transform copyTo)
         {
             copyTo.hideFlags = copyFrom.hideFlags;
-            for (var i = 0; i < copyFrom.childCount; ++i)
+            var childCount = copyFrom.childCount;
+            for (var i = 0; i < childCount; ++i)
             {
                 CopyHideFlagsRecursively(copyFrom.GetChild(i), copyTo.GetChild(i));
             }

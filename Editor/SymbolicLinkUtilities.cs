@@ -53,14 +53,14 @@ namespace PKGE.Editor
         {
             Assert.IsNotNull(links);
 
-            var args = new StringBuilder();
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var args);
             args.Append("/C");
             for (int i = 0; i < links.Length; ++i)
             {
                 if (i > 0)
                     args.Append(" &&");
 
-                args.Append($" fsutil reparsepoint query \"{links[i]}\" | find \"Symbolic Link\" >nul");
+                args.Append(" fsutil reparsepoint query \"").Append(links[i]).Append("\" | find \"Symbolic Link\" >nul");
             }
 
             args.Append(" && echo true || echo false");
@@ -89,14 +89,14 @@ namespace PKGE.Editor
             Assert.IsNotNull(targets);
             Assert.AreEqual(links.Length, targets.Length);
 
-            var args = new StringBuilder();
+            using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var args);
             args.Append("/C");
             for (int i = 0; i < links.Length; ++i)
             {
                 if (i > 0)
                     args.Append(" &");
 
-                args.Append($" mklink /D \"{links[i]}\" \"{targets[i]}\"");
+                args.Append(" mklink /D \"").Append(links[i]).Append("\" \"").Append(targets[i]).Append('\"');
             }
 
             var p = new ProcessStartInfo("cmd.exe")
