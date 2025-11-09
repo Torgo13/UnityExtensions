@@ -46,8 +46,8 @@ namespace PKGE
         [SerializeField]
         AnimationCurve curve;
 
-        AnimationCurve _loopingCurve;
-        Texture2D _texture;
+        AnimationCurve _loopingCurve = new AnimationCurve();
+        Texture2D? _texture;
 
         bool _isCurveDirty;
         bool _isTextureDirty;
@@ -99,7 +99,7 @@ namespace PKGE
         /// </summary>
         public void Release()
         {
-            CoreUtils.Destroy(_texture);
+            CoreUtils.Destroy(_texture!);
             _texture = null;
         }
 
@@ -185,9 +185,6 @@ namespace PKGE
 
             if (_isCurveDirty)
             {
-                if (_loopingCurve == null)
-                    _loopingCurve = new AnimationCurve();
-
                 var prev = curve[length - 1];
                 prev.time -= range;
                 var next = curve[0];

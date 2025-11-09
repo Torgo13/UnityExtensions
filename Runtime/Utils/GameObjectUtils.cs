@@ -125,7 +125,7 @@ namespace PKGE
         /// <returns>The clone of the original Game Object</returns>
         public static GameObject ClonePrefabWithHideFlags(GameObject prefab, Transform parent = null)
         {
-            var copy = UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
+            var copy = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
             CopyHideFlagsRecursively(prefab, copy);
             return copy;
         }
@@ -136,14 +136,25 @@ namespace PKGE
             CopyHideFlagsRecursively(copyFrom.transform, copyTo.transform);
         }
 
-        static void CopyHideFlagsRecursively(Transform copyFrom, Transform copyTo)
+        static void CopyHideFlagsRecursively(Component copyFrom, Component copyTo)
         {
             copyTo.hideFlags = copyFrom.hideFlags;
-            var childCount = copyFrom.childCount;
-            for (var i = 0; i < childCount; ++i)
+
+            var copyFromChildren = ListPool<Transform>.Get();
+            var copyToChildren = ListPool<Transform>.Get();
+            copyFrom.GetComponentsInChildren(copyFromChildren);
+            copyTo.GetComponentsInChildren(copyToChildren);
+            
+            UnityEngine.Assertions.Assert.AreEqual(copyFromChildren.Count, copyToChildren.Count);
+            
+            var childCount = copyFromChildren.Count;
+            for (var i = 1; i < childCount; ++i)
             {
-                CopyHideFlagsRecursively(copyFrom.GetChild(i), copyTo.GetChild(i));
+                copyFromChildren[i].hideFlags = copyToChildren[i].hideFlags;
             }
+            
+            ListPool<Transform>.Release(copyToChildren);
+            ListPool<Transform>.Release(copyFromChildren);
         }
 
         /// <summary>
@@ -353,25 +364,6 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Get the direct children GameObjects of this GameObject.
-        /// </summary>
-        /// <param name="go">The parent GameObject that we will want to get the child GameObjects on.</param>
-        /// <param name="childGameObjects">The direct children of a GameObject.</param>
-        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects)
-        {
-            var goTransform = go.transform;
-            var childCount = goTransform.childCount;
-            if (childCount == 0)
-                return;
-
-            childGameObjects.EnsureCapacity(childCount);
-            for (var i = 0; i < childCount; i++)
-            {
-                childGameObjects.Add(goTransform.GetChild(i).gameObject);
-            }
-        }
-
-        /// <summary>
         /// Gets a descendant GameObject with a specific name
         /// </summary>
         /// <param name="go">The parent object that is searched for a named child.</param>
@@ -382,8 +374,10 @@ namespace PKGE
             List<Transform> transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(transforms);
             Transform foundObject = null;
-            foreach (var currentTransform in transforms)
+            
+            for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
             {
+                var currentTransform = transforms[i];
                 if (string.Equals(currentTransform.name, name, StringComparison.Ordinal))
                 {
                     foundObject = currentTransform;

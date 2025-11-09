@@ -77,14 +77,16 @@ namespace PKGE
         public static bool TryGetComponentInChildren(GameObject gameObject, out T foundComponent)
         {
             foundComponent = null;
-            using var _0 = ListPool<T>.Get(out var retrievalList);
+            var retrievalList = ListPool<T>.Get();
             gameObject.GetComponentsInChildren(retrievalList);
             if (retrievalList.Count > 0)
             {
                 foundComponent = retrievalList[0];
+                ListPool<T>.Release(retrievalList);
                 return true;
             }
 
+            ListPool<T>.Release(retrievalList);
             return false;
         }
     }

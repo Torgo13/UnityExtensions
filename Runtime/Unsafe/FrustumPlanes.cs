@@ -105,7 +105,7 @@ namespace PKGE.Unsafe
         public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
         {
             var inCountRef = new NativeReference<int>(Allocator.TempJob);
-            var intersectResultRef = new NativeReference<bool>(Allocator.TempJob);
+            var intersectResultRef = new NativeReference<bool>(AllocatorManager.TempJob);
 
             var intersectJob = new IntersectJob
             {

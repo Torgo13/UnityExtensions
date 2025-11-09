@@ -192,7 +192,7 @@ namespace PKGE
         {
             int childCount = 0;
             var childEnumerator = ListPool<Transform>.Get();
-
+            
             int numChildren = t.childCount;
             for (int i = 0; i < numChildren; ++i)
             {
@@ -212,7 +212,7 @@ namespace PKGE
         {
             int activeChildCount = 0;
             var childEnumerator = ListPool<Transform>.Get();
-
+            
             int numChildren = t.childCount;
             for (int i = 0; i < numChildren; ++i)
             {
@@ -282,21 +282,24 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The <c>Transform</c> component.</param>
         /// <param name="type">The type of component to search for.</param>
-        /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
+        /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.</param>
         public static void GetComponentsInChildren(this Transform transform, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
-            if ((includeInactive || transform.gameObject.activeInHierarchy)
-                && transform.TryGetComponent(type, out var root))
+            var children = ListPool<Transform>.Get();
+            transform.GetComponentsInChildren(includeInactive: true, children);
+            
+            for (int i = 0, childCount = children.Count; i < childCount; i++)
             {
-                results.Add(root);
+                if ((includeInactive || children[i].gameObject.activeInHierarchy)
+                    && children[i].TryGetComponent(type, out var root))
+                {
+                    results.Add(root);
+                }
             }
-
-            for (int i = 0, childCount = transform.childCount; i < childCount; i++)
-            {
-                transform.GetChild(i).GetComponentsInChildren(type, results, includeInactive);
-            }
+            
+            ListPool<Transform>.Release(children);
         }
         
         /// <summary>
@@ -326,9 +329,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
         /// <param name="childTransforms">The direct children of a Transform.</param>
-        /// <param name="recursive">Set to <see langword="true"/> to also get the descendents.</param>
-        public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms,
-            bool recursive = false)
+        public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
             if (childCount == 0)
@@ -338,35 +339,29 @@ namespace PKGE
             for (var i = 0; i < childCount; i++)
             {
                 childTransforms.Add(transform.GetChild(i));
-                if (recursive)
-                {
-                    transform.GetChildTransforms(childTransforms, recursive: true);
-                }
             }
         }
 
-        public static void GetChildInstanceIDs(this Transform transform, List<int> childInstanceIDs,
-            bool recursive = false)
+        public static void GetChildInstanceIDs(this Transform transform, List<int> childInstanceIDs)
         {
-            var childCount = transform.childCount;
-            if (childCount == 0)
-                return;
-
+            var children = ListPool<Transform>.Get();
+            transform.GetComponentsInChildren(children);
+            
+            var childCount = children.Count;
             childInstanceIDs.EnsureCapacity(childCount);
-            for (var i = 0; i < childCount; i++)
+            
+            for (var i = 1; i < childCount; i++)
             {
-                childInstanceIDs.Add(transform.GetChild(i).GetInstanceID());
-                if (recursive)
-                {
-                    transform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
-                }
+                childInstanceIDs.Add(children[i].GetInstanceID());
             }
+            
+            ListPool<Transform>.Release(children);
         }
 
         public static void SetActiveRecursively(this Transform transform, bool active)
         {
             var childInstanceIDs = ListPool<int>.Get();
-            transform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+            transform.GetChildInstanceIDs(childInstanceIDs);
 
             if (childInstanceIDs.Count > 0)
             {
@@ -382,16 +377,11 @@ namespace PKGE
 
         public static void SetGrandchildrenActiveRecursively(this Transform transform, bool active)
         {
-            var childTransforms = ListPool<Transform>.Get();
-            transform.GetChildTransforms(childTransforms, recursive: false);
-            
             var childInstanceIDs = ListPool<int>.Get();
-            foreach (var childTransform in childTransforms)
+            for (int i = 0, childCount = transform.childCount; i < childCount; i++)
             {
-                childTransform.GetChildInstanceIDs(childInstanceIDs, recursive: true);
+                transform.GetChild(i).GetChildInstanceIDs(childInstanceIDs);
             }
-            
-            ListPool<Transform>.Release(childTransforms);
 
             if (childInstanceIDs.Count > 0)
             {
@@ -418,7 +408,7 @@ namespace PKGE
             var transforms = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(transforms);
             Transform foundObject = null;
-            for (var i = 0; i < transforms.Count; i++)
+            for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
             {
                 if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
                 {

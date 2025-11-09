@@ -205,30 +205,23 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent GameObject that we will want to get the child GameObjects on.</param>
         /// <param name="childGameObjects">The direct children of a GameObject.</param>
-        /// <param name="recursive">Set to <see langword="true"/> to also get the descendents.</param>
-        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects,
-            bool recursive = false)
+        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects)
         {
             var goTransform = go.transform;
             var childCount = goTransform.childCount;
             if (childCount == 0)
                 return;
-
+            
             childGameObjects.EnsureCapacity(childCount);
             for (var i = 0; i < childCount; i++)
             {
                 childGameObjects.Add(goTransform.GetChild(i).gameObject);
-                if (recursive)
-                {
-                    go.GetChildGameObjects(childGameObjects, recursive: true);
-                }
             }
         }
 
-        public static void GetChildInstanceIDs(this GameObject go, List<int> childInstanceIDs,
-            bool recursive = false)
+        public static void GetChildInstanceIDs(this GameObject go, List<int> childInstanceIDs)
         {
-            go.transform.GetChildInstanceIDs(childInstanceIDs, recursive);
+            go.transform.GetChildInstanceIDs(childInstanceIDs);
         }
 
         public static void SetActiveRecursively(this GameObject go, bool active)
@@ -249,9 +242,9 @@ namespace PKGE
             var transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(transforms);
             GameObject foundObject = null;
-            for (var i = 0; i < transforms.Count; i++)
+            for (var i = 1; i < transforms.Count; i++)
             {
-                if (transforms[i].name == name)
+                if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
                 {
                     found = true;
                     foundObject = transforms[i].gameObject;
