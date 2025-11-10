@@ -169,7 +169,19 @@ namespace PKGE.Packages
                 return null;
 
 #if UNITY_6000_3_OR_NEWER
-            return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
+            if (!System.Threading.Thread.CurrentThread.IsBackground)
+                return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
+
+            // Cannot use Allocator.Temp in a background thread
+            using var entityIds = new NativeArray<EntityId>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory)
+            {
+                [0] = unityObjectRef.Id.instanceId,
+            };
+
+            // Cannot use ListPool in a background thread
+            var objects = new List<Object>(1);
+            Resources.EntityIdsToObjectList(entityIds, objects);
+            return (T)objects[0];
 #else
             return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
 #endif // UNITY_6000_3_OR_NEWER

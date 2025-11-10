@@ -20,7 +20,6 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
         #region UnityEngine.XR.ARCore
         /// <exception cref="System.InvalidOperationException">Texture format is not supported</exception>
-        [Unity.Burst.BurstCompile]
         public static JobHandle Schedule(
             NativeSlice<byte> inputImage,
             Vector2Int sizeInPixels,
@@ -195,7 +194,8 @@ namespace PKGE.Packages
         }
 
         /// <summary>
-        /// Must use GetPixels32 when the texture is compressed.
+        /// <see cref="Texture2D.GetPixels32(int)"/> is used when the input <see cref="Texture2D"/>
+        /// is not <see cref="TextureFormat.RGBA32"/>, which allocates a <see cref="Color32"/>[].
         /// </summary>
         public static JobHandle GetPixelData32(this Texture2D texture, out NativeArray<Color32> colour32,
             out bool dispose, out int mipmapCount, JobHandle handle = default)
