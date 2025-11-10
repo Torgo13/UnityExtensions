@@ -72,8 +72,7 @@ namespace PKGE
 
         void OnDestroy()
         {
-            if (_skyboxMaterial != null)
-                CoreUtils.Destroy(_skyboxMaterial);
+            CoreUtils.Destroy(ref _skyboxMaterial);
         }
         
         /// <summary>

@@ -332,9 +332,6 @@ namespace PKGE
         public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
-            if (childCount == 0)
-                return;
-
             childTransforms.EnsureCapacity(childCount);
             for (var i = 0; i < childCount; i++)
             {

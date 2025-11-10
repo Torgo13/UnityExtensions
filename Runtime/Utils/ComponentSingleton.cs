@@ -48,7 +48,7 @@ namespace PKGE
             if (_instance != null)
             {
                 var go = _instance.gameObject;
-                CoreUtils.Destroy(go);
+                CoreUtils.Destroy(ref go);
                 _instance = null;
             }
         }

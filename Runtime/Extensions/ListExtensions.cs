@@ -184,9 +184,22 @@ namespace PKGE
             return list.AsArray().AsSpan(start: 0, length: list.Count);
         }
 
+        public static Span<T> AsSpan<T>(this List<T> list, int start, int length)
+        {
+            if (list == null)
+                return new Span<T>();
+
+            return list.AsArray().AsSpan(start, length);
+        }
+
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list)
         {
             return list.AsSpan();
+        }
+
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list, int start, int length)
+        {
+            return list.AsSpan(start, length);
         }
 
         /// <inheritdoc cref="Dictionary{TKey, TValue}.TryAdd(TKey, TValue)"/>

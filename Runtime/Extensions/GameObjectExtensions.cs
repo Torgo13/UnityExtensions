@@ -209,9 +209,6 @@ namespace PKGE
         {
             var goTransform = go.transform;
             var childCount = goTransform.childCount;
-            if (childCount == 0)
-                return;
-            
             childGameObjects.EnsureCapacity(childCount);
             for (var i = 0; i < childCount; i++)
             {

@@ -84,8 +84,9 @@ namespace PKGE
             if (allCamerasCount == 0)
                 return null;
 
-            using var pooledArray = DisposeArrayPool<Camera>.Rent(allCamerasCount);
-            Camera[] allCameras = pooledArray.PooledArray;
+            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var list);
+            list.EnsureCapacity(allCamerasCount);
+            Camera[] allCameras = list.AsArray();
 
             _ = Camera.GetAllCameras(allCameras);
 
@@ -106,8 +107,9 @@ namespace PKGE
             if (allCamerasCount == 0)
                 return false;
 
-            using var pooledArray = DisposeArrayPool<Camera>.Rent(allCamerasCount);
-            Camera[] allCameras = pooledArray.PooledArray;
+            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var list);
+            list.EnsureCapacity(allCamerasCount);
+            Camera[] allCameras = list.AsArray();
 
             _ = Camera.GetAllCameras(allCameras);
 

@@ -124,7 +124,7 @@ namespace PKGE
             }
             finally
             {
-                CoreUtils.Destroy(result);
+                CoreUtils.Destroy(ref result, skipNullCheck: true);
             }
         }
 

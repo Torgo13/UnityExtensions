@@ -99,7 +99,7 @@ namespace PKGE
         /// </summary>
         public void Release()
         {
-            CoreUtils.Destroy(_texture!);
+            CoreUtils.Destroy(_texture);
             _texture = null;
         }
 

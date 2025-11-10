@@ -588,7 +588,7 @@ namespace PKGE
             if (rt != null)
             {
                 rt.Release();
-                CoreUtils.Destroy(rt);
+                CoreUtils.Destroy(ref rt, skipNullCheck: true);
             }
         }
 

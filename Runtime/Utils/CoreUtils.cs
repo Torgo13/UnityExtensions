@@ -531,37 +531,42 @@ namespace PKGE
         {
             if (skipNullCheck || obj != null)
             {
-#if UNITY_EDITOR
-                if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
-                {
 #if UNITY_6000_4_OR_NEWER
 #else
-                    if (obj is Transform transform)
-                    {
-                        transform.gameObject.SetActive(false);
-                    }
-                    else if (obj is GameObject go)
-                    {
+                switch (obj)
+                {
+                    case Transform t:
+                        t.gameObject.SetActive(false);
+                        break;
+                    case GameObject go:
                         go.SetActive(false);
-                    }
+                        break;
+                }
 #endif // UNITY_6000_4_OR_NEWER
 
-                    if (delay > 0f)
-                        UnityObject.Destroy(obj, delay);
-                    else
-                        UnityObject.Destroy(obj);
-                }
+#if UNITY_EDITOR
+                if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
+                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
                 else if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
                 else
                     UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
 #else
-                if (delay > 0f)
-                    UnityObject.Destroy(obj, delay);
-                else
-                    UnityObject.Destroy(obj);
+                UnityObject.Destroy(obj, Mathf.Max(0f, delay));
 #endif
             }
+        }
+
+        public static void Destroy<T>(ref T obj, bool withUndo = false,
+            bool skipNullCheck = false, bool allowDestroyingAssets = false, float delay = 0f)
+            where T : UnityObject
+        {
+            if (skipNullCheck || obj != null)
+            {
+                obj.Destroy(withUndo, skipNullCheck: true, allowDestroyingAssets, delay);
+            }
+
+            obj = null;
         }
 
         /// <summary>

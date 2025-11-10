@@ -150,7 +150,7 @@ namespace PKGE
             var childCount = copyFromChildren.Count;
             for (var i = 1; i < childCount; ++i)
             {
-                copyFromChildren[i].hideFlags = copyToChildren[i].hideFlags;
+                copyToChildren[i].hideFlags = copyFromChildren[i].hideFlags;
             }
             
             ListPool<Transform>.Release(copyToChildren);
