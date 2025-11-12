@@ -876,7 +876,8 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
-        public static void Resize<TValue>(ref this NativeArray<TValue> array, int newSize, Allocator allocator)
+        public static void Resize<TValue>(ref this NativeArray<TValue> array, int newSize, Allocator allocator,
+            NativeArrayOptions options = NativeArrayOptions.ClearMemory)
             where TValue : struct
         {
             var oldSize = array.Length;
@@ -892,7 +893,7 @@ namespace PKGE
                 return;
             }
 
-            var newArray = new NativeArray<TValue>(newSize, allocator);
+            var newArray = new NativeArray<TValue>(newSize, allocator, options);
             if (oldSize != 0)
             {
                 // Copy contents from old array.
@@ -907,17 +908,18 @@ namespace PKGE
             array = newArray;
         }
 
-        public static int GrowBy<TValue>(ref this NativeArray<TValue> array, int count, Allocator allocator)
+        public static int GrowBy<TValue>(ref this NativeArray<TValue> array, int count, Allocator allocator,
+            NativeArrayOptions options = NativeArrayOptions.ClearMemory)
             where TValue : struct
         {
             var length = array.Length;
             if (length == 0)
             {
-                array = new NativeArray<TValue>(count, allocator);
+                array = new NativeArray<TValue>(count, allocator, options);
                 return 0;
             }
 
-            var newArray = new NativeArray<TValue>(length + count, allocator);
+            var newArray = new NativeArray<TValue>(length + count, allocator, options);
             array.CopyTo(newArray.GetSubArray(0, array.Length));
             array.Dispose();
             array = newArray;
@@ -925,13 +927,31 @@ namespace PKGE
             return length;
         }
 
+        public static void EraseAtWithCapacity<TValue>(this NativeArray<TValue> array, ref int count, int index)
+            where TValue : struct
+        {
+            Debug.Assert(array.IsCreated);
+            Debug.Assert(count <= array.Length);
+            Debug.Assert(index >= 0 && index < count);
+
+            // If we're erasing from the beginning or somewhere in the middle, move
+            // the array contents down from after the index.
+            if (index < count - 1)
+            {
+                var length = count - index - 1;
+                array.GetSubArray(index + 1, length).CopyTo(array.GetSubArray(index, length));
+            }
+
+            --count;
+        }
+
         public static int AppendWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, TValue value,
-            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
+            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
             where TValue : struct
         {
             var capacity = array.Length;
             if (capacity == count)
-                _ = GrowBy(ref array, capacityIncrement > 1 ? capacityIncrement : 1, allocator);
+                _ = GrowBy(ref array, capacityIncrement > 1 ? capacityIncrement : 1, allocator, options);
 
             var index = count;
             array[index] = value;
@@ -941,7 +961,7 @@ namespace PKGE
         }
 
         public static int GrowWithCapacity<TValue>(ref this NativeArray<TValue> array, ref int count, int growBy,
-            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent)
+            int capacityIncrement = 10, Allocator allocator = Allocator.Persistent, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
             where TValue : struct
         {
             var length = array.Length;
@@ -950,7 +970,7 @@ namespace PKGE
                 if (capacityIncrement < growBy)
                     capacityIncrement = growBy;
 
-                _ = GrowBy(ref array, capacityIncrement, allocator);
+                _ = GrowBy(ref array, capacityIncrement, allocator, options);
             }
 
             var offset = count;

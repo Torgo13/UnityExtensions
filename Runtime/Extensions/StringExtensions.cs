@@ -1148,6 +1148,49 @@ namespace PKGE
             return (usefulInputLength / 4) * 3 + padding;
         }
         #endregion // dotnet
+
+        //https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Convert.cs
+        #region dotnet
+        public static int ToBase64_CalculateAndValidateOutputLength(int inputLength, bool insertLineBreaks)
+        {
+            const uint Base64LineBreakPosition = 76;
+
+            // the base length - we want integer division here, at most 4 more chars for the remainder
+            uint outlen = ((uint)inputLength + 2) / 3 * 4;
+
+            if (outlen == 0)
+                return 0;
+
+            if (insertLineBreaks)
+            {
+                (uint newLines, uint remainder) = DivRem(outlen, Base64LineBreakPosition);
+                if (remainder == 0)
+                {
+                    --newLines;
+                }
+
+                outlen += newLines * 2; // the number of line break chars we'll add, "\r\n"
+            }
+
+            // If we overflow an int then we cannot allocate enough
+            // memory to output the value so throw
+            if (outlen > int.MaxValue)
+                throw new OutOfMemoryException();
+
+            return (int)outlen;
+        }
+
+        /// <summary>Produces the quotient and the remainder of two unsigned 32-bit numbers.</summary>
+        /// <param name="left">The dividend.</param>
+        /// <param name="right">The divisor.</param>
+        /// <returns>The quotient and the remainder of the specified numbers.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (uint Quotient, uint Remainder) DivRem(uint left, uint right)
+        {
+            uint quotient = left / right;
+            return (quotient, left - (quotient * right));
+        }
+        #endregion // dotnet
     }
 }
 

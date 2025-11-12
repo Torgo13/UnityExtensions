@@ -209,18 +209,19 @@ namespace PKGE
             }
         }
 
-        public static NativeArray<T> ResizeIfNeeded<T>(this ref NativeArray<T> array, int newLength, Allocator a = Allocator.Persistent) where T : struct
+        public static NativeArray<T> ResizeIfNeeded<T>(this ref NativeArray<T> array, int newLength,
+            Allocator a = Allocator.Persistent, NativeArrayOptions o = NativeArrayOptions.ClearMemory) where T : struct
         {
             if (array.Length != newLength)
             {
                 array.DisposeIfPossible();
-                array = new NativeArray<T>(newLength, a);
+                array = new NativeArray<T>(newLength, a, o);
             }
 
             // The array is either created and of the right size, or not created, and we are asking to resize to 0
             if (!array.IsCreated)
             {
-                array = new NativeArray<T>(0, a);
+                array = new NativeArray<T>(0, a, o);
             }
 
             return array;

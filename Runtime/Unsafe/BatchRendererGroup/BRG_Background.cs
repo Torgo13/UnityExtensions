@@ -384,7 +384,8 @@ namespace PKGE.Unsafe
             if (m_brgContainer != null)
                 m_brgContainer.Shutdown();
 
-            m_backgroundItems.Dispose();
+            if (m_backgroundItems.IsCreated)
+                m_backgroundItems.Dispose();
         }
         #endregion // brg-shooter
 #endif // INCLUDE_RENDER_PIPELINE_CORE

@@ -275,4 +275,21 @@ namespace PKGE.Packages
         }
         #endregion // Unity.Entities
     }
+
+    public static class UnityObjectRefExtensions
+    {
+        /// <summary>
+        /// Activates or deactivates the GameObject locally, according to the value of the
+        /// supplied parameter.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="value">
+        /// The active state to set, where true sets the GameObject to active and false sets
+        /// it to inactive.
+        /// </param>
+        public static void SetActive(this UnityObjectRef<GameObject> obj, bool value)
+        {
+            obj.Value.SetActive(value);
+        }
+    }
 }

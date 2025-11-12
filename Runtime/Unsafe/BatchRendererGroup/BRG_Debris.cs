@@ -70,6 +70,7 @@ namespace PKGE.Unsafe
         };
 
         private NativeArray<GfxItem> m_gfxItems;
+        readonly
         private List<DebrisSpawnDesc> m_debrisExplosions = new List<DebrisSpawnDesc>();
 
         public NativeArray<int> m_inOutCounters;
