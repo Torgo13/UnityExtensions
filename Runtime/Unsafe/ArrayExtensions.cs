@@ -5,7 +5,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
-    public static class ArrayExtensions
+    public static partial class ArrayExtensions
     {
         /// <exception cref="IndexOutOfRangeException"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
