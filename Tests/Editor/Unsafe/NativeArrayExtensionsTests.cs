@@ -19,7 +19,7 @@ namespace PKGE.Unsafe.Tests
             {
                 fixed (void* sourcePtr = sourceArray)
                 {
-                    var nativeArray = NativeCopyUtility.PtrToNativeArrayWithDefault(defaultValue, (IntPtr)sourcePtr, elementSize, length, Allocator.Temp);
+                    var nativeArray = NativeCopyUtility.PtrToNativeArrayWithDefault(defaultValue, sourcePtr, elementSize, length, Allocator.Temp);
 
                     Assert.AreEqual(length, nativeArray.Length);
                     for (int i = 0; i < length; i++)

@@ -7,7 +7,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
-    public static class NativeCopyUtility
+    public static partial class NativeCopyUtility
     {
         //https://github.com/needle-mirror/com.unity.xr.arfoundation/blob/master/Runtime/ARSubsystems/NativeCopyUtility.cs
         #region UnityEngine.XR.ARSubsystems
@@ -53,18 +53,6 @@ namespace PKGE.Unsafe
             return array;
         }
 
-        #region IntPtr
-        public static unsafe NativeArray<T> PtrToNativeArrayWithDefault<T>(
-            T defaultT,
-            IntPtr source,
-            int sourceElementSize,
-            int length,
-            Allocator allocator) where T : struct
-        {
-            return PtrToNativeArrayWithDefault(defaultT, (void*)source, sourceElementSize, length, allocator);
-        }
-        #endregion // IntPtr
-
         /// <summary>
         /// Fills <paramref name="array"/> with repeated copies of <paramref name="value"/>.
         /// </summary>
@@ -102,23 +90,14 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.XR.ARSubsystems
     }
 
-    public static class NativeArrayExtensions
+    public static partial class NativeArrayExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/4b463aa72c78ec7490b7f03176bd012399881768/Runtime/Export/NativeArray/NativeArray.cs#L1024
         #region Unity.Collections.LowLevel.Unsafe
-        #region IntPtr
+#if UNITY_6000_3_OR_NEWER
+#else
         /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
         /// <remarks>The caller is still the owner of the data.</remarks>
-        public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(IntPtr dataPointer, int length,
-            Allocator allocator = Allocator.None) where T : struct
-        {
-            Assert.AreNotEqual(IntPtr.Zero, dataPointer);
-
-            return NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>((void*)dataPointer, length, allocator);
-        }
-        #endregion // IntPtr
-
-        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(IntPtr, int, Allocator)"/>
         public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data,
             Allocator allocator = Allocator.None) where T : unmanaged
         {
@@ -131,9 +110,10 @@ namespace PKGE.Unsafe
                 return nativeArray;
             }
         }
+#endif // UNITY_6000_3_OR_NEWER
         #endregion // Unity.Collections.LowLevel.Unsafe
 
-        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(IntPtr, int, Allocator)"/>
+        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(Span{T}, Allocator)"/>
         public static unsafe NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
         {
             var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
@@ -189,18 +169,6 @@ namespace PKGE.Unsafe
         {
             return array.IsCreated ? array.GetUnsafeReadOnlyPtr() : null;
         }
-
-        #region IntPtr
-        public static unsafe IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
-        {
-            return array.IsCreated ? (IntPtr)array.GetUnsafePtr() : IntPtr.Zero;
-        }
-
-        public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeArray<T> array) where T : struct
-        {
-            return array.IsCreated ? (IntPtr)array.GetUnsafeReadOnlyPtr() : IntPtr.Zero;
-        }
-        #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
 
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs

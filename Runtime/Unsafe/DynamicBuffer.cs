@@ -507,21 +507,6 @@ namespace PKGE.Unsafe
             return BufferHeader.GetElementPointer(m_Buffer);
         }
 
-        #region IntPtr
-        /// <inheritdoc cref="GetUnsafePtr"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPtr GetIntPtr()
-        {
-            return (IntPtr)GetUnsafePtr();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPtr GetReadOnlyIntPtr()
-        {
-            return (IntPtr)GetUnsafeReadOnlyPtr();
-        }
-        #endregion // IntPtr
-
         [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS"), Conditional("UNITY_DOTS_DEBUG")]
         private static void AssertReinterpretSizesMatch<U>() where U : struct
         {
@@ -662,7 +647,7 @@ namespace PKGE.Unsafe
         /// </example>
         /// <param name="v">A C# array containing the elements to copy.</param>
         /// <exception cref="ArgumentNullException">Thrown if the given array is empty.</exception>
-        public void CopyFrom(T[] v)
+        public void CopyFrom(Span<T> v)
         {
             if (v == null)
                 throw new ArgumentNullException(nameof(v));
@@ -670,11 +655,9 @@ namespace PKGE.Unsafe
             ResizeUninitialized(v.Length);
             CheckWriteAccess();
 
-            GCHandle gcHandle = GCHandle.Alloc((object)v, GCHandleType.Pinned);
-            IntPtr num = gcHandle.AddrOfPinnedObject();
+            var num = UnsafeUtility.AddressOf(ref v[0]);
 
-            UnsafeUtility.MemCpy(BufferHeader.GetElementPointer(m_Buffer), (void*)num, Length * SizeOfCache<T>.Size);
-            gcHandle.Free();
+            UnsafeUtility.MemCpy(BufferHeader.GetElementPointer(m_Buffer), num, Length * SizeOfCache<T>.Size);
         }
         #endregion // Unity.Entities
     }

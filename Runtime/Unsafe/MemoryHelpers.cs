@@ -163,7 +163,7 @@ namespace PKGE.Unsafe
     }
     #endregion // Unity.Collections
 
-    public static unsafe class MemoryHelpers
+    public static unsafe partial class MemoryHelpers
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
@@ -242,11 +242,6 @@ namespace PKGE.Unsafe
             return MemCmpBitRegion(ptr1, ptr2, region.BITOffset, region.SizeInBits);
         }
 
-        public static bool Compare(IntPtr ptr1, IntPtr ptr2, BitRegion region)
-        {
-            return Compare((void*)ptr1, (void*)ptr2, region);
-        }
-
         public static uint ComputeFollowingByteOffset(uint byteOffset, uint sizeInBits)
         {
             return (uint)(byteOffset + sizeInBits / 8 + (sizeInBits % 8 > 0 ? 1 : 0));
@@ -262,21 +257,11 @@ namespace PKGE.Unsafe
                 *((byte*)ptr + byteOffset) &= (byte)~(1U << (int)bitOffset);
         }
 
-        public static void WriteSingleBit(IntPtr ptr, uint bitOffset, bool value)
-        {
-            WriteSingleBit((void*)ptr, bitOffset, value);
-        }
-
         public static bool ReadSingleBit(void* ptr, uint bitOffset)
         {
             var byteOffset = bitOffset >> 3;
             bitOffset &= 7;
             return (*((byte*)ptr + byteOffset) & (1U << (int)bitOffset)) != 0;
-        }
-
-        public static bool ReadSingleBit(IntPtr ptr, uint bitOffset)
-        {
-            return ReadSingleBit((void*)ptr, bitOffset);
         }
 
         public static void MemCpyBitRegion(void* destination, void* source, uint bitOffset, uint bitCount)
@@ -330,12 +315,6 @@ namespace PKGE.Unsafe
 
                 *destPtr = (byte)(((*destPtr & ~byteMask) | (*sourcePtr & byteMask)) & 0xFF);
             }
-        }
-
-        /// <inheritdoc cref="MemCpyBitRegion"/>
-        public static void MemCpyBitRegion(IntPtr destination, IntPtr source, uint bitOffset, uint bitCount)
-        {
-            MemCpyBitRegion((void*)destination, (void*)source, bitOffset, bitCount);
         }
 
         /// <summary>
@@ -449,12 +428,6 @@ namespace PKGE.Unsafe
             return true;
         }
 
-        /// <inheritdoc cref="MemCmpBitRegion"/>
-        public static bool MemCmpBitRegion(IntPtr ptr1, IntPtr ptr2, uint bitOffset, uint bitCount, IntPtr mask = default)
-        {
-            return MemCmpBitRegion((void*)ptr1, (void*)ptr2, bitOffset, bitCount, (void*)mask);
-        }
-
         public static void MemSet(void* destination, int numBytes, byte value)
         {
             var to = (byte*)destination;
@@ -489,12 +462,6 @@ namespace PKGE.Unsafe
                     pos += 1;
                 }
             }
-        }
-
-        /// <inheritdoc cref="MemSet"/>
-        public static void MemSet(IntPtr destination, int numBytes, byte value)
-        {
-            MemSet((void*)destination, numBytes, value);
         }
 
         /// <summary>
@@ -549,12 +516,6 @@ namespace PKGE.Unsafe
             }
         }
 
-        /// <inheritdoc cref="MemCpyMasked"/>
-        public static void MemCpyMasked(IntPtr destination, IntPtr source, int numBytes, IntPtr mask)
-        {
-            MemCpyMasked((void*)destination, (void*)source, numBytes, (void*)mask);
-        }
-
         /// <summary>
         /// Reads bits memory region as unsigned int, up to and including 32 bits, least-significant bit first (LSB).
         /// </summary>
@@ -606,12 +567,6 @@ namespace PKGE.Unsafe
             }
 
             throw new NotImplementedException("Reading int straddling int boundary");
-        }
-
-        /// <inheritdoc cref="ReadMultipleBitsAsUInt"/>
-        public static uint ReadMultipleBitsAsUInt(IntPtr ptr, uint bitOffset, uint bitCount)
-        {
-            return ReadMultipleBitsAsUInt((void*)ptr, bitOffset, bitCount);
         }
 
         /// <summary>
@@ -670,12 +625,6 @@ namespace PKGE.Unsafe
             throw new NotImplementedException("Writing int straddling int boundary");
         }
 
-        /// <inheritdoc cref="WriteUIntAsMultipleBits"/>
-        public static void WriteUIntAsMultipleBits(IntPtr ptr, uint bitOffset, uint bitCount, uint value)
-        {
-            WriteUIntAsMultipleBits((void*)ptr, bitOffset, bitCount, value);
-        }
-
         /// <summary>
         /// Reads bits memory region as two's complement integer, up to and including 32 bits, least-significant bit first (LSB).
         /// For example reading 0xff as 8 bits will result in -1.
@@ -690,12 +639,6 @@ namespace PKGE.Unsafe
             return (int)ReadMultipleBitsAsUInt(ptr, bitOffset, bitCount);
         }
 
-        /// <inheritdoc cref="ReadTwosComplementMultipleBitsAsInt"/>
-        public static int ReadTwosComplementMultipleBitsAsInt(IntPtr ptr, uint bitOffset, uint bitCount)
-        {
-            return ReadTwosComplementMultipleBitsAsInt((void*)ptr, bitOffset, bitCount);
-        }
-
         /// <summary>
         /// Writes bits memory region as two's complement integer, up to and including 32 bits, least-significant bit first (LSB).
         /// </summary>
@@ -707,12 +650,6 @@ namespace PKGE.Unsafe
         {
             // int is already represented as two's complement, so write as-is
             WriteUIntAsMultipleBits(ptr, bitOffset, bitCount, (uint)value);
-        }
-
-        /// <inheritdoc cref="WriteIntAsTwosComplementMultipleBits"/>
-        public static void WriteIntAsTwosComplementMultipleBits(IntPtr ptr, uint bitOffset, uint bitCount, int value)
-        {
-            WriteIntAsTwosComplementMultipleBits((void*)ptr, bitOffset, bitCount, value);
         }
 
         /// <summary>
@@ -731,12 +668,6 @@ namespace PKGE.Unsafe
             return (int)(value - halfMax);
         }
 
-        /// <inheritdoc cref="ReadExcessKMultipleBitsAsInt"/>
-        public static int ReadExcessKMultipleBitsAsInt(IntPtr ptr, uint bitOffset, uint bitCount)
-        {
-            return ReadExcessKMultipleBitsAsInt((void*)ptr, bitOffset, bitCount);
-        }
-
         /// <summary>
         /// Writes bits memory region as excess-K integer where K is set to (2^bitCount)/2, up to and including 32 bits, least-significant bit first (LSB).
         /// </summary>
@@ -750,12 +681,6 @@ namespace PKGE.Unsafe
             var halfMax = (long)((1UL << (int)bitCount) / 2);
             var unsignedValue = halfMax + value;
             WriteUIntAsMultipleBits(ptr, bitOffset, bitCount, (uint)unsignedValue);
-        }
-
-        /// <inheritdoc cref="WriteIntAsExcessKMultipleBits"/>
-        public static void WriteIntAsExcessKMultipleBits(IntPtr ptr, uint bitOffset, uint bitCount, int value)
-        {
-            WriteIntAsExcessKMultipleBits((void*)ptr, bitOffset, bitCount, value);
         }
 
         /// <summary>
@@ -773,12 +698,6 @@ namespace PKGE.Unsafe
             return uintValue.UIntToNormalizedFloat(0, maxValue);
         }
 
-        /// <inheritdoc cref="ReadMultipleBitsAsNormalizedUInt"/>
-        public static float ReadMultipleBitsAsNormalizedUInt(IntPtr ptr, uint bitOffset, uint bitCount)
-        {
-            return ReadMultipleBitsAsNormalizedUInt((void*)ptr, bitOffset, bitCount);
-        }
-
         /// <summary>
         /// Writes bits memory region as normalized unsigned integer, up to and including 32 bits, least-significant bit first (LSB).
         /// </summary>
@@ -791,12 +710,6 @@ namespace PKGE.Unsafe
             var maxValue = (uint)((1UL << (int)bitCount) - 1);
             var uintValue = value.NormalizedFloatToUInt(0, maxValue);
             WriteUIntAsMultipleBits(ptr, bitOffset, bitCount, uintValue);
-        }
-
-        /// <inheritdoc cref="WriteNormalizedUIntAsMultipleBits"/>
-        public static void WriteNormalizedUIntAsMultipleBits(IntPtr ptr, uint bitOffset, uint bitCount, float value)
-        {
-            WriteNormalizedUIntAsMultipleBits((void*)ptr, bitOffset, bitCount, value);
         }
 
         public static void SetBitsInBuffer(void* buffer, int byteOffset, int bitOffset, int sizeInBits, bool value)
@@ -858,11 +771,6 @@ namespace PKGE.Unsafe
 
             Assert.IsTrue(bytePos <= (byte*)buffer +
                 ComputeFollowingByteOffset((uint)byteOffset, (uint)bitOffset + (uint)sizeInBits));
-        }
-
-        public static void SetBitsInBuffer(IntPtr buffer, int byteOffset, int bitOffset, int sizeInBits, bool value)
-        {
-            SetBitsInBuffer((void*)buffer, byteOffset, bitOffset, sizeInBits, value);
         }
 
         public static uint AlignNatural(uint offset, uint sizeInBytes)

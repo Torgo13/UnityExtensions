@@ -27,20 +27,25 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int WriteStruct<T>(this byte[] buffer, ref T data, int offset = 0) where T : struct
         {
+            return WriteStruct(buffer.AsSpan(), ref data, offset);
+        }
+
+        /// <inheritdoc cref="WriteStruct{T}(byte[], ref T, int)"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe int WriteStruct<T>(this Span<byte> buffer, ref T data, int offset = 0) where T : struct
+        {
             var size = SizeOfCache<T>.Size;
 
-            fixed (byte* ptr = &buffer[offset])
-            {
-                UnsafeUtility.MemClear(ptr, size);
+            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
+            UnsafeUtility.MemClear(ptr, size);
 
-                if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-                {
-                    UnsafeUtility.CopyStructureToPtr(ref data, ptr);
-                }
-                else
-                {
-                    Marshal.StructureToPtr(data, (IntPtr)ptr, false);
-                }
+            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
+            {
+                UnsafeUtility.CopyStructureToPtr(ref data, ptr);
+            }
+            else
+            {
+                Marshal.StructureToPtr(data, (IntPtr)ptr, false);
             }
 
             return offset + size;
@@ -60,17 +65,22 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe T ReadStruct<T>(this byte[] buffer, int offset = 0) where T : struct
         {
-            fixed (byte* ptr = &buffer[offset])
+            return ReadStruct<T>(buffer.AsSpan(), offset);
+        }
+
+        /// <inheritdoc cref="ReadStruct{T}(byte[], int)"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe T ReadStruct<T>(this Span<byte> buffer, int offset = 0) where T : struct
+        {
+            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
+            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
             {
-                if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-                {
-                    UnsafeUtility.CopyPtrToStructure(ptr, out T value);
-                    return value;
-                }
-                else
-                {
-                    return Marshal.PtrToStructure<T>((IntPtr)ptr);
-                }
+                UnsafeUtility.CopyPtrToStructure(ptr, out T value);
+                return value;
+            }
+            else
+            {
+                return Marshal.PtrToStructure<T>((IntPtr)ptr);
             }
         }
 
@@ -89,19 +99,24 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe T ReadStruct<T>(this byte[] buffer, int offset, out int nextOffset) where T : struct
         {
+            return ReadStruct<T>(buffer.AsSpan(), offset, out nextOffset);
+        }
+
+        /// <inheritdoc cref="ReadStruct{T}(byte[], int, out int)"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe T ReadStruct<T>(this Span<byte> buffer, int offset, out int nextOffset) where T : struct
+        {
             nextOffset = offset + SizeOfCache<T>.Size;
 
-            fixed (byte* ptr = &buffer[offset])
+            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
+            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
             {
-                if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-                {
-                    UnsafeUtility.CopyPtrToStructure(ptr, out T value);
-                    return value;
-                }
-                else
-                {
-                    return Marshal.PtrToStructure<T>((IntPtr)ptr);
-                }
+                UnsafeUtility.CopyPtrToStructure(ptr, out T value);
+                return value;
+            }
+            else
+            {
+                return Marshal.PtrToStructure<T>((IntPtr)ptr);
             }
         }
     }

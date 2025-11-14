@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
-    public static class NativeListExtensions
+    public static partial class NativeListExtensions
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
@@ -21,18 +21,6 @@ namespace PKGE.Unsafe
         {
             return nativeList.GetUnsafeReadOnlyPtr();
         }
-
-        #region IntPtr
-        public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
-        {
-            return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafePtr() : IntPtr.Zero;
-        }
-
-        public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
-        {
-            return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafeReadOnlyPtr() : IntPtr.Zero;
-        }
-        #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs

@@ -62,6 +62,7 @@ namespace PKGE.Unsafe.Tests
             var offset = UnsafeExtensions.CalculateOffset(ref array[idx + idxOffset], ref array[idx]);
             Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
 
+#if PKGE_USING_INTPTR
             unsafe
             {
                 fixed (int* ptr = &array[0])
@@ -70,6 +71,7 @@ namespace PKGE.Unsafe.Tests
                     Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
                 }
             }
+#endif // PKGE_USING_INTPTR
 
             idx = 1; idxOffset = 2;
 
@@ -80,6 +82,7 @@ namespace PKGE.Unsafe.Tests
             offset = UnsafeExtensions.CalculateOffset(ref array[idx + idxOffset], ref array[idx]);
             Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
 
+#if PKGE_USING_INTPTR
             unsafe
             {
                 fixed (int* ptr = &array[1])
@@ -88,6 +91,7 @@ namespace PKGE.Unsafe.Tests
                     Assert.AreEqual(UnsafeUtility.SizeOf<int>() * idxOffset, offset);
                 }
             }
+#endif // PKGE_USING_INTPTR
         }
 
         /// <summary>

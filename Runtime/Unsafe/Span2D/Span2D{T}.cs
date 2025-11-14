@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if NETSTANDARD2_1
+#define NETSTANDARD2_1_OR_GREATER
+#endif // NETSTANDARD2_1
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -963,7 +967,7 @@ namespace PKGE.Unsafe
             T[,] array = new T[Height, this.width];
 
 #if NETSTANDARD2_1_OR_GREATER
-        CopyTo(array.AsSpan());
+            CopyTo(array.AsSpan());
 #else
             // Skip the initialization if the array is empty
             if (Length > 0)

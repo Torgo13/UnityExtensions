@@ -42,7 +42,7 @@ namespace PKGE.Unsafe
 
         public static bool IsFunctionPointerValid<TDelegate>(ref FunctionPointer<TDelegate> functionPointer) where TDelegate : class
         {
-            return UnsafeExtensions.AddressOf(ref functionPointer) != IntPtr.Zero;
+            return functionPointer.IsCreated;
         }
         #endregion // Unity.Kinematica
     }
