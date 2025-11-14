@@ -10,12 +10,12 @@ using static Unity.Mathematics.math;
 namespace PKGE.Unsafe
 {
     #region Unity.Collections
-    unsafe internal struct Memory
+    internal struct Memory
     {
         internal const long k_MaximumRamSizeInBytes = 1L << 40; // a terabyte
 
         [GenerateTestsForBurstCompatibility]
-        internal struct Unmanaged
+        unsafe internal struct Unmanaged
         {
             internal static void* Allocate(long size, int align, AllocatorManager.AllocatorHandle allocator)
             {
@@ -117,7 +117,7 @@ namespace PKGE.Unsafe
         }
 
         [GenerateTestsForBurstCompatibility]
-        internal struct Array
+        unsafe internal struct Array
         {
             [GenerateTestsForBurstCompatibility(GenericTypeArguments = new[] { typeof(int) })]
             internal static void Set<T>(T* pointer, long count, T t = default) where T : unmanaged

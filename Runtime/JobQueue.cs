@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace PKGE
 {
@@ -117,27 +115,34 @@ namespace PKGE
             }
         }
 
-        public async ValueTask WaitFinishAsync()
+#if UNITY_6000_0_OR_NEWER
+        public async UnityEngine.Awaitable WaitFinishAsync()
+#else
+        public async System.Threading.Tasks.ValueTask WaitFinishAsync()
+#endif // UNITY_6000_0_OR_NEWER
         {
-            bool isFinish = false;
-            while (isFinish == false)
+            bool isFinished = false;
+            while (isFinished == false)
             {
-                while (true)
+                Action mainThreadJob = DequeueMainThreadJob();
+                while (mainThreadJob != null)
                 {
-                    Action mainThreadJob = DequeueMainThreadJob();
-                    if (mainThreadJob == null)
-                        break;
-
                     mainThreadJob.Invoke();
+                    mainThreadJob = DequeueMainThreadJob();
                 }
 
                 if (_jobs.Count > 0)
                 {
-                    await Task.Yield();
+#if UNITY_6000_0_OR_NEWER
+                    await UnityEngine.Awaitable.NextFrameAsync();
+#else
+                    await System.Threading.Tasks.Task.Yield();
+#endif // UNITY_6000_0_OR_NEWER
+
                     continue;
                 }
 
-                isFinish = true;
+                isFinished = true;
                 for (int i = 0; i < _workers.Length; ++i)
                 {
                     if (_workers[i].IsException())
@@ -147,12 +152,18 @@ namespace PKGE
 
                     if (_workers[i].IsWorking())
                     {
-                        isFinish = false;
+                        isFinished = false;
                     }
                 }
 
-                if (isFinish == false)
-                    await Task.Yield();
+                if (isFinished == false)
+                {
+#if UNITY_6000_0_OR_NEWER
+                    await UnityEngine.Awaitable.NextFrameAsync();
+#else
+                    await System.Threading.Tasks.Task.Yield();
+#endif // UNITY_6000_0_OR_NEWER
+                }
             }
         }
 

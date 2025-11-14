@@ -12,12 +12,12 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        public static unsafe void* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static unsafe T* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
             return nativeList.GetUnsafePtr();
         }
 
-        public static unsafe void* GetReadOnlyPtr<T>(this NativeList<T> nativeList) where T : unmanaged
+        public static unsafe T* GetReadOnlyPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
             return nativeList.GetUnsafeReadOnlyPtr();
         }
@@ -41,35 +41,34 @@ namespace PKGE.Unsafe
         /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
-            Assert.IsTrue(nativeList.IsCreated);
-
-            return ref UnsafeUtility.AsRef<T>(nativeList.GetUnsafeReadOnlyPtr() + index);
+            return ref nativeList.UnsafeElementAtMutable(index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-            
-            return ref UnsafeUtility.AsRef<T>(nativeList.GetUnsafePtr() + index);
+            Assert.IsTrue(index < nativeList.Capacity);
+
+            if (index >= nativeList.Length)
+                nativeList.ResizeUninitialized(index);
+
+            return ref nativeList.ElementAt(index);
         }
         #endregion // UnityEngine.Rendering.Universal
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsNotNull(array);
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
-            
-            fixed (T* p = array)
-            {
-                nativeList.AddRange(p, count);
-            }
+
+            nativeList.AddRange(array.AsSpan(start: 0, length: count).AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,9 +88,9 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
+        public static void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
         {
-            nativeList.AddRangeNoResize(nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length);
+            nativeList.AddRangeNoResize(nativeArray.AsNativeList());
         }
     }
 }

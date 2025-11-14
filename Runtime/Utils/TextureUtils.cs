@@ -998,7 +998,7 @@ namespace PKGE
         {
             foreach (var request in _readbackRequests)
             {
-                if (!request.done)
+                while (!request.done)
                 {
                     await Task.Yield();
                 }

@@ -66,9 +66,9 @@ namespace PKGE.Unsafe.Tests
         }
         
         [Test]
-        public unsafe void GetPointer_ShouldReturnNullForEmptyArray()
+        public unsafe void GetPointer_ShouldReturnNullForDefaultArray()
         {
-            var emptyArray = new NativeArray<int>(0, Allocator.Temp);
+            NativeArray<int> emptyArray = default;
             Assert.IsTrue(null == emptyArray.GetPtr());
         }
 

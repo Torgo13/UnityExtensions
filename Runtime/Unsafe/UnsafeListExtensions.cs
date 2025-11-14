@@ -12,12 +12,12 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        public static unsafe void* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        public static unsafe T* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
             return unsafeList.Ptr;
         }
 
-        public static unsafe void* GetReadOnlyPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        public static unsafe T* GetReadOnlyPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
             return unsafeList.IsCreated ? unsafeList.AsReadOnly().Ptr : null;
         }
@@ -41,15 +41,21 @@ namespace PKGE.Unsafe
         /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAt<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAt<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
-            return ref UnsafeUtility.AsRef<T>(unsafeList.Ptr + index);
+            return ref unsafeList.UnsafeElementAtMutable(index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAtMutable<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAtMutable<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
-            return ref UnsafeUtility.AsRef<T>(unsafeList.Ptr + index);
+            Assert.IsTrue(unsafeList.IsCreated);
+            Assert.IsTrue(index < unsafeList.Capacity);
+
+            if (index >= unsafeList.Length)
+                unsafeList.Length = index;
+
+            return ref unsafeList.ElementAt(index);
         }
         #endregion // UnityEngine.Rendering.Universal
 
@@ -77,17 +83,14 @@ namespace PKGE.Unsafe
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsNotNull(array);
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
 
-            fixed (T* p = array)
-            {
-                unsafeList.AddRange(p, count);
-            }
+            unsafeList.AddRange(array.AsSpan(start: 0, length: count).AsNativeArray().AsUnsafeList());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

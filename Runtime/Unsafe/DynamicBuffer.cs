@@ -507,6 +507,21 @@ namespace PKGE.Unsafe
             return BufferHeader.GetElementPointer(m_Buffer);
         }
 
+        #region IntPtr
+        /// <inheritdoc cref="GetUnsafePtr"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntPtr GetIntPtr()
+        {
+            return (IntPtr)GetUnsafePtr();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IntPtr GetReadOnlyIntPtr()
+        {
+            return (IntPtr)GetUnsafeReadOnlyPtr();
+        }
+        #endregion // IntPtr
+
         [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS"), Conditional("UNITY_DOTS_DEBUG")]
         private static void AssertReinterpretSizesMatch<U>() where U : struct
         {

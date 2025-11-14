@@ -182,23 +182,23 @@ namespace PKGE.Unsafe
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return array.Length == 0 ? null : array.GetUnsafePtr();
+            return array.IsCreated ? array.GetUnsafePtr() : null;
         }
 
         public static unsafe void* GetReadOnlyPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return array.Length == 0 ? null : array.GetUnsafeReadOnlyPtr();
+            return array.IsCreated ? array.GetUnsafeReadOnlyPtr() : null;
         }
 
         #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return array.Length == 0 ? IntPtr.Zero : (IntPtr)array.GetUnsafePtr();
+            return array.IsCreated ? (IntPtr)array.GetUnsafePtr() : IntPtr.Zero;
         }
 
         public static unsafe IntPtr GetReadOnlyIntPtr<T>(this NativeArray<T> array) where T : struct
         {
-            return array.Length == 0 ? IntPtr.Zero : (IntPtr)array.GetUnsafeReadOnlyPtr();
+            return array.IsCreated ? (IntPtr)array.GetUnsafeReadOnlyPtr() : IntPtr.Zero;
         }
         #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
@@ -276,5 +276,23 @@ namespace PKGE.Unsafe
             --count;
         }
         #endregion // UnityEngine.InputSystem.Utilities
+
+        public static unsafe NativeList<T> AsNativeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            var nativeList = new NativeList<T>(array.Length, AllocatorManager.None);
+            nativeList.ResizeUninitialized(array.Length);
+            nativeList.GetUnsafeList()->Ptr = (T*)array.GetUnsafePtr();
+            return nativeList;
+        }
+
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)array.GetUnsafePtr(), array.Length);
+        }
+
+        public static unsafe UnsafeList<T>.ReadOnly AsReadOnlyUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)array.GetUnsafeReadOnlyPtr(), array.Length).AsReadOnly();
+        }
     }
 }
