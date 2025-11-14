@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -69,3 +70,4 @@ namespace PKGE.Unsafe.Tests
         }
     }
 }
+#endif // PKGE_USING_UNSAFE

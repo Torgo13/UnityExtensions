@@ -19,7 +19,6 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
-        #region IntPtr
         /// <exception cref="ArgumentNullException">target</exception>
         public unsafe static IntPtr PinGCObjectAndGetAddress(object target, out ulong gcHandle)
         {
@@ -173,7 +172,6 @@ namespace PKGE.Unsafe
         {
             return ref UnsafeUtility.ArrayElementAsRef<T>((void*)ptr, index);
         }
-        #endregion // IntPtr
         #endregion // Unity.Collections.LowLevel.Unsafe
 
         #region Unmanaged
@@ -286,7 +284,6 @@ namespace PKGE.Unsafe
 
         //https://github.com/needle-mirror/com.unity.physics/blob/master/Unity.Physics/Base/Containers/UnsafeEx.cs
         #region Unity.Physics
-        #region IntPtr
         public static long CalculateOffset<T>(IntPtr value, ref T baseValue)
             where T : struct
         {
@@ -297,7 +294,6 @@ namespace PKGE.Unsafe
         {
             return value.ToInt64() - baseValue.ToInt64();
         }
-        #endregion // IntPtr
         #endregion // Unity.Physics
     }
 }

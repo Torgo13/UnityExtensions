@@ -51,6 +51,7 @@ namespace PKGE.Unsafe.Tests
             Assert.AreEqual(0, byteSpan.Length);
         }
 
+#if PKGE_USING_UNSAFE
         [Test]
         public void CalculateOffset_ShouldReturnCorrectOffset()
         {
@@ -93,6 +94,7 @@ namespace PKGE.Unsafe.Tests
             }
 #endif // PKGE_USING_INTPTR
         }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Correctness: Ensures the entire array is filled with the specified value

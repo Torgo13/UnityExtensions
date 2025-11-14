@@ -143,6 +143,7 @@ namespace PKGE.Unsafe.Tests
             // _intDefault is not created
         }
 
+#if PKGE_USING_UNSAFE
         #region GetPtr
         [Test]
         public unsafe void GetPtr_ReturnsNull_OnDefaultNotCreated()
@@ -190,7 +191,9 @@ namespace PKGE.Unsafe.Tests
             NUnitAssert.AreEqual(new IntPtr(_intSmall.AsReadOnly().Ptr), (IntPtr)p);
         }
         #endregion // GetReadOnlyPtr
+#endif // PKGE_USING_UNSAFE
 
+#if PKGE_USING_INTPTR
         #region GetIntPtr
         [Test]
         public void GetIntPtr_ReturnsZero_OnDefaultNotCreated()
@@ -238,6 +241,7 @@ namespace PKGE.Unsafe.Tests
             NUnitAssert.AreEqual(new IntPtr(_intSmall.AsReadOnly().Ptr), ip);
         }
         #endregion // GetReadOnlyIntPtr
+#endif // PKGE_USING_INTPTR
 
         #region EnsureCapacity
         [Test]
@@ -246,7 +250,7 @@ namespace PKGE.Unsafe.Tests
             // UnityEngine.Assertions.Assert throws UnityEngine.Assertions.AssertionException
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
+                Packages.UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
             });
         }
 
@@ -259,7 +263,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    UnsafeListExtensions.EnsureCapacity(ref list, requested);
+                    Packages.UnsafeListExtensions.EnsureCapacity(ref list, requested);
                 });
             }
             finally
@@ -283,7 +287,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.AreEqual(4, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity);
-                UnsafeListExtensions.EnsureCapacity(ref list, 32);
+                Packages.UnsafeListExtensions.EnsureCapacity(ref list, 32);
                 NUnitAssert.AreEqual(32, list.Capacity);
             }
             finally
@@ -299,7 +303,7 @@ namespace PKGE.Unsafe.Tests
             var list = new UnsafeList<int>(16, Allocator.Persistent);
             try
             {
-                UnsafeListExtensions.EnsureCapacity(ref list, 10);
+                Packages.UnsafeListExtensions.EnsureCapacity(ref list, 10);
                 NUnitAssert.AreEqual(16, list.Capacity);
             }
             finally
@@ -316,7 +320,7 @@ namespace PKGE.Unsafe.Tests
         {
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
+                Packages.UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
             });
         }
 
@@ -329,7 +333,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    UnsafeListExtensions.EnsureRoom(ref list, room);
+                    Packages.UnsafeListExtensions.EnsureRoom(ref list, room);
                 });
             }
             finally
@@ -350,7 +354,7 @@ namespace PKGE.Unsafe.Tests
                 NUnitAssert.AreEqual(3, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
 
-                UnsafeListExtensions.EnsureRoom(ref list, 5);
+                Packages.UnsafeListExtensions.EnsureRoom(ref list, 5);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -367,7 +371,7 @@ namespace PKGE.Unsafe.Tests
             try
             {
                 Populate(ref list, new[] { 10, 20, 30 }); // length = 3
-                UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
+                Packages.UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -462,7 +466,7 @@ namespace PKGE.Unsafe.Tests
             if (!list.IsCreated)
                 list = new UnsafeList<T>(values.Length, Allocator.Persistent);
 
-            list.EnsureCapacity(values.Length);
+            Packages.UnsafeListExtensions.EnsureCapacity(ref list, values.Length);
             list.Length = values.Length;
 
             for (int i = 0; i < values.Length; i++)

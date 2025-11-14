@@ -86,6 +86,7 @@ namespace PKGE.Unsafe
         #endregion // Blittable
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+#if PKGE_USING_UNSAFE
         #region Unmanaged
         #region ArrayToArray
         /// <inheritdoc cref="MemCpy"/>
@@ -254,7 +255,7 @@ namespace PKGE.Unsafe
             NoAllocHelpers.ResetListContents(list, nativeList.AsSpan());
         }
 #endif // INCLUDE_COLLECTIONS
-#endregion // CopyToList
+        #endregion // CopyToList
 
         #region CopyToNativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -297,7 +298,7 @@ namespace PKGE.Unsafe
             nativeArray.CopyFrom(nativeList.AsArray());
         }
 #endif // INCLUDE_COLLECTIONS
-#endregion // CopyToNativeArray
+        #endregion // CopyToNativeArray
 
 #if INCLUDE_COLLECTIONS
         #region CopyToNativeList
@@ -334,6 +335,7 @@ namespace PKGE.Unsafe
         }
         #endregion // CopyToNativeList
 #endif // INCLUDE_COLLECTIONS
-#endregion // CopyTo
+        #endregion // CopyTo
+#endif // PKGE_USING_UNSAFE
     }
 }

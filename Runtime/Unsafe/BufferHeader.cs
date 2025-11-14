@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 #if INCLUDE_COLLECTIONS
 using System;
 using System.Runtime.InteropServices;
@@ -9,11 +10,11 @@ namespace PKGE.Unsafe
 {
     [StructLayout(LayoutKind.Explicit)]
     [NoAlias]
-    internal unsafe struct BufferHeader
+    public unsafe struct BufferHeader
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Types/BufferHeader.cs
         #region Unity.Entities
-        public const int kMinimumCapacity = 8;
+        public const int MinimumCapacity = 8;
 
         [NoAlias]
         [FieldOffset(0)] public byte* Pointer;
@@ -38,7 +39,7 @@ namespace PKGE.Unsafe
         {
             if (count <= header->Capacity)
                 return;
-            var adjustedCount = Math.Max(kMinimumCapacity, Math.Max(2 * header->Capacity, count)); // stop pathological performance of ++Capacity allocating every time, tiny Capacities
+            var adjustedCount = Math.Max(MinimumCapacity, Math.Max(2 * header->Capacity, count)); // stop pathological performance of ++Capacity allocating every time, tiny Capacities
             SetCapacity(header, adjustedCount, typeSize, alignment, trashMode, useMemoryInitPattern, memoryInitPattern, 0);
         }
 
@@ -123,7 +124,7 @@ namespace PKGE.Unsafe
             Memory.Unmanaged.Free(ptr, Allocator.Persistent);
         }
 
-        /*
+#if ZERO
         // After cloning two worlds have access to the same malloc'ed buffer pointer leading to double deallocate etc.
         // So after cloning, just allocate all malloc based buffers and copy the data.
         public static void PatchAfterCloningChunk(Archetype* archetype, byte* chunkBuffer, int entityCount)
@@ -152,7 +153,7 @@ namespace PKGE.Unsafe
                 }
             }
         }
-        */
+#endif // ZERO
 
         public static void MemsetUnusedMemory(BufferHeader* bufferHeader, int internalCapacity, int elementSize, byte value)
         {
@@ -174,3 +175,4 @@ namespace PKGE.Unsafe
     }
 }
 #endif // INCLUDE_COLLECTIONS
+#endif // PKGE_USING_UNSAFE

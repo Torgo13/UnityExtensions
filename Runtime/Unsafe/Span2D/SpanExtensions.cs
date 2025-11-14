@@ -117,7 +117,7 @@ namespace PKGE.Unsafe
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<byte> AsBytes<T>(this Span<T> span)
-            where T : unmanaged
+            where T : struct
         {
             return MemoryMarshal.AsBytes(span);
         }
@@ -134,8 +134,8 @@ namespace PKGE.Unsafe
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<TTo> Cast<TFrom, TTo>(this Span<TFrom> span)
-            where TFrom : unmanaged
-            where TTo : unmanaged
+            where TFrom : struct
+            where TTo : struct
         {
             return MemoryMarshal.Cast<TFrom, TTo>(span);
         }

@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 using System;
 using UnityEngine;
 
@@ -361,3 +362,4 @@ namespace PKGE.Unsafe
         #endregion // FPSSample
     }
 }
+#endif // PKGE_USING_UNSAFE

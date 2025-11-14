@@ -18,14 +18,15 @@ namespace PKGE.Unsafe
     /// <summary>
     /// Static class with unsafe utility functions.
     /// </summary>
-    public static unsafe partial class CoreUnsafeUtils
+    public static partial class CoreUnsafeUtils
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/CoreUnsafeUtils.cs#L258
         #region UnityEngine.Rendering
+#if PKGE_USING_UNSAFE
         /// <summary>
         /// Fixed Buffer String Queue class.
         /// </summary>
-        public struct FixedBufferStringQueue
+        public unsafe struct FixedBufferStringQueue
         {
             byte* _readCursor;
             byte* _writeCursor;
@@ -111,6 +112,7 @@ namespace PKGE.Unsafe
                 UnsafeUtility.MemClear(_bufferStart, _bufferLength);
             }
         }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Key Getter interface.
@@ -134,7 +136,6 @@ namespace PKGE.Unsafe
         internal struct UlongKeyGetter : IKeyGetter<ulong, ulong>
         { public readonly ulong Get(ref ulong v) { return v; } }
 
-
         /// <summary>
         /// Extension method to copy elements of a list into a buffer.
         /// </summary>
@@ -142,12 +143,10 @@ namespace PKGE.Unsafe
         /// <param name="list">Input List.</param>
         /// <param name="dest">Destination buffer.</param>
         /// <param name="count">Number of elements to copy.</param>
-        public static void CopyTo<T>(this List<T> list, void* dest, int count)
+        public static void CopyTo<T>(this List<T> list, Span<byte> dest, int count)
             where T : struct
         {
-            var c = min(count, list.Count);
-            for (int i = 0; i < c; ++i)
-                UnsafeUtility.WriteArrayElement(dest, i, list[i]);
+            CopyTo(list.AsSpan(), dest, count);
         }
 
         /// <summary>
@@ -157,12 +156,19 @@ namespace PKGE.Unsafe
         /// <param name="list">Input List.</param>
         /// <param name="dest">Destination buffer.</param>
         /// <param name="count">Number of elements to copy.</param>
-        public static void CopyTo<T>(this T[] list, void* dest, int count)
+        public static void CopyTo<T>(this T[] list, Span<byte> dest, int count)
+            where T : struct
+        {
+            CopyTo(list.AsSpan(), dest, count);
+        }
+
+        public static void CopyTo<T>(this Span<T> list, Span<byte> dest, int count)
             where T : struct
         {
             var c = min(count, list.Length);
+            var destT = dest.Cast<byte, T>();
             for (int i = 0; i < c; ++i)
-                UnsafeUtility.WriteArrayElement(dest, i, list[i]);
+                destT[i] = list[i];
         }
 
         private static void CalculateRadixParams(int radixBits, out int bitStates)
@@ -180,17 +186,28 @@ namespace PKGE.Unsafe
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "arrayLength is unused.")]
-        private static void CalculateRadixSortSupportArrays(
-            int bitStates, int arrayLength, uint* supportArray,
+        private static unsafe void CalculateRadixSortSupportArrays(
+            int bitStates, int arrayLength, Span<uint> supportArray,
             out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
         {
-            bucketIndices = supportArray;
+            bucketIndices = (uint*)UnsafeUtility.AddressOf(ref supportArray[0]);
             bucketSizes = bucketIndices + bitStates;
             bucketPrefix = bucketSizes + bitStates;
             arrayOutput = bucketPrefix + bitStates;
         }
+        /*
+        private static void CalculateRadixSortSupportArrays(
+            int bitStates, int arrayLength, Span<uint> supportArray,
+            out Span<uint> bucketIndices, out Span<uint> bucketSizes, out Span<uint> bucketPrefix, out Span<uint> arrayOutput)
+        {
+            bucketIndices = supportArray;
+            bucketSizes = bucketIndices[bitStates..];
+            bucketPrefix = bucketSizes[bitStates..];
+            arrayOutput = bucketPrefix[bitStates..];
+        }
+        */
 
-        private static void MergeSort(uint* array, uint* support, int length)
+        private static void MergeSort(Span<uint> array, Span<uint> support, int length)
         {
             for (int k = 1; k < length; k *= 2)
             {
@@ -255,9 +272,7 @@ namespace PKGE.Unsafe
             if (supportArray == null || supportArray.Length < sortSize)
                 supportArray = new uint[sortSize];
 
-            fixed (uint* arrPtr = arr)
-            fixed (uint* supportPtr = supportArray)
-                MergeSort(arrPtr, supportPtr, sortSize);
+            MergeSort(arr, supportArray, sortSize);
         }
 
         /// <summary>
@@ -275,10 +290,10 @@ namespace PKGE.Unsafe
             if (!supportArray.IsCreated || supportArray.Length < sortSize)
                 supportArray.ResizeArray(arr.Length);
 
-            MergeSort((uint*)arr.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), sortSize);
+            MergeSort(arr, supportArray, sortSize);
         }
 
-        private static void InsertionSort(uint* arr, int length)
+        private static void InsertionSort(Span<uint> arr, int length)
         {
             for (int i = 0; i < length; ++i)
             {
@@ -306,8 +321,7 @@ namespace PKGE.Unsafe
             if (sortSize == 0)
                 return;
 
-            fixed (uint* ptr = arr)
-                InsertionSort(ptr, sortSize);
+            InsertionSort(arr.AsSpan(), sortSize);
         }
 
         /// <summary>
@@ -321,17 +335,17 @@ namespace PKGE.Unsafe
             if (!arr.IsCreated || sortSize == 0)
                 return;
 
-            InsertionSort((uint*)arr.GetUnsafePtr(), sortSize);
+            InsertionSort(arr.AsSpan(), sortSize);
         }
 
-        private static void RadixSort(uint* array, uint* support, int radixBits, int bitStates, int length)
+        private static unsafe void RadixSort(Span<uint> array, Span<uint> support, int radixBits, int bitStates, int length)
         {
             uint mask = (uint)(bitStates - 1);
             CalculateRadixSortSupportArrays(bitStates, length, support, out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput);
 
             int buckets = (sizeof(uint) * 8) / radixBits;
             uint* targetBuffer = arrayOutput;
-            uint* inputBuffer = array;
+            uint* inputBuffer = (uint*)UnsafeUtility.AddressOf(ref array[0]);
             for (int b = 0; b < buckets; ++b)
             {
                 int shift = b * radixBits;
@@ -356,6 +370,40 @@ namespace PKGE.Unsafe
                 targetBuffer = tmp;
             }
         }
+        /*
+        private static void RadixSort(Span<uint> array, Span<uint> support, int radixBits, int bitStates, int length)
+        {
+            uint mask = (uint)(bitStates - 1);
+            CalculateRadixSortSupportArrays(bitStates, length, support, out var bucketIndices, out var bucketSizes, out var bucketPrefix, out var arrayOutput);
+
+            int buckets = (sizeof(uint) * 8) / radixBits;
+            var targetBuffer = arrayOutput;
+            var inputBuffer = array;
+            for (int b = 0; b < buckets; ++b)
+            {
+                int shift = b * radixBits;
+                for (int s = 0; s < 3 * bitStates; ++s)
+                    bucketIndices[s] = 0;//bucketSizes and bucketPrefix get zeroed, since we walk 3x the bit states
+
+                for (int i = 0; i < length; ++i)
+                    bucketSizes[(int)((inputBuffer[i] >> shift) & mask)]++;
+
+                for (int s = 1; s < bitStates; ++s)
+                    bucketPrefix[s] = bucketPrefix[s - 1] + bucketSizes[s - 1];
+
+                for (int i = 0; i < length; ++i)
+                {
+                    uint val = inputBuffer[i];
+                    var bucket = (int)((val >> shift) & mask);
+                    targetBuffer[(int)(bucketPrefix[bucket] + bucketIndices[bucket]++)] = val;
+                }
+
+                var tmp = inputBuffer;
+                inputBuffer = targetBuffer;
+                targetBuffer = tmp;
+            }
+        }
+        */
 
         /// <summary>
         /// Radix sort or bucket sort, stable and non in-place.
@@ -378,9 +426,7 @@ namespace PKGE.Unsafe
             if (supportArray == null || supportArray.Length < supportSize)
                 supportArray = new uint[supportSize];
 
-            fixed (uint* ptr = arr)
-            fixed (uint* supportArrayPtr = supportArray)
-                RadixSort(ptr, supportArrayPtr, radixBits, bitStates, sortSize);
+            RadixSort(arr, supportArray, radixBits, bitStates, sortSize);
         }
 
         /// <summary>
@@ -401,7 +447,7 @@ namespace PKGE.Unsafe
             if (!supportArray.IsCreated || supportArray.Length < supportSize)
                 supportArray.ResizeArray(supportSize);
 
-            RadixSort((uint*)array.GetUnsafePtr(), (uint*)supportArray.GetUnsafePtr(), radixBits, bitStates, sortSize);
+            RadixSort(array, supportArray, radixBits, bitStates, sortSize);
         }
 
         /// <summary>
@@ -412,12 +458,12 @@ namespace PKGE.Unsafe
         /// <param name="count">Number of elements.</param>
         /// <param name="v">Element to test against.</param>
         /// <returns>The first index of the provided element.</returns>
-        public static int IndexOf<T>(void* data, int count, T v)
+        public static int IndexOf<T>(Span<T> data, int count, T v)
             where T : struct, IEquatable<T>
         {
             for (int i = 0; i < count; ++i)
             {
-                if (UnsafeUtility.ReadArrayElement<T>(data, i).Equals(v))
+                if (data[i].Equals(v))
                     return i;
             }
 

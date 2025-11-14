@@ -7,6 +7,7 @@ namespace PKGE.Unsafe.Tests
 {
     public class NativeArrayExtensionsTests
     {
+#if PKGE_USING_UNSAFE
         [Test]
         public void PtrToNativeArrayWithDefault_ShouldCreateNativeArrayAndCopySourceData()
         {
@@ -31,6 +32,7 @@ namespace PKGE.Unsafe.Tests
                 }
             }
         }
+#endif // PKGE_USING_UNSAFE
 
         [Test]
         public void FillArrayWithValue_ShouldFillNativeArrayWithSpecifiedValue()
@@ -64,7 +66,8 @@ namespace PKGE.Unsafe.Tests
 
             nativeArray.Dispose();
         }
-        
+
+#if PKGE_USING_UNSAFE
         [Test]
         public unsafe void GetPointer_ShouldReturnNullForDefaultArray()
         {
@@ -78,6 +81,7 @@ namespace PKGE.Unsafe.Tests
             var array = new NativeArray<int>(10, Allocator.Temp);
             Assert.IsTrue(null != array.GetPtr());
         }
+#endif // PKGE_USING_UNSAFE
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Assets/Tests/InputSystem/Utilities/ArrayHelperTests.cs
         #region UnityEngine.InputSystem.Utilities

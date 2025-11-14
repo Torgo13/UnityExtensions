@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 #if INCLUDE_COLLECTIONS
 using System;
 using NUnit.Framework;
@@ -297,3 +298,4 @@ namespace PKGE.Unsafe.Tests
     }
 }
 #endif // INCLUDE_COLLECTIONS
+#endif // PKGE_USING_UNSAFE

@@ -100,6 +100,7 @@ namespace PKGE.Unsafe
         /// <param name="width">The width of the 2D memory area to map.</param>
         /// <param name="pitch">The pitch of the 2D memory area to map (the distance between each row).</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when one of the parameters are negative.</exception>
+#if PKGE_USING_UNSAFE
         public unsafe Span2D(void* pointer, int height, int width, int pitch)
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
@@ -128,6 +129,65 @@ namespace PKGE.Unsafe
             this.width = width;
             this.Stride = width + pitch;
         }
+#else
+        public Span2D(Span<T> pointer, int height, int width, int pitch)
+        {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                ThrowHelper.ThrowArgumentExceptionForManagedType();
+            }
+
+            if (width < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForWidth();
+            }
+
+            if (height < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForHeight();
+            }
+
+            if (pitch < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForPitch();
+            }
+
+            OverflowHelper.EnsureIsInNativeIntRange(height, width, pitch);
+
+            this.span = pointer[..height];
+            this.width = width;
+            this.Stride = width + pitch;
+        }
+
+        public Span2D(Memory<T> pointer, int height, int width, int pitch)
+        {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                ThrowHelper.ThrowArgumentExceptionForManagedType();
+            }
+
+            if (width < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForWidth();
+            }
+
+            if (height < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForHeight();
+            }
+
+            if (pitch < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeExceptionForPitch();
+            }
+
+            OverflowHelper.EnsureIsInNativeIntRange(height, width, pitch);
+
+            this.span = pointer.Span[..height];
+            this.width = width;
+            this.Stride = width + pitch;
+        }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Span2D{T}"/> struct.
@@ -816,16 +876,23 @@ namespace PKGE.Unsafe
         /// <returns>A reference to the 0th element, or a <see langword="null"/> reference.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public unsafe ref T GetPinnableReference()
+        public ref T GetPinnableReference()
         {
-            ref T r0 = ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(null);
-
-            if (Length != 0)
+#if PKGE_USING_UNSAFE
+            unsafe
             {
-                r0 = ref MemoryMarshal.GetReference(this.span);
-            }
+                ref T r0 = ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(null);
 
-            return ref r0;
+                if (Length != 0)
+                {
+                    r0 = ref MemoryMarshal.GetReference(this.span);
+                }
+
+                return ref r0;
+            }
+#else
+            return ref span[0];
+#endif // PKGE_USING_UNSAFE
         }
 
         /// <summary>
@@ -1035,7 +1102,7 @@ namespace PKGE.Unsafe
         /// <param name="array">The input 2D array to convert.</param>
         public static implicit operator Span2D<T>(T[,]? array) => new(array);
 #endif // ZERO
-        #endregion // CommunityToolkit.HighPerformance
+#endregion // CommunityToolkit.HighPerformance
     }
 
     public static class Span2DExtensions

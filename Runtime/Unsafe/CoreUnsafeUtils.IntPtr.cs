@@ -19,32 +19,30 @@ namespace PKGE.Unsafe
     /// <summary>
     /// Static class with unsafe utility functions.
     /// </summary>
-    public static unsafe partial class CoreUnsafeUtils
+    public static partial class CoreUnsafeUtils
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/CoreUnsafeUtils.cs#L258
         #region UnityEngine.Rendering
-        #region IntPtr
         /// <inheritdoc cref="CopyTo"/>
-        public static void CopyTo<T>(this List<T> list, IntPtr dest, int count)
+        public static unsafe void CopyTo<T>(this List<T> list, IntPtr dest, int count)
             where T : struct
         {
-            CopyTo(list, (void*)dest, count);
+            CopyTo(list, new Span<byte>((void*)dest, SizeOfCache<T>.Size * count), count);
         }
 
         /// <inheritdoc cref="CopyTo"/>
-        public static void CopyTo<T>(this T[] list, IntPtr dest, int count)
+        public static unsafe void CopyTo<T>(this T[] list, IntPtr dest, int count)
             where T : struct
         {
-            CopyTo(list, (void*)dest, count);
+            CopyTo(list, new Span<byte>((void*)dest, SizeOfCache<T>.Size * count), count);
         }
 
         /// <inheritdoc cref="IndexOf"/>
-        public static int IndexOf<T>(IntPtr data, int count, T v)
+        public static unsafe int IndexOf<T>(IntPtr data, int count, T v)
             where T : struct, IEquatable<T>
         {
-            return IndexOf((void*)data, count, v);
+            return IndexOf(new Span<T>((void*)data, SizeOfCache<T>.Size * count), count, v);
         }
-        #endregion // IntPtr
         #endregion // UnityEngine.Rendering
     }
 }

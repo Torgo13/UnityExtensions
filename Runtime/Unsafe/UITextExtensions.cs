@@ -9,6 +9,7 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/UIExtensionMethods.cs
         #region FPSSample
+#if PKGE_USING_UNSAFE
         public static void Format<T0>(this Text me, string format, T0 arg0)
         {
             using var pooledArray = DisposeArrayPool<char>.Rent(1024);
@@ -68,6 +69,7 @@ namespace PKGE.Unsafe
             me.Set(buf, l);
         }
 #endif // INCLUDE_TEXTMESH_PRO
+#endif // PKGE_USING_UNSAFE
 
         public static void Set(this Text me, char[] text, int length)
         {

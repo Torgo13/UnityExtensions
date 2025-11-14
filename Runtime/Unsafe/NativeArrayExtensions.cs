@@ -11,6 +11,7 @@ namespace PKGE.Unsafe
     {
         //https://github.com/needle-mirror/com.unity.xr.arfoundation/blob/master/Runtime/ARSubsystems/NativeCopyUtility.cs
         #region UnityEngine.XR.ARSubsystems
+#if PKGE_USING_UNSAFE
         /// <summary>
         /// Creates a <c>NativeArray</c> from a pointer by first copying <paramref name="length"/>
         /// <paramref name="defaultT"/>s into the <c>NativeArray</c>, and then overwriting the
@@ -52,6 +53,7 @@ namespace PKGE.Unsafe
 
             return array;
         }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Fills <paramref name="array"/> with repeated copies of <paramref name="value"/>.
@@ -59,17 +61,27 @@ namespace PKGE.Unsafe
         /// <typeparam name="T">The type of the <c>NativeArray</c>. Must be a <c>struct</c>.</typeparam>
         /// <param name="array">The array to fill.</param>
         /// <param name="value">The value with which to fill the array.</param>
-        public static unsafe void FillArrayWithValue<T>(this NativeArray<T> array, T value) where T : struct
+        public static void FillArrayWithValue<T>(this NativeArray<T> array, T value) where T : struct
         {
+#if PKGE_USING_UNSAFE
             // Early out if array is zero, or iOS will crash in MemCpyReplicate.
             if (array.Length == 0)
                 return;
 
-            UnsafeUtility.MemCpyReplicate(
-                array.GetUnsafePtr(),
-                UnsafeUtility.AddressOf(ref value),
-                SizeOfCache<T>.Size,
-                array.Length);
+            unsafe
+            {
+                UnsafeUtility.MemCpyReplicate(
+                    array.GetUnsafePtr(),
+                    UnsafeUtility.AddressOf(ref value),
+                    SizeOfCache<T>.Size,
+                    array.Length);
+            }
+#else
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = value;
+            }
+#endif // PKGE_USING_UNSAFE
         }
 
         /// <summary>
@@ -92,12 +104,12 @@ namespace PKGE.Unsafe
 
     public static partial class NativeArrayExtensions
     {
+#if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/UnityCsReference/blob/4b463aa72c78ec7490b7f03176bd012399881768/Runtime/Export/NativeArray/NativeArray.cs#L1024
         #region Unity.Collections.LowLevel.Unsafe
 #if UNITY_6000_3_OR_NEWER
 #else
         /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
-        /// <remarks>The caller is still the owner of the data.</remarks>
         public static unsafe NativeArray<T> ConvertExistingDataToNativeArray<T>(Span<T> data,
             Allocator allocator = Allocator.None) where T : unmanaged
         {
@@ -112,8 +124,10 @@ namespace PKGE.Unsafe
         }
 #endif // UNITY_6000_3_OR_NEWER
         #endregion // Unity.Collections.LowLevel.Unsafe
+#endif // PKGE_USING_UNSAFE
 
-        /// <inheritdoc cref="ConvertExistingDataToNativeArray{T}(Span{T}, Allocator)"/>
+        /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
+        /// <remarks>The caller is still the owner of the data.</remarks>
         public static unsafe NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
         {
             var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
@@ -158,6 +172,43 @@ namespace PKGE.Unsafe
             return list.ExtractArrayFromList().AsNativeArray(list.Count, out gcHandle);
         }
 
+#if INCLUDE_COLLECTIONS
+        public static unsafe NativeList<T> AsNativeList<T>(this Span<T> span) where T : unmanaged
+        {
+            var nativeList = new NativeList<T>(span.Length, AllocatorManager.None);
+            *nativeList.GetUnsafeList() = span.AsUnsafeList();
+            return nativeList;
+        }
+
+        public static unsafe NativeList<T> AsNativeList<T>(this T[] array, int count) where T : unmanaged
+        {
+            var nativeList = new NativeList<T>(count, AllocatorManager.None);
+            *nativeList.GetUnsafeList() = array.AsUnsafeList();
+            return nativeList;
+        }
+
+        public static unsafe NativeList<T> AsNativeList<T>(this T[] array) where T : unmanaged
+        {
+            return array.AsNativeList(array.Length);
+        }
+
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this Span<T> span) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref span[0]), span.Length);
+        }
+
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this T[] array, int count) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref array[0]), count);
+        }
+
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this T[] array) where T : unmanaged
+        {
+            return array.AsUnsafeList(array.Length);
+        }
+#endif // INCLUDE_COLLECTIONS
+
+#if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe void* GetPtr<T>(this NativeArray<T> array) where T : struct
@@ -170,6 +221,7 @@ namespace PKGE.Unsafe
             return array.IsCreated ? array.GetUnsafeReadOnlyPtr() : null;
         }
         #endregion // UnityEngine.Formats.Alembic.Importer
+#endif // PKGE_USING_UNSAFE
 
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
         #region UnityEngine.Rendering
@@ -191,6 +243,7 @@ namespace PKGE.Unsafe
             if (startIndex + length >= array.Length)
                 throw new IndexOutOfRangeException(nameof(length));
 
+#if PKGE_USING_UNSAFE
             unsafe
             {
                 T* ptr = (T*)array.GetUnsafePtr();
@@ -200,6 +253,12 @@ namespace PKGE.Unsafe
                 for (int i = startIndex; i < endIndex; ++i)
                     ptr[i] = value;
             }
+#else
+            int endIndex = length == -1 ? array.Length : startIndex + length;
+
+            for (int i = startIndex; i < endIndex; ++i)
+                array[i] = value;
+#endif // PKGE_USING_UNSAFE
         }
         #endregion // UnityEngine.Rendering
 
@@ -223,7 +282,7 @@ namespace PKGE.Unsafe
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
-        public static unsafe void EraseAtWithCapacity<TValue>(this NativeArray<TValue> array, ref int count, int index)
+        public static void EraseAtWithCapacity<TValue>(this NativeArray<TValue> array, ref int count, int index)
             where TValue : struct
         {
             Assert.IsTrue(array.IsCreated);
@@ -235,10 +294,13 @@ namespace PKGE.Unsafe
             if (index < count - 1)
             {
                 var elementSize = SizeOfCache<TValue>.Size;
-                var arrayPtr = (byte*)array.GetUnsafePtr();
+                unsafe
+                {
+                    var arrayPtr = (byte*)array.GetUnsafePtr();
 
-                UnsafeUtility.MemCpy(arrayPtr + elementSize * index, arrayPtr + elementSize * (index + 1),
-                    (count - index - 1) * elementSize);
+                    UnsafeUtility.MemCpy(arrayPtr + elementSize * index, arrayPtr + elementSize * (index + 1),
+                        (count - index - 1) * elementSize);
+                }
             }
 
             --count;

@@ -36,6 +36,7 @@ namespace PKGE.Unsafe
             var container = new NativeList<T>(list.Count, allocator);
             container.ResizeUninitialized(container.Capacity);
             list.AsSpan().CopyTo(container.AsSpan());
+            container.Length = list.Count;
 
             return container;
         }

@@ -10,6 +10,7 @@ namespace PKGE.Unsafe
 {
     public static partial class NativeListExtensions
     {
+#if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe T* GetPtr<T>(this NativeList<T> nativeList) where T : unmanaged
@@ -22,6 +23,7 @@ namespace PKGE.Unsafe
             return nativeList.GetUnsafeReadOnlyPtr();
         }
         #endregion // UnityEngine.Formats.Alembic.Importer
+#endif // PKGE_USING_UNSAFE
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal

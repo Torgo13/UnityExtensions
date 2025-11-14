@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 using System;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -145,3 +146,4 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // PKGE_USING_UNSAFE

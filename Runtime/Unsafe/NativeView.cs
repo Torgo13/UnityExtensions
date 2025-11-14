@@ -1,3 +1,5 @@
+#if PKGE_USING_UNSAFE
+using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -11,6 +13,7 @@ namespace PKGE.Unsafe
     /// </summary>
     public unsafe struct NativeView
     {
+        public IntPtr IntPtr { readonly get => (IntPtr)Ptr; set => Ptr = (void*)value; }
         public void* Ptr;
         public int Count;
     }
@@ -31,3 +34,4 @@ namespace PKGE.Unsafe
     }
     #endregion // UnityEngine.XR.ARCore
 }
+#endif // PKGE_USING_UNSAFE

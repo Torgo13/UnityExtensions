@@ -1,4 +1,7 @@
+#if ENABLE_VR && ENABLE_XR
+#else
 #undef INCLUDE_UGUI
+#endif // ENABLE_VR && ENABLE_XR
 
 using NUnit.Framework;
 using UnityEngine;

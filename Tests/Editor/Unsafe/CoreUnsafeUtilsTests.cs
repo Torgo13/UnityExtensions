@@ -50,8 +50,8 @@ namespace PKGE.Editor.Unsafe.Tests
         [TestCaseSource(nameof(s_CopyToList))]
         public void CopyToList(List<TestData> data)
         {
-            var dest = stackalloc TestData[data.Count];
-            data.CopyTo(dest, data.Count);
+            Span<TestData> dest = stackalloc TestData[data.Count];
+            data.CopyTo(dest.Cast<TestData, byte>(), data.Count);
 
             for (int i = 0; i < data.Count; ++i)
                 Assert.AreEqual(data[i], dest[i]);
@@ -73,8 +73,8 @@ namespace PKGE.Editor.Unsafe.Tests
         [TestCaseSource(nameof(s_CopyToArray))]
         public void CopyToArray(TestData[] data)
         {
-            var dest = stackalloc TestData[data.Length];
-            data.CopyTo(dest, data.Length);
+            Span<TestData> dest = stackalloc TestData[data.Length];
+            data.CopyTo(dest.Cast<TestData, byte>(), data.Length);
 
             for (int i = 0; i < data.Length; ++i)
                 Assert.AreEqual(data[i], dest[i]);

@@ -13,7 +13,6 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
-        #region IntPtr
         public static unsafe IntPtr GetIntPtr<T>(this NativeList<T> nativeList) where T : unmanaged
         {
             return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafePtr() : IntPtr.Zero;
@@ -23,7 +22,6 @@ namespace PKGE.Unsafe
         {
             return nativeList.IsCreated ? (IntPtr)nativeList.GetUnsafeReadOnlyPtr() : IntPtr.Zero;
         }
-        #endregion // IntPtr
         #endregion // UnityEngine.Formats.Alembic.Importer
     }
 }

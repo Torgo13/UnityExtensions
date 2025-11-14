@@ -49,7 +49,11 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public unsafe void Test_Span2DT_PtrConstructor()
         {
+#if PKGE_USING_UNSAFE
             int* ptr = stackalloc[]
+#else
+            Span<int> ptr = stackalloc[]
+#endif // PKGE_USING_UNSAFE
             {
                 1,
                 2,
@@ -73,10 +77,17 @@ namespace PKGE.Unsafe.Tests
             Assert.AreEqual(ptr[0], 99);
             Assert.AreEqual(ptr[5], 101);
 
+#if PKGE_USING_UNSAFE
             _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>((void*)0, -1, 0, 0));
             _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>((void*)0, 1, -2, 0));
             _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>((void*)0, 1, 0, -5));
             _ = Assert.Throws<ArgumentException>(() => new Span2D<string>((void*)0, 2, 2, 0));
+#else
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>(new Memory<int>(), -1, 0, 0));
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>(new Memory<int>(), 1, -2, 0));
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Span2D<int>(new Memory<int>(), 1, 0, -5));
+            _ = Assert.Throws<ArgumentException>(() => new Span2D<string>(new Memory<string>(), 2, 2, 0));
+#endif // PKGE_USING_UNSAFE
         }
 
         [Test]
@@ -852,7 +863,11 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public unsafe void Test_Span2DT_Pointer_GetRow()
         {
+#if PKGE_USING_UNSAFE
             int* array = stackalloc[]
+#else
+            Memory<int> array = new int[]
+#endif // PKGE_USING_UNSAFE
             {
                 1,
                 2,
@@ -900,7 +915,11 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public unsafe void Test_Span2DT_Pointer_GetColumn()
         {
+#if PKGE_USING_UNSAFE
             int* array = stackalloc[]
+#else
+            Memory<int> array = new int[]
+#endif // PKGE_USING_UNSAFE
             {
                 1,
                 2,
@@ -958,7 +977,11 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public unsafe void Test_Span2DT_Pointer_GetEnumerator()
         {
+#if PKGE_USING_UNSAFE
             int* array = stackalloc[]
+#else
+            Span<int> array = stackalloc[]
+#endif // PKGE_USING_UNSAFE
             {
                 1,
                 2,
@@ -972,11 +995,20 @@ namespace PKGE.Unsafe.Tests
             int i = 0;
 
             // Same test as above, but wrapping a raw pointer
+#if PKGE_USING_UNSAFE
             foreach (ref int item in new Span2D<int>(array + 1, 2, 2, 1))
+#else
+            foreach (ref int item in new Span2D<int>(array[1..], 2, 2, 1))
+#endif // PKGE_USING_UNSAFE
             {
                 // Check the reference again
                 Assert.AreEqual(
+#if PKGE_USING_UNSAFE
                     Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AsRef<int>(&array[((i / 2) * 3) + (i % 2) + 1]),
+#else
+                    Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AsRef<int>(
+                        Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref array[((i / 2) * 3) + (i % 2) + 1])),
+#endif // PKGE_USING_UNSAFE
                     item);
 
                 result[i++] = item;

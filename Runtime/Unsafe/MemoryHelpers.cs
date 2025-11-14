@@ -9,6 +9,7 @@ using static Unity.Mathematics.math;
 
 namespace PKGE.Unsafe
 {
+#if PKGE_USING_UNSAFE
     #region Unity.Collections
     internal struct Memory
     {
@@ -162,12 +163,14 @@ namespace PKGE.Unsafe
         }
     }
     #endregion // Unity.Collections
+#endif // PKGE_USING_UNSAFE
 
-    public static unsafe partial class MemoryHelpers
+    public static partial class MemoryHelpers
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/MemoryUtilities.cs
         #region UnityEngine.Rendering
-        public static T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
+#if PKGE_USING_UNSAFE
+        public static unsafe T* MallocTracked<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
         {
             return (T*)UnsafeUtility.MallocTracked(
                 SizeOfCache<T>.Size * count,
@@ -176,14 +179,14 @@ namespace PKGE.Unsafe
                 callstacksToSkip);
         }
 
-        public static void FreeTracked<T>(T* p, Allocator allocator) where T : unmanaged
+        public static unsafe void FreeTracked<T>(T* p, Allocator allocator) where T : unmanaged
         {
             UnsafeUtility.FreeTracked(p, allocator);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Compatibility")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "UnusedParameter.Global")]
-        public static T* Malloc<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
+        public static unsafe T* Malloc<T>(int count, Allocator allocator, int callstacksToSkip = 0) where T : unmanaged
         {
             return (T*)UnsafeUtility.Malloc(
                 SizeOfCache<T>.Size * count,
@@ -191,10 +194,11 @@ namespace PKGE.Unsafe
                 allocator);
         }
 
-        public static void Free<T>(T* p, Allocator allocator) where T : unmanaged
+        public static unsafe void Free<T>(T* p, Allocator allocator) where T : unmanaged
         {
             UnsafeUtility.Free(p, allocator);
         }
+#endif // PKGE_USING_UNSAFE
         #endregion // UnityEngine.Rendering
 
         //https://github.com/Unity-Technologies/InputSystem/blob/develop/Packages/com.unity.inputsystem/InputSystem/Utilities/MemoryHelpers.cs
@@ -235,7 +239,7 @@ namespace PKGE.Unsafe
             }
         }
 
-        public static bool Compare(void* ptr1, void* ptr2, BitRegion region)
+        public static bool Compare(Span<byte> ptr1, Span<byte> ptr2, BitRegion region)
         {
             if (region.SizeInBits == 1)
                 return ReadSingleBit(ptr1, region.BITOffset) == ReadSingleBit(ptr2, region.BITOffset);
@@ -247,27 +251,28 @@ namespace PKGE.Unsafe
             return (uint)(byteOffset + sizeInBits / 8 + (sizeInBits % 8 > 0 ? 1 : 0));
         }
 
-        public static void WriteSingleBit(void* ptr, uint bitOffset, bool value)
+        public static void WriteSingleBit(Span<byte> ptr, uint bitOffset, bool value)
         {
-            var byteOffset = bitOffset >> 3;
+            int byteOffset = (int)(bitOffset >> 3);
             bitOffset &= 7;
             if (value)
-                *((byte*)ptr + byteOffset) |= (byte)(1U << (int)bitOffset);
+                ptr[byteOffset] |= (byte)(1U << (int)bitOffset);
             else
-                *((byte*)ptr + byteOffset) &= (byte)~(1U << (int)bitOffset);
+                ptr[byteOffset] &= (byte)~(1U << (int)bitOffset);
         }
 
-        public static bool ReadSingleBit(void* ptr, uint bitOffset)
+        public static bool ReadSingleBit(Span<byte> ptr, uint bitOffset)
         {
-            var byteOffset = bitOffset >> 3;
+            int byteOffset = (int)(bitOffset >> 3);
             bitOffset &= 7;
-            return (*((byte*)ptr + byteOffset) & (1U << (int)bitOffset)) != 0;
+            return (ptr[byteOffset] & (1U << (int)bitOffset)) != 0;
         }
 
-        public static void MemCpyBitRegion(void* destination, void* source, uint bitOffset, uint bitCount)
+#if PKGE_USING_UNSAFE
+        public static unsafe void MemCpyBitRegion(Span<byte> destination, Span<byte> source, uint bitOffset, uint bitCount)
         {
-            var destPtr = (byte*)destination;
-            var sourcePtr = (byte*)source;
+            var destPtr = (byte*)UnsafeUtility.AddressOf(ref destination[0]);
+            var sourcePtr = (byte*)UnsafeUtility.AddressOf(ref source[0]);
 
             // If we're offset by more than a byte, adjust our pointers.
             if (bitOffset >= 8)
@@ -316,6 +321,7 @@ namespace PKGE.Unsafe
                 *destPtr = (byte)(((*destPtr & ~byteMask) | (*sourcePtr & byteMask)) & 0xFF);
             }
         }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Compare two memory regions that may be offset by a bit-count and have a length expressed
@@ -328,20 +334,20 @@ namespace PKGE.Unsafe
         /// <param name="mask">If not null, only compare bits set in the mask. This allows comparing two memory regions while
         /// ignoring specific bits.</param>
         /// <returns>True if the two memory regions are identical, false otherwise.</returns>
-        public static bool MemCmpBitRegion(void* ptr1, void* ptr2, uint bitOffset, uint bitCount, void* mask = null)
+        public static bool MemCmpBitRegion(Span<byte> ptr1, Span<byte> ptr2, uint bitOffset, uint bitCount, Span<byte> mask = default)
         {
-            var bytePtr1 = (byte*)ptr1;
-            var bytePtr2 = (byte*)ptr2;
-            var maskPtr = (byte*)mask;
+            var bytePtr1 = ptr1;
+            var bytePtr2 = ptr2;
+            var maskPtr = mask;
 
             // If we're offset by more than a byte, adjust our pointers.
             if (bitOffset >= 8)
             {
-                var skipBytes = bitOffset / 8;
-                bytePtr1 += skipBytes;
-                bytePtr2 += skipBytes;
+                var skipBytes = (int)(bitOffset / 8);
+                bytePtr1 = bytePtr1[skipBytes..];
+                bytePtr2 = bytePtr2[skipBytes..];
                 if (maskPtr != null)
-                    maskPtr += skipBytes;
+                    maskPtr = bytePtr2[skipBytes..];
                 bitOffset %= 8;
             }
 
@@ -356,12 +362,12 @@ namespace PKGE.Unsafe
 
                 if (maskPtr != null)
                 {
-                    byteMask &= *maskPtr;
-                    ++maskPtr;
+                    byteMask &= maskPtr[0];
+                    maskPtr = maskPtr[1..];
                 }
 
-                var byte1 = *bytePtr1 & byteMask;
-                var byte2 = *bytePtr2 & byteMask;
+                var byte1 = bytePtr1[0] & byteMask;
+                var byte2 = bytePtr2[0] & byteMask;
 
                 if (byte1 != byte2)
                     return false;
@@ -371,14 +377,14 @@ namespace PKGE.Unsafe
                 if (bitCount + bitOffset <= 8)
                     return true;
 
-                ++bytePtr1;
-                ++bytePtr2;
+                bytePtr1 = bytePtr1[1..];
+                bytePtr2 = bytePtr2[1..];
 
                 bitCount -= 8 - bitOffset;
             }
 
             // Compare contiguous bytes in-between, if any.
-            var byteCount = bitCount / 8;
+            var byteCount = (int)(bitCount / 8);
             if (byteCount >= 1)
             {
                 if (maskPtr != null)
@@ -397,7 +403,7 @@ namespace PKGE.Unsafe
                 }
                 else
                 {
-                    if (UnsafeUtility.MemCmp(bytePtr1, bytePtr2, byteCount) != 0)
+                    if (!bytePtr1.SequenceEqual(bytePtr2))
                         return false;
                 }
             }
@@ -406,20 +412,20 @@ namespace PKGE.Unsafe
             var remainingBitCount = bitCount % 8;
             if (remainingBitCount > 0)
             {
-                bytePtr1 += byteCount;
-                bytePtr2 += byteCount;
+                bytePtr1 = bytePtr1[byteCount..];
+                bytePtr2 = bytePtr2[byteCount..];
 
                 // We want the lowest remaining bits.
                 var byteMask = 0xFF >> (int)(8 - remainingBitCount);
 
                 if (maskPtr != null)
                 {
-                    maskPtr += byteCount;
-                    byteMask &= *maskPtr;
+                    maskPtr = maskPtr[byteCount..];
+                    byteMask &= maskPtr[0];
                 }
 
-                var byte1 = *bytePtr1 & byteMask;
-                var byte2 = *bytePtr2 & byteMask;
+                var byte1 = bytePtr1[0] & byteMask;
+                var byte2 = bytePtr2[0] & byteMask;
 
                 if (byte1 != byte2)
                     return false;
@@ -428,9 +434,10 @@ namespace PKGE.Unsafe
             return true;
         }
 
-        public static void MemSet(void* destination, int numBytes, byte value)
+#if PKGE_USING_UNSAFE
+        public static unsafe void MemSet(Span<byte> destination, int numBytes, byte value)
         {
-            var to = (byte*)destination;
+            var to = (byte*)UnsafeUtility.AddressOf(ref destination[0]);
             var pos = 0;
 
             unchecked
@@ -463,7 +470,9 @@ namespace PKGE.Unsafe
                 }
             }
         }
+#endif // PKGE_USING_UNSAFE
 
+#if PKGE_USING_UNSAFE
         /// <summary>
         /// Copy from <paramref name="source"/> to <paramref name="destination"/> all the bits that
         /// ARE set in <paramref name="mask"/>.
@@ -472,11 +481,11 @@ namespace PKGE.Unsafe
         /// <param name="source">Memory to copy from.</param>
         /// <param name="numBytes">Number of bytes to copy.</param>
         /// <param name="mask">Bitmask that determines which bits to copy. Bits that are set WILL be copied.</param>
-        public static void MemCpyMasked(void* destination, void* source, int numBytes, void* mask)
+        public static unsafe void MemCpyMasked(Span<byte> destination, Span<byte> source, int numBytes, Span<byte> mask)
         {
-            var from = (byte*)source;
-            var to = (byte*)destination;
-            var bits = (byte*)mask;
+            var from = (byte*)UnsafeUtility.AddressOf(ref source[0]);
+            var to = (byte*)UnsafeUtility.AddressOf(ref destination[0]);
+            var bits = (byte*)UnsafeUtility.AddressOf(ref mask[0]);
             var pos = 0;
 
             unchecked
@@ -515,6 +524,7 @@ namespace PKGE.Unsafe
                 }
             }
         }
+#endif // PKGE_USING_UNSAFE
 
         /// <summary>
         /// Reads bits memory region as unsigned int, up to and including 32 bits, least-significant bit first (LSB).
@@ -523,7 +533,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the unsigned integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <returns>Read unsigned integer.</returns>
-        public static uint ReadMultipleBitsAsUInt(void* ptr, uint bitOffset, uint bitCount)
+        public static uint ReadMultipleBitsAsUInt(Span<byte> ptr, uint bitOffset, uint bitCount)
         {
             if (ptr == null)
                 throw new ArgumentNullException(nameof(ptr));
@@ -535,14 +545,14 @@ namespace PKGE.Unsafe
             {
                 var newBitOffset = (int)bitOffset % 32;
                 var intOffset = ((int)bitOffset - newBitOffset) / 32;
-                ptr = (byte*)ptr + (intOffset * 4);
+                ptr = ptr[(intOffset * 4)..];
                 bitOffset = (uint)newBitOffset;
             }
 
             // Bits out of byte.
             if (bitOffset + bitCount <= 8)
             {
-                var value = *(byte*)ptr;
+                var value = ptr[0];
                 value >>= (int)bitOffset;
                 var mask = 0xFFu >> (8 - (int)bitCount);
                 return value & mask;
@@ -551,7 +561,7 @@ namespace PKGE.Unsafe
             // Bits out of short.
             if (bitOffset + bitCount <= 16)
             {
-                var value = *(ushort*)ptr;
+                var value = ptr.Cast<byte, ushort>()[0];
                 value >>= (int)bitOffset;
                 var mask = 0xFFFFu >> (16 - (int)bitCount);
                 return value & mask;
@@ -560,7 +570,7 @@ namespace PKGE.Unsafe
             // Bits out of int.
             if (bitOffset + bitCount <= 32)
             {
-                var value = *(uint*)ptr;
+                var value = ptr.Cast<byte, uint>()[0];
                 value >>= (int)bitOffset;
                 var mask = 0xFFFFFFFFu >> (32 - (int)bitCount);
                 return value & mask;
@@ -576,7 +586,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the unsigned integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <param name="value">Value to write.</param>
-        public static void WriteUIntAsMultipleBits(void* ptr, uint bitOffset, uint bitCount, uint value)
+        public static void WriteUIntAsMultipleBits(Span<byte> ptr, uint bitOffset, uint bitCount, uint value)
         {
             if (ptr == null)
                 throw new ArgumentNullException(nameof(ptr));
@@ -588,7 +598,7 @@ namespace PKGE.Unsafe
             {
                 var newBitOffset = (int)bitOffset % 32;
                 var intOffset = ((int)bitOffset - newBitOffset) / 32;
-                ptr = (byte*)ptr + (intOffset * 4);
+                ptr = ptr[(intOffset * 4)..];
                 bitOffset = (uint)newBitOffset;
             }
 
@@ -598,7 +608,7 @@ namespace PKGE.Unsafe
                 var byteValue = (byte)value;
                 byteValue <<= (int)bitOffset;
                 var mask = ~((0xFFU >> (8 - (int)bitCount)) << (int)bitOffset);
-                *(byte*)ptr = (byte)((*(byte*)ptr & mask) | byteValue);
+                ptr[0] = (byte)((ptr[0] & mask) | byteValue);
                 return;
             }
 
@@ -608,7 +618,8 @@ namespace PKGE.Unsafe
                 var ushortValue = (ushort)value;
                 ushortValue <<= (int)bitOffset;
                 var mask = ~((0xFFFFU >> (16 - (int)bitCount)) << (int)bitOffset);
-                *(ushort*)ptr = (ushort)((*(ushort*)ptr & mask) | ushortValue);
+                var ushortPtr = ptr.Cast<byte, ushort>();
+                ushortPtr[0] = (ushort)((ushortPtr[0] & mask) | ushortValue);
                 return;
             }
 
@@ -618,7 +629,8 @@ namespace PKGE.Unsafe
                 var uintValue = value;
                 uintValue <<= (int)bitOffset;
                 var mask = ~((0xFFFFFFFFU >> (32 - (int)bitCount)) << (int)bitOffset);
-                *(uint*)ptr = (*(uint*)ptr & mask) | uintValue;
+                var uintPtr = ptr.Cast<byte, uint>();
+                uintPtr[0] = (uintPtr[0] & mask) | uintValue;
                 return;
             }
 
@@ -633,7 +645,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <returns>Read integer.</returns>
-        public static int ReadTwosComplementMultipleBitsAsInt(void* ptr, uint bitOffset, uint bitCount)
+        public static int ReadTwosComplementMultipleBitsAsInt(Span<byte> ptr, uint bitOffset, uint bitCount)
         {
             // int is already represented as two's complement
             return (int)ReadMultipleBitsAsUInt(ptr, bitOffset, bitCount);
@@ -646,7 +658,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <param name="value">Value to write.</param>
-        public static void WriteIntAsTwosComplementMultipleBits(void* ptr, uint bitOffset, uint bitCount, int value)
+        public static void WriteIntAsTwosComplementMultipleBits(Span<byte> ptr, uint bitOffset, uint bitCount, int value)
         {
             // int is already represented as two's complement, so write as-is
             WriteUIntAsMultipleBits(ptr, bitOffset, bitCount, (uint)value);
@@ -660,7 +672,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <returns>Read integer.</returns>
-        public static int ReadExcessKMultipleBitsAsInt(void* ptr, uint bitOffset, uint bitCount)
+        public static int ReadExcessKMultipleBitsAsInt(Span<byte> ptr, uint bitOffset, uint bitCount)
         {
             // https://en.wikipedia.org/wiki/Signed_number_representations#Offset_binary
             var value = (long)ReadMultipleBitsAsUInt(ptr, bitOffset, bitCount);
@@ -675,7 +687,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <param name="value">Value to write.</param>
-        public static void WriteIntAsExcessKMultipleBits(void* ptr, uint bitOffset, uint bitCount, int value)
+        public static void WriteIntAsExcessKMultipleBits(Span<byte> ptr, uint bitOffset, uint bitCount, int value)
         {
             // https://en.wikipedia.org/wiki/Signed_number_representations#Offset_binary
             var halfMax = (long)((1UL << (int)bitCount) / 2);
@@ -691,7 +703,7 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the unsigned integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <returns>Normalized unsigned integer.</returns>
-        public static float ReadMultipleBitsAsNormalizedUInt(void* ptr, uint bitOffset, uint bitCount)
+        public static float ReadMultipleBitsAsNormalizedUInt(Span<byte> ptr, uint bitOffset, uint bitCount)
         {
             var uintValue = ReadMultipleBitsAsUInt(ptr, bitOffset, bitCount);
             var maxValue = (uint)((1UL << (int)bitCount) - 1);
@@ -705,14 +717,14 @@ namespace PKGE.Unsafe
         /// <param name="bitOffset">Offset in bits from the pointer to the start of the unsigned integer.</param>
         /// <param name="bitCount">Number of bits to read.</param>
         /// <param name="value">Normalized value to write.</param>
-        public static void WriteNormalizedUIntAsMultipleBits(void* ptr, uint bitOffset, uint bitCount, float value)
+        public static void WriteNormalizedUIntAsMultipleBits(Span<byte> ptr, uint bitOffset, uint bitCount, float value)
         {
             var maxValue = (uint)((1UL << (int)bitCount) - 1);
             var uintValue = value.NormalizedFloatToUInt(0, maxValue);
             WriteUIntAsMultipleBits(ptr, bitOffset, bitCount, uintValue);
         }
 
-        public static void SetBitsInBuffer(void* buffer, int byteOffset, int bitOffset, int sizeInBits, bool value)
+        public static void SetBitsInBuffer(Span<byte> buffer, int byteOffset, int bitOffset, int sizeInBits, bool value)
         {
             if (buffer == null)
                 throw new ArgumentException("A buffer must be provided to apply the bitmask on", nameof(buffer));
@@ -731,7 +743,7 @@ namespace PKGE.Unsafe
                 bitOffset %= 8;
             }
 
-            var bytePos = (byte*)buffer + byteOffset;
+            var bytePos = buffer[byteOffset..];
             var sizeRemainingInBits = sizeInBits;
 
             // Handle first byte separately if unaligned to byte boundary.
@@ -744,18 +756,18 @@ namespace PKGE.Unsafe
                 }
 
                 if (value)
-                    *bytePos |= (byte)mask;
+                    bytePos[0] |= (byte)mask;
                 else
-                    *bytePos &= (byte)~mask;
-                ++bytePos;
+                    bytePos[0] &= (byte)~mask;
+                bytePos = bytePos[1..];
                 sizeRemainingInBits -= 8 - bitOffset;
             }
 
             // Handle full bytes in-between.
             while (sizeRemainingInBits >= 8)
             {
-                *bytePos = value ? (byte)0xFF : (byte)0;
-                ++bytePos;
+                bytePos[0] = value ? (byte)0xFF : (byte)0;
+                bytePos = bytePos[1..];
                 sizeRemainingInBits -= 8;
             }
 
@@ -764,13 +776,18 @@ namespace PKGE.Unsafe
             {
                 var mask = (byte)(0xFF >> 8 - sizeRemainingInBits);
                 if (value)
-                    *bytePos |= mask;
+                    bytePos[0] |= mask;
                 else
-                    *bytePos &= (byte)~mask;
+                    bytePos[0] &= (byte)~mask;
             }
 
-            Assert.IsTrue(bytePos <= (byte*)buffer +
-                ComputeFollowingByteOffset((uint)byteOffset, (uint)bitOffset + (uint)sizeInBits));
+#if PKGE_USING_UNSAFE
+            unsafe
+            {
+                Assert.IsTrue((byte*)UnsafeUtility.AddressOf(ref bytePos[0]) <= (byte*)UnsafeUtility.AddressOf(ref buffer[
+                    (int)ComputeFollowingByteOffset((uint)byteOffset, (uint)bitOffset + (uint)sizeInBits)]));
+            }
+#endif // PKGE_USING_UNSAFE
         }
 
         public static uint AlignNatural(uint offset, uint sizeInBytes)

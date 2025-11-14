@@ -45,6 +45,7 @@ namespace PKGE.Unsafe.Tests
             Assert.AreEqual(10, list[index]);
         }
 
+#if PKGE_USING_UNSAFE
         [Test]
         public void CopyToList_FromArray_ShouldCopyElementsToList()
         {
@@ -199,6 +200,7 @@ namespace PKGE.Unsafe.Tests
             nativeArray.Dispose();
             nativeList.Dispose();
         }
+#endif // PKGE_USING_UNSAFE
 #endif // INCLUDE_COLLECTIONS
     }
 }

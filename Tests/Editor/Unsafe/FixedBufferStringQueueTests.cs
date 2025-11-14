@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 using NUnit.Framework;
 using PKGE.Unsafe;
 
@@ -65,3 +66,4 @@ namespace PKGE.Editor.Unsafe.Tests
         #endregion // UnityEngine.Rendering.Tests
     }
 }
+#endif // PKGE_USING_UNSAFE

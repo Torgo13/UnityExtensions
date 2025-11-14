@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
@@ -19,15 +18,20 @@ namespace PKGE.Unsafe
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> GetByteSpanFromArray(this Array array, int elementSize)
+        public static Span<byte> GetByteSpan<T>(this Span<T> array) where T : struct
         {
-            if (array.IsNullOrEmpty())
+            if (array == null || array.Length == 0)
                 return new Span<byte>();
 
-            Assert.AreEqual(UnsafeUtility.SizeOf(array.GetType().GetElementType()), elementSize);
+            return System.Runtime.InteropServices.MemoryMarshal.Cast<T, byte>(array);
+        }
 
-            var bArray = UnsafeUtility.As<Array, byte[]>(ref array);
-            return new Span<byte>(UnsafeUtility.AddressOf(ref bArray[0]), array.Length * elementSize);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<byte> GetByteSpanFromArray<T>(this T[] array, int elementSize = default) where T : struct
+        {
+            Assert.AreEqual(SizeOfCache<T>.Size, elementSize);
+
+            return GetByteSpan(array.AsSpan());
         }
         #endregion // Unity.Collections.LowLevel.Unsafe
 

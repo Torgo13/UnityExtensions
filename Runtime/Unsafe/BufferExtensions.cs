@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
@@ -25,29 +24,17 @@ namespace PKGE.Unsafe
         /// <typeparam name="T">A blittable struct type.</typeparam>
         /// <returns>The index in the buffer immediately following the last byte written.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int WriteStruct<T>(this byte[] buffer, ref T data, int offset = 0) where T : struct
+        public static int WriteStruct<T>(this byte[] buffer, ref T data, int offset = 0) where T : struct
         {
             return WriteStruct(buffer.AsSpan(), ref data, offset);
         }
 
         /// <inheritdoc cref="WriteStruct{T}(byte[], ref T, int)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int WriteStruct<T>(this Span<byte> buffer, ref T data, int offset = 0) where T : struct
+        public static int WriteStruct<T>(this Span<byte> buffer, ref T data, int offset = 0) where T : struct
         {
             var size = SizeOfCache<T>.Size;
-
-            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
-            UnsafeUtility.MemClear(ptr, size);
-
-            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-            {
-                UnsafeUtility.CopyStructureToPtr(ref data, ptr);
-            }
-            else
-            {
-                Marshal.StructureToPtr(data, (IntPtr)ptr, false);
-            }
-
+            MemoryMarshal.Cast<byte, T>(buffer[offset..])[0] = data;
             return offset + size;
         }
 
@@ -63,25 +50,16 @@ namespace PKGE.Unsafe
         /// <typeparam name="T">A blittable struct type.</typeparam>
         /// <returns>The read struct.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T ReadStruct<T>(this byte[] buffer, int offset = 0) where T : struct
+        public static T ReadStruct<T>(this byte[] buffer, int offset = 0) where T : struct
         {
             return ReadStruct<T>(buffer.AsSpan(), offset);
         }
 
         /// <inheritdoc cref="ReadStruct{T}(byte[], int)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T ReadStruct<T>(this Span<byte> buffer, int offset = 0) where T : struct
+        public static T ReadStruct<T>(this Span<byte> buffer, int offset = 0) where T : struct
         {
-            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
-            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-            {
-                UnsafeUtility.CopyPtrToStructure(ptr, out T value);
-                return value;
-            }
-            else
-            {
-                return Marshal.PtrToStructure<T>((IntPtr)ptr);
-            }
+            return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
         }
 
         /// <summary>
@@ -97,27 +75,17 @@ namespace PKGE.Unsafe
         /// <typeparam name="T">A blittable struct type.</typeparam>
         /// <returns>The read struct.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T ReadStruct<T>(this byte[] buffer, int offset, out int nextOffset) where T : struct
+        public static T ReadStruct<T>(this byte[] buffer, int offset, out int nextOffset) where T : struct
         {
             return ReadStruct<T>(buffer.AsSpan(), offset, out nextOffset);
         }
 
         /// <inheritdoc cref="ReadStruct{T}(byte[], int, out int)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe T ReadStruct<T>(this Span<byte> buffer, int offset, out int nextOffset) where T : struct
+        public static T ReadStruct<T>(this Span<byte> buffer, int offset, out int nextOffset) where T : struct
         {
             nextOffset = offset + SizeOfCache<T>.Size;
-
-            byte* ptr = (byte*)UnsafeUtility.AddressOf(ref buffer[offset]);
-            if (typeof(T).IsEnum || UnsafeUtility.IsBlittable<T>())
-            {
-                UnsafeUtility.CopyPtrToStructure(ptr, out T value);
-                return value;
-            }
-            else
-            {
-                return Marshal.PtrToStructure<T>((IntPtr)ptr);
-            }
+            return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
         }
     }
     #endregion // Unity.LiveCapture.Networking

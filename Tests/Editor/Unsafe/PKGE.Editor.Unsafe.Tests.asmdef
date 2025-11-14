@@ -29,6 +29,21 @@
             "name": "com.unity.ext.nunit",
             "expression": "2.0.3",
             "define": "USING_NUNIT_2_0_3_OR_NEWER"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "INCLUDE_BURST"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "INCLUDE_COLLECTIONS"
+        },
+        {
+            "name": "com.unity.mathematics",
+            "expression": "",
+            "define": "INCLUDE_MATHEMATICS"
         }
     ],
     "noEngineReferences": false

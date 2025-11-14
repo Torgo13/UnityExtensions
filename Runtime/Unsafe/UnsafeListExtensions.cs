@@ -10,6 +10,7 @@ namespace PKGE.Unsafe
 {
     public static partial class UnsafeListExtensions
     {
+#if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         public static unsafe T* GetPtr<T>(this UnsafeList<T> unsafeList) where T : unmanaged
@@ -22,6 +23,7 @@ namespace PKGE.Unsafe
             return unsafeList.IsCreated ? unsafeList.AsReadOnly().Ptr : null;
         }
         #endregion // UnityEngine.Formats.Alembic.Importer
+#endif // PKGE_USING_UNSAFE
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
@@ -29,13 +31,13 @@ namespace PKGE.Unsafe
         /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAt<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
             return ref unsafeList.UnsafeElementAtMutable(index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAtMutable<T>(this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        public static ref T UnsafeElementAtMutable<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsTrue(index < unsafeList.Capacity);
@@ -51,8 +53,6 @@ namespace PKGE.Unsafe
         #region CullingExtensions
         public static unsafe NativeArray<T> AsNativeArray<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            Assert.IsTrue(unsafeList.IsCreated);
-
             var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(unsafeList.Ptr, unsafeList.Length, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
@@ -71,30 +71,39 @@ namespace PKGE.Unsafe
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsNotNull(array);
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
 
-            unsafeList.AddRange(array.AsSpan(start: 0, length: count).AsNativeArray().AsUnsafeList());
+            unsafeList.AddRange(array.AsSpan(start: 0, length: count));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
         {
             Assert.IsNotNull(array);
 
-            unsafeList.AddRange(array, array.Length);
+            unsafeList.AddRange(array.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
         {
             Assert.IsNotNull(list);
 
-            unsafeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
+            unsafeList.AddRange(list.AsSpan());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, Span<T> span) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+            Assert.IsFalse(span == null);
+
+            unsafeList.AddRange(UnsafeUtility.AddressOf(ref span[0]), span.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

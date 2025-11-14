@@ -116,6 +116,7 @@ namespace PKGE.Unsafe.Tests
             job.output.Dispose();
         }
 
+#if PKGE_USING_UNSAFE
         [BurstCompile(CompileSynchronously = true)]
         struct MallocTestJob : IJob
         {
@@ -132,6 +133,7 @@ namespace PKGE.Unsafe.Tests
             var jobData = new MallocTestJob();
             jobData.Run();
         }
+#endif // PKGE_USING_UNSAFE
 
         [BurstCompile(CompileSynchronously = true)]
         struct ListCapacityJob : IJob
@@ -332,6 +334,7 @@ namespace PKGE.Unsafe.Tests
             public static implicit operator int(Data d) => d.Payload;
         }
 
+#if PKGE_USING_UNSAFE
         [BurstCompile(CompileSynchronously = true)]
         public static int MinInDynamicBuffer(in DynamicBuffer<Data> buffer)
         {
@@ -344,6 +347,7 @@ namespace PKGE.Unsafe.Tests
 
             return min;
         }
+#endif // PKGE_USING_UNSAFE
 
         /*
         public delegate int MinInDynamicBufferDelegate(in DynamicBuffer<Data> buffer);

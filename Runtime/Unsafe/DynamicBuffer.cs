@@ -1,3 +1,4 @@
+#if PKGE_USING_UNSAFE
 #if INCLUDE_COLLECTIONS
 using System;
 using System.Collections;
@@ -677,3 +678,4 @@ namespace PKGE.Unsafe
     }
 }
 #endif // INCLUDE_COLLECTIONS
+#endif // PKGE_USING_UNSAFE
