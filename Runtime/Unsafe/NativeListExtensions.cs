@@ -58,7 +58,12 @@ namespace PKGE.Unsafe
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
 
+#if UNITY_6000_3_OR_NEWER
+            nativeList.AddRange(NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(
+                array.AsSpan(start: 0, length: count), Allocator.None));
+#else
             nativeList.AddRange(array.AsSpan(start: 0, length: count).AsNativeArray());
+#endif // UNITY_6000_3_OR_NEWER
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,9 +83,9 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
+        public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
         {
-            nativeList.AddRangeNoResize(nativeArray.AsNativeList());
+            nativeList.AddRangeNoResize(nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length);
         }
     }
 }

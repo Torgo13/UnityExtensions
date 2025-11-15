@@ -128,10 +128,36 @@ namespace PKGE.Unsafe
 
         /// <summary>Internal method used typically by other systems to provide a view on them.</summary>
         /// <remarks>The caller is still the owner of the data.</remarks>
-        public static unsafe NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : struct
+        public static NativeArray<T> AsNativeArray<T>(this Span<T> span, Allocator allocator = Allocator.None) where T : struct
         {
-            var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-                UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
+            NativeArray<T> nativeArray;
+            unsafe
+            {
+                nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    UnsafeUtility.AddressOf(ref span[0]), span.Length, allocator);
+            }
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
+            return nativeArray;
+        }
+
+        /// <inheritdoc cref="AsNativeArray{T}(Span{T}, Allocator)"/>
+        public static NativeArray<T> AsNativeArray<T>(this Span<T> span) where T : unmanaged
+        {
+#if UNITY_6000_3_OR_NEWER
+            var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(
+                span, Allocator.None);
+#else
+            NativeArray<T> nativeArray;
+            unsafe
+            {
+                nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    UnsafeUtility.AddressOf(ref span[0]), span.Length, Allocator.None);
+            }
+#endif // UNITY_6000_3_OR_NEWER
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
@@ -142,14 +168,19 @@ namespace PKGE.Unsafe
         /// Use <see cref="UnsafeUtility.ReleaseGCObject(ulong)"/> with <paramref name="gcHandle"/>
         /// when finished with the returned <see cref="NativeArray{T}"/>.
         /// </param>
-        public static unsafe NativeArray<T> AsNativeArray<T>(this T[] array, int length, out ulong gcHandle) where T : struct
+        public static NativeArray<T> AsNativeArray<T>(this T[] array, int length, out ulong gcHandle) where T : struct
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(length > 0);
             Assert.IsTrue(length <= array.Length);
 
-            var nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-                UnsafeUtility.PinGCArrayAndGetDataAddress(array, out gcHandle), length, Allocator.None);
+            NativeArray<T> nativeArray;
+            unsafe
+            {
+                nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    UnsafeUtility.PinGCArrayAndGetDataAddress(array, out gcHandle), length, Allocator.None);
+            }
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
@@ -172,6 +203,7 @@ namespace PKGE.Unsafe
             return list.ExtractArrayFromList().AsNativeArray(list.Count, out gcHandle);
         }
 
+#if ZERO
 #if INCLUDE_COLLECTIONS
         public static unsafe NativeList<T> AsNativeList<T>(this Span<T> span) where T : unmanaged
         {
@@ -206,7 +238,26 @@ namespace PKGE.Unsafe
         {
             return array.AsUnsafeList(array.Length);
         }
+
+        public static unsafe NativeList<T> AsNativeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            var nativeList = new NativeList<T>(array.Length, AllocatorManager.Temp);
+            nativeList.GetUnsafeList()->Ptr = (T*)array.GetUnsafePtr();
+            nativeList.ResizeUninitialized(array.Length);
+            return nativeList;
+        }
+
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)array.GetUnsafePtr(), array.Length);
+        }
+
+        public static unsafe UnsafeList<T>.ReadOnly AsReadOnlyUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)array.GetUnsafeReadOnlyPtr(), array.Length).AsReadOnly();
+        }
 #endif // INCLUDE_COLLECTIONS
+#endif // ZERO
 
 #if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
@@ -306,23 +357,5 @@ namespace PKGE.Unsafe
             --count;
         }
         #endregion // UnityEngine.InputSystem.Utilities
-
-        public static unsafe NativeList<T> AsNativeList<T>(this NativeArray<T> array) where T : unmanaged
-        {
-            var nativeList = new NativeList<T>(array.Length, AllocatorManager.None);
-            nativeList.ResizeUninitialized(array.Length);
-            nativeList.GetUnsafeList()->Ptr = (T*)array.GetUnsafePtr();
-            return nativeList;
-        }
-
-        public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
-        {
-            return new UnsafeList<T>((T*)array.GetUnsafePtr(), array.Length);
-        }
-
-        public static unsafe UnsafeList<T>.ReadOnly AsReadOnlyUnsafeList<T>(this NativeArray<T> array) where T : unmanaged
-        {
-            return new UnsafeList<T>((T*)array.GetUnsafeReadOnlyPtr(), array.Length).AsReadOnly();
-        }
     }
 }

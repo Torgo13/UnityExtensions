@@ -49,11 +49,18 @@ namespace PKGE.Unsafe
         }
         #endregion // UnityEngine.Rendering.Universal
 
-        //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs
+        //https://github.com/needle-mirror/com.unity.entities.graphics/blob/a50f9d68777370c4f402c07f175d74bdbbcb24f9/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs#L258
         #region CullingExtensions
-        public static unsafe NativeArray<T> AsNativeArray<T>(this UnsafeList<T> unsafeList) where T : unmanaged
+        /// <remarks>Cannot use <see cref="NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray{T}(Span{T}, Allocator)"/>
+        /// as this would cause recursion when calling <see cref="AsSpan{T}(UnsafeList{T})"/>.</remarks>
+        public static NativeArray<T> AsNativeArray<T>(this UnsafeList<T> unsafeList) where T : unmanaged
         {
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(unsafeList.Ptr, unsafeList.Length, Allocator.None);
+            NativeArray<T> array;
+            unsafe
+            {
+                array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(unsafeList.Ptr, unsafeList.Length, Allocator.None);
+            }
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
@@ -67,7 +74,7 @@ namespace PKGE.Unsafe
         public static NativeArray<T> GetSubNativeArray<T>(this UnsafeList<T> unsafeList, int start, int length)
             where T : unmanaged =>
             unsafeList.AsNativeArray().GetSubArray(start, length);
-        #endregion // CullingExtensions
+#endregion // CullingExtensions
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

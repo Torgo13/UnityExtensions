@@ -6,7 +6,7 @@ using PKGE.Packages;
 
 namespace PKGE.Unsafe
 {
-    public static class ListExtensions
+    public static partial class ListExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T AsRef<T>(this List<T> list, int index) where T : struct
