@@ -25,7 +25,7 @@ namespace PKGE
             {
                 if (_instance == null)
                 {
-                    GameObject go = new GameObject("Default " + typeof(TType).Name)
+                    GameObject go = new GameObject("Default " + nameof(TType))
                         { hideFlags = HideFlags.HideAndDontSave };
 
 #if !UNITY_EDITOR

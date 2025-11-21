@@ -195,17 +195,6 @@ namespace PKGE.Unsafe
             bucketPrefix = bucketSizes + bitStates;
             arrayOutput = bucketPrefix + bitStates;
         }
-        /*
-        private static void CalculateRadixSortSupportArrays(
-            int bitStates, int arrayLength, Span<uint> supportArray,
-            out Span<uint> bucketIndices, out Span<uint> bucketSizes, out Span<uint> bucketPrefix, out Span<uint> arrayOutput)
-        {
-            bucketIndices = supportArray;
-            bucketSizes = bucketIndices[bitStates..];
-            bucketPrefix = bucketSizes[bitStates..];
-            arrayOutput = bucketPrefix[bitStates..];
-        }
-        */
 
         private static void MergeSort(Span<uint> array, Span<uint> support, int length)
         {
@@ -370,40 +359,6 @@ namespace PKGE.Unsafe
                 targetBuffer = tmp;
             }
         }
-        /*
-        private static void RadixSort(Span<uint> array, Span<uint> support, int radixBits, int bitStates, int length)
-        {
-            uint mask = (uint)(bitStates - 1);
-            CalculateRadixSortSupportArrays(bitStates, length, support, out var bucketIndices, out var bucketSizes, out var bucketPrefix, out var arrayOutput);
-
-            int buckets = (sizeof(uint) * 8) / radixBits;
-            var targetBuffer = arrayOutput;
-            var inputBuffer = array;
-            for (int b = 0; b < buckets; ++b)
-            {
-                int shift = b * radixBits;
-                for (int s = 0; s < 3 * bitStates; ++s)
-                    bucketIndices[s] = 0;//bucketSizes and bucketPrefix get zeroed, since we walk 3x the bit states
-
-                for (int i = 0; i < length; ++i)
-                    bucketSizes[(int)((inputBuffer[i] >> shift) & mask)]++;
-
-                for (int s = 1; s < bitStates; ++s)
-                    bucketPrefix[s] = bucketPrefix[s - 1] + bucketSizes[s - 1];
-
-                for (int i = 0; i < length; ++i)
-                {
-                    uint val = inputBuffer[i];
-                    var bucket = (int)((val >> shift) & mask);
-                    targetBuffer[(int)(bucketPrefix[bucket] + bucketIndices[bucket]++)] = val;
-                }
-
-                var tmp = inputBuffer;
-                inputBuffer = targetBuffer;
-                targetBuffer = tmp;
-            }
-        }
-        */
 
         /// <summary>
         /// Radix sort or bucket sort, stable and non in-place.

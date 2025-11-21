@@ -50,8 +50,10 @@ namespace PKGE
             where T : struct
         {
             if (source.Count != destination.Length)
-                throw new System.ArgumentOutOfRangeException(nameof(destination),
-                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            {
+                ThrowHelper.CopyFromReadOnlyList(source, destination);
+                return;
+            }
 
             for (var i = 0; i < source.Count; i++)
             {
@@ -74,8 +76,10 @@ namespace PKGE
             where T : struct
         {
             if (source.Count != destination.Length)
-                throw new System.ArgumentOutOfRangeException(nameof(destination),
-                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            {
+                ThrowHelper.CopyFromReadOnlyCollection(source, destination);
+                return;
+            }
 
             var index = 0;
             foreach (var item in source)
@@ -85,5 +89,24 @@ namespace PKGE
             }
         }
         #endregion // UnityEngine.XR.ARSubsystems
+
+        private static class ThrowHelper
+        {
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public static void CopyFromReadOnlyList<T>(IReadOnlyList<T> source, NativeArray<T> destination)
+                where T : struct
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            }
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public static void CopyFromReadOnlyCollection<T>(IReadOnlyCollection<T> source, NativeArray<T> destination)
+                where T : struct
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            }
+        }
     }
 }

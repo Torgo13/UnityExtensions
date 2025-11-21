@@ -11,6 +11,16 @@ namespace PKGE
     /// </summary>
     public static class ReflectionUtils
     {
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Init()
+        {
+            _assemblies = null;
+            _typesPerAssembly = null;
+            _typesPerAssemblyDictionary = null;
+            _assemblyTypeMaps = null;
+            _genericTypeNames?.Clear();
+        }
+
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/ReflectionUtils.cs
         #region Unity.XR.CoreUtils
         static Assembly[] _assemblies;

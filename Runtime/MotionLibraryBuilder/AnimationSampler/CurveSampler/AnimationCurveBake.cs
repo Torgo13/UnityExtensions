@@ -123,7 +123,9 @@ namespace PKGE.Packages
                 return ConfigureBake(new NativeArray<Curve>(curves, Allocator.Temp), frameRate,
                     new NativeArray<Curve>(outCurves, Allocator.Temp), alloc, sampleRange);
             }
-            
+
+            /// <remarks>Dispose of <see cref="BakeJob.curves"/> and <see cref="BakeJob.outCurves"/>
+            /// after completing <see cref="BakeJob"/>.</remarks>
             public static BakeJob ConfigureBake(in NativeArray<Curve> curves, float frameRate, in NativeArray<Curve> outCurves, Allocator alloc, in SampleRange sampleRange)
             {
                 var job = new BakeJob();

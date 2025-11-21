@@ -44,25 +44,6 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/EnumerableExtensions.cs
         #region Unity.FilmInternalUtilities
-        //Returns -1 if not found
-        public static int FindIndex<T>(this IEnumerable<T> collection, T elementToFind)
-        {
-            int i = 0;
-            using var enumerator = collection.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                T obj = enumerator.Current;
-                if (null != obj && obj.Equals(elementToFind))
-                {
-                    return i;
-                }
-
-                ++i;
-            }
-
-            return -1;
-        }
-
         //Returns false with ret set to default(T) if not found
         public static bool FindElementAt<T>(this IEnumerable<T> collection, int index, out T ret)
         {
@@ -152,8 +133,25 @@ namespace PKGE
 
             return -1;
         }
+
+        public static int IndexOfIEquatable<T>(this IEnumerable<T> source, T element)
+            where T : IEquatable<T>
+        {
+            if (source is IList<T> list)
+                return list.IndexOf(element);
+
+            int i = 0;
+            foreach (var x in source)
+            {
+                if (element.Equals(x))
+                    return i;
+                i++;
+            }
+
+            return -1;
+        }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
-        
+
         public static double Sum(this double[] enumerable)
         {
             double sum = 0;

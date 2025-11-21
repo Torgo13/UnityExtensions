@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Pool;
@@ -57,12 +58,10 @@ namespace PKGE
         /// which places it in the same position as the cloned GameObject,
         /// or to offset the new object from <paramref name="parent"/>.</param>
         /// <returns>The instantiated clone.</returns>
-        public static GameObject Instantiate(GameObject original, Transform parent = null, bool worldPositionStays = true)
+        public static GameObject Instantiate([DisallowNull] GameObject original, Transform parent = null, bool worldPositionStays = true)
         {
             var gameObject = UnityObject.Instantiate(original, parent, worldPositionStays);
-            if (gameObject != null && OnGameObjectInstantiated != null)
-                OnGameObjectInstantiated(gameObject);
-
+            OnGameObjectInstantiated?.Invoke(gameObject);
             return gameObject;
         }
 
@@ -75,7 +74,7 @@ namespace PKGE
         /// <param name="position">Position for the new object.</param>
         /// <param name="rotation">Orientation of the new object.</param>
         /// <returns>The instantiated clone.</returns>
-        public static GameObject Instantiate(GameObject original, Vector3 position, Quaternion rotation)
+        public static GameObject Instantiate([DisallowNull] GameObject original, Vector3 position, Quaternion rotation)
         {
             return Instantiate(original, null, position, rotation);
         }
@@ -90,12 +89,10 @@ namespace PKGE
         /// <param name="rotation">Orientation of the new object.</param>
         /// <param name="parent">Parent that will be assigned to the new object</param>
         /// <returns>The instantiated clone</returns>
-        public static GameObject Instantiate(GameObject original, Transform parent, Vector3 position, Quaternion rotation)
+        public static GameObject Instantiate([DisallowNull] GameObject original, Transform parent, Vector3 position, Quaternion rotation)
         {
             var gameObject = UnityObject.Instantiate(original, position, rotation, parent);
-            if (gameObject != null && OnGameObjectInstantiated != null)
-                OnGameObjectInstantiated(gameObject);
-
+            OnGameObjectInstantiated?.Invoke(gameObject);
             return gameObject;
         }
 
@@ -107,7 +104,7 @@ namespace PKGE
         /// <param name="original">The Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>
-        public static GameObject CloneWithHideFlags(GameObject original, Transform parent = null)
+        public static GameObject CloneWithHideFlags([DisallowNull] GameObject original, Transform parent = null)
         {
             var copy = UnityObject.Instantiate(original, parent);
             CopyHideFlagsRecursively(original, copy);
@@ -131,12 +128,12 @@ namespace PKGE
         }
 #endif
 
-        static void CopyHideFlagsRecursively(GameObject copyFrom, GameObject copyTo)
+        static void CopyHideFlagsRecursively([DisallowNull] GameObject copyFrom, [DisallowNull] GameObject copyTo)
         {
             CopyHideFlagsRecursively(copyFrom.transform, copyTo.transform);
         }
 
-        static void CopyHideFlagsRecursively(Component copyFrom, Component copyTo)
+        static void CopyHideFlagsRecursively([DisallowNull] Component copyFrom, [DisallowNull] Component copyTo)
         {
             copyTo.hideFlags = copyFrom.hideFlags;
 
@@ -306,6 +303,8 @@ namespace PKGE
         public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
             where T : Component
         {
+            UnityEngine.Assertions.Assert.IsNotNull(components);
+
             var gameObjects = ListPool<GameObject>.Get();
             var children = ListPool<T>.Get();
             scene.GetRootGameObjects(gameObjects);
@@ -369,7 +368,7 @@ namespace PKGE
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
         /// <returns>The returned child GameObject or null if no child is found.</returns>
-        public static GameObject GetNamedChild(this GameObject go, string name)
+        public static GameObject GetNamedChild([DisallowNull] this GameObject go, string name)
         {
             List<Transform> transforms = ListPool<Transform>.Get();
             go.GetComponentsInChildren(transforms);

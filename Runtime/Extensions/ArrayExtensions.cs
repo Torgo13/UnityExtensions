@@ -34,6 +34,23 @@ namespace PKGE
             array = new NativeArray<T>(capacity, allocator, NativeArrayOptions.ClearMemory);
         }
 
+        /// <inheritdoc cref="ResizeArray{T}(ref NativeArray{T}, int, Allocator)"/>
+        public static void ResizeArray<T>(this ref NativeArray<T> array, int capacity, AllocatorManager.AllocatorHandle allocator) where T : unmanaged
+        {
+            Assert.IsTrue(capacity >= 0);
+
+            if (array.IsCreated)
+            {
+                var newArray = CollectionHelper.CreateNativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
+                NativeArray<T>.Copy(array, newArray, Math.Min(array.Length, capacity));
+                array.Dispose();
+                array = newArray;
+                return;
+            }
+
+            array = CollectionHelper.CreateNativeArray<T>(capacity, allocator, NativeArrayOptions.ClearMemory);
+        }
+
         /// <summary>
         /// Resizes a transform access array.
         /// </summary>
@@ -261,7 +278,9 @@ namespace PKGE
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "index", Justification = "Keep this for future implementation")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter")]
         public static bool HaveDuplicateReferences<TFirst>(this TFirst[] first, int index, int count)
+            where TFirst : class
         {
             for (var i = 0; i < count; ++i)
             {

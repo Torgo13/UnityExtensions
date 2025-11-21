@@ -151,6 +151,7 @@ namespace PKGE
         /// Throws an <see cref="ArgumentOutOfRangeException"/> when the "capacity" parameter is negative.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The array capacity must be a positive number.</exception>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static void ThrowArgumentOutOfRangeExceptionForNegativeArrayCapacity()
         {
             throw new ArgumentOutOfRangeException("capacity", "The array capacity must be a positive number.");

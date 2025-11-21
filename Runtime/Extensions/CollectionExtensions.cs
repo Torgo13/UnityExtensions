@@ -198,34 +198,5 @@ namespace PKGE
             return false;
         }
         #endregion // Unity.Collections
-        
-        //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
-        #region UnityEngine.Formats.Alembic.Importer
-        public static void DisposeIfPossible<T>(this NativeArray<T> array) where T : struct
-        {
-            if (array.IsCreated)
-            {
-                array.Dispose();
-            }
-        }
-
-        public static NativeArray<T> ResizeIfNeeded<T>(this ref NativeArray<T> array, int newLength,
-            Allocator a = Allocator.Persistent, NativeArrayOptions o = NativeArrayOptions.ClearMemory) where T : struct
-        {
-            if (array.Length != newLength)
-            {
-                array.DisposeIfPossible();
-                array = new NativeArray<T>(newLength, a, o);
-            }
-
-            // The array is either created and of the right size, or not created, and we are asking to resize to 0
-            if (!array.IsCreated)
-            {
-                array = new NativeArray<T>(0, a, o);
-            }
-
-            return array;
-        }
-        #endregion // UnityEngine.Formats.Alembic.Importer
     }
 }

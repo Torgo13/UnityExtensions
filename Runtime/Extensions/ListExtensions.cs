@@ -72,6 +72,7 @@ namespace PKGE
         }
 
         public static void RemoveNull<T>(this List<T> list)
+            where T : class
         {
             var temp = UnityEngine.Pool.ListPool<T>.Get();
             temp.EnsureCapacity(list.Count);

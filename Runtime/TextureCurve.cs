@@ -46,8 +46,10 @@ namespace PKGE
         [SerializeField]
         AnimationCurve curve;
 
-        AnimationCurve _loopingCurve = new AnimationCurve();
+        readonly AnimationCurve _loopingCurve = new AnimationCurve();
+#nullable enable
         Texture2D? _texture;
+#nullable disable
 
         bool _isCurveDirty;
         bool _isTextureDirty;
@@ -190,8 +192,8 @@ namespace PKGE
                 var next = curve[0];
                 next.time += range;
                 _loopingCurve.keys = curve.keys; // GC pressure
-                _loopingCurve.AddKey(prev);
-                _loopingCurve.AddKey(next);
+                _ = _loopingCurve.AddKey(prev);
+                _ = _loopingCurve.AddKey(next);
                 _isCurveDirty = false;
             }
 

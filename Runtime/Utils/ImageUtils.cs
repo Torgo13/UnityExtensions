@@ -386,7 +386,7 @@ namespace PKGE
         public uint Color;
         public double Ratio;
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{ImageUtils.IntToColor32(Color)} [{(Ratio * 100)}%]";
         }

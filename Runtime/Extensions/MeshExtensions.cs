@@ -340,7 +340,7 @@ namespace PKGE.Packages
                 _ = sb.Append("  Submesh[")
                     .Append(i)
                     .Append("] (")
-                    .Append(topo)
+                    .Append(EnumValues<MeshTopology>.Name(topo))
                     .Append(')')
                     .AppendLine();
                 //sb.AppendLine($"  Submesh[{i}] ({topo})");

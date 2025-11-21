@@ -244,7 +244,7 @@ namespace PKGE
 
             if (dim != TextureDimension.None)
             {
-                sb.Append(dim);
+                sb.Append(EnumValues<TextureDimension>.Name(dim));
                 sb.Append('_');
             }
         

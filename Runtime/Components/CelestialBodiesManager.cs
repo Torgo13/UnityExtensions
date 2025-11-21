@@ -91,7 +91,7 @@ namespace PKGE
 
         private void SortBodies()
         {
-            _bodiesData.Sort((a, b) => a.evaluatedIntensity > b.evaluatedIntensity ? -1 : 1);
+            _bodiesData.Sort(static (a, b) => a.evaluatedIntensity > b.evaluatedIntensity ? -1 : 1);
         }
 
         void ApplyFade()

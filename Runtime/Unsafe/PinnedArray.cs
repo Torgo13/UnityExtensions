@@ -30,6 +30,26 @@ namespace PKGE.Unsafe
 #endif
         }
 
+        public PinnedArray(T[] array, int start, int length)
+        {
+            Assert.IsNotNull(array);
+            Assert.IsTrue(start > 0);
+            Assert.IsTrue(length > 0);
+            Assert.IsTrue(start + length <= array.Length);
+            managedArray = array;
+            unsafe
+            {
+                nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                    UnsafeUtility.PinGCArrayAndGetDataAddress(managedArray, out handle), array.Length, Allocator.None);
+            }
+
+            nativeArray = nativeArray.GetSubArray(start, length);
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref nativeArray, AtomicSafetyHandle.Create());
+#endif
+        }
+
         public PinnedArray(T[] array, int length)
         {
             Assert.IsNotNull(array);
@@ -88,6 +108,14 @@ namespace PKGE.Unsafe
 
     public static partial class ArrayExtensions
     {
+        public static PinnedArray<T> AsNativeArray<T>(this T[] array, int start, int length, out NativeArray<T> nativeArray)
+            where T : struct
+        {
+            var pinnedArray = new PinnedArray<T>(array, start, length);
+            nativeArray = pinnedArray.nativeArray;
+            return pinnedArray;
+        }
+
         public static PinnedArray<T> AsNativeArray<T>(this T[] array, int length, out NativeArray<T> nativeArray)
             where T : struct
         {
