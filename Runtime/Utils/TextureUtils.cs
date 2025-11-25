@@ -1000,7 +1000,11 @@ namespace PKGE
             {
                 while (!request.done)
                 {
+#if UNITY_6000_0_OR_NEWER
+                    await Awaitable.NextFrameAsync();
+#else
                     await Task.Yield();
+#endif // UNITY_6000_0_OR_NEWER
                 }
             }
 

@@ -112,7 +112,7 @@ namespace PKGE
 
         #region Async
         /// <inheritdoc cref="WriteTextureToDisk(Texture,string,string)"/>
-        public static async ValueTask WriteTextureToDiskAsync(this Texture target, string filePath)
+        public static async ValueTask<string> WriteTextureToDiskAsync(this Texture target, string filePath)
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -124,10 +124,8 @@ namespace PKGE
             var t2D = target as Texture2D;
             if (t2D != null)
             {
-                _ = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
+                return await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
                     .ConfigureAwait(continueOnCapturedContext: true);
-
-                return;
             }
 
             var cube = target as Cubemap;
@@ -147,11 +145,11 @@ namespace PKGE
 
                 Graphics.ExecuteCommandBuffer(cmd);
 
-                _ = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
+                var assetPath = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
                     .ConfigureAwait(continueOnCapturedContext: true);
 
                 cmd.Dispose();
-                return;
+                return assetPath;
             }
 
             throw new ArgumentException("Texture target is not a Texture2D, a RenderTexture or a Cubemap.", nameof(target));
@@ -223,12 +221,12 @@ namespace PKGE
                     int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format)
                                             * source.width * source.height * source.volumeDepth;
 
-                    // Staging memory for the readback.
-                    var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.Persistent,
-                        NativeArrayOptions.UninitializedMemory);
-
                     // Async-readbacks do not work if the RT resource is not registered with the graphics API backend.
                     Assert.IsTrue(source.IsCreated());
+
+                    // Staging memory for the readback.
+                    var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.TempJob,
+                        NativeArrayOptions.UninitializedMemory);
 
                     // Request and wait for the GPU data to transfer into staging memory.
 #if UNITY_6000_3_OR_NEWER

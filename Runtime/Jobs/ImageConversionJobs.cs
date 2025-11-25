@@ -161,7 +161,7 @@ namespace PKGE.Packages
                         hn = mipHeight - 1,
                         offset = offset,
                         normalStrength = normalStrength,// / pow2,
-                        input = input,
+                        input = input.AsReadOnly(),
                         output = output,
                     }.Schedule(output.Length, handle)
                     : new CreateNormalMapJob
@@ -171,7 +171,7 @@ namespace PKGE.Packages
                         hn = mipHeight - 1,
                         offset = offset,
                         normalStrength = normalStrength,// / pow2,
-                        input = input,
+                        input = input.AsReadOnly(),
                         output = output,
                     }.Schedule(output.Length, handle);
             }
@@ -305,7 +305,7 @@ namespace PKGE.Packages
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color24 NormalMap(in float3 scale, int width, int offset, float normalStrength,
-            in NativeArray<Color32> input, int x0, int y0, int xn, int yn, int xp, int yp)
+            in NativeArray<Color32>.ReadOnly input, int x0, int y0, int xn, int yn, int xp, int yp)
         {
             // Obtain the colors of the eight surrounding pixels
             Color32 c_xn_yn = input[offset + mad(yn, width, xn)];
@@ -675,7 +675,7 @@ namespace PKGE.Packages
         [ReadOnly] public int hn;
         [ReadOnly] public int offset;
         [ReadOnly] public float normalStrength;
-        [ReadOnly] public NativeArray<Color32> input;
+        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
         [WriteOnly] public NativeArray<Color24> output;
 
         public void Execute(int index)
@@ -704,7 +704,7 @@ namespace PKGE.Packages
         [ReadOnly] public int hn;
         [ReadOnly] public int offset;
         [ReadOnly] public float normalStrength;
-        [ReadOnly] public NativeArray<Color32> input;
+        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
         [WriteOnly] public NativeArray<Color24> output;
 
         public void Execute(int index)

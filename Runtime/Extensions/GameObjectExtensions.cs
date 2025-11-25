@@ -300,9 +300,9 @@ namespace PKGE
         public static Object LoadAssetFromGUID(Union16 guid)
         {
 #if UNITY_EDITOR
-            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid)),
-                GetMainAssetTypeFromGUID(guid));
+            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID,
+                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -311,8 +311,8 @@ namespace PKGE
         public static T LoadAssetFromGUID<T>(Union16 guid) where T : Object
         {
 #if UNITY_EDITOR
-            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid)));
+            return UnityEditor.AssetDatabase.LoadAssetByGUID<T>(
+                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -321,7 +321,9 @@ namespace PKGE
         public static Object LoadAssetFromGUID(string guid)
         {
 #if UNITY_EDITOR
-            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+            var GUID = new UnityEditor.GUID(guid);
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID,
+                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -330,7 +332,7 @@ namespace PKGE
         public static T LoadAssetFromGUID<T>(string guid) where T : Object
         {
 #if UNITY_EDITOR
-            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+            return UnityEditor.AssetDatabase.LoadAssetByGUID<T>(new UnityEditor.GUID(guid));
 #else
             return default;
 #endif // UNITY_EDITOR

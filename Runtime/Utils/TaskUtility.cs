@@ -118,5 +118,93 @@ namespace PKGE
 
             await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: true);
         }
+
+#if UNITY_6000_0_OR_NEWER
+        /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
+        public static async UnityEngine.Awaitable RunAsync<TInput, TOutput>(
+            List<TInput> items,
+            ConcurrentBag<TOutput> cb,
+            Action<TInput, ConcurrentBag<TOutput>> action,
+            CancellationToken ct = default)
+        {
+            var count = Environment.ProcessorCount;
+            using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get(out var tasks);
+            tasks.EnsureCapacity(count);
+            int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
+
+            for (int i = 0; i < count; i++)
+            {
+                tasks.Add(RunAsync(items, cb, action, itemsPerTask, i, ct));
+            }
+
+            foreach (var task in tasks)
+            {
+                if (!task.IsCompleted)
+                {
+                    await task;
+                }
+            }
+        }
+
+        private static async UnityEngine.Awaitable RunAsync<TInput, TOutput>(
+            List<TInput> items,
+            ConcurrentBag<TOutput> cb,
+            Action<TInput, ConcurrentBag<TOutput>> action,
+            int itemsPerTask, int i,
+            CancellationToken ct = default)
+        {
+            await UnityEngine.Awaitable.BackgroundThreadAsync();
+            if (ct.IsCancellationRequested)
+                return;
+
+            for (int j = 0; j < itemsPerTask && j + itemsPerTask * i < items.Count; j++)
+            {
+                int index = j + itemsPerTask * i;
+                action.Invoke(items[index], cb);
+            }
+        }
+
+        /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
+        public static async UnityEngine.Awaitable RunAsync<TInput>(
+            List<TInput> items,
+            Action<TInput> action,
+            CancellationToken ct = default)
+        {
+            var count = Environment.ProcessorCount;
+            using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get(out var tasks);
+            tasks.EnsureCapacity(count);
+            int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
+
+            for (int i = 0; i < count; i++)
+            {
+                tasks.Add(RunAsync(items, action, itemsPerTask, i, ct));
+            }
+
+            foreach (var task in tasks)
+            {
+                if (!task.IsCompleted)
+                {
+                    await task;
+                }
+            }
+        }
+
+        private static async UnityEngine.Awaitable RunAsync<TInput>(
+            List<TInput> items,
+            Action<TInput> action,
+            int itemsPerTask, int i,
+            CancellationToken ct = default)
+        {
+            await UnityEngine.Awaitable.BackgroundThreadAsync();
+            if (ct.IsCancellationRequested)
+                return;
+
+            for (int j = 0; j < itemsPerTask && j + itemsPerTask * i < items.Count; j++)
+            {
+                int index = j + itemsPerTask * i;
+                action.Invoke(items[index]);
+            }
+        }
+#endif // UNITY_6000_0_OR_NEWER
     }
 }

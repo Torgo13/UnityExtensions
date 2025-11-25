@@ -23,7 +23,8 @@ namespace PKGE.Unsafe
 
         public void Dispose()
         {
-            bytes.Dispose();
+            if (bytes.IsCreated)
+                bytes.Dispose();
         }
 
         public void Reserve<T>(int numElements) where T : struct
