@@ -653,7 +653,9 @@ namespace PKGE
                 }
             }
 
-            AverageColours(ref ambientColours, out var equator, out var skyEquator);
+            var ambientColoursRO = ambientColours.AsReadOnly();
+
+            AverageColours(ambientColoursRO, out var equator, out var skyEquator);
 
             RenderSettings.ambientSkyColor = ambientColours[(int)CubemapFace.PositiveY];
             RenderSettings.ambientEquatorColor = groundColour
@@ -666,7 +668,7 @@ namespace PKGE
             // Forward is +Z, index 4
             if (FindMainCamera())
             {
-                SampleCubemapBilinear(ambientColours, _mainCameraTransform.forward, out adaptiveColour);
+                SampleCubemapBilinear(ambientColoursRO, _mainCameraTransform.forward, out adaptiveColour);
             }
 
             if (!sunFound)
@@ -675,8 +677,8 @@ namespace PKGE
             }
 
             Vector3 sunForward = sunTransform.forward;
-            SampleCubemapBilinear(ambientColours, sunForward, out skyColour);
-            SampleCubemapBilinear(ambientColours, -sunForward, out var invSkyColor);
+            SampleCubemapBilinear(ambientColoursRO, sunForward, out skyColour);
+            SampleCubemapBilinear(ambientColoursRO, -sunForward, out var invSkyColor);
             float denominator = invSkyColor.grayscale;
 
             skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
@@ -692,7 +694,7 @@ namespace PKGE
         /// <param name="equator">Average colour at the horizon.</param>
         /// <param name="skyEquator">Average colour above the horizon.</param>
         [Unity.Burst.BurstCompile]
-        internal static void AverageColours(ref NativeArray<Color32> ambientColours,
+        internal static void AverageColours(in NativeArray<Color32>.ReadOnly ambientColours,
             out Vector4 equator, out Vector4 skyEquator)
         {
             const float equatorScale = 1f / (4 * byte.MaxValue);
@@ -721,7 +723,7 @@ namespace PKGE
         /// The direction is inverted to calculate the similarity instead.
         /// </remarks>
         [Unity.Burst.BurstCompile]
-        internal static void SampleCubemapBilinear(in NativeArray<Color32> colours, in Vector3 forward,
+        internal static void SampleCubemapBilinear(in NativeArray<Color32>.ReadOnly colours, in Vector3 forward,
             out Color sum)
         {
             const float scale = 1f / 6;

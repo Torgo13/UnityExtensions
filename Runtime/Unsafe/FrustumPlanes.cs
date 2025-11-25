@@ -17,6 +17,7 @@ namespace PKGE.Unsafe
     /// <summary>
     /// Represents frustum planes.
     /// </summary>
+    [BurstCompile]
     public struct FrustumPlanes
     {
         //https://github.com/needle-mirror/com.unity.entities.graphics/blob/master/Unity.Entities.Graphics/FrustumPlanes.cs
@@ -102,27 +103,9 @@ namespace PKGE.Unsafe
         /// <param name="m">Centre of the AABB to intersect.</param>
         /// <param name="extent">Extents of the AABB to intersect.</param>
         /// <returns>Intersection result</returns>
-        public static IntersectResult Intersect(NativeArray<float4> cullingPlanes, float3 m, float3 extent)
+        public static IntersectResult Intersect(NativeArray<float4>.ReadOnly cullingPlanes, float3 m, float3 extent)
         {
-            var inCountRef = new NativeReference<int>(Allocator.TempJob);
-            var intersectResultRef = new NativeReference<bool>(AllocatorManager.TempJob);
-
-            var intersectJob = new IntersectJob
-            {
-                cullingPlanes = cullingPlanes,
-                m = m,
-                extent = extent,
-                inCount = inCountRef,
-                IntersectResultOut = intersectResultRef,
-            };
-
-            intersectJob.Run(cullingPlanes.Length);
-
-            int inCount = inCountRef.Value;
-            inCountRef.Dispose();
-
-            bool intersectResult = intersectResultRef.Value;
-            intersectResultRef.Dispose();
+            Intersect(cullingPlanes, m, extent, out var inCount, out var intersectResult);
 
             if (intersectResult)
                 return IntersectResult.Out;
@@ -131,23 +114,27 @@ namespace PKGE.Unsafe
         }
 
         [BurstCompile(FloatMode = FloatMode.Fast)]
-        struct IntersectJob : IJobFor
+        static void Intersect(in NativeArray<float4>.ReadOnly cullingPlanes, in float3 m, in float3 extent,
+            out int inCount, out bool intersectResult)
         {
-            [ReadOnly] public NativeArray<float4> cullingPlanes;
-            [ReadOnly] public float3 m;
-            [ReadOnly] public float3 extent;
-            public NativeReference<int> inCount;
-            public NativeReference<bool> IntersectResultOut;
+            inCount = default;
+            intersectResult = default;
 
-            public void Execute(int i)
+            for (int i = 0; i < cullingPlanes.Length; i++)
             {
-                float3 normal = cullingPlanes[i].xyz;
-                float dist = math.dot(normal, m) + cullingPlanes[i].w;
-                float radius = math.dot(extent, math.abs(normal));
-                IntersectResultOut.Value |= dist + radius <= 0;
-                inCount.Value += (int)(math.ceil(math.saturate(dist - radius))
-                    * math.ceil(math.saturate(dist + radius)));
+                Intersect(cullingPlanes[i], m, extent, ref inCount, ref intersectResult);
             }
+        }
+
+        static void Intersect(in float4 cullingPlane, in float3 m, in float3 extent,
+            ref int inCount, ref bool intersectResult)
+        {
+            float3 normal = cullingPlane.xyz;
+            float dist = math.dot(normal, m) + cullingPlane.w;
+            float radius = math.dot(extent, math.abs(normal));
+            intersectResult |= dist + radius <= 0;
+            inCount += (int)(math.ceil(math.saturate(dist - radius))
+                * math.ceil(math.saturate(dist + radius)));
         }
 #endif // INCLUDE_COLLECTIONS
 

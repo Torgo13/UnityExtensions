@@ -322,14 +322,14 @@ namespace PKGE.Packages
                 .Append(')')
                 .AppendLine();
 
-            PrintAttribute(sb, "positions", positions, "pos: {0:F2}");
-            PrintAttribute(sb, "normals", normals, "nrm: {0:F2}");
-            PrintAttribute(sb, "colors", colors, "col: {0:F2}");
-            PrintAttribute(sb, "tangents", tangents, "tan: {0:F2}");
-            PrintAttribute(sb, "uv0", uv0, "uv0: {0:F2}");
-            PrintAttribute(sb, "uv2", uv2, "uv2: {0:F2}");
-            PrintAttribute(sb, "uv3", uv3, "uv3: {0:F2}");
-            PrintAttribute(sb, "uv4", uv4, "uv4: {0:F2}");
+            PrintAttribute(sb, nameof(positions), positions, "pos: {0:F2}");
+            PrintAttribute(sb, nameof(normals), normals, "nrm: {0:F2}");
+            PrintAttribute(sb, nameof(colors), colors, "col: {0:F2}");
+            PrintAttribute(sb, nameof(tangents), tangents, "tan: {0:F2}");
+            PrintAttribute(sb, nameof(uv0), uv0, "uv0: {0:F2}");
+            PrintAttribute(sb, nameof(uv2), uv2, "uv2: {0:F2}");
+            PrintAttribute(sb, nameof(uv3), uv3, "uv3: {0:F2}");
+            PrintAttribute(sb, nameof(uv4), uv4, "uv4: {0:F2}");
 
             _ = sb.AppendLine("# Topology");
 

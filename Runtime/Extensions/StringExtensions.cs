@@ -151,9 +151,13 @@ namespace PKGE
             Func<char, char> middleStringCaseHandler)
         {
             if (text == null)
-            {
                 throw new ArgumentNullException(nameof(text));
-            }
+
+            if (startOfStringCaseHandler == null)
+                throw new ArgumentNullException(nameof(startOfStringCaseHandler));
+
+            if (middleStringCaseHandler == null)
+                throw new ArgumentNullException(nameof(middleStringCaseHandler));
 
             using var _0 = StringBuilderPool.Get(out var builder);
 
@@ -172,6 +176,7 @@ namespace PKGE
                         //we disable the delimiter insertion
                         outputDelimiter = false;
                     }
+
                     startOfWord = true;
                 }
                 else if (!char.IsLetterOrDigit(c))
@@ -193,6 +198,7 @@ namespace PKGE
                             {
                                 builder.Append(outputWordDelimiter);
                             }
+
                             builder.Append(middleStringCaseHandler(c));
                             outputDelimiter = true;
                         }
@@ -1107,7 +1113,6 @@ namespace PKGE
             const uint intSpace = ' ';
 
             Assert.IsNotNull(input);
-            Assert.IsTrue(0 <= input.Length);
 
             int usefulInputLength = input.Length;
             int padding = 0;

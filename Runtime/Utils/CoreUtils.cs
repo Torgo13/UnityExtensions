@@ -227,12 +227,12 @@ namespace PKGE
         /// <returns>Generated names based on the provided parameters.</returns>
         public static string GetTextureAutoName(int width, int height, TextureFormat format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
-            => GetTextureAutoName(width, height, format.ToString(), dim, name, mips, depth);
+            => GetTextureAutoName(width, height, EnumValues<TextureFormat>.Name(format), dim, name, mips, depth);
 
         /// <inheritdoc cref="GetTextureAutoName(int,int,UnityEngine.TextureFormat,UnityEngine.Rendering.TextureDimension,string,bool,int)"/>
         public static string GetTextureAutoName(int width, int height, GraphicsFormat format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
-            => GetTextureAutoName(width, height, format.ToString(), dim, name, mips, depth);
+            => GetTextureAutoName(width, height, EnumValues<GraphicsFormat>.Name(format), dim, name, mips, depth);
 
         /// <inheritdoc cref="GetTextureAutoName(int,int,UnityEngine.TextureFormat,UnityEngine.Rendering.TextureDimension,string,bool,int)"/>
         static string GetTextureAutoName(int width, int height, string format,
@@ -890,11 +890,11 @@ namespace PKGE
 #if UNITY_EDITOR
                 hash = 23 * hash + texture.imageContentsHash.GetHashCode();
 #endif
-                hash = 23 * hash + texture.graphicsFormat.GetHashCode();
-                hash = 23 * hash + texture.wrapMode.GetHashCode();
+                hash = 23 * hash + ((int)texture.graphicsFormat).GetHashCode();
+                hash = 23 * hash + ((int)texture.wrapMode).GetHashCode();
                 hash = 23 * hash + texture.width.GetHashCode();
                 hash = 23 * hash + texture.height.GetHashCode();
-                hash = 23 * hash + texture.filterMode.GetHashCode();
+                hash = 23 * hash + ((int)texture.filterMode).GetHashCode();
                 hash = 23 * hash + texture.anisoLevel.GetHashCode();
                 hash = 23 * hash + texture.mipmapCount.GetHashCode();
                 hash = 23 * hash + texture.updateCount.GetHashCode();

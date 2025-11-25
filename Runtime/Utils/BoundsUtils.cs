@@ -208,20 +208,7 @@ namespace PKGE
         
         public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
         {
-            Bounds bounds = renderer.bounds;
-            Matrix4x4 matrix = transform.worldToLocalMatrix;
-            var newBoundsResult = new NativeArray<Bounds>(1,
-                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var calculateLocalBoundsJob = new CalculateLocalBoundsJob
-            {
-                matrix = matrix,
-                min = bounds.min,
-                max = bounds.max,
-                newBounds = newBoundsResult,
-            };
-            Unity.Jobs.IJobExtensions.Schedule(calculateLocalBoundsJob);
-            var newBounds = newBoundsResult[0];
-            newBoundsResult.Dispose();
+            CalcLocalBounds(renderer, transform, out var newBounds);
             return newBounds;
         }
         #endregion // Unity.HLODSystem.Utils
@@ -272,58 +259,6 @@ namespace PKGE
                 extents = extents,
                 center = newMin + extents,
             };
-        }
-        
-        [Unity.Burst.BurstCompile]
-        struct CalculateLocalBoundsJob : Unity.Jobs.IJob
-        {
-            [ReadOnly] public Matrix4x4 matrix;
-            [ReadOnly] public Vector3 min;
-            [ReadOnly] public Vector3 max;
-            [WriteOnly] public NativeArray<Bounds> newBounds;
-
-            public void Execute()
-            {
-                var points = new NativeArray<Vector3>(8,
-                    Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-                points[0] = new Vector3(min.x, min.y, min.z);
-                points[1] = new Vector3(max.x, min.y, min.z);
-                points[2] = new Vector3(min.x, min.y, max.z);
-                points[3] = new Vector3(max.x, min.y, max.z);
-                points[4] = new Vector3(min.x, max.y, min.z);
-                points[5] = new Vector3(max.x, max.y, min.z);
-                points[6] = new Vector3(min.x, max.y, max.z);
-                points[7] = new Vector3(max.x, max.y, max.z);
-
-                for (int i = 0; i < points.Length; ++i)
-                {
-                    points[i] = matrix.MultiplyPoint(points[i]);
-                }
-
-                Vector3 newMin = points[0];
-                Vector3 newMax = points[0];
-
-                for (int i = 1; i < points.Length; ++i)
-                {
-                    if (newMin.x > points[i].x) newMin.x = points[i].x;
-                    if (newMax.x < points[i].x) newMax.x = points[i].x;
-
-                    if (newMin.y > points[i].y) newMin.y = points[i].y;
-                    if (newMax.y < points[i].y) newMax.y = points[i].y;
-
-                    if (newMin.z > points[i].z) newMin.z = points[i].z;
-                    if (newMax.z < points[i].z) newMax.z = points[i].z;
-                }
-                
-                points.Dispose();
-
-                var extents = (newMax - newMin) * 0.5f;
-                newBounds[0] = new Bounds
-                {
-                    extents = extents,
-                    center = newMin + extents,
-                };
-            }
         }
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs

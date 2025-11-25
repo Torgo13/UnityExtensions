@@ -67,14 +67,11 @@ namespace PKGE
         /// <returns>Cloned materials</returns>
         public static Material[] CloneMaterials(Renderer renderer)
         {
-            var sharedMaterials = renderer.sharedMaterials;
-            for (var i = 0; i < sharedMaterials.Length; i++)
-            {
-                sharedMaterials[i] = UnityObject.Instantiate(sharedMaterials[i]);
-            }
-
-            renderer.sharedMaterials = sharedMaterials;
-            return sharedMaterials;
+            var sharedMaterials = ListPool<Material>.Get();
+            CloneMaterials(sharedMaterials, renderer);
+            var sharedMaterialsArray = sharedMaterials.ToArray();
+            ListPool<Material>.Release(sharedMaterials);
+            return sharedMaterialsArray;
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/WindowsUtil.cs
         #region FPSSample
 #if WINDOWS
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        [DllImport("user32.dll", EntryPoint = nameof(SetWindowPos))]
         private static extern bool SetWindowPos(IntPtr hwnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);

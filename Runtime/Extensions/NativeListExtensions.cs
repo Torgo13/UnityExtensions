@@ -40,6 +40,31 @@ namespace PKGE.Packages
         {
             return nativeList.AsReadOnly().AsReadOnlySpan();
         }
+
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(count >= 0);
+            Assert.IsTrue(count <= array.Length);
+
+            int start = nativeList.Length;
+            nativeList.ResizeUninitialized(start + count);
+            array.AsSpan(0, count).CopyTo(nativeList.AsSpan().Slice(start, count));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
+        {
+            nativeList.AddRange(array, array.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this NativeList<T> nativeList, System.Collections.Generic.List<T> list) where T : unmanaged
+        {
+            nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
+        }
     }
 }
 #endif // INCLUDE_COLLECTIONS

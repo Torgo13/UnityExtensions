@@ -113,7 +113,7 @@ namespace PKGE
             {
                 LightType.Spot => spotReflector ? GetSolidAngleFromSpotLight(spotAngle) : SphereSolidAngle,
                 LightType.Point => GetSolidAngleFromPointLight(),
-                _ => throw new ArgumentException("Solid angle is undefined for lights of type " + lightType)
+                _ => throw new ArgumentException("Solid angle is undefined for lights of type " + EnumValues<LightType>.Name(lightType))
             };
         }
 

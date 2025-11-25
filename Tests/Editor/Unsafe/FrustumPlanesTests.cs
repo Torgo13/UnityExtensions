@@ -96,7 +96,7 @@ namespace PKGE.Unsafe.Tests
                 temp[i] = new float4(par[i].normal, par[i].distance);
             }
 
-            result = FrustumPlanes.Intersect(temp, box.Center, box.Extents);
+            result = FrustumPlanes.Intersect(temp.AsReadOnly(), box.Center, box.Extents);
 
             temp.Dispose();
             return result;

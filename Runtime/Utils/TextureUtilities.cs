@@ -231,11 +231,15 @@ namespace PKGE
                     Assert.IsTrue(source.IsCreated());
 
                     // Request and wait for the GPU data to transfer into staging memory.
+#if UNITY_6000_3_OR_NEWER
+                    var request = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref stagingReadback, source, 0, format);
+#else
                     var request = AsyncGPUReadback.RequestIntoNativeArray(ref stagingReadback, source, 0, format);
                     while (!request.done)
                     {
                         await Task.Yield();
                     }
+#endif // UNITY_6000_3_OR_NEWER
 
                     // Finally transfer the staging memory into the texture asset.
                     result.SetPixelData(stagingReadback, mipLevel: 0);

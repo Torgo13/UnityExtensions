@@ -69,6 +69,7 @@ namespace PKGE.Unsafe.Tests
             }
         }
 
+#if PKGE_DOTS_2992
         [Test]
 #if !UNITY_WEBGL
         [ConditionalIgnore("IgnoreForCoverage", "Fails randonly when ran with code coverage enabled")]
@@ -114,6 +115,7 @@ namespace PKGE.Unsafe.Tests
             funcPtr.Invoke(ref job);
             Assert.AreEqual(job.I, 1);
         }
+#endif // PKGE_DOTS_2992
         #endregion // Unity.Entities
     }
 }

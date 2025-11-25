@@ -13,8 +13,8 @@ namespace PKGE
         #region UnityEngine.Rendering.Universal
         // Add profiling samplers to sorts as they are often a bottleneck when scaling things up.
         // By default, avoid sampling recursion, but these can be used externally as well.
-        static readonly ProfilingSampler QuickSortSampler = new ProfilingSampler("QuickSort");
-        static readonly ProfilingSampler InsertionSortSampler = new ProfilingSampler("InsertionSort");
+        static readonly ProfilingSampler QuickSortSampler = new ProfilingSampler(nameof(QuickSort));
+        static readonly ProfilingSampler InsertionSortSampler = new ProfilingSampler(nameof(InsertionSort));
 
         public static void QuickSort<T>(T[] data, Func<T, T, int> compare)
         {
@@ -251,5 +251,19 @@ namespace PKGE
 #pragma warning restore CS0649
         }
         #endregion // UnityEngine
+
+        public static void AddRange<T>(this List<T> list, ReadOnlySpan<T> span)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            // make sure capacity is enough (that's where alloc WILL happen if needed)
+            list.EnsureRoom(span.Length);
+
+            var tListAccess = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<T>, ListPrivateFieldAccess<T>>(ref list);
+            span.CopyTo(tListAccess._items.AsSpan(tListAccess._size, span.Length));
+            tListAccess._size += span.Length;
+            tListAccess._version++;
+        }
     }
 }

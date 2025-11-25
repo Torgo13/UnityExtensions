@@ -116,7 +116,7 @@ namespace PKGE.Collections
                 return false;
             if (ReferenceEquals(this, obj))
                 return true;
-            return obj.GetType() == GetType() && Equals((ReadOnlyList<T>)obj);
+            return obj is ReadOnlyList<T> other && Equals(other);
         }
 
         /// <summary>

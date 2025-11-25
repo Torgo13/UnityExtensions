@@ -27,9 +27,6 @@ namespace PKGE.Unsafe
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
-        /// <summary>
-        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
-        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
@@ -49,43 +46,22 @@ namespace PKGE.Unsafe
         }
         #endregion // UnityEngine.Rendering.Universal
 
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        public static unsafe void AddRange<T>(this NativeList<T> nativeList, NativeArray<T>.ReadOnly nativeArrayRO) where T : unmanaged
         {
-            Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsNotNull(array);
-            Assert.IsTrue(count >= 0);
-            Assert.IsTrue(count <= array.Length);
-
-#if UNITY_6000_3_OR_NEWER
-            nativeList.AddRange(NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray(
-                array.AsSpan(start: 0, length: count), Allocator.None));
-#else
-            nativeList.AddRange(array.AsSpan(start: 0, length: count).AsNativeArray());
-#endif // UNITY_6000_3_OR_NEWER
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
-        {
-            Assert.IsNotNull(array);
-
-            nativeList.AddRange(array, array.Length);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, List<T> list) where T : unmanaged
-        {
-            Assert.IsNotNull(list);
-
-            nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
+            nativeList.AddRange(nativeArrayRO.GetUnsafeReadOnlyPtr(), nativeArrayRO.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T> nativeArray) where T : unmanaged
         {
             nativeList.AddRangeNoResize(nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeArray<T>.ReadOnly nativeArrayRO) where T : unmanaged
+        {
+            nativeList.AddRangeNoResize(nativeArrayRO.GetUnsafeReadOnlyPtr(), nativeArrayRO.Length);
         }
     }
 }

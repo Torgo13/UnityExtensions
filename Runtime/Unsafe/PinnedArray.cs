@@ -18,7 +18,7 @@ namespace PKGE.Unsafe
 
         public PinnedArray(int length)
         {
-            Assert.IsTrue(length > 0);
+            Assert.IsTrue(length >= 0);
             managedArray = new T[length];
             unsafe
             {
@@ -33,8 +33,8 @@ namespace PKGE.Unsafe
         public PinnedArray(T[] array, int start, int length)
         {
             Assert.IsNotNull(array);
-            Assert.IsTrue(start > 0);
-            Assert.IsTrue(length > 0);
+            Assert.IsTrue(start >= 0);
+            Assert.IsTrue(length >= 0);
             Assert.IsTrue(start + length <= array.Length);
             managedArray = array;
             unsafe
@@ -53,7 +53,7 @@ namespace PKGE.Unsafe
         public PinnedArray(T[] array, int length)
         {
             Assert.IsNotNull(array);
-            Assert.IsTrue(length > 0);
+            Assert.IsTrue(length >= 0);
             managedArray = array;
             unsafe
             {

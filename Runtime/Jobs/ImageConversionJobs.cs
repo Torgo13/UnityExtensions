@@ -381,7 +381,7 @@ namespace PKGE.Packages
         }
 
         public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip, ref int offset,
-            in NativeArray<Color24> rawTextureData)
+            in NativeArray<Color24>.ReadOnly rawTextureData)
         {
             int pow2 = 1 << mip;
             int mipWidth = width / pow2;
@@ -397,7 +397,7 @@ namespace PKGE.Packages
         }
 
         public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip,
-            in NativeArray<Color24> rawTextureData)
+            in NativeArray<Color24>.ReadOnly rawTextureData)
         {
             TextureUtils.GetMipData(mip, width, height,
                 out int offset, out int pow2, out int mipWidth, out int mipHeight);
@@ -579,8 +579,7 @@ namespace PKGE.Packages
 
         public void Execute(int index)
         {
-            int x = index % mipWidth;
-            int y = index / mipWidth;
+            int y = System.Math.DivRem(index, mipWidth, out int x);
 
             // Convert coordinates from source mip level to target mip level
             int wn = mipWidthn - 1;
@@ -616,18 +615,19 @@ namespace PKGE.Packages
 
         public void Execute(int index)
         {
-            int x = index % width;
-            int y = index / width;
+            int y = System.Math.DivRem(index, width, out int x);
 
             const float scale = 1f / byte.MaxValue;
 
             Color24 c = rawTextureData[index];
             float3 rgb = new float3(c.r, c.g, c.b) * scale;
 
+            var rawTextureDataRO = rawTextureData.AsReadOnly();
+
             // TODO Bilinear filtering for higher mip levels
             for (int mip = 1; mip < mipmapCount; mip++)
             {
-                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureData);
+                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureDataRO);
                 rgb = ImageConversionJobs.BlendNormal(rgb, new float3(c.r, c.g, c.b) * scale);
             }
 
@@ -647,16 +647,17 @@ namespace PKGE.Packages
 
         public void Execute(int index)
         {
-            int x = index % width;
-            int y = index / width;
+            int y = System.Math.DivRem(index, width, out int x);
 
             Color24 c = rawTextureData[index];
             float3 rgb = new float3(c.r, c.g, c.b);
 
+            var rawTextureDataRO = rawTextureData.AsReadOnly();
+
             // TODO Bilinear filtering for higher mip levels
             for (int mip = 1; mip < mipmapCount; mip++)
             {
-                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureData);
+                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureDataRO);
                 rgb += new float3(c.r, c.g, c.b);
             }
 
@@ -682,8 +683,7 @@ namespace PKGE.Packages
             // Fix out of bounds array access on image edges
             int wn = width - 1;
 
-            int x0 = index % width;
-            int y0 = index / width;
+            int y0 = System.Math.DivRem(index, width, out int x0);
 
             int xn = max(0, x0 - 1);
             int yn = max(0, y0 - 1);
@@ -712,8 +712,7 @@ namespace PKGE.Packages
             // Fix out of bounds array access on image edges
             int wn = width - 1;
 
-            int x0 = index % width;
-            int y0 = index / width;
+            int y0 = System.Math.DivRem(index, width, out int x0);
 
             int xn = mod(x0 - 1, wn);
             int yn = mod(y0 - 1, hn);
