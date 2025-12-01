@@ -253,7 +253,7 @@ namespace PKGE.Editor
             {
                 try
                 {
-                    foreach (var type in assembly.GetTypes())
+                    foreach (var type in ReflectionUtils.GetCachedTypesDictionary()[assembly])
                     {
                         if (type.Name.Equals(name) && typeof(UnityObject).IsAssignableFrom(type))
                             return type;

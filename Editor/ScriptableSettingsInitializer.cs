@@ -54,7 +54,7 @@ namespace PKGE.Editor
 
         static IEnumerable<Type> GetSettingsClasses(Assembly assembly)
         {
-            return assembly.GetTypes().Where(EditorApplication.isPlayingOrWillChangePlaymode ? Filter : EditorFilter);
+            return ReflectionUtils.GetCachedTypesDictionary()[assembly].Where(EditorApplication.isPlayingOrWillChangePlaymode ? Filter : EditorFilter);
             
             bool Filter(Type t) => t.IsSubclassOf(typeof(ScriptableSettings<>));
             bool EditorFilter(Type t) => t.IsSubclassOf(typeof(ScriptableSettingsBase)) && !t.IsAbstract;

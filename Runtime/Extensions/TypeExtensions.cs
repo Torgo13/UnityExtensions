@@ -23,9 +23,9 @@ namespace PKGE
         /// Return false to ignore given type.</param>
         public static void GetAssignableTypes(this Type type, List<Type> list, Func<Type, bool> predicate = null)
         {
-            foreach (var types in ReflectionUtils.GetCachedTypesPerAssembly())
+            foreach (var types in ReflectionUtils.GetCachedTypesDictionary())
             {
-                foreach (var t in types)
+                foreach (var t in types.Value)
                 {
                     if (type.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract && (predicate == null || predicate(t)))
                         list.Add(t);

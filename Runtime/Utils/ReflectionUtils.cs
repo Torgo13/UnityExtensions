@@ -18,7 +18,8 @@ namespace PKGE
             _typesPerAssembly = null;
             _typesPerAssemblyDictionary = null;
             _assemblyTypeMaps = null;
-            _genericTypeNames?.Clear();
+            _genericTypeNames = null;
+            _assemblyTypeFullNames = null;
         }
 
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/ReflectionUtils.cs
@@ -28,6 +29,7 @@ namespace PKGE
         static Dictionary<Assembly, Type[]> _typesPerAssemblyDictionary;
         static List<Dictionary<string, Type>> _assemblyTypeMaps;
         static Dictionary<Type, string> _genericTypeNames;
+        static Dictionary<Assembly, string> _assemblyTypeFullNames;
 
         public static Assembly[] GetCachedAssemblies() { return _assemblies ??= AppDomain.CurrentDomain.GetAssemblies(); }
 
@@ -35,18 +37,10 @@ namespace PKGE
         {
             if (_typesPerAssembly == null)
             {
-                var assemblies = GetCachedAssemblies();
-                _typesPerAssembly = new List<Type[]>(assemblies.Length);
-                foreach (var assembly in assemblies)
+                _typesPerAssembly = new List<Type[]>(GetCachedAssemblies().Length);
+                foreach (var assembly in GetCachedTypesDictionary())
                 {
-                    try
-                    {
-                        _typesPerAssembly.Add(assembly.GetTypes());
-                    }
-                    catch (ReflectionTypeLoadException)
-                    {
-                        // Skip any assemblies that don't load properly -- suppress errors
-                    }
+                    _typesPerAssembly.Add(assembly.Value);
                 }
             }
 
@@ -61,14 +55,31 @@ namespace PKGE
                 _typesPerAssemblyDictionary = new Dictionary<Assembly, Type[]>(assemblies.Length);
                 foreach (var assembly in assemblies)
                 {
+                    _typesPerAssemblyDictionary.Add(assembly, assembly.GetTypesSafe());
+#if ZERO
                     try
                     {
                         _typesPerAssemblyDictionary.Add(assembly, assembly.GetTypes());
                     }
-                    catch (ReflectionTypeLoadException)
+                    catch (ReflectionTypeLoadException e)
                     {
                         // Skip any assemblies that don't load properly -- suppress errors
+                        Debug.LogException(e);
+
+                        var types = e.Types;
+                        var temp = UnityEngine.Pool.ListPool<Type>.Get();
+                        temp.EnsureCapacity(types.Length);
+
+                        foreach (var type in types)
+                        {
+                            if (type != null)
+                                temp.Add(type);
+                        }
+
+                        _typesPerAssemblyDictionary.Add(assembly, temp.ToArray());
+                        UnityEngine.Pool.ListPool<Type>.Release(temp);
                     }
+#endif // ZERO
                 }
             }
 
@@ -79,14 +90,13 @@ namespace PKGE
         {
             if (_assemblyTypeMaps == null)
             {
-                var typesPerAssembly = GetCachedTypesPerAssembly();
-                _assemblyTypeMaps = new List<Dictionary<string, Type>>(typesPerAssembly.Count);
-                foreach (var types in typesPerAssembly)
+                _assemblyTypeMaps = new List<Dictionary<string, Type>>(GetCachedAssemblies().Length);
+                foreach (var types in GetCachedTypesDictionary())
                 {
                     try
                     {
-                        var typeMap = new Dictionary<string, Type>(types.Length);
-                        foreach (var type in types)
+                        var typeMap = new Dictionary<string, Type>(types.Value.Length, StringComparer.Ordinal);
+                        foreach (var type in types.Value)
                         {
                             typeMap[type.FullName!] = type;
                         }
@@ -115,9 +125,12 @@ namespace PKGE
             if (_genericTypeNames.TryGetValue(type, out var genericTypeName))
                 return genericTypeName;
 
-            genericTypeName = string.IsNullOrEmpty(type.Namespace)
-                ? type.Name
-                : $"{type.Namespace}.{type.Name}";
+            var typeName = type.Name;
+            var typeNamespace = type.Namespace;
+
+            genericTypeName = string.IsNullOrEmpty(typeNamespace)
+                ? typeName
+                : $"{typeNamespace}.{typeName}";
 
             _genericTypeNames.Add(type, genericTypeName);
 
@@ -154,10 +167,10 @@ namespace PKGE
         /// <param name="callback">The callback to execute.</param>
         public static void ForEachType(Action<Type> callback)
         {
-            var typesPerAssembly = GetCachedTypesPerAssembly();
+            var typesPerAssembly = GetCachedTypesDictionary();
             foreach (var types in typesPerAssembly)
             {
-                foreach (var type in types)
+                foreach (var type in types.Value)
                 {
                     callback(type);
                 }
@@ -168,9 +181,9 @@ namespace PKGE
         {
             Assert.IsNotNull(types);
 
-            foreach (var t in GetCachedTypesPerAssembly())
+            foreach (var t in GetCachedTypesDictionary())
             {
-                types.AddRange(t);
+                types.AddRange(t.Value);
             }
 
             return types;
@@ -185,10 +198,10 @@ namespace PKGE
         /// or `null` if no matching type exists.</returns>
         public static Type FindType(Func<Type, bool> predicate)
         {
-            var typesPerAssembly = GetCachedTypesPerAssembly();
+            var typesPerAssembly = GetCachedTypesDictionary();
             foreach (var types in typesPerAssembly)
             {
-                foreach (var type in types)
+                foreach (var type in types.Value)
                 {
                     if (predicate(type))
                         return type;
@@ -231,13 +244,13 @@ namespace PKGE
         /// the same number of elements as the <paramref name="predicates"/> list.</param>
         public static void FindTypesBatch(List<Func<Type, bool>> predicates, List<Type> resultList)
         {
-            var typesPerAssembly = GetCachedTypesPerAssembly();
+            var typesPerAssembly = GetCachedTypesDictionary();
             for (var i = 0; i < predicates.Count; i++)
             {
                 var predicate = predicates[i];
                 foreach (var assemblyTypes in typesPerAssembly)
                 {
-                    foreach (var type in assemblyTypes)
+                    foreach (var type in assemblyTypes.Value)
                     {
                         if (predicate(type))
                             resultList[i] = type;
@@ -292,7 +305,14 @@ namespace PKGE
             var assemblyTypeMaps = GetCachedAssemblyTypeMaps();
             for (var i = 0; i < assemblies.Length; i++)
             {
-                if (assemblies[i].GetName().Name != assemblyName)
+                _assemblyTypeFullNames ??= new Dictionary<Assembly, string>(assemblies.Length);
+                if (!_assemblyTypeFullNames.TryGetValue(assemblies[i], out var assemblyFullName))
+                {
+                    assemblyFullName = assemblies[i].GetName().Name;
+                    _assemblyTypeFullNames.Add(assemblies[i], assemblyFullName);
+                }
+
+                if (!string.Equals(assemblyFullName, assemblyName, StringComparison.Ordinal))
                     continue;
 
                 return assemblyTypeMaps[i].GetValueOrDefault(typeName);
