@@ -11,9 +11,10 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/NoAllocUtils.cs
         #region UnityEngine.Rendering.Universal
-        // Add profiling samplers to sorts as they are often a bottleneck when scaling things up.
-        // By default, avoid sampling recursion, but these can be used externally as well.
+        /// <summary>Add profiling samplers to sorts as they are often a bottleneck when scaling things up.</summary>
+        /// <remarks>By default, avoid sampling recursion, but these can be used externally as well.</remarks>
         static readonly ProfilingSampler QuickSortSampler = new ProfilingSampler(nameof(QuickSort));
+        /// <inheritdoc cref="QuickSortSampler"/>
         static readonly ProfilingSampler InsertionSortSampler = new ProfilingSampler(nameof(InsertionSort));
 
         public static void QuickSort<T>(T[] data, Func<T, T, int> compare)
@@ -26,11 +27,11 @@ namespace PKGE
         /// A non-allocating predicated sub-array quick sort for managed arrays.
         /// </summary>
         /// <remarks>
-        /// Similar to UnityEngine.Rendering.CoreUnsafeUtils.QuickSort in CoreUnsafeUtils.cs
-        /// </remarks>>
+        /// Similar to <see cref="UnityEngine.Rendering.CoreUnsafeUtils.QuickSort"/> in CoreUnsafeUtils.cs
         /// <example><code>
         /// Sorting.QuickSort(test, 0, test.Length - 1, (int a, int b) => a - b);
         /// </code></example>
+        /// </remarks>
         /// <param name="data"></param>
         /// <param name="start"></param>
         /// <param name="end">The end param is inclusive.</param>
@@ -124,7 +125,12 @@ namespace PKGE
         /// <summary>
         /// A non-allocating predicated sub-array insertion sort for managed arrays.
         /// </summary>
-        /// <remarks>Called also from QuickSort for small ranges.</remarks>
+        /// <remarks>Called also from <see cref="QuickSort{T}(T[], int, int, Func{T, T, int})"/> for small ranges.</remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="compare"></param>
         public static void InsertionSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
         {
             Assert.IsTrue((uint)start < data.Length);
@@ -160,6 +166,11 @@ namespace PKGE
         #region UnityEngine
         /// <summary><see cref="ResetListSize{T}"/> with runtime checks.</summary>
         /// <remarks>Also clears the <see cref="List{T}"/> <paramref name="list"/>.</remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">Input <see cref="List{T}"/>.</param>
+        /// <param name="count">Desired element count.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public static void EnsureListElemCount<T>(this List<T> list, int count)
         {
             if (list == null)
@@ -186,9 +197,12 @@ namespace PKGE
         public static int SafeLength(this Array values) { return values != null ? values.Length : 0; }
         public static int SafeLength<T>(this List<T> values) { return values != null ? values.Count : 0; }
 
-        /// <summary>
+        /// <remarks>
         /// Returned array will be invalid if the Capacity of the List is modified.
-        /// </summary>
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list">Input <see cref="System.Collections.Generic.List{T}"/>.</param>
+        /// <returns>Internal <see cref="{T}[]"/> of <paramref name="list"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T[] ExtractArrayFromList<T>(this List<T> list)
         {

@@ -11,7 +11,7 @@ using PKGE.Mathematics;
 namespace PKGE.Unsafe
 {
     [GenerateTestsForBurstCompatibility]
-    internal struct Bitwise
+    public struct Bitwise
     {
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections/BitField.cs
         #region Unity.Collections

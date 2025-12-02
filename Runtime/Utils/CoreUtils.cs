@@ -521,11 +521,13 @@ namespace PKGE
         /// this function calls <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/>.
         /// </remarks>
         /// <param name="obj"><see cref="UnityEngine.Object"/> to be destroyed.</param>
-        /// <param name="withUndo">Whether to record and undo operation for the destroy action.</param>
+        /// <param name="withUndo">Whether to record and undo operation for the destroy action.
+        /// Only used in the Editor.</param>
         /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is
         /// <see langword="false"/> before destroying it.</param>
-        /// <param name="allowDestroyingAssets">Set to true to allow assets to be destroyed.</param>
-        /// <param name="delay">Delay in seconds before the object is destroyed.</param>
+        /// <param name="allowDestroyingAssets">Set to <see langword="true"/> to allow assets to be destroyed.</param>
+        /// <param name="delay">Delay in seconds before the object is destroyed.
+        /// Set to negative to call <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/></param>
         public static void Destroy(this UnityObject obj, bool withUndo = false,
             bool skipNullCheck = false, bool allowDestroyingAssets = false, float delay = 0f)
         {
@@ -535,24 +537,29 @@ namespace PKGE
 #else
                 switch (obj)
                 {
-                    case Transform t:
-                        t.gameObject.SetActive(false);
-                        break;
                     case GameObject go:
                         go.SetActive(false);
+                        break;
+                    case Transform t:
+                        t.gameObject.SetActive(false);
                         break;
                 }
 #endif // UNITY_6000_4_OR_NEWER
 
 #if UNITY_EDITOR
-                if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
-                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
-                else if (withUndo)
+                if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
+                else if (delay < 0f)
+                    UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
+                else if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
+                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
                 else
                     UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
 #else
-                UnityObject.Destroy(obj, Mathf.Max(0f, delay));
+                if (delay < 0f)
+                    UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
+                else
+                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
 #endif
             }
         }

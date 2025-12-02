@@ -186,9 +186,13 @@ namespace PKGE
         }
 
         #region TextureFileType
-        /// <summary>
+        /// <remarks>
         /// Use EXR 32-bit float for HDR textures
-        /// </summary>
+        /// </remarks>
+        /// <param name="texture">Input <see cref="Texture"/>.</param>
+        /// <param name="fileType">Supported <see cref="Texture"/> file types.</param>
+        /// <param name="flags">Additional flags for when <paramref name="fileType"/> is <see cref="TextureFileType.EXR"/>.</param>
+        /// <returns><see langword="true"/> if <paramref name="fileType"/> is HDR.</returns>
         static bool IsHDR(this Texture2D texture, ref TextureFileType fileType, ref Texture2D.EXRFlags flags)
         {
             if ((fileType == TextureFileType.Auto || fileType == TextureFileType.EXR)

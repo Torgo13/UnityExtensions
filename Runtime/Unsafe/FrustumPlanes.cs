@@ -141,6 +141,7 @@ namespace PKGE.Unsafe
         /// <summary>
         /// Represents four three-dimensional culling planes where all coordinate components and distances are combined.
         /// </summary>
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
         public struct PlanePacket4
         {
             /// <summary>
@@ -297,6 +298,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility")]
         private static float4 dot4(float4 xs, float4 ys, float4 zs, float4 mx, float4 my, float4 mz)
         {
             return xs * mx + ys * my + zs * mz;
