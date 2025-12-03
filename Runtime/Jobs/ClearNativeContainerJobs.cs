@@ -95,4 +95,32 @@ namespace PKGE.Packages
             dst[index] = src0[index].Equals(src1[index]);
         }
     }
+
+#if INCLUDE_COLLECTIONS
+    /// <remarks>
+    /// Does not clear <see cref="input"/> after the job is complete.
+    /// </remarks>
+    [Unity.Burst.BurstCompile]
+    public struct CopyQueueJob<T> : IJobFor where T : unmanaged
+    {
+        [ReadOnly] public NativeQueue<T>.ReadOnly input;
+        [WriteOnly] public NativeQueue<T>.ParallelWriter output;
+
+        public void Execute(int index)
+        {
+            output.Enqueue(input[index]);
+        }
+    }
+
+    [Unity.Burst.BurstCompile]
+    public struct ClearQueueJob<T> : IJob where T : unmanaged
+    {
+        [WriteOnly] public NativeQueue<T> input;
+
+        public void Execute()
+        {
+            input.Clear();
+        }
+    }
+#endif // INCLUDE_COLLECTIONS
 }
