@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityObject = UnityEngine.Object;
 
 namespace PKGE
@@ -145,7 +144,7 @@ namespace PKGE
                         if (_dirty)
                         {
                             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                                SceneManager.GetActiveScene());
+                                UnityEngine.SceneManagement.SceneManager.GetActiveScene());
                         }
                     }
 

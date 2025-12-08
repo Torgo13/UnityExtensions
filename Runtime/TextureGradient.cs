@@ -191,7 +191,8 @@ namespace PKGE
             if (_texture == null)
             {
                 _texture = new Texture2D(textureSize, 1, GetTextureFormat(),
-                    UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels);
+                    UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels |
+                    UnityEngine.Experimental.Rendering.TextureCreationFlags.DontUploadUponCreate);
                 _texture.name = "GradientTexture";
                 _texture.hideFlags = HideFlags.HideAndDontSave;
                 _texture.filterMode = FilterMode.Bilinear;
@@ -202,7 +203,7 @@ namespace PKGE
 
             if (_isTextureDirty)
             {
-                var pixels = _texture.GetPixelData<Color>(mipLevel: 0);
+                var pixels = _texture.GetRawTextureData<Color>();
 
                 for (int i = 0; i < pixels.Length; i++)
                     pixels[i] = Evaluate(i * step);

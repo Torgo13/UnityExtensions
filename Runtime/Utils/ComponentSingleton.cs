@@ -45,12 +45,7 @@ namespace PKGE
         /// </summary>
         public static void Release()
         {
-            if (_instance != null)
-            {
-                var go = _instance.gameObject;
-                CoreUtils.Destroy(ref go);
-                _instance = null;
-            }
+            CoreUtils.Destroy(ref _instance, destroyGameObject: true);
         }
         #endregion // UnityEngine.Rendering
     }

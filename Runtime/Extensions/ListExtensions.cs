@@ -262,10 +262,11 @@ namespace PKGE
         public static NativeList<T> ToNativeList<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
-            var container = new NativeList<T>(list.Count, allocator);
-            container.ResizeUninitialized(container.Capacity);
-            list.AsSpan().CopyTo(container.AsArray().AsSpan());
-            container.Length = list.Count;
+            var count = list.Count;
+            var container = new NativeList<T>(count, allocator);
+            container.ResizeUninitialized(count);
+            list.AsSpan(start: 0, length: count).CopyTo(container.AsArray().AsSpan());
+            container.Length = count;
 
             return container;
         }

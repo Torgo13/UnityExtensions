@@ -63,7 +63,8 @@ namespace PKGE
             // Texture
             var result = new Texture2D(resolution, slicesY.Count,
                 UnityEngine.Experimental.Rendering.DefaultFormat.HDR,
-                UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels);
+                UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels |
+                UnityEngine.Experimental.Rendering.TextureCreationFlags.DontUploadUponCreate);
             var data = result.GetPixelData<Vector4>(mipLevel: 0);
 
             List<PointWithUV> slice = ListPool<PointWithUV>.Get();
@@ -124,7 +125,7 @@ namespace PKGE
             }
             finally
             {
-                CoreUtils.Destroy(ref result, skipNullCheck: true);
+                CoreUtils.Destroy(result, skipNullCheck: true);
             }
         }
 

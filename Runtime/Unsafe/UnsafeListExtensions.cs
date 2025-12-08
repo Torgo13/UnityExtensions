@@ -121,6 +121,18 @@ namespace PKGE.Unsafe
         {
             return unsafeList.AsNativeArray().AsReadOnlySpan();
         }
+
+        /// <summary>Create an <see cref="UnsafeList{T}"/> that aliases a <paramref name="nativeArray"/>.</summary>
+        /// <remarks>The returned <see cref="UnsafeList{T}"/> must not have its <see cref="UnsafeList{T}.Capacity"/> changed.</remarks>
+        /// <typeparam name="T"><see cref="NativeArray{T}"/> supports <see langword="struct"/>, but it can only
+        /// be converted to an <see cref="UnsafeList{T}"/> if it contains <see langword="unmanaged"/> types.</typeparam>
+        /// <param name="nativeArray">Input <see cref="NativeArray{T}"/>.</param>
+        /// <returns>An <see cref="UnsafeList{T}"/> that aliases the <paramref name="nativeArray"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)nativeArray.GetUnsafePtr(), nativeArray.Length);
+        }
     }
 }
 #endif // INCLUDE_COLLECTIONS

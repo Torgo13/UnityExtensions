@@ -84,7 +84,9 @@ namespace PKGE.Packages
             if (samplingResolution <= 0)
                 throw new ArgumentOutOfRangeException(nameof(samplingResolution), "SamplingAttempts cannot be <= 0");
 
-            var superSampledPoints = new NativeList<float2>(allocator);
+            var superSampledPoints = new NativeList<float2>(AllocatorManager.TempJob);
+            croppedSamples = new NativeList<float2>(allocator);
+
             var sampleJob = new SampleJob
             {
                 width = width + minimumRadius * 2,
@@ -95,7 +97,6 @@ namespace PKGE.Packages
                 samples = superSampledPoints
             }.Schedule();
 
-            croppedSamples = new NativeList<float2>(allocator);
             sampleJob = new CropJob
             {
                 width = width,
@@ -116,6 +117,7 @@ namespace PKGE.Packages
             public float minimumRadius;
             public uint seed;
             public int samplingResolution;
+            [WriteOnly]
             public NativeList<float2> samples;
 
             public void Execute()
@@ -217,7 +219,7 @@ namespace PKGE.Packages
                 gridToSampleIndex[i] = -1;
 
             // This list will track all points that may still have space around them for generating new points
-            var activePoints = new NativeList<float2>(Allocator.Temp);
+            var activePoints = new NativeList<float2>(samples.Length, AllocatorManager.Temp);
 
             // Randomly place a seed point to kick off the algorithm
             var firstPoint = new float2(random.NextFloat(0f, width), random.NextFloat(0f, height));

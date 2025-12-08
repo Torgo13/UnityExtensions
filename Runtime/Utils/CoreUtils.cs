@@ -60,7 +60,7 @@ namespace PKGE
                         TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _blackCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.black);
-                    _blackCubeTexture.Apply();
+                    _blackCubeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _blackCubeTexture;
@@ -81,7 +81,7 @@ namespace PKGE
                         TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _magentaCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.magenta);
-                    _magentaCubeTexture.Apply();
+                    _magentaCubeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _magentaCubeTexture;
@@ -107,7 +107,7 @@ namespace PKGE
                         _magentaCubeTextureArray.SetPixelData(colors, mipLevel: 0, (CubemapFace)i, element: 0);
                     }
 
-                    _magentaCubeTextureArray.Apply();
+                    _magentaCubeTextureArray.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _magentaCubeTextureArray;
@@ -128,7 +128,7 @@ namespace PKGE
                         TextureCreationFlags.DontInitializePixels);
                     for (int i = 0; i < 6; ++i)
                         _whiteCubeTexture.SetPixel((CubemapFace)i, 0, 0, Color.white);
-                    _whiteCubeTexture.Apply();
+                    _whiteCubeTexture.Apply(updateMipmaps: false, makeNoLongerReadable: true);
                 }
 
                 return _whiteCubeTexture;
@@ -521,15 +521,20 @@ namespace PKGE
         /// this function calls <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/>.
         /// </remarks>
         /// <param name="obj"><see cref="UnityEngine.Object"/> to be destroyed.</param>
-        /// <param name="withUndo">Whether to record and undo operation for the destroy action.
-        /// Only used in the Editor.</param>
+        /// <param name="withUndo">Set to <see langword="true"/> to record an undo operation
+        /// for the destroy action. Only used in the Editor. Ignores
+        /// <paramref name="allowDestroyingAssets"/> and <paramref name="delay"/>.</param>
         /// <param name="skipNullCheck">Optionally skip checking if <paramref name="obj"/> is
-        /// <see langword="false"/> before destroying it.</param>
-        /// <param name="allowDestroyingAssets">Set to <see langword="true"/> to allow assets to be destroyed.</param>
+        /// <see langword="null"/> before destroying it.</param>
+        /// <param name="allowDestroyingAssets">Set to <see langword="true"/> to also destroy
+        /// the asset of <paramref name="obj"/>.</param>
+        /// <param name="destroyGameObject">If <paramref name="obj"/> is a <see cref="UnityEngine.Component"/>,
+        /// destroy the <see cref="UnityEngine.GameObject"/> that it is attached to.</param>
         /// <param name="delay">Delay in seconds before the object is destroyed.
-        /// Set to negative to call <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/></param>
+        /// A negative values calls <see cref="UnityEngine.Object.DestroyImmediate(UnityObject)"/></param>
         public static void Destroy(this UnityObject obj, bool withUndo = false,
-            bool skipNullCheck = false, bool allowDestroyingAssets = false, float delay = 0f)
+            bool skipNullCheck = false, bool allowDestroyingAssets = false,
+            bool destroyGameObject = false, float delay = 0f)
         {
             if (skipNullCheck || obj != null)
             {
@@ -546,31 +551,37 @@ namespace PKGE
                 }
 #endif // UNITY_6000_4_OR_NEWER
 
+                if (destroyGameObject && obj is Component c)
+                    obj = c.gameObject;
+
+#if UNITY_EDITOR
+                bool immediate = allowDestroyingAssets || delay < 0f || !Application.isPlaying || UnityEditor.EditorApplication.isPaused;
+#else
+                bool immediate = allowDestroyingAssets || delay < 0f;
+#endif // UNITY_EDITOR
+
 #if UNITY_EDITOR
                 if (withUndo)
                     UnityEditor.Undo.DestroyObjectImmediate(obj);
-                else if (delay < 0f)
-                    UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
-                else if (Application.isPlaying && !UnityEditor.EditorApplication.isPaused)
-                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
                 else
-                    UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
-#else
-                if (delay < 0f)
+#endif // UNITY_EDITOR
+                if (immediate)
                     UnityObject.DestroyImmediate(obj, allowDestroyingAssets);
                 else
-                    UnityObject.Destroy(obj, Mathf.Max(0f, delay));
-#endif
+                    UnityObject.Destroy(obj, delay);
             }
         }
 
+        /// <remarks>Also sets the <paramref name="obj"/> to <see langword="null"/>.</remarks>
+        /// <inheritdoc cref="Destroy(UnityObject, bool, bool, bool, float)"/>
         public static void Destroy<T>(ref T obj, bool withUndo = false,
-            bool skipNullCheck = false, bool allowDestroyingAssets = false, float delay = 0f)
+            bool skipNullCheck = false, bool allowDestroyingAssets = false,
+            bool destroyGameObject = false, float delay = 0f)
             where T : UnityObject
         {
             if (skipNullCheck || obj != null)
             {
-                obj.Destroy(withUndo, skipNullCheck: true, allowDestroyingAssets, delay);
+                obj.Destroy(withUndo, skipNullCheck: true, allowDestroyingAssets, destroyGameObject, delay);
             }
 
             obj = null;

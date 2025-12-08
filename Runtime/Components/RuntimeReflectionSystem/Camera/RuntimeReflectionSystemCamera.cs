@@ -4,7 +4,6 @@
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 
 namespace PKGE
 {
@@ -42,6 +41,7 @@ namespace PKGE
 
             if (!Reflection.InitialiseMaterial())
             {
+                Reflection = null;
                 CoreUtils.Destroy(this);
                 return;
             }
@@ -80,10 +80,9 @@ namespace PKGE
             // Check if it is on a child GameObject
             // It should be on a child because it will update its position to match the camera
             Reflection._reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
-            if (Reflection._reflectionCamera != null)
-                return;
 
-            Reflection.CreateReflectionCamera(transform);
+            if (Reflection._reflectionCamera == null)
+                Reflection.CreateReflectionCamera(transform);
         }
     }
 
@@ -223,7 +222,7 @@ namespace PKGE
             const RenderTextureReadWrite readWrite = RenderTextureReadWrite.Linear;
 
             var desc = new RenderTextureDescriptor(Resolution, Resolution,
-                format, depthBufferBits: 0, mipCount: 0, readWrite)
+                format, depthBufferBits: 0, mipCount: 1, readWrite)
             {
                 dimension = TextureDimension.Cube,
                 autoGenerateMips = false,
@@ -267,7 +266,7 @@ namespace PKGE
             // Cubemap must be sampled directly in Skybox shaders as unity_SpecCube0 is undefined
             UpdateCustomReflectionTexture(unloadedScene: default, loadedScene: default);
 
-            SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
 
             _skyboxMaterial.SetTexture(Tex, _blendedTexture);
 
@@ -284,18 +283,19 @@ namespace PKGE
         {
 #if BLEND_SHADER
 #else
-            SceneManager.activeSceneChanged -= UpdateCustomReflectionTexture;
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= UpdateCustomReflectionTexture;
 
             DestroyRenderTexture(_blendedTexture);
+            _blendedTexture = null;
 
             ambientColours.Dispose();
 #endif // BLEND_SHADER
 
             if (_createdMaterial)
-                CoreUtils.Destroy(_skyboxMaterial);
+                CoreUtils.Destroy(ref _skyboxMaterial, skipNullCheck: true);
 
             if (_createdReflectionCamera)
-                CoreUtils.Destroy(_reflectionCamera.gameObject);
+                CoreUtils.Destroy(ref _reflectionCamera, skipNullCheck: true, destroyGameObject: true);
 
             if (_renderTextures != null)
             {
@@ -303,6 +303,8 @@ namespace PKGE
                 {
                     DestroyRenderTexture(rt);
                 }
+
+                System.Array.Clear(_renderTextures, index: 0, length: _renderTextures.Length);
             }
         }
 
@@ -588,7 +590,7 @@ namespace PKGE
             if (rt != null)
             {
                 rt.Release();
-                CoreUtils.Destroy(ref rt, skipNullCheck: true);
+                CoreUtils.Destroy(rt, skipNullCheck: true);
             }
         }
 
@@ -599,7 +601,7 @@ namespace PKGE
         /// <summary>
         /// Update customReflectionTexture when the scene changes.
         /// </summary>
-        internal void UpdateCustomReflectionTexture(Scene unloadedScene, Scene loadedScene)
+        internal void UpdateCustomReflectionTexture(UnityEngine.SceneManagement.Scene unloadedScene, UnityEngine.SceneManagement.Scene loadedScene)
         {
             RenderSettings.customReflectionTexture = _blendedTexture;
             UpdateSkybox();
