@@ -159,23 +159,6 @@ namespace PKGE
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
 
-        //https://github.com/needle-mirror/com.unity.addressables/blob/b9b97fefbdf24fe7f86d2f50efae7f0fd5a1bba7/Runtime/Utility/SerializationUtilities.cs
-        #region UnityEngine.AddressableAssets.Utility
-        public static int ReadInt32FromByteArray(this byte[] data, int offset)
-        {
-            return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
-        }
-
-        public static int WriteInt32ToByteArray(this byte[] data, int val, int offset)
-        {
-            data[offset] = (byte)(val & 0xFF);
-            data[offset + 1] = (byte)((val >> 8) & 0xFF);
-            data[offset + 2] = (byte)((val >> 16) & 0xFF);
-            data[offset + 3] = (byte)((val >> 24) & 0xFF);
-            return offset + 4;
-        }
-        #endregion // UnityEngine.AddressableAssets.Utility
-
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         public static int LengthSafe<TValue>(this TValue[] array)

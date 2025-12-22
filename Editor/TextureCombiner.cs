@@ -177,7 +177,7 @@ namespace PKGE.Editor
         /// </summary>
         /// <param name="savePath">The path to save the Texture Asset to, relative to the Project folder.</param>
         /// <returns></returns>
-        public Texture2D Combine(string savePath)
+        public Texture2D Combine(string savePath, Shader textureCombiner = default)
         {
             int xMin = int.MaxValue;
             int yMin = int.MaxValue;
@@ -198,7 +198,17 @@ namespace PKGE.Editor
                 TextureCreationFlags.DontInitializePixels);
             combined.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            Material combinerMaterial = new Material(Shader.Find("Hidden/SRP_Core/TextureCombiner"));
+            bool textureCombinerFound = textureCombiner != null;
+            if (!textureCombinerFound)
+            {
+                textureCombiner = Shader.Find("Hidden/SRP_Core/TextureCombiner");
+                textureCombinerFound = textureCombiner != null;
+            }
+
+            if (!textureCombinerFound)
+                return default;
+
+            Material combinerMaterial = new Material(textureCombiner);
             combinerMaterial.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             Dictionary<Texture, Texture> rawTextures = DictionaryPool<Texture, Texture>.Get();

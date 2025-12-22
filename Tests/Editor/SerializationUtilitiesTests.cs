@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace PKGE.Editor.Tests
 {
@@ -15,8 +14,8 @@ namespace PKGE.Editor.Tests
             {
                 var val = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
                 var off = UnityEngine.Random.Range(0, data.Length - sizeof(int));
-                Assert.AreEqual(off + sizeof(int), ArrayExtensions.WriteInt32ToByteArray(data, val, off));
-                Assert.AreEqual(val, ArrayExtensions.ReadInt32FromByteArray(data, off));
+                Assert.AreEqual(off + sizeof(int), SerializationUtilities.WriteInt32ToByteArray(data, val, off));
+                Assert.AreEqual(val, SerializationUtilities.ReadInt32FromByteArray(data, off));
             }
         }
         #endregion // UnityEditor.AddressableAssets.Tests

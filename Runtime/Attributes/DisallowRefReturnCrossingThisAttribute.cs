@@ -3,8 +3,7 @@ using System;
 namespace PKGE.Attributes
 {
     /// <summary>
-    ///     What is this : Attribute signaling that ref returned values, of a type that has this attribute, cannot intersect
-    ///     with
+    ///     Attribute signaling that ref returned values, of a type that has this attribute, cannot intersect with
     ///     calls to methods that also have this attribute.
     ///     Motivation(s): ref returns of values that are backed by native memory (unsafe), like IComponentData in ecs chunks,
     ///     can have the referenced
@@ -12,8 +11,8 @@ namespace PKGE.Attributes
     ///     accessing invalidated references.
     ///     Notes:
     ///     - This attribute is used/feeds a Static Analyzer at compilation time.
-    ///     - Attribute transfers with aggragations: struct A has this attribute, struct B has a field of type A; both A and B
-    ///     are concidered to have the attribute.
+    ///     - Attribute transfers with aggregations: struct A has this attribute, struct B has a field of type A; both A and B
+    ///     are considered to have the attribute.
     /// </summary>
     [AttributeUsage(AttributeTargets.Struct
         | AttributeTargets.Method

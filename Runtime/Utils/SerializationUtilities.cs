@@ -22,12 +22,12 @@ namespace PKGE
             JsonObject
         }
 
-        public static int ReadInt32FromByteArray(byte[] data, int offset)
+        public static int ReadInt32FromByteArray(this byte[] data, int offset)
         {
             return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
         }
 
-        public static int WriteInt32ToByteArray(byte[] data, int val, int offset)
+        public static int WriteInt32ToByteArray(this byte[] data, int val, int offset)
         {
             data[offset] = (byte)(val & 0xFF);
             data[offset + 1] = (byte)((val >> 8) & 0xFF);
@@ -36,12 +36,12 @@ namespace PKGE
             return offset + 4;
         }
 
-        public static ushort ReadUInt16FromByteArray(byte[] data, int offset)
+        public static ushort ReadUInt16FromByteArray(this byte[] data, int offset)
         {
             return (ushort)(data[offset] | (data[offset + 1] << 8));
         }
 
-        public static int WriteUInt16ToByteArray(byte[] data, ushort val, int offset)
+        public static int WriteUInt16ToByteArray(this byte[] data, ushort val, int offset)
         {
             data[offset] = (byte)(val & 0xFF);
             data[offset + 1] = (byte)((val >> 8) & 0xFF);
@@ -56,7 +56,7 @@ namespace PKGE
         /// The first byte is the ObjectType. The rest depends on the type.</param>
         /// <param name="dataIndex">The index of the first byte of the data.</param>
         /// <returns>The deserialized object.</returns>
-        public static object ReadObjectFromByteArray(byte[] keyData, int dataIndex)
+        public static object ReadObjectFromByteArray(this byte[] keyData, int dataIndex)
         {
             try
             {
