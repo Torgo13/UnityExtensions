@@ -88,5 +88,33 @@ namespace PKGE
             rt.anchorMax = s_TopCenterAnchorPosition;
         }
         #endregion // UnityEngine.XR.ARFoundation.Samples
+
+        public static void GetWorldCorners(this RectTransform rectTransform, System.Span<Vector3> fourCornersArray)
+        {
+            if (fourCornersArray == null || fourCornersArray.Length < 4)
+            {
+                Debug.LogError("Calling GetWorldCorners with an array that is null or has less than 4 elements.");
+                return;
+            }
+
+            GetLocalCorners(rectTransform.rect, fourCornersArray);
+            Matrix4x4 matrix4x = rectTransform.localToWorldMatrix;
+            for (int i = 0; i < 4; i++)
+            {
+                fourCornersArray[i] = matrix4x.MultiplyPoint(fourCornersArray[i]);
+            }
+        }
+
+        private static void GetLocalCorners(in Rect rect, System.Span<Vector3> fourCornersArray)
+        {
+            float x = rect.x;
+            float y = rect.y;
+            float xMax = rect.xMax;
+            float yMax = rect.yMax;
+            fourCornersArray[0] = new Vector3(x, y, 0f);
+            fourCornersArray[1] = new Vector3(x, yMax, 0f);
+            fourCornersArray[2] = new Vector3(xMax, yMax, 0f);
+            fourCornersArray[3] = new Vector3(xMax, y, 0f);
+        }
     }
 }

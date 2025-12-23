@@ -20,7 +20,7 @@ namespace PKGE
         {
             Type t = typeof(T);
             bool isEnum = t.IsEnum;
-            if (!t.IsValueType && !isEnum)
+            if (!isEnum && !t.IsValueType)
             {
                 Size = -1;
                 return;
@@ -48,7 +48,7 @@ namespace PKGE
         {
             Type t = typeof(T);
             bool isEnum = t.IsEnum;
-            if (!t.IsValueType && !isEnum)
+            if (!isEnum && !t.IsValueType)
             {
                 Alignment = -1;
                 return;

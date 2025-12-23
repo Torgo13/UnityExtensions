@@ -94,6 +94,7 @@ namespace PKGE
             DestroyIfNeeded(ref obj);
         }
 
+        /// <inheritdoc cref="DestroyIfNeeded{T}(T)"/>
         public static void DestroyIfNeeded<T>(ref T obj) where T : Object
         {
             if (obj != null)

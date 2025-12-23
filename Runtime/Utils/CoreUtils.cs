@@ -554,10 +554,9 @@ namespace PKGE
                 if (destroyGameObject && obj is Component c)
                     obj = c.gameObject;
 
-#if UNITY_EDITOR
-                bool immediate = allowDestroyingAssets || delay < 0f || !Application.isPlaying || UnityEditor.EditorApplication.isPaused;
-#else
                 bool immediate = allowDestroyingAssets || delay < 0f;
+#if UNITY_EDITOR
+                immediate |= !Application.isPlaying || UnityEditor.EditorApplication.isPaused;
 #endif // UNITY_EDITOR
 
 #if UNITY_EDITOR
