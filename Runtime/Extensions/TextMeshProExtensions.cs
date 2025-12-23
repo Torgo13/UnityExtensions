@@ -1,5 +1,6 @@
 #if INCLUDE_TEXTMESH_PRO
 using System;
+using System.Text;
 using TMPro;
 using UnityEngine.Pool;
 
@@ -27,6 +28,33 @@ namespace PKGE.Packages
             {
                 text.SetText(sb.Append(arg0));
             }
+        }
+
+        public static void SetText(this TMP_Text text, StringBuilder arg0, int start)
+        {
+            SetText(text, arg0, start, arg0?.Length - start ?? 0);
+        }
+
+        public static void SetText(this TMP_Text text, StringBuilder arg0, int start, int length)
+        {
+            UnityEngine.Assertions.Assert.IsNotNull(text);
+            UnityEngine.Assertions.Assert.IsTrue(start >= 0);
+
+            if (length == 0 || arg0 == null || arg0.Length == 0)
+            {
+                text.SetText(string.Empty);
+                return;
+            }
+
+            UnityEngine.Assertions.Assert.IsTrue(start + length <= arg0.Length);
+
+            var list = ListPool<char>.Get();
+            list.EnsureCapacity(length);
+            var buffer = list.AsArray();
+
+            arg0.CopyTo(start, buffer, destinationIndex: 0, length);
+            text.SetCharArray(buffer, start: 0, length);
+            ListPool<char>.Release(list);
         }
 
         public static void SetTextAsSpan(this TMP_Text text, string arg0)

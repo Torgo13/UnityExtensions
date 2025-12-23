@@ -23,7 +23,12 @@
         },
         {
             "name": "com.unity.textmeshpro",
-            "expression": "1.0.0",
+            "expression": "",
+            "define": "INCLUDE_TEXTMESH_PRO"
+        },
+        {
+            "name": "Unity",
+            "expression": "6000",
             "define": "INCLUDE_TEXTMESH_PRO"
         },
         {
