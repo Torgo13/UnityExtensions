@@ -10,7 +10,6 @@ using PKGE.Mathematics;
 
 namespace PKGE.Packages
 {
-    [Unity.Burst.BurstCompile]
     public static class AnimationCurveBake
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/AnimationCurveBake.cs
@@ -49,35 +48,70 @@ namespace PKGE.Packages
             nativeKeys.CopyTo(keys);
             return frameCount;
         }
-        
-        [Unity.Burst.BurstCompile]
+
+        /// <exception cref="System.InvalidOperationException">Not Implemented</exception>
         public static int Bake(ref NativeArray<Keyframe> keys, float frameRate, in InterpolationMode mode = InterpolationMode.Auto)
         {
-            float duration = keys[keys.Length - 1].time - keys[0].time;
-            int frameCount = (int)math.ceil(frameRate * duration);
-            var bakedKeys = new NativeArray<Keyframe>(frameCount, Allocator.Temp);
-            var sampleRange = new SampleRange(startFrameIndex: 0, numFrames: frameCount);
-            
-            ThreadSafe.Bake(keys, frameRate, ref bakedKeys, sampleRange);
-
             switch (mode)
             {
                 case InterpolationMode.Linear:
-                    KeyframeUtilities.AlignTangentsLinear(ref bakedKeys);
-                    break;
                 case InterpolationMode.Auto:
-                    KeyframeUtilities.AlignTangentsSmooth(ref bakedKeys);
-                    break;
                 case InterpolationMode.ClampedAuto:
-                    KeyframeUtilities.AlignTangentsClamped(ref bakedKeys);
                     break;
                 default:
                     throw new System.InvalidOperationException("Not Implemented");
             }
 
-            keys.CopyFrom(bakedKeys);
-            bakedKeys.Dispose();
+            var result = new NativeArray<int>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            new BakeJob
+            {
+                result = result,
+                keys = keys,
+                frameRate = frameRate,
+                mode = mode,
+            }.Run();
+
+            int frameCount = result[0];
+            result.Dispose();
             return frameCount;
+        }
+
+        [Unity.Burst.BurstCompile]
+        private struct BakeJob : IJob
+        {
+            [WriteOnly] public NativeArray<int> result;
+            public NativeArray<Keyframe> keys;
+            public float frameRate;
+            public InterpolationMode mode;
+
+            public void Execute()
+            {
+                float duration = keys[keys.Length - 1].time - keys[0].time;
+                int frameCount = (int)math.ceil(frameRate * duration);
+                var bakedKeys = new NativeArray<Keyframe>(frameCount, Allocator.Temp);
+                var sampleRange = new SampleRange(startFrameIndex: 0, numFrames: frameCount);
+
+                ThreadSafe.Bake(keys, frameRate, ref bakedKeys, sampleRange);
+
+                switch (mode)
+                {
+                    case InterpolationMode.Linear:
+                        KeyframeUtilities.AlignTangentsLinear(ref bakedKeys);
+                        break;
+                    case InterpolationMode.Auto:
+                        KeyframeUtilities.AlignTangentsSmooth(ref bakedKeys);
+                        break;
+                    case InterpolationMode.ClampedAuto:
+                        KeyframeUtilities.AlignTangentsClamped(ref bakedKeys);
+                        break;
+                    default:
+                        throw new System.InvalidOperationException("Not Implemented");
+                }
+
+                keys.CopyFrom(bakedKeys);
+                bakedKeys.Dispose();
+                result[0] = frameCount;
+            }
         }
 
         public static class ThreadSafe

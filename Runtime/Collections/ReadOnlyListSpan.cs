@@ -146,7 +146,6 @@ namespace PKGE.Collections
         /// <remarks>
         /// Two instances compare equal if they are read-only views of the same list, for the same start and end indices.
         /// </remarks>
-        [Unity.Burst.BurstDiscard]
         public bool Equals(ReadOnlyListSpan<T> other)
         {
             return ReferenceEquals(_enumerator.List, other._enumerator.List)
@@ -159,7 +158,6 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="obj">An object to compare with this object.</param>
         /// <returns>`true` if the current object is equal to the `other` parameter. Otherwise, `false`.</returns>
-        [Unity.Burst.BurstDiscard]
         public override bool Equals(object obj)
             => obj is ReadOnlyListSpan<T> other && Equals(other);
 

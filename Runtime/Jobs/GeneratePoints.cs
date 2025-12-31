@@ -16,16 +16,18 @@ namespace PKGE.Packages
         {
             public float Radius;
             public float3 Center;
+            [WriteOnly]
             public NativeArray<float3> Points;
+            public int Count;
+            public uint Seed;
 
             public void Execute()
             {
                 var radiusSquared = Radius * Radius;
                 var pointsFound = 0;
-                var count = Points.Length;
-                var random = new Random(0x6E624EB7u);
+                var random = new Random(Seed);
 
-                while (pointsFound < count)
+                while (pointsFound < Count)
                 {
                     var p = random.NextFloat3() * new float3(Radius + Radius) - new float3(Radius);
                     if (math.lengthsq(p) < radiusSquared)
@@ -52,7 +54,9 @@ namespace PKGE.Packages
             {
                 Radius = radius,
                 Center = center,
-                Points = points
+                Points = points,
+                Count = points.Length,
+                Seed = 0x6E624EB7u,
             };
             var pointsInSphereJobHandle = pointsInSphereJob.Schedule(inputDeps);
             return pointsInSphereJobHandle;

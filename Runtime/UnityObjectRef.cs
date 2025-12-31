@@ -88,7 +88,6 @@ namespace PKGE.Packages
             return instanceId == other.instanceId;
         }
 
-        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj)
         {
             return obj is UntypedUnityObjectRef other && Equals(other);
@@ -214,7 +213,6 @@ namespace PKGE.Packages
         /// <param name="obj">The object to compare.</param>
         /// <returns>True, if the <paramref name="obj"/> parameter is a UnityEngine.Object instance that points to the same
         /// instance as this.</returns>
-        [Unity.Burst.BurstDiscard]
         public override readonly bool Equals(object obj)
         {
             return obj is UnityObjectRef<T> other && Equals(other);

@@ -1,7 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 #if INCLUDE_MATHEMATICS
@@ -87,42 +89,86 @@ namespace PKGE.Packages
         #endregion // Unity.Curves
     }
     
-    [Unity.Burst.BurstCompile]
     public static class CurveSampling
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
         #region Unity.Curves
         const float DefaultWeight = 0;
 
-        [Unity.Burst.BurstCompile]
         public static class ThreadSafe
         {
-            [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
             public static void Evaluate(in NativeArray<Keyframe> keys, float curveT,
                 out float result)
             {
-                EvaluateWithinRange(keys, curveT, 0, keys.Length - 1, out result);
+                var results = new NativeArray<float>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                new EvaluateJob
+                {
+                    result = results,
+                    keys = keys,
+                    curveT = curveT,
+                }.Run();
+
+                result = results[0];
+                results.Dispose();
             }
 
-            [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+            [BurstCompile(FloatMode = FloatMode.Fast)]
+            private struct EvaluateJob : IJob
+            {
+                [WriteOnly] public NativeArray<float> result;
+                [ReadOnly] public NativeArray<Keyframe> keys;
+                [ReadOnly] public float curveT;
+
+                public void Execute()
+                {
+                    EvaluateWithinRange(keys, curveT, 0, keys.Length - 1, out var output);
+                    result[0] = output;
+                }
+            }
+
             public static void EvaluateWithHint(in NativeArray<Keyframe> keys, float curveT, ref int hintIndex,
                 out float result)
             {
-                const int startIndex = 0;
-                int endIndex = keys.Length - 1;
-                if (endIndex <= hintIndex)
+                var results = new NativeArray<float>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                new EvaluateWithHintJob
                 {
-                    result = keys[hintIndex].value;
-                    return;
+                    result = results,
+                    keys = keys,
+                    curveT = curveT,
+                    hintIndex = hintIndex,
+                }.Run();
+
+                result = results[0];
+                results.Dispose();
+            }
+
+            [BurstCompile(FloatMode = FloatMode.Fast)]
+            private struct EvaluateWithHintJob : IJob
+            {
+                [WriteOnly] public NativeArray<float> result;
+                [ReadOnly] public NativeArray<Keyframe> keys;
+                [ReadOnly] public float curveT;
+                [ReadOnly] public int hintIndex;
+
+                public void Execute()
+                {
+                    const int startIndex = 0;
+                    int endIndex = keys.Length - 1;
+                    if (endIndex <= hintIndex)
+                    {
+                        result[0] = keys[hintIndex].value;
+                        return;
+                    }
+
+                    // wrap time
+                    curveT = math.clamp(curveT, keys[hintIndex].time, keys[endIndex].time);
+                    FindIndexForSampling(keys, curveT, startIndex, endIndex, hintIndex, out int lhsIndex, out int rhsIndex);
+
+                    Keyframe lhs = keys[hintIndex];
+                    Keyframe rhs = keys[rhsIndex];
+                    InterpolateKeyframe(lhs, rhs, curveT, out var output);
+                    result[0] = output;
                 }
-
-                // wrap time
-                curveT = math.clamp(curveT, keys[hintIndex].time, keys[endIndex].time);
-                FindIndexForSampling(keys, curveT, startIndex, endIndex, hintIndex, out int lhsIndex, out int rhsIndex);
-
-                Keyframe lhs = keys[hintIndex];
-                Keyframe rhs = keys[rhsIndex];
-                InterpolateKeyframe(lhs, rhs, curveT, out result);
             }
 
             public static void EvaluateWithinRange(in NativeArray<Keyframe> keys, float curveT, int startIndex,
