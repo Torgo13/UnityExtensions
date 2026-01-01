@@ -105,6 +105,22 @@ namespace PKGE
             }
         }
 
+        public static void GetWorldCorners(this RectTransform rectTransform, Unity.Collections.NativeArray<Vector3> fourCornersArray)
+        {
+            UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.IsCreated);
+            UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.Length >= 4);
+            UnityEngine.Assertions.Assert.IsNotNull(rectTransform);
+
+            var fourCornersJob = new FourCornersJob
+            {
+                fourCornersArray = fourCornersArray,
+                matrix4x = rectTransform.localToWorldMatrix,
+                rect = rectTransform.rect,
+            };
+
+            Unity.Jobs.IJobExtensions.Run(fourCornersJob);
+        }
+
         private static void GetLocalCorners(in Rect rect, System.Span<Vector3> fourCornersArray)
         {
             float x = rect.x;
@@ -115,6 +131,23 @@ namespace PKGE
             fourCornersArray[1] = new Vector3(x, yMax, 0f);
             fourCornersArray[2] = new Vector3(xMax, yMax, 0f);
             fourCornersArray[3] = new Vector3(xMax, y, 0f);
+        }
+
+        [Unity.Burst.BurstCompile]
+        struct FourCornersJob : Unity.Jobs.IJob
+        {
+            public Unity.Collections.NativeArray<Vector3> fourCornersArray;
+            public Matrix4x4 matrix4x;
+            public Rect rect;
+
+            public void Execute()
+            {
+                GetLocalCorners(rect, fourCornersArray);
+                for (int i = 0; i < 4; i++)
+                {
+                    fourCornersArray[i] = matrix4x.MultiplyPoint(fourCornersArray[i]);
+                }
+            }
         }
     }
 }
