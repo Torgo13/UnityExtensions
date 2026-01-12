@@ -152,6 +152,7 @@ namespace PKGE.Packages
                     out int offset, out _, out int mipWidth, out int mipHeight);
 
                 var output = normalData.GetSubArray(offset, mipWidth * mipHeight);
+                var inputRO = input.GetSubArray(offset, input.Length - offset).AsReadOnly();
 
                 handle = wrap
                     ? new CreateNormalMapWrapJob
@@ -159,9 +160,8 @@ namespace PKGE.Packages
                         scale = scale,
                         width = mipWidth,
                         hn = mipHeight - 1,
-                        offset = offset,
                         normalStrength = normalStrength,// / pow2,
-                        input = input.AsReadOnly(),
+                        input = inputRO,
                         output = output,
                     }.Schedule(output.Length, handle)
                     : new CreateNormalMapJob
@@ -169,9 +169,8 @@ namespace PKGE.Packages
                         scale = scale,
                         width = mipWidth,
                         hn = mipHeight - 1,
-                        offset = offset,
                         normalStrength = normalStrength,// / pow2,
-                        input = input.AsReadOnly(),
+                        input = inputRO,
                         output = output,
                     }.Schedule(output.Length, handle);
             }
@@ -304,20 +303,20 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color24 NormalMap(in float3 scale, int width, int offset, float normalStrength,
+        public static Color24 NormalMap(in float3 scale, int width, float normalStrength,
             in NativeArray<Color32>.ReadOnly input, int x0, int y0, int xn, int yn, int xp, int yp)
         {
             // Obtain the colors of the eight surrounding pixels
-            Color32 c_xn_yn = input[offset + mad(yn, width, xn)];
-            Color32 c_x0_yn = input[offset + mad(yn, width, x0)];
-            Color32 c_xp_yn = input[offset + mad(yn, width, xp)];
+            Color32 c_xn_yn = input[mad(yn, width, xn)];
+            Color32 c_x0_yn = input[mad(yn, width, x0)];
+            Color32 c_xp_yn = input[mad(yn, width, xp)];
 
-            Color32 c_xn_y0 = input[offset + mad(y0, width, xn)];
-            Color32 c_xp_y0 = input[offset + mad(y0, width, xp)];
+            Color32 c_xn_y0 = input[mad(y0, width, xn)];
+            Color32 c_xp_y0 = input[mad(y0, width, xp)];
 
-            Color32 c_xn_yp = input[offset + mad(yp, width, xn)];
-            Color32 c_x0_yp = input[offset + mad(yp, width, x0)];
-            Color32 c_xp_yp = input[offset + mad(yp, width, xp)];
+            Color32 c_xn_yp = input[mad(yp, width, xn)];
+            Color32 c_x0_yp = input[mad(yp, width, x0)];
+            Color32 c_xp_yp = input[mad(yp, width, xp)];
 
             // Average the colour values
             float f_xn_yn = dot(c_xn_yn, scale);
@@ -673,7 +672,6 @@ namespace PKGE.Packages
         [ReadOnly] public float3 scale;
         [ReadOnly] public int width;
         [ReadOnly] public int hn;
-        [ReadOnly] public int offset;
         [ReadOnly] public float normalStrength;
         [ReadOnly] public NativeArray<Color32>.ReadOnly input;
         [WriteOnly] public NativeArray<Color24> output;
@@ -691,7 +689,7 @@ namespace PKGE.Packages
             int xp = min(wn, x0 + 1);
             int yp = min(hn, y0 + 1);
 
-            output[index] = ImageConversionJobs.NormalMap(scale, width, offset, normalStrength,
+            output[index] = ImageConversionJobs.NormalMap(scale, width, normalStrength,
                 input, x0, y0, xn, yn, xp, yp);
         }
     }
@@ -702,7 +700,6 @@ namespace PKGE.Packages
         [ReadOnly] public float3 scale;
         [ReadOnly] public int width;
         [ReadOnly] public int hn;
-        [ReadOnly] public int offset;
         [ReadOnly] public float normalStrength;
         [ReadOnly] public NativeArray<Color32>.ReadOnly input;
         [WriteOnly] public NativeArray<Color24> output;
@@ -720,7 +717,7 @@ namespace PKGE.Packages
             int xp = mod(x0 + 1, wn);
             int yp = mod(y0 + 1, hn);
 
-            output[index] = ImageConversionJobs.NormalMap(scale, width, offset, normalStrength,
+            output[index] = ImageConversionJobs.NormalMap(scale, width, normalStrength,
                 input, x0, y0, xn, yn, xp, yp);
         }
 
