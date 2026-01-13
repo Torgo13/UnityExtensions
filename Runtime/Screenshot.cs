@@ -19,7 +19,7 @@ namespace PKGE
             var width = Math.Max(1, (int)Math.Round(camera.pixelWidth * scale));
             var height = Math.Max(1, (int)Math.Round(camera.pixelHeight * scale));
             var prevCameraRenderTexture = camera.targetTexture;
-            var renderTexture = RenderTexture.GetTemporary(width, height, 0,
+            var renderTexture = RenderTexture.GetTemporary(width, height, depthBuffer: 16,
                 hdr ? RenderTextureFormat.ARGBFloat : RenderTextureFormat.ARGB32);
 
             camera.targetTexture = renderTexture;

@@ -8,7 +8,7 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public void CreateCircleSprite_ShouldCreateSpriteWithCorrectDimensionsAndColors()
         {
-            int radius = 16;
+            const int radius = 16;
             Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
             var sprite = SpriteUtilities.CreateCircleSprite(radius, color);
 
@@ -36,14 +36,9 @@ namespace PKGE.Unsafe.Tests
         [Test]
         public void CreateCircleSprite_ShouldHandleZeroRadius()
         {
-            int radius = 0;
+            const int radius = 0;
             Color32 color = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-            var sprite = SpriteUtilities.CreateCircleSprite(radius, color);
-
-            // Verify the sprite's texture has the correct dimensions
-            var texture = sprite.texture;
-            Assert.AreEqual(0, texture.width);
-            Assert.AreEqual(0, texture.height);
+            _ = Assert.Throws<UnityEngine.Assertions.AssertionException>(() => SpriteUtilities.CreateCircleSprite(radius, color));
         }
     }
 }

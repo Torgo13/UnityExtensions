@@ -20,6 +20,7 @@ namespace PKGE.Unsafe
         {
             // cache the diameter
             var d = radius * 2;
+            UnityEngine.Assertions.Assert.IsTrue(d > 0);
 
             var texture = new Texture2D(d, d, TextureFormat.RGBA32,
                 mipChain: false, linear: false, createUninitialized: true);

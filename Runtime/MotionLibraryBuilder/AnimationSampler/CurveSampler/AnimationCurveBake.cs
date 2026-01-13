@@ -79,6 +79,7 @@ namespace PKGE.Packages
         [Unity.Burst.BurstCompile]
         private struct BakeJob : IJob
         {
+            [NativeFixedLength(1)]
             [WriteOnly] public NativeArray<int> result;
             public NativeArray<Keyframe> keys;
             public float frameRate;

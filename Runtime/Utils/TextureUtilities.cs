@@ -175,7 +175,7 @@ namespace PKGE
                     var resolution = source.width;
 
                     var result = RenderTexture.GetTemporary(resolution * 6, resolution,
-                        depthBuffer: 0, source.format);
+                        depthBuffer: 16, source.format);
 
                     var cmd = new CommandBuffer();
                     for (var i = 0; i < 6; ++i)

@@ -1,8 +1,6 @@
 using System.Threading;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace PKGE.Unsafe
@@ -119,7 +117,7 @@ namespace PKGE.Unsafe
 
         public readonly ulong InterlockedReadChunk(int chunkIndex)
         {
-            return (ulong)Interlocked.Read(ref _bits.UnsafeElementAt(chunkIndex));
+            return (ulong)Interlocked.Read(ref _bits.UnsafeElementAtMutable(chunkIndex));
         }
 
         public readonly void InterlockedOrChunk(int chunkIndex, ulong chunkBits)

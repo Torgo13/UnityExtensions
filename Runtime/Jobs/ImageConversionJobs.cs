@@ -101,6 +101,10 @@ namespace PKGE.Packages
         }
         #endregion // UnityEngine.XR.ARCore
 
+        const float rec601r = 0.299f;
+        const float rec601g = 0.587f;
+        const float rec601b = 0.144f;
+
         /// <summary>
         /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
         /// when created with mipChain as <see langword="true"/>.
@@ -145,19 +149,21 @@ namespace PKGE.Packages
             if (!layered)
                 mipmapCount = 1;
 
-            var scale = new float3(0.299f, 0.587f, 0.144f);
+            const float edgeScale = (float)(1 / ((SQRT2_DBL * 2) + 2));
+            normalStrength *= edgeScale;
+
             for (int i = 0; i < mipmapCount; i++)
             {
                 TextureUtils.GetMipData(i, width, height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
 
-                var output = normalData.GetSubArray(offset, mipWidth * mipHeight);
-                var inputRO = input.GetSubArray(offset, input.Length - offset).AsReadOnly();
+                var length = mipWidth * mipHeight;
+                var output = normalData.GetSubArray(offset, length);
+                var inputRO = input.GetSubArray(offset, length).AsReadOnly();
 
                 handle = wrap
                     ? new CreateNormalMapWrapJob
                     {
-                        scale = scale,
                         width = mipWidth,
                         hn = mipHeight - 1,
                         normalStrength = normalStrength,// / pow2,
@@ -166,7 +172,6 @@ namespace PKGE.Packages
                     }.Schedule(output.Length, handle)
                     : new CreateNormalMapJob
                     {
-                        scale = scale,
                         width = mipWidth,
                         hn = mipHeight - 1,
                         normalStrength = normalStrength,// / pow2,
@@ -303,7 +308,7 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color24 NormalMap(in float3 scale, int width, float normalStrength,
+        public static Color24 NormalMap(int width, float normalStrength,
             in NativeArray<Color32>.ReadOnly input, int x0, int y0, int xn, int yn, int xp, int yp)
         {
             // Obtain the colors of the eight surrounding pixels
@@ -319,34 +324,34 @@ namespace PKGE.Packages
             Color32 c_xp_yp = input[mad(yp, width, xp)];
 
             // Average the colour values
-            float f_xn_yn = dot(c_xn_yn, scale);
-            float f_x0_yn = dot(c_x0_yn, scale);
-            float f_xp_yn = dot(c_xp_yn, scale);
+            float f_xn_yn = normalise(c_xn_yn);
+            float f_x0_yn = normalise(c_x0_yn);
+            float f_xp_yn = normalise(c_xp_yn);
 
-            float f_xn_y0 = dot(c_xn_y0, scale);
-            float f_xp_y0 = dot(c_xp_y0, scale);
+            float f_xn_y0 = normalise(c_xn_y0);
+            float f_xp_y0 = normalise(c_xp_y0);
 
-            float f_xn_yp = dot(c_xn_yp, scale);
-            float f_x0_yp = dot(c_x0_yp, scale);
-            float f_xp_yp = dot(c_xp_yp, scale);
+            float f_xn_yp = normalise(c_xn_yp);
+            float f_x0_yp = normalise(c_x0_yp);
+            float f_xp_yp = normalise(c_xp_yp);
 
             // Calculate the horizontal and vertical gradients
             float edgeX =
-                  (f_xn_yn - f_xp_yn) * 0.25f
-                + (f_xn_y0 - f_xp_y0) * 0.50f
-                + (f_xn_yp - f_xp_yp) * 0.25f;
+                  (f_xn_yn - f_xp_yn) * SQRT2
+                + (f_xn_y0 - f_xp_y0) * 2
+                + (f_xn_yp - f_xp_yp) * SQRT2;
 
             float edgeY =
-                  (f_xn_yn - f_xn_yp) * 0.25f
-                + (f_x0_yn - f_x0_yp) * 0.50f
-                + (f_xp_yn - f_xp_yp) * 0.25f;
+                  (f_xn_yn - f_xn_yp) * SQRT2
+                + (f_x0_yn - f_x0_yp) * 2
+                + (f_xp_yn - f_xp_yp) * SQRT2;
 
             // Apply the scale factor
             float normX = edgeX * normalStrength;
             float normY = edgeY * normalStrength;
 
             // Convert the vector to the normal map colour
-            float normDot = normX * normX + normY * normY + 1.0f;
+            float normDot = (normX * normX) + (normY * normY) + 1.0f;
             float normRsqrt = rsqrt(normDot);
 
             normX *= normRsqrt;
@@ -367,13 +372,12 @@ namespace PKGE.Packages
             /// so that transparent pixels are treated as black.
             /// </remarks>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static float dot(Color32 c, float3 v)
+            static float normalise(Color32 c)
             {
                 const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
-                float a = c.a * normalise;
-                float x = v.x * c.r * a;
-                float y = v.y * c.g * a;
-                float z = v.z * c.b * a;
+                float x = rec601r * normalise * c.r * c.a;
+                float y = rec601g * normalise * c.g * c.a;
+                float z = rec601b * normalise * c.b * c.a;
                 return x * x + y * y + z * z;
             }
 #pragma warning restore IDE1006 // Naming Styles
@@ -395,18 +399,59 @@ namespace PKGE.Packages
             return c;
         }
 
-        public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip,
-            in NativeArray<Color24>.ReadOnly rawTextureData)
+        public static Color24 GetHigherMipColor(int maxX, int maxY, int mipWidth, int mipHeight,
+            int offset, in NativeArray<Color24>.ReadOnly rawTextureData)
         {
-            TextureUtils.GetMipData(mip, width, height,
-                out int offset, out int pow2, out int mipWidth, out int mipHeight);
+            int mipX0 = MinUnlikely(MaxUnlikely(0, mipWidth - 1), maxX);
+            int mipY0 = MinUnlikely(MaxUnlikely(0, mipHeight - 1), maxY);
 
-            int mipX = MinUnlikely(MaxUnlikely(0, mipWidth - 1), x / pow2);
-            int mipY = MinUnlikely(MaxUnlikely(0, mipHeight - 1), y / pow2);
+            int mipXn = MaxUnlikely(0, mipX0 - 1) + offset;
+            int mipYn = MaxUnlikely(0, mipY0 - 1);
 
-            int mipIndex = mad(mipY, mipWidth, mipX);
-            return rawTextureData[offset + mipIndex];
+            int mipXp = MinUnlikely(mipX0, maxX) + offset;
+            int mipYp = MinUnlikely(mipY0, maxY);
+
+            mipX0 += offset;
+
+            // Gaussian with Amplitude 1, Spread 1
+            const float ce = 1.0f;                  // centre   distance 0
+            const float ca = 0.606530659712633f;    // cardinal distance 1
+            const float or = 0.367879441171442f;    // ordinal  distance SQRT2 / 2
+            const float scale = 1 / (byte.MaxValue * (ce + 4 * (ca + or)));
+
+            Color24 xn_yn = rawTextureData[mad(mipYn, mipWidth, mipXn)];
+            Color24 x0_yn = rawTextureData[mad(mipYn, mipWidth, mipX0)];
+            Color24 xp_yn = rawTextureData[mad(mipYn, mipWidth, mipXp)];
+
+            Color24 xn_y0 = rawTextureData[mad(mipY0, mipWidth, mipXn)];
+            Color24 x0_y0 = rawTextureData[mad(mipY0, mipWidth, mipX0)];
+            Color24 xp_y0 = rawTextureData[mad(mipY0, mipWidth, mipXp)];
+
+            Color24 xn_yp = rawTextureData[mad(mipYp, mipWidth, mipXn)];
+            Color24 x0_yp = rawTextureData[mad(mipYp, mipWidth, mipX0)];
+            Color24 xp_yp = rawTextureData[mad(mipYp, mipWidth, mipXp)];
+
+            float3 result =
+                  mul(xn_yn, or * scale)
+                + mul(x0_yn, ca * scale)
+                + mul(xp_yn, or * scale)
+                + mul(xn_y0, ca * scale)
+                + mul(x0_y0, ce * scale)
+                + mul(xp_y0, ca * scale)
+                + mul(xn_yp, or * scale)
+                + mul(x0_yp, ca * scale)
+                + mul(xp_yp, or * scale);
+
+            return new Color24(result.x, result.y, result.z);
         }
+
+#pragma warning disable IDE1006 // Naming Styles
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float3 mul(Color24 input, float scale)
+        {
+            return new float3(input.r * scale, input.g * scale, input.b * scale);
+        }
+#pragma warning restore IDE1006 // Naming Styles
     }
 
     //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
@@ -583,15 +628,15 @@ namespace PKGE.Packages
             // Convert coordinates from source mip level to target mip level
             int wn = mipWidthn - 1;
             int hn = mipHeightn - 1;
-            int x0 = min(wn, x + x);
+            int x0 = min(wn, x + x) + offsetn;
             int y0 = min(hn, y + y);
-            int x1 = min(wn, x0 + 1);
+            int x1 = min(wn, x0 + 1) + offsetn;
             int y1 = min(hn, y0 + 1);
 
-            Color32 tl = rawTextureData[offsetn + mad(y0, mipWidthn, x0)];
-            Color32 tr = rawTextureData[offsetn + mad(y0, mipWidthn, x1)];
-            Color32 bl = rawTextureData[offsetn + mad(y1, mipWidthn, x0)];
-            Color32 br = rawTextureData[offsetn + mad(y1, mipWidthn, x1)];
+            Color32 tl = rawTextureData[mad(y0, mipWidthn, x0)];
+            Color32 tr = rawTextureData[mad(y0, mipWidthn, x1)];
+            Color32 bl = rawTextureData[mad(y1, mipWidthn, x0)];
+            Color32 br = rawTextureData[mad(y1, mipWidthn, x1)];
 
             byte r = (byte)((tl.r + tr.r + bl.r + br.r) >> 2);
             byte g = (byte)((tl.g + tr.g + bl.g + br.g) >> 2);
@@ -623,11 +668,15 @@ namespace PKGE.Packages
 
             var rawTextureDataRO = rawTextureData.AsReadOnly();
 
-            // TODO Bilinear filtering for higher mip levels
             for (int mip = 1; mip < mipmapCount; mip++)
             {
-                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureDataRO);
-                rgb = ImageConversionJobs.BlendNormal(rgb, new float3(c.r, c.g, c.b) * scale);
+                TextureUtils.GetMipData(mip, width, height,
+                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
+
+                var m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                    mipWidth, mipHeight, offset, rawTextureDataRO);
+
+                rgb = ImageConversionJobs.BlendNormal(rgb, new float3(m.r, m.g, m.b) * scale);
             }
 
             rawTextureData[index] = new Color24(rgb);
@@ -648,28 +697,39 @@ namespace PKGE.Packages
         {
             int y = System.Math.DivRem(index, width, out int x);
 
+            var rgbArray = new NativeArray<float3>(mipmapCount,
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
             Color24 c = rawTextureData[index];
-            float3 rgb = new float3(c.r, c.g, c.b);
+            rgbArray[0] = new float3(c.r, c.g, c.b);
 
             var rawTextureDataRO = rawTextureData.AsReadOnly();
 
-            // TODO Bilinear filtering for higher mip levels
             for (int mip = 1; mip < mipmapCount; mip++)
             {
-                c = ImageConversionJobs.GetHigherMipColor(width, height, x, y, mip, rawTextureDataRO);
-                rgb += new float3(c.r, c.g, c.b);
+                TextureUtils.GetMipData(mip, width, height,
+                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
+
+                var m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                    mipWidth, mipHeight, offset, rawTextureDataRO);
+
+                rgbArray[mip] = new float3(m.r, m.g, m.b);
             }
 
-            rgb *= rcp(mipmapCount * byte.MaxValue);
+            float3 rgb = default;
+            for (int i = 0; i < rgbArray.Length; i++)
+            {
+                rgb += rgbArray[i];
+            }
 
-            rawTextureData[index] = new Color24(rgb);
+            rgbArray.Dispose();
+            rawTextureData[index] = new Color24(rgb * rcp(mipmapCount * byte.MaxValue));
         }
     }
 
     [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
     public struct CreateNormalMapJob : IJobFor
     {
-        [ReadOnly] public float3 scale;
         [ReadOnly] public int width;
         [ReadOnly] public int hn;
         [ReadOnly] public float normalStrength;
@@ -689,7 +749,7 @@ namespace PKGE.Packages
             int xp = min(wn, x0 + 1);
             int yp = min(hn, y0 + 1);
 
-            output[index] = ImageConversionJobs.NormalMap(scale, width, normalStrength,
+            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
                 input, x0, y0, xn, yn, xp, yp);
         }
     }
@@ -697,7 +757,6 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
     public struct CreateNormalMapWrapJob : IJobFor
     {
-        [ReadOnly] public float3 scale;
         [ReadOnly] public int width;
         [ReadOnly] public int hn;
         [ReadOnly] public float normalStrength;
@@ -717,7 +776,7 @@ namespace PKGE.Packages
             int xp = mod(x0 + 1, wn);
             int yp = mod(y0 + 1, hn);
 
-            output[index] = ImageConversionJobs.NormalMap(scale, width, normalStrength,
+            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
                 input, x0, y0, xn, yn, xp, yp);
         }
 

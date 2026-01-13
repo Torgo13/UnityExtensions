@@ -4,9 +4,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace PKGE.Unsafe
@@ -27,7 +25,7 @@ namespace PKGE.Unsafe
 
             if (array.Length >= MinRadixSortArraySize)
             {
-                int workersCount = System.Math.Max(JobsUtility.JobWorkerCount + 1, 1);
+                int workersCount = System.Math.Max(Unity.Jobs.LowLevel.Unsafe.JobsUtility.JobWorkerCount + 1, 1);
                 int batchSize = System.Math.Max(MinRadixSortBatchSize, (int)System.Math.Ceiling((double)array.Length / workersCount));
                 int jobsCount = (int)System.Math.Ceiling((double)array.Length / batchSize);
 

@@ -113,7 +113,9 @@ namespace PKGE.Unsafe
         [BurstCompile]
         private struct DebrisGenerationJob : IJob
         {
+            [NativeFixedLength(kMaxDebris)]
             [WriteOnly] public NativeArray<GfxItem> _gfxItems;
+            [NativeFixedLength(kTotalCounters)]
             public NativeArray<int> _inOutCounters;
             [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<DebrisSpawnDesc> _inSpawnInfos;
             [ReadOnly] public int _spawnCount;
@@ -179,6 +181,7 @@ namespace PKGE.Unsafe
             [ReadOnly] [NativeDisableParallelForRestriction]
             public NativeArray<int> _deadList;
 
+            [NativeFixedLength(kTotalCounters)]
             [NativeDisableParallelForRestriction]
             public NativeArray<int> _inOutCounters;
 
@@ -214,7 +217,9 @@ namespace PKGE.Unsafe
         [BurstCompile]
         private struct DebrisRecyclingJob : IJob
         {
+            [NativeFixedLength(kMaxDebris)]
             public NativeArray<GfxItem> _gfxItems;
+            [NativeFixedLength(kTotalCounters)]
             public NativeArray<int> _inOutCounters;
             [ReadOnly] public NativeArray<int> _deadList;
 
@@ -245,6 +250,7 @@ namespace PKGE.Unsafe
         [BurstCompile]
         private struct PhysicsUpdateJob : IJobFor
         {
+            [NativeFixedLength(kMaxDebris)]
             [NativeDisableParallelForRestriction] public NativeArray<GfxItem> _gfxItems;
 
             [NativeDisableParallelForRestriction] [WriteOnly]
@@ -253,8 +259,11 @@ namespace PKGE.Unsafe
             [NativeDisableParallelForRestriction] [ReadOnly]
             public NativeArray<BRG_Background.BackgroundItem> _backgroundItems;
 
+            [NativeFixedLength(kMaxJustLandedPerFrame)]
             [NativeDisableParallelForRestriction] [WriteOnly] public NativeArray<int> _justLandedList;
+            [NativeFixedLength(kMaxDeadPerFrame)]
             [NativeDisableParallelForRestriction] [WriteOnly] public NativeArray<int> _justDeadList;
+            [NativeFixedLength(kTotalCounters)]
             [NativeDisableParallelForRestriction] public NativeArray<int> _inOutCounters;
 
             public int _sliceId;

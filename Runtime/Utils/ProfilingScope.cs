@@ -29,6 +29,7 @@ namespace PKGE
         {
             var names = EnumValues<TEnum>.Names;
 #if USE_UNSAFE
+            UnityEngine.Assertions.Assert.AreEqual(sizeof(int), SizeOfCache<TEnum>.Size);
             var enumValues = EnumValues<TEnum>.Values;
             var values = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum[], int[]>(ref enumValues);
             Samples = new TProfilingSampler<TEnum>[values.Max() + 1];
@@ -74,6 +75,7 @@ namespace PKGE
             where TEnum : Enum
         {
 #if USE_UNSAFE
+            UnityEngine.Assertions.Assert.AreEqual(sizeof(int), SizeOfCache<TEnum>.Size);
             return TProfilingSampler<TEnum>.Samples[Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum, int>(ref marker)];
 #else
             TProfilingSampler<TEnum>.Samples.TryGetValue(marker, out var sampler);

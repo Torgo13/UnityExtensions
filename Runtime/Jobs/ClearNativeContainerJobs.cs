@@ -11,6 +11,7 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct ClearArrayJob<T> : IJobParallelFor where T : struct
     {
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<T> Data;
 
         public void Execute(int index)
@@ -47,7 +48,9 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct CopyArrayJob<T> : IJobFor where T : struct
     {
+        [NativeMatchesParallelForLength]
         [ReadOnly] public NativeArray<T> src;
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<T> dst;
 
         public void Execute(int index)
@@ -62,6 +65,7 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
         #region Unity.Entities
         [ReadOnly] public T src;
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<T> dst;
 
         public void Execute(int index)
@@ -74,7 +78,9 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct SwapArrayJob<T> : IJobFor where T : struct
     {
+        [NativeMatchesParallelForLength]
         public NativeArray<T> src0;
+        [NativeMatchesParallelForLength]
         public NativeArray<T> src1;
 
         public void Execute(int index)
@@ -86,8 +92,11 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct CompareArrayJob<T> : IJobFor where T : struct, System.IEquatable<T>
     {
+        [NativeMatchesParallelForLength]
         [ReadOnly] public NativeArray<T> src0;
+        [NativeMatchesParallelForLength]
         [ReadOnly] public NativeArray<T> src1;
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<bool> dst;
 
         public void Execute(int index)
@@ -103,6 +112,7 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct CopyQueueJob<T> : IJobFor where T : unmanaged
     {
+        [NativeMatchesParallelForLength]
         [ReadOnly] public NativeQueue<T>.ReadOnly input;
         [WriteOnly] public NativeQueue<T>.ParallelWriter output;
 

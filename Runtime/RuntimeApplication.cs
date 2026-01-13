@@ -90,15 +90,14 @@ namespace PKGE
             playerLoopSystems.RemoveAll(s => s.type == typeof(UpdatePreFrame));
             playerLoopSystems.RemoveAll(s => s.type == typeof(UpdatePostFrame));
 #else
-            using var _0 = playerLoop.subSystemList.ToListPooled(out var temp);
-            using var _1 = UnityEngine.Pool.ListPool<PlayerLoopSystem>.Get(out var playerLoopSystems);
-            playerLoopSystems.EnsureCapacity(temp.Count);
-            for (int i = 0, tempCount = temp.Count; i < tempCount; i++)
+            using var _0 = UnityEngine.Pool.ListPool<PlayerLoopSystem>.Get(out var playerLoopSystems);
+            playerLoopSystems.EnsureCapacity(playerLoop.subSystemList.Length);
+            foreach (var subSystem in playerLoop.subSystemList.AsSpan())
             {
-                if (temp[i].type != typeof(UpdatePreFrame)
-                    && temp[i].type != typeof(UpdatePostFrame))
+                if (subSystem.type != typeof(UpdatePreFrame)
+                    && subSystem.type != typeof(UpdatePostFrame))
                 {
-                    playerLoopSystems.Add(temp[i]);
+                    playerLoopSystems.Add(subSystem);
                 }
             }
 #endif // USING_LINQ

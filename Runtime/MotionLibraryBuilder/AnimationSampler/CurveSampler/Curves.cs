@@ -115,6 +115,7 @@ namespace PKGE.Packages
             [BurstCompile(FloatMode = FloatMode.Fast)]
             private struct EvaluateJob : IJob
             {
+                [NativeFixedLength(1)]
                 [WriteOnly] public NativeArray<float> result;
                 [ReadOnly] public NativeArray<Keyframe> keys;
                 [ReadOnly] public float curveT;

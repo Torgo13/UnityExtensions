@@ -118,10 +118,10 @@ namespace PKGE
                 rect = rectTransform.rect,
             };
 
-            Unity.Jobs.IJobExtensions.Run(fourCornersJob);
+            Unity.Jobs.IJobExtensions.RunByRef(ref fourCornersJob);
         }
 
-        private static void GetLocalCorners(in Rect rect, System.Span<Vector3> fourCornersArray)
+        private static void GetLocalCorners(Rect rect, System.Span<Vector3> fourCornersArray)
         {
             float x = rect.x;
             float y = rect.y;
@@ -136,6 +136,7 @@ namespace PKGE
         [Unity.Burst.BurstCompile]
         struct FourCornersJob : Unity.Jobs.IJob
         {
+            [Unity.Collections.NativeFixedLength(4)]
             public Unity.Collections.NativeArray<Vector3> fourCornersArray;
             public Matrix4x4 matrix4x;
             public Rect rect;

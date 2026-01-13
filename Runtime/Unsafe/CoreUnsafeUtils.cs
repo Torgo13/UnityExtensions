@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -190,7 +189,7 @@ namespace PKGE.Unsafe
             int bitStates, int arrayLength, Span<uint> supportArray,
             out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
         {
-            bucketIndices = (uint*)UnsafeUtility.AddressOf(ref supportArray[0]);
+            bucketIndices = (uint*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref supportArray[0]);
             bucketSizes = bucketIndices + bitStates;
             bucketPrefix = bucketSizes + bitStates;
             arrayOutput = bucketPrefix + bitStates;
@@ -334,7 +333,7 @@ namespace PKGE.Unsafe
 
             int buckets = (sizeof(uint) * 8) / radixBits;
             uint* targetBuffer = arrayOutput;
-            uint* inputBuffer = (uint*)UnsafeUtility.AddressOf(ref array[0]);
+            uint* inputBuffer = (uint*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref array[0]);
             for (int b = 0; b < buckets; ++b)
             {
                 int shift = b * radixBits;

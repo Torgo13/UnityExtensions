@@ -221,9 +221,6 @@ namespace PKGE
             return name;
         }
 
-        public static string Name(int value)
-            => Name(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<int, T>(ref value));
-
         public static bool TryGetName(T value, out string name)
         {
             if (TryGetIndex(value, out var index))
@@ -254,9 +251,6 @@ namespace PKGE
             return description;
         }
 
-        public static string Description(int value)
-            => Description(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<int, T>(ref value));
-
         public static bool TryGetDescription(T value, out string description)
         {
             if (TryGetIndex(value, out var index))
@@ -275,9 +269,6 @@ namespace PKGE
             _ = TryGetDisplayName(value, out var displayName);
             return displayName;
         }
-
-        public static string DisplayName(int value)
-            => DisplayName(Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<int, T>(ref value));
 
         public static bool TryGetDisplayName(T value, out string displayName)
         {

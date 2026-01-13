@@ -238,6 +238,8 @@ namespace PKGE
 
         public static List<T> As<U, T>(this List<U> list)
         {
+            Assert.AreEqual(SizeOfCache<T>.Size, SizeOfCache<U>.Size);
+
             return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<U>, List<T>>(ref list);
         }
 
