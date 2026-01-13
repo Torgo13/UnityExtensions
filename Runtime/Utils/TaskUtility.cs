@@ -128,7 +128,7 @@ namespace PKGE
             CancellationToken ct = default)
         {
             var count = Environment.ProcessorCount;
-            using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get(out var tasks);
+            var tasks = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get();
             tasks.EnsureCapacity(count);
             int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
 
@@ -139,11 +139,10 @@ namespace PKGE
 
             foreach (var task in tasks)
             {
-                if (!task.IsCompleted)
-                {
-                    await task;
-                }
+                await task;
             }
+
+            UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Release(tasks);
         }
 
         private static async UnityEngine.Awaitable RunAsync<TInput, TOutput>(
@@ -157,7 +156,7 @@ namespace PKGE
             if (ct.IsCancellationRequested)
                 return;
 
-            for (int j = 0; j < itemsPerTask && j + itemsPerTask * i < items.Count; j++)
+            for (int j = 0, itemsCount = items.Count; j < itemsPerTask && j + itemsPerTask * i < itemsCount; j++)
             {
                 int index = j + itemsPerTask * i;
                 action.Invoke(items[index], cb);
@@ -171,7 +170,7 @@ namespace PKGE
             CancellationToken ct = default)
         {
             var count = Environment.ProcessorCount;
-            using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get(out var tasks);
+            var tasks = UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Get();
             tasks.EnsureCapacity(count);
             int itemsPerTask = (int)Math.Ceiling(items.Count / (double)count);
 
@@ -182,11 +181,10 @@ namespace PKGE
 
             foreach (var task in tasks)
             {
-                if (!task.IsCompleted)
-                {
-                    await task;
-                }
+                await task;
             }
+
+            UnityEngine.Pool.ListPool<UnityEngine.Awaitable>.Release(tasks);
         }
 
         private static async UnityEngine.Awaitable RunAsync<TInput>(
@@ -199,7 +197,7 @@ namespace PKGE
             if (ct.IsCancellationRequested)
                 return;
 
-            for (int j = 0; j < itemsPerTask && j + itemsPerTask * i < items.Count; j++)
+            for (int j = 0, itemsCount = items.Count; j < itemsPerTask && j + itemsPerTask * i < itemsCount; j++)
             {
                 int index = j + itemsPerTask * i;
                 action.Invoke(items[index]);

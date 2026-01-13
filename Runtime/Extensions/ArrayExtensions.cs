@@ -74,17 +74,6 @@ namespace PKGE
 
             array = newArray;
         }
-
-        /// <summary>
-        /// Resizes an array.
-        /// </summary>
-        /// <typeparam name="T">The type of the array</typeparam>
-        /// <param name="array">Target array to resize</param>
-        /// <param name="capacity">New size of array to resize</param>
-        public static void ResizeArray<T>(this T[] array, int capacity)
-        {
-            Array.Resize(ref array, capacity);
-        }
         #endregion // UnityEngine.Rendering
 
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/ArrayUtils.cs

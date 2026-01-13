@@ -112,7 +112,6 @@ namespace PKGE.Packages
     [Unity.Burst.BurstCompile]
     public struct CopyQueueJob<T> : IJobFor where T : unmanaged
     {
-        [NativeMatchesParallelForLength]
         [ReadOnly] public NativeQueue<T>.ReadOnly input;
         [WriteOnly] public NativeQueue<T>.ParallelWriter output;
 

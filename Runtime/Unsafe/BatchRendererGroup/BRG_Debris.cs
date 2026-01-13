@@ -178,6 +178,7 @@ namespace PKGE.Unsafe
             [NativeDisableParallelForRestriction]
             public NativeArray<BRG_Background.BackgroundItem> _backgroundItems;
 
+            [NativeFixedLength(kMaxJustLandedPerFrame)]
             [ReadOnly] [NativeDisableParallelForRestriction]
             public NativeArray<int> _deadList;
 

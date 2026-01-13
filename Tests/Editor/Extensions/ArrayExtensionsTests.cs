@@ -142,19 +142,6 @@ namespace PKGE.Tests
 
         #endregion
 
-        #region ResizeArray_T
-
-        [Test]
-        public void ResizeArray_Generic_ChangesLength()
-        {
-            int[] arr = { 1, 2, 3 };
-            arr.ResizeArray(5); // wrapper around Array.Resize
-            Assert.AreEqual(3, arr.Length, "NOTE: This test will fail because 'this T[]' extension's resize won't persist as written due to pass-by-value behaviour.");
-            // This demonstrates that the current implementation won't modify the caller's ref.
-        }
-
-        #endregion
-
         #region IsBytesEquals
 
         [Test]

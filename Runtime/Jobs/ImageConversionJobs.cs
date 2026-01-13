@@ -361,27 +361,27 @@ namespace PKGE.Packages
             float normZ = mad(normRsqrt, 0.5f, 0.5f);
 
             return new Color24(normX, normY, normZ);
+        }
 
 #pragma warning disable IDE1006 // Naming Styles
-            /// <summary>
-            /// Take the dot product of a <see cref="Color32"/> and a
-            /// <see cref="Unity.Mathematics.float3"/> by normalising the colour byte values.
-            /// </summary>
-            /// <remarks>
-            /// Also multiplies <paramref name="c"/> by its alpha channel
-            /// so that transparent pixels are treated as black.
-            /// </remarks>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static float normalise(Color32 c)
-            {
-                const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
-                float x = rec601r * normalise * c.r * c.a;
-                float y = rec601g * normalise * c.g * c.a;
-                float z = rec601b * normalise * c.b * c.a;
-                return x * x + y * y + z * z;
-            }
-#pragma warning restore IDE1006 // Naming Styles
+        /// <summary>
+        /// Take the dot product of a <see cref="Color32"/> and a
+        /// <see cref="Unity.Mathematics.float3"/> by normalising the colour byte values.
+        /// </summary>
+        /// <remarks>
+        /// Also multiplies <paramref name="c"/> by its alpha channel
+        /// so that transparent pixels are treated as black.
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static float normalise(Color32 c)
+        {
+            const float normalise = 1f / (byte.MaxValue * byte.MaxValue);
+            float x = rec601r * normalise * c.r * c.a;
+            float y = rec601g * normalise * c.g * c.a;
+            float z = rec601b * normalise * c.b * c.a;
+            return x * x + y * y + z * z;
         }
+#pragma warning restore IDE1006 // Naming Styles
 
         public static Color24 GetHigherMipColor(int width, int height, int x, int y, int mip, ref int offset,
             in NativeArray<Color24>.ReadOnly rawTextureData)
@@ -447,7 +447,7 @@ namespace PKGE.Packages
 
 #pragma warning disable IDE1006 // Naming Styles
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float3 mul(Color24 input, float scale)
+        internal static float3 mul(Color24 input, float scale)
         {
             return new float3(input.r * scale, input.g * scale, input.b * scale);
         }
@@ -660,20 +660,18 @@ namespace PKGE.Packages
         public void Execute(int index)
         {
             int y = System.Math.DivRem(index, width, out int x);
+            var rawTextureDataRO = rawTextureData.AsReadOnly();
 
             const float scale = 1f / byte.MaxValue;
-
-            Color24 c = rawTextureData[index];
-            float3 rgb = new float3(c.r, c.g, c.b) * scale;
-
-            var rawTextureDataRO = rawTextureData.AsReadOnly();
+            Color24 c = rawTextureDataRO[index];
+            var rgb = new float3(c.r, c.g, c.b) * scale;
 
             for (int mip = 1; mip < mipmapCount; mip++)
             {
                 TextureUtils.GetMipData(mip, width, height,
                     out int offset, out int pow2, out int mipWidth, out int mipHeight);
 
-                var m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
                     mipWidth, mipHeight, offset, rawTextureDataRO);
 
                 rgb = ImageConversionJobs.BlendNormal(rgb, new float3(m.r, m.g, m.b) * scale);
@@ -696,34 +694,23 @@ namespace PKGE.Packages
         public void Execute(int index)
         {
             int y = System.Math.DivRem(index, width, out int x);
-
-            var rgbArray = new NativeArray<float3>(mipmapCount,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-
-            Color24 c = rawTextureData[index];
-            rgbArray[0] = new float3(c.r, c.g, c.b);
-
             var rawTextureDataRO = rawTextureData.AsReadOnly();
+
+            Color24 c = rawTextureDataRO[index];
+            var rgb = new float4(c.r, c.g, c.b, 0);
 
             for (int mip = 1; mip < mipmapCount; mip++)
             {
                 TextureUtils.GetMipData(mip, width, height,
                     out int offset, out int pow2, out int mipWidth, out int mipHeight);
 
-                var m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
                     mipWidth, mipHeight, offset, rawTextureDataRO);
 
-                rgbArray[mip] = new float3(m.r, m.g, m.b);
+                rgb += new float4(m.r, m.g, m.b, 0);
             }
 
-            float3 rgb = default;
-            for (int i = 0; i < rgbArray.Length; i++)
-            {
-                rgb += rgbArray[i];
-            }
-
-            rgbArray.Dispose();
-            rawTextureData[index] = new Color24(rgb * rcp(mipmapCount * byte.MaxValue));
+            rawTextureData[index] = new Color24((rgb * rcp(mipmapCount * byte.MaxValue)).xyz);
         }
     }
 
@@ -743,11 +730,11 @@ namespace PKGE.Packages
 
             int y0 = System.Math.DivRem(index, width, out int x0);
 
-            int xn = max(0, x0 - 1);
-            int yn = max(0, y0 - 1);
+            int xn = ImageConversionJobs.MaxUnlikely(0, x0 - 1);
+            int yn = ImageConversionJobs.MaxUnlikely(0, y0 - 1);
 
-            int xp = min(wn, x0 + 1);
-            int yp = min(hn, y0 + 1);
+            int xp = ImageConversionJobs.MinUnlikely(x0 + 1, wn);
+            int yp = ImageConversionJobs.MinUnlikely(y0 + 1, hn);
 
             output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
                 input, x0, y0, xn, yn, xp, yp);
