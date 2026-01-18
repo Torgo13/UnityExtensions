@@ -290,8 +290,7 @@ namespace PKGE
         public static Object LoadAssetAtPath(string path)
         {
 #if UNITY_EDITOR
-            var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path);
-            return UnityEditor.AssetDatabase.LoadAssetAtPath(path, type);
+            return LoadAssetAtPath(path, UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path));
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -308,6 +307,21 @@ namespace PKGE
             var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
             return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID),
                 UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
+#endif // UNITY_6000_3_OR_NEWER
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadAssetFromGUID(Union16 guid, System.Type type)
+        {
+#if UNITY_EDITOR
+#if UNITY_6000_3_OR_NEWER
+            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID, type);
+#else
+            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID), type);
 #endif // UNITY_6000_3_OR_NEWER
 #else
             return default;
@@ -336,6 +350,20 @@ namespace PKGE
 #if UNITY_6000_3_OR_NEWER
             return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID,
                 UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
+#else
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID));
+#endif // UNITY_6000_3_OR_NEWER
+#else
+            return default;
+#endif // UNITY_EDITOR
+        }
+
+        public static Object LoadAssetFromGUID(string guid, System.Type type)
+        {
+#if UNITY_EDITOR
+            var GUID = new UnityEditor.GUID(guid);
+#if UNITY_6000_3_OR_NEWER
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID, type);
 #else
             return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID));
 #endif // UNITY_6000_3_OR_NEWER

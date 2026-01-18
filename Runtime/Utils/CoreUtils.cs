@@ -430,6 +430,38 @@ namespace PKGE
             return (maskInt & flagInt) != 0;
         }
 
+        /// <inheritdoc cref="HasFlag{T}(T, T)"/>
+        public static bool HasFlagSafe<T>(T mask, T flag) where T : struct, IConvertible
+        {
+            switch (SizeOfCache<T>.Size)
+            {
+                case 8:
+                {
+                    var maskUlong = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ulong>(ref mask);
+                    var flagUlong = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ulong>(ref flag);
+                    return (maskUlong & flagUlong) != 0;
+                }
+                case 4:
+                {
+                    var maskUint = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, uint>(ref mask);
+                    var flagUint = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, uint>(ref flag);
+                    return (maskUint & flagUint) != 0;
+                }
+                case 2:
+                {
+                    var maskUshort = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ushort>(ref mask);
+                    var flagUshort = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ushort>(ref flag);
+                    return (maskUshort & flagUshort) != 0;
+                }
+                default:
+                {
+                    var maskByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref mask);
+                    var flagByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref flag);
+                    return (maskByte & flagByte) != 0;
+                }
+            }
+        }
+
         /// <summary>
         /// Swaps two values.
         /// </summary>
@@ -975,6 +1007,12 @@ namespace PKGE
         public static T GetLastEnumValue<T>() where T : Enum
             => EnumValues<T>.Values[^1];
 
+        public static T GetSmallestEnumValue<T>() where T : Enum
+            => EnumValues<T>.SortedValues[0];
+
+        public static T GetLargestEnumValue<T>() where T : Enum
+            => EnumValues<T>.SortedValues[^1];
+
 #if UNITY_EDITOR
         // This is required in Runtime assembly between #if UNITY_EDITOR
         /// <summary>
@@ -1046,40 +1084,49 @@ namespace PKGE
         /// <param name="z"> Z-depth from the camera origin at which the corners will be calculated. </param>
         /// <param name="outCorners"> Return conner vectors for left-bottom, right-bottom,
         /// right-top, left-top in view space. </param>
-        public static void CalculateViewSpaceCorners(Matrix4x4 proj, float z, Vector3[] outCorners)
+        public static void CalculateViewSpaceCorners(in Matrix4x4 proj, float z, Span<Vector3> outCorners)
         {
-            Assert.IsNotNull(outCorners);
+            Assert.IsTrue(outCorners != null);
             Assert.IsTrue(outCorners.Length >= 4);
 
-            var list = UnityEngine.Pool.ListPool<Vector3>.Get();
-            CalculateViewSpaceCorners(proj, z, list);
-            
-            for (int i = 0; i < list.Count; i++)
-                outCorners[i] = list[i];
+            var outCornersArray = new NativeArray<Vector3>(4, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            var calculateViewSpaceCornersJob = new CalculateViewSpaceCornersJob
+            {
+                proj = proj,
+                z = z,
+                outCorners = outCornersArray,
+            };
 
-            UnityEngine.Pool.ListPool<Vector3>.Release(list);
+            Unity.Jobs.IJobExtensions.RunByRef(ref calculateViewSpaceCornersJob);
+            outCornersArray.AsReadOnlySpan().CopyTo(outCorners);
+            outCornersArray.Dispose();
         }
-        
-        /// <inheritdoc cref="CalculateViewSpaceCorners(UnityEngine.Matrix4x4,float,UnityEngine.Vector3[])"/>
-        public static void CalculateViewSpaceCorners(Matrix4x4 proj, float z, List<Vector3> outCorners)
+
+        [Unity.Burst.BurstCompile]
+        public struct CalculateViewSpaceCornersJob : Unity.Jobs.IJob
         {
-            Assert.IsNotNull(outCorners);
-            
-            outCorners.Clear();
-            Matrix4x4 invProj = Matrix4x4.Inverse(proj);
+            public Matrix4x4 proj;
+            public float z;
+            [NativeFixedLength(4)]
+            public NativeArray<Vector3> outCorners;
 
-            // We transform a point further than near plane and closer than far plane, for precision reasons.
-            // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
-            // 5 units from the camera.
-            const float projZ = 0.95f;
-            outCorners.Add(invProj.MultiplyPoint(new Vector3(-1, -1, projZ)));
-            outCorners.Add(invProj.MultiplyPoint(new Vector3(1, -1, projZ)));
-            outCorners.Add(invProj.MultiplyPoint(new Vector3(1, 1, projZ)));
-            outCorners.Add(invProj.MultiplyPoint(new Vector3(-1, 1, projZ)));
+            public void Execute()
+            {
+                Matrix4x4 invProj = Matrix4x4.Inverse(proj);
 
-            // Rescale vectors to have the desired z distance.
-            for (int r = 0; r < 4; ++r)
-                outCorners[r] *= z / (-outCorners[r].z);
+                // We transform a point further than near plane and closer than far plane, for precision reasons.
+                // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
+                // 5 units from the camera.
+                const float projZ = 0.95f;
+                outCorners[0] = invProj.MultiplyPoint(new Vector3(-1, -1, projZ));
+                outCorners[1] = invProj.MultiplyPoint(new Vector3(1, -1, projZ));
+                outCorners[2] = invProj.MultiplyPoint(new Vector3(1, 1, projZ));
+                outCorners[3] = invProj.MultiplyPoint(new Vector3(-1, 1, projZ));
+
+                // Rescale vectors to have the desired z distance.
+                for (int r = 0; r < 4; ++r)
+                    outCorners[r] *= z / (-outCorners[r].z);
+            }
         }
 
         /// <summary>

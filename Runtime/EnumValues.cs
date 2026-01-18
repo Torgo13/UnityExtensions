@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
 namespace PKGE
 {
@@ -41,9 +40,10 @@ namespace PKGE
             return false;
         }
 
-        public static void GetAllDescriptions<T>(List<string> list) where T : Enum
+        public static List<string> GetAllDescriptions<T>(List<string> list = default) where T : Enum
         {
-            Assert.IsNotNull(list);
+            list ??= new List<string>();
+            list.Clear();
 
             string[] names = EnumValues<T>.Names;
             list.EnsureCapacity(names.Length);
@@ -55,13 +55,16 @@ namespace PKGE
                     list.Add(description);
                 }
             }
+
+            return list;
         }
 
         public static string[] GetDescriptions<T>() where T : Enum
         {
-            using var _0 = UnityEngine.Pool.ListPool<string>.Get(out var list);
-            GetAllDescriptions<T>(list);
-            return list.ToArray();
+            var list = UnityEngine.Pool.ListPool<string>.Get();
+            var descriptions = GetAllDescriptions<T>(list).ToArray();
+            UnityEngine.Pool.ListPool<string>.Release(list);
+            return descriptions;
         }
 
         public static bool GetDescription(this Type type, int val, out string description)
