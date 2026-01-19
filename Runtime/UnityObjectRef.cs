@@ -172,7 +172,7 @@ namespace PKGE.Packages
                 return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
 
             // Cannot use Allocator.Temp in a background thread
-            using var entityIds = new NativeArray<EntityId>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory)
+            var entityIds = new NativeArray<EntityId>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory)
             {
                 [0] = unityObjectRef.Id.instanceId,
             };
@@ -180,6 +180,7 @@ namespace PKGE.Packages
             // Cannot use ListPool in a background thread
             var objects = new List<Object>(1);
             Resources.EntityIdsToObjectList(entityIds, objects);
+            entityIds.Dispose();
             return (T)objects[0];
 #else
             return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);

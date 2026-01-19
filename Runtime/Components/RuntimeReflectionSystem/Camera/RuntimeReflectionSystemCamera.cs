@@ -636,28 +636,57 @@ namespace PKGE
 
             if (removeBlue)
             {
-                Color sunColour;
+                Color sunColour = default;
+                float colorTemperature = 5000f;
+                bool useColorTemperature = true;
 
                 if (sunFound)
                 {
-                    sunColour = sun.useColorTemperature
-                        ? Mathf.CorrelatedColorTemperatureToRGB(sun.colorTemperature)
-                        : sun.color;
-                }
-                else
-                {
-                    sunColour = Mathf.CorrelatedColorTemperatureToRGB(5000f);
+                    colorTemperature = sun.colorTemperature;
+                    useColorTemperature = sun.useColorTemperature;
+
+                    if (!useColorTemperature)
+                    {
+                        sunColour = sun.color;
+                    }
                 }
 
-                for (int i = 0; i < ambientColours.Length; i++)
+                if (useColorTemperature)
                 {
-                    ambientColours[i] = sunColour * ((Color)ambientColours[i]).grayscale;
+                    sunColour = Mathf.CorrelatedColorTemperatureToRGB(colorTemperature);
                 }
+
+                Unity.Jobs.IJobForExtensions.Run(new RemoveBlueJob
+                {
+                    ambientColours = ambientColours,
+                    sunColour = sunColour,
+                }, 6);
             }
 
             var ambientColoursRO = ambientColours.AsReadOnly();
 
-            AverageColours(ambientColoursRO, out var equator, out var skyEquator);
+            var equatorArray = new NativeArray<float>(4, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            var skyEquatorArray = new NativeArray<float>(4, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            var temp = new NativeArray<float>(4, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+            Unity.Jobs.IJobForExtensions.Run(new AmbientColoursJob
+            {
+                temp = temp,
+                ambientColours = ambientColoursRO.Reinterpret<uint>(),
+            }, 4);
+
+            Unity.Jobs.IJobForExtensions.Run(new AverageColoursJob
+            {
+                equator = equatorArray,
+                skyEquator = skyEquatorArray,
+                ambientColourPositiveY = ambientColoursRO.Reinterpret<uint>()[(int)CubemapFace.PositiveY],
+                temp = temp,
+            }, 4);
+
+            var equator = equatorArray.Reinterpret<Vector4>(sizeof(float))[0];
+            var skyEquator = skyEquatorArray.Reinterpret<Vector4>(sizeof(float))[0];
+            equatorArray.Dispose();
+            skyEquatorArray.Dispose();
 
             RenderSettings.ambientSkyColor = ambientColours[(int)CubemapFace.PositiveY];
             RenderSettings.ambientEquatorColor = groundColour
@@ -685,7 +714,46 @@ namespace PKGE
 
             skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
         }
-        
+
+        /// <summary>
+        /// Extract the colour value without using a switch statement.
+        /// </summary>
+        /// <param name="colour"></param>
+        /// <param name="channel"></param>
+        /// <returns></returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        internal static uint Color32Channel(uint colour, int channel)
+        {
+            return colour >> (8 * channel) & 255U;
+        }
+
+        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
+        internal struct RemoveBlueJob : Unity.Jobs.IJobFor
+        {
+            [NativeFixedLength(6)][NativeMatchesParallelForLength] public NativeArray<Color32> ambientColours;
+            [ReadOnly] public Color sunColour;
+
+            public void Execute(int index)
+            {
+                ambientColours[index] = sunColour * ((Color)ambientColours[index]).grayscale;
+            }
+        }
+
+        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
+        internal struct AmbientColoursJob : Unity.Jobs.IJobFor
+        {
+            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> temp;
+            [ReadOnly][NativeFixedLength(6)] public NativeArray<uint>.ReadOnly ambientColours;
+
+            public void Execute(int index)
+            {
+                temp[index] = Color32Channel(ambientColours[(int)CubemapFace.PositiveX], index)
+                        + Color32Channel(ambientColours[(int)CubemapFace.NegativeX], index)
+                        + Color32Channel(ambientColours[(int)CubemapFace.PositiveZ], index)
+                        + Color32Channel(ambientColours[(int)CubemapFace.NegativeZ], index);
+            }
+        }
+
         /// <summary>
         /// Calculate the average of the four colours at the horizon.
         /// </summary>
@@ -695,25 +763,24 @@ namespace PKGE
         /// <param name="ambientColours">Input colours.</param>
         /// <param name="equator">Average colour at the horizon.</param>
         /// <param name="skyEquator">Average colour above the horizon.</param>
-        [Unity.Burst.BurstCompile]
-        internal static void AverageColours(in NativeArray<Color32>.ReadOnly ambientColours,
-            out Vector4 equator, out Vector4 skyEquator)
+        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
+        internal struct AverageColoursJob : Unity.Jobs.IJobFor
         {
-            const float equatorScale = 1f / (4 * byte.MaxValue);
-            const float skyEquatorScale = 1f / (6 * byte.MaxValue);
-            
-            equator = default;
-            skyEquator = default;
-            
-            for (int i = 0; i < 4; i++)
-            {
-                var temp = ambientColours[(int)CubemapFace.PositiveX][i]
-                          + ambientColours[(int)CubemapFace.NegativeX][i]
-                          + ambientColours[(int)CubemapFace.PositiveZ][i]
-                          + ambientColours[(int)CubemapFace.NegativeZ][i];
+            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> equator;
+            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> skyEquator;
+            [ReadOnly] public uint ambientColourPositiveY;
+            [ReadOnly][NativeFixedLength(4)][NativeMatchesParallelForLength][DeallocateOnJobCompletion] public NativeArray<float> temp;
 
-                equator[i] = equatorScale * temp;
-                skyEquator[i] = skyEquatorScale * (temp + (0.5f * ambientColours[(int)CubemapFace.PositiveY][i]));
+            public void Execute(int index)
+            {
+                const float equatorScale = 1f / (4 * byte.MaxValue);
+                const float skyEquatorScale = 1f / (6 * byte.MaxValue);
+                const float ambientScale = 0.5f * skyEquatorScale;
+
+                var sky = ambientScale * Color32Channel(ambientColourPositiveY, index);
+
+                skyEquator[index] = skyEquatorScale * temp[index] + sky;
+                equator[index] = equatorScale * temp[index];
             }
         }
 
@@ -724,7 +791,7 @@ namespace PKGE
         /// <see cref="Vector3.Distance"/> calculates the difference between two vectors.
         /// The direction is inverted to calculate the similarity instead.
         /// </remarks>
-        [Unity.Burst.BurstCompile]
+        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal static void SampleCubemapBilinear(in NativeArray<Color32>.ReadOnly colours, in Vector3 forward,
             out Color sum)
         {

@@ -6,6 +6,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CS0660, CS0661
+
 namespace PKGE.Unsafe
 {
     partial struct Span2D<T>

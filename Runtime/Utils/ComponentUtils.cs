@@ -106,14 +106,13 @@ namespace PKGE
         /// <param name="add">Whether to add a new component of the given type, if one does not already exist.</param>
         /// <typeparam name="T">The type of component to get or add.</typeparam>
         /// <returns>The new or retrieved component.</returns>
-        public static T GetOrAddIf<T>(GameObject gameObject, bool add) where T : Component
+        public static T GetOrAddIf<T>(GameObject gameObject, bool add = true) where T : Component
         {
-            var component = gameObject.GetComponent<T>();
+            bool found = gameObject.TryGetComponent<T>(out var component);
+            if (add && !found)
 #if UNITY_EDITOR
-            if (add && component == null)
                 component = UnityEditor.Undo.AddComponent<T>(gameObject);
 #else
-            if (add && component == null)
                 component = gameObject.AddComponent<T>();
 #endif
 
