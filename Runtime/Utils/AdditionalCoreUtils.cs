@@ -68,48 +68,6 @@ namespace PKGE
             };
             return mat;
         }
-
-        /// <summary>
-        /// Retrieves a component from a gameObject, adding it if none already exists.
-        /// </summary>
-        /// <param name="gameObject">The gameObject holding the component.</param>
-        /// <typeparam name="T">The type of the component.</typeparam>
-        /// <returns>The component instance.</returns>
-        public static T GetOrAddComponent<T>(GameObject gameObject) where T : Component
-        {
-            if (gameObject.TryGetComponent(out T comp))
-            {
-                return comp;
-            }
-
-            return gameObject.AddComponent<T>();
-        }
-
-        /// <summary>
-        /// Destroys a UnityObject safely.
-        /// </summary>
-        /// <param name="obj">Object to destroy.</param>
-        public static void DestroyIfNeeded<T>(T obj) where T : Object
-        {
-            DestroyIfNeeded(ref obj);
-        }
-
-        /// <inheritdoc cref="DestroyIfNeeded{T}(T)"/>
-        public static void DestroyIfNeeded<T>(ref T obj) where T : Object
-        {
-            if (obj != null)
-            {
-#if UNITY_EDITOR
-                if (Application.isPlaying)
-                    Object.Destroy(obj);
-                else
-                    Object.DestroyImmediate(obj);
-#else
-                Object.Destroy(obj);
-#endif
-                obj = null;
-            }
-        }
         #endregion // Unity.LiveCapture
     }
 }

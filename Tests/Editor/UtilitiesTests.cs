@@ -123,7 +123,7 @@ namespace PKGE.Editor.Tests
             _createdObjects.Add(go);
 
             var existing = go.AddComponent<DummyComponent>();
-            var result = AdditionalCoreUtils.GetOrAddComponent<DummyComponent>(go);
+            var result = ComponentUtils.GetOrAddIf<DummyComponent>(go);
 
             Assert.AreSame(existing, result);
             Assert.AreEqual(1, go.GetComponents<DummyComponent>().Length);
@@ -135,13 +135,13 @@ namespace PKGE.Editor.Tests
             var go = new GameObject("TestGO");
             _createdObjects.Add(go);
 
-            var result = AdditionalCoreUtils.GetOrAddComponent<DummyComponent>(go);
+            var result = ComponentUtils.GetOrAddIf<DummyComponent>(go);
 
             Assert.IsNotNull(result);
             Assert.AreSame(result, go.GetComponent<DummyComponent>());
             Assert.AreEqual(1, go.GetComponents<DummyComponent>().Length);
         }
-        #endregion  // GetOrAddComponent
+        #endregion // GetOrAddComponent    
 
         #region DestroyIfNeeded
         [Test]
@@ -150,7 +150,7 @@ namespace PKGE.Editor.Tests
             var go = new GameObject("ToDestroy");
             _createdObjects.Add(go);
 
-            AdditionalCoreUtils.DestroyIfNeeded(ref go);
+            CoreUtils.Destroy(ref go);
             Assert.IsNull(go); // ref param set to null
         }
 
@@ -160,7 +160,7 @@ namespace PKGE.Editor.Tests
             var go = new GameObject("ToDestroy");
             _createdObjects.Add(go);
 
-            AdditionalCoreUtils.DestroyIfNeeded(go);
+            CoreUtils.Destroy(go);
             // Can't check ref nulling because passed by value
             // Instead check it gets destroyed next frame (playmode) or immediately (editmode)
             // In edit mode DestroyImmediate is used => null immediately
@@ -171,10 +171,10 @@ namespace PKGE.Editor.Tests
         public void DestroyIfNeeded_DoesNothing_WhenObjectIsNull()
         {
             GameObject go = null;
-            AdditionalCoreUtils.DestroyIfNeeded(ref go);
+            CoreUtils.Destroy(ref go);
             Assert.IsNull(go); // stays null
         }
-        #endregion // DestroyIfNeeded
+        #endregion // DestroyIfNeeded    
     }
 
     public class UtilitiesTests
