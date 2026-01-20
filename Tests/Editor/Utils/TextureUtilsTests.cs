@@ -435,7 +435,7 @@ namespace PKGE.Tests
         {
             Assert.Throws<AssertionException>(() =>
             {
-                var _ = new ReadbackMipsAsyncDispose(null, 1);
+                var _ = new ReadbackMipsAsyncDispose(null, Allocator.TempJob, 1);
             });
         }
 
@@ -445,7 +445,7 @@ namespace PKGE.Tests
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, true);
             Assert.Throws<AssertionException>(() =>
             {
-                var _ = new ReadbackMipsAsyncDispose(tex, tex.mipmapCount + 1);
+                var _ = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob, tex.mipmapCount + 1);
             });
             UnityEngine.Object.DestroyImmediate(tex);
         }
@@ -463,7 +463,7 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
                 readback.WaitForCompletionAll();
                 Assert.IsTrue(readback.GetCompleted());
@@ -485,9 +485,9 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
-                var data = readback.GetData(-1, Allocator.Temp);
+                var data = readback.GetData(-1, Allocator.TempJob);
                 Assert.Greater(data.Length, 0);
                 data.Dispose();
             }
@@ -508,9 +508,9 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
-                var data = readback.GetData(0, Allocator.Temp);
+                var data = readback.GetData(0, Allocator.TempJob);
                 Assert.AreEqual(tex.width * tex.height * 4, data.Length);
                 data.Dispose();
             }
@@ -531,7 +531,7 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
                 Assert.Throws<AssertionException>(() => readback.GetData(999));
             }
@@ -552,7 +552,7 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
                 var mips = new NativeArray<MipLevelParameters>(tex.mipmapCount, Allocator.Temp);
                 int offset = 0;
@@ -589,7 +589,7 @@ namespace PKGE.Tests
 #if USING_NUNIT_2_0_3_OR_NEWER
             await
 #endif // USING_NUNIT_2_0_3_OR_NEWER
-            using (var readback = new ReadbackMipsAsyncDispose(tex))
+            using (var readback = new ReadbackMipsAsyncDispose(tex, Allocator.TempJob))
             {
                 readback.WaitForCompletionAll();
                 var status = readback.GetStatus((short)-1);
@@ -769,7 +769,7 @@ namespace PKGE.Tests
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
             Assert.IsTrue(props.texReadable.UncompressedReadable);
             Assert.IsTrue(props.IsReady());
@@ -788,7 +788,7 @@ namespace PKGE.Tests
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
             // Force logic into "Compressed" branch by faking compressed flags
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
             // Should report PerformedBlit if RGBA32 but not UncompressedReadable/Unreadable
             Assert.IsTrue(props.texReadable.IsReady);
@@ -801,7 +801,7 @@ namespace PKGE.Tests
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
             Texture2D applied = props.Apply32();
             Assert.IsNotNull(applied);
@@ -819,7 +819,7 @@ namespace PKGE.Tests
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGB24, mipChain: false);
             tex.Apply();
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
             NativeArray<Color32> data = props.GetData32();
             Assert.AreEqual(default(NativeArray<Color32>), data);
@@ -833,7 +833,7 @@ namespace PKGE.Tests
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
             Assert.IsFalse(((IEnumerator)props).MoveNext());
             ((IEnumerator)props).Reset();
@@ -847,7 +847,7 @@ namespace PKGE.Tests
         {
             var tex = new Texture2D(4, 4, TextureFormat.RGBA32, mipChain: false);
             tex.Apply();
-            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.Temp);
+            var props = new Texture2DProperties(tex, mipChain: false, allocator: Allocator.TempJob);
 
 #if USING_NUNIT_2_0_3_OR_NEWER
             yield return props.DisposeAsync();

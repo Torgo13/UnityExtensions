@@ -43,12 +43,12 @@ namespace PKGE
         private bool disposed;
 
         /// <param name="tex">The original <see cref="Texture"/> to be kept but not modified.</param>
-        /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
         /// <param name="allocator">Only change to <see cref="Allocator.TempJob"/> if the
         /// <see cref="AsyncGPUReadbackRequest"/> and job will complete within four frames.</param>
-        public Texture2DProperties(Texture tex, bool mipChain = true,
-            Allocator allocator = Allocator.Persistent)
+        /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
+        public Texture2DProperties(Texture tex, Allocator allocator = Allocator.TempJob, bool mipChain = true)
         {
+            Assert.IsTrue((int)allocator > (int)Allocator.Temp);
             Assert.IsNotNull(tex);
             Assert.AreEqual(TextureDimension.Tex2D, tex.dimension);
 
@@ -838,48 +838,50 @@ namespace PKGE
 
         #region Constructors
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
-        public ReadbackMipsAsyncDispose(Texture src, int mipCount)
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator, int mipCount)
         {
             Assert.IsNotNull(src);
             Assert.IsTrue(mipCount <= src.mipmapCount);
 
-            _readbackRequests = InitialiseReadbackRequests(src, mipCount);
+            _readbackRequests = InitialiseReadbackRequests(src, allocator, mipCount);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
-        public ReadbackMipsAsyncDispose(Texture src)
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator)
         {
             Assert.IsNotNull(src);
 
-            _readbackRequests = InitialiseReadbackRequests(src, src.mipmapCount);
+            _readbackRequests = InitialiseReadbackRequests(src, allocator, src.mipmapCount);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
-        public ReadbackMipsAsyncDispose(Texture src, int mipCount,
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator, int mipCount,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
             Assert.IsNotNull(src);
             Assert.IsTrue(mipCount <= src.mipmapCount);
 
-            _readbackRequests = InitialiseReadbackRequests(src, mipCount,
+            _readbackRequests = InitialiseReadbackRequests(src, allocator, mipCount,
                 x, width, y, height, z, depth);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
-        public ReadbackMipsAsyncDispose(Texture src,
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
             Assert.IsNotNull(src);
 
-            _readbackRequests = InitialiseReadbackRequests(src, src.mipmapCount,
+            _readbackRequests = InitialiseReadbackRequests(src, allocator, src.mipmapCount,
                 x, width, y, height, z, depth);
         }
         #endregion // Constructors
 
-        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, int mipCount)
+        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, Allocator allocator, int mipCount)
         {
+            Assert.IsTrue((int)allocator > (int)Allocator.Temp);
+
             var readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount,
-                Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+                allocator, NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < readbackRequests.Length; i++)
             {
@@ -889,11 +891,13 @@ namespace PKGE
             return readbackRequests;
         }
 
-        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, int mipCount,
+        static NativeArray<AsyncGPUReadbackRequest> InitialiseReadbackRequests(Texture src, Allocator allocator, int mipCount,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
+            Assert.IsTrue((int)allocator > (int)Allocator.Temp);
+
             var readbackRequests = new NativeArray<AsyncGPUReadbackRequest>(mipCount,
-                Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+                allocator, NativeArrayOptions.UninitializedMemory);
 
             for (int i = 0; i < readbackRequests.Length; i++)
             {

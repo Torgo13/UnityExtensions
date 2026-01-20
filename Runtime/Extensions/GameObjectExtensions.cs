@@ -253,6 +253,15 @@ namespace PKGE
             return foundObject;
         }
 
+        /// <summary>
+        /// Instantiate multiple <see cref="UnityEngine.GameObject"/>s. Results are stored in the provided <see cref="System.Collections.Generic.List{UnityEngine.GameObject}"/>.
+        /// </summary>
+        /// <remarks>Must be called from the main thread.</remarks>
+        /// <param name="go">Input <see cref="UnityEngine.GameObject"/></param>
+        /// <param name="count">Number of copies to instantiate</param>
+        /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{UnityEngine.GameObject}"/> to store the results</param>
+        /// <param name="destinationScene">Optionally specify the destination <see cref="UnityEngine.SceneManagement.Scene"/></param>
+        /// <exception cref="System.InvalidOperationException">EnsureRunningOnMainThread can only be called from the main thread</exception>
         public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,
             UnityEngine.SceneManagement.Scene destinationScene = default)
         {

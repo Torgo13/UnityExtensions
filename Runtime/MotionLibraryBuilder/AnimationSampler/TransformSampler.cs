@@ -80,48 +80,53 @@ namespace PKGE.Packages
                 return null;
             }
 
+            if (curveNameStrings[1].Length > 1)
+                return null;
+
             string curvePrefix = curveNameStrings[0];
-            string curvePostfix = curveNameStrings[1];
+            char curvePostfix = curveNameStrings[1][0];
+
+            const Allocator allocator = Allocator.Persistent;
 
             if (curvePrefix == posCurvePrefix)
             {
-                if (curvePostfix == "x")
+                if (curvePostfix == 'x')
                 {
                     curveIndex = 0;
-                    return positions.x.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return positions.x.SetCurve(new Curve(curve, allocator));
                 }
-                else if (curvePostfix == "y")
+                else if (curvePostfix == 'y')
                 {
                     curveIndex = 1;
-                    return positions.y.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return positions.y.SetCurve(new Curve(curve, allocator));
                 }
-                else if (curvePostfix == "z")
+                else if (curvePostfix == 'z')
                 {
                     curveIndex = 2;
-                    return positions.z.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return positions.z.SetCurve(new Curve(curve, allocator));
                 }
             }
             else if (curvePrefix == rotCurvePrefix)
             {
-                if (curvePostfix == "x")
+                if (curvePostfix == 'x')
                 {
                     curveIndex = 3;
-                    return rotations.x.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return rotations.x.SetCurve(new Curve(curve, allocator));
                 }
-                else if (curvePostfix == "y")
+                else if (curvePostfix == 'y')
                 {
                     curveIndex = 4;
-                    return rotations.y.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return rotations.y.SetCurve(new Curve(curve, allocator));
                 }
-                else if (curvePostfix == "z")
+                else if (curvePostfix == 'z')
                 {
                     curveIndex = 5;
-                    return rotations.z.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return rotations.z.SetCurve(new Curve(curve, allocator));
                 }
-                else if (curvePostfix == "w")
+                else if (curvePostfix == 'w')
                 {
                     curveIndex = 6;
-                    return rotations.w.SetCurve(new Curve(curve, Allocator.Persistent));
+                    return rotations.w.SetCurve(new Curve(curve, allocator));
                 }
             }
 

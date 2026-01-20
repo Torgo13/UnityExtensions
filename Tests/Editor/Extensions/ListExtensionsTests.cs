@@ -120,9 +120,7 @@ namespace PKGE.Editor.Tests
         void EnsureRoomHelper<T>(List<T> list, int desiredRoom = k_DefaultTestCapacity)
         {
             Assert.AreNotEqual(desiredRoom, list.Capacity);
-
             list.EnsureRoom(desiredRoom);
-
             Assert.AreEqual(list.Count + desiredRoom, list.Capacity);
         }
 
@@ -200,6 +198,7 @@ namespace PKGE.Editor.Tests
             }
         }
         #endregion // UnityEditor.Rendering.Tests
+        
         //https://github.com/needle-mirror/com.unity.collections/blob/feee1d82af454e1023e3e04789fce4d30fc1d938/Unity.Collections.Tests/ListExtensionsTests.cs
         #region ListExtensionsTests
         [Test]

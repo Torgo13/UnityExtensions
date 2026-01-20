@@ -41,6 +41,7 @@ namespace PKGE
 
             if (!Reflection.InitialiseMaterial())
             {
+                Reflection.OnDestroy();
                 Reflection = null;
                 CoreUtils.Destroy(this);
                 return;

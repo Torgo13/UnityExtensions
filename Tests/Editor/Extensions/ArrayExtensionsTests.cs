@@ -525,7 +525,10 @@ namespace PKGE.Tests
             Assert.GreaterOrEqual(arr.Length, 4);
         }
         #endregion // Resize
+    }
 
+    class NativeArrayExtensionsTests
+    {
         private NativeArray<int> _array;
         private int _count;
 

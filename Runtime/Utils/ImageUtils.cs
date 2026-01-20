@@ -809,7 +809,7 @@ namespace PKGE
 
         public static void RGBToXYZ(Color rgb, out float[] xyz)
         {
-            float[] scaledColors = System.Buffers.ArrayPool<float>.Shared.Rent(3);
+            Span<float> scaledColors = stackalloc float[3];
             for (var i = 0; i < 3; ++i)
             {
                 if (rgb[i] > 0.04045) scaledColors[i] = Mathf.Pow((rgb[i] + 0.055f) / 1.055f, 2.4f);
@@ -822,13 +822,11 @@ namespace PKGE
             xyz[0] = scaledColors[0] * 0.4124f + scaledColors[1] * 0.3576f + scaledColors[2] * 0.1805f;
             xyz[1] = scaledColors[0] * 0.2126f + scaledColors[1] * 0.7152f + scaledColors[2] * 0.0722f;
             xyz[2] = scaledColors[0] * 0.0193f + scaledColors[1] * 0.1192f + scaledColors[2] * 0.9505f;
-            
-            System.Buffers.ArrayPool<float>.Shared.Return(scaledColors);
         }
 
         public static void XYZToCIELab(float[] xyz, out float[] lab, Vector3 reference)
         {
-            float[] scaledXYZ = System.Buffers.ArrayPool<float>.Shared.Rent(3);
+            Span<float> scaledXYZ = stackalloc float[3];
             for (var i = 0; i < 3; ++i)
             {
                 scaledXYZ[i] = xyz[i] / reference[i];
@@ -840,8 +838,6 @@ namespace PKGE
             lab[0] = (116f * scaledXYZ[1]) - 16f;
             lab[1] = 500f * (scaledXYZ[0] - scaledXYZ[1]);
             lab[2] = 200f * (scaledXYZ[1] - scaledXYZ[2]);
-            
-            System.Buffers.ArrayPool<float>.Shared.Return(scaledXYZ);
         }
 
         public static void RGBToYUV(Color rgb, out float[] yuv)
