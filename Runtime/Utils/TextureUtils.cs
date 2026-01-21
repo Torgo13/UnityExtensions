@@ -1105,6 +1105,18 @@ namespace PKGE
         #endregion // Unity.XR.CoreUtils
 
         #region Texture2D
+        /// <inheritdoc cref="SystemInfo.maxTextureSize"/>
+        /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/SystemInfo-maxTextureSize.html"/></remarks>
+        public const int maxTextureSize = 16_384;
+        public const int minTextureSize = 1;
+
+        /// <summary>Log2(<see cref="maxTextureSize"/>)</summary>
+        public const int maxMipCount = 14;
+        public const int minMipCount = 1;
+
+        public const int maxMipLevel = maxMipCount - 1;
+        public const int minMipLevel = minMipCount - 1;
+
         /// <summary>
         /// Calculates the starting index of a mip level given the
         /// original width and height of the texture.
@@ -1121,7 +1133,10 @@ namespace PKGE
         /// <param name="pow2">2^<paramref name="mipLevel"/>.</param>
         /// <param name="mipWidth">The width of the mip level.</param>
         /// <param name="mipHeight">The height of the mip level.</param>
-        public static void GetMipData(int mipLevel, int width, int height,
+        public static void GetMipData(
+            [Unity.Burst.CompilerServices.AssumeRange(minMipLevel, maxMipLevel)] int mipLevel,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
             out int offset, out int pow2, out int mipWidth, out int mipHeight)
         {
             offset = 0;
@@ -1146,7 +1161,10 @@ namespace PKGE
         /// <param name="width">The original width of the texture at mip 0.</param>
         /// <param name="height">The original height of the texture at mip 0.</param>
         /// <returns>The number of elements required for all given mip levels.</returns>
-        public static int MipChainLength(int mipmapCount, int width, int height)
+        public static int MipChainLength(
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)] int mipmapCount,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height)
         {
             GetMipData(mipmapCount, width, height,
                 out int offset, out _, out _, out _);
@@ -1156,15 +1174,21 @@ namespace PKGE
 
         /// <inheritdoc cref="MipChainLength(int, int, int)"/>
         public static int MipChainLength(Texture2D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height);
-        
+
         /// <summary>Calculate the required number of mipmaps for the given
         /// <see cref="width"/> and <see cref="height"/>.</summary>
+        /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/SystemInfo-maxTextureSize.html"/>
+        /// "Unity only supports textures up to a size of 16384, even if maxTextureSize returns a larger size."</remarks>
         /// <param name="width">Width of the texture.</param>
         /// <param name="height">Height of the texture.</param>
-        public static int MipmapCount(int width, int height)
+        [return: Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)]
+        public static int MipmapCount(
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth = 1)
         {
             int mipmapCount = 0;
-            int s = Math.Max(width, height);
+            int s = Math.Max(Math.Max(width, height), depth);
             while (s > 1)
             {
                 ++mipmapCount;
@@ -1180,7 +1204,11 @@ namespace PKGE
         
         #region Texture3D
         /// <inheritdoc cref="GetMipData(int, int, int, out int, out int, out int, out int)"/>
-        public static void GetMipData(int mipLevel, int width, int height, int depth,
+        public static void GetMipData(
+            [Unity.Burst.CompilerServices.AssumeRange(minMipLevel, maxMipLevel)] int mipLevel,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth,
             out int offset, out int pow2, out int mipWidth, out int mipHeight, out int mipDepth)
         {
             offset = 0;
@@ -1200,7 +1228,12 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="MipChainLength(int, int, int)"/>
-        public static int MipChainLength(int mipmapCount, int width, int height, int depth)
+        [return: Unity.Burst.CompilerServices.AssumeRange(1, int.MaxValue)]
+        public static int MipChainLength(
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)] int mipmapCount,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth)
         {
             GetMipData(mipmapCount, width, height, depth,
                 out int offset, out _, out _, out _, out _);
@@ -1210,20 +1243,6 @@ namespace PKGE
 
         /// <inheritdoc cref="MipChainLength(int, int, int, int)"/>
         public static int MipChainLength(Texture3D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height, tex.depth);
-
-        /// <inheritdoc cref="MipmapCount(int, int)"/>
-        public static int MipmapCount(int width, int height, int depth)
-        {
-            int mipmapCount = 0;
-            int s = Math.Max(Math.Max(width, height), depth);
-            while (s > 1)
-            {
-                ++mipmapCount;
-                s >>= 1;
-            }
-
-            return mipmapCount;
-        }
 
         /// <inheritdoc cref="MipmapCount(int, int, int)"/>
         public static int MipmapCount(Texture3D tex) => MipmapCount(tex.width, tex.height, tex.depth);

@@ -213,28 +213,22 @@ namespace PKGE
         }
         #endregion // Unity.HLODSystem.Utils
         
-        [Unity.Burst.BurstCompile]
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         public static void CalcLocalBounds(in Vector3 min, in Vector3 max, ref Matrix4x4 matrix,
             out Bounds newBounds)
         {
             var points = new NativeArray<Vector3>(8,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            points[0] = new Vector3(min.x, min.y, min.z);
-            points[1] = new Vector3(max.x, min.y, min.z);
-            points[2] = new Vector3(min.x, min.y, max.z);
-            points[3] = new Vector3(max.x, min.y, max.z);
-            points[4] = new Vector3(min.x, max.y, min.z);
-            points[5] = new Vector3(max.x, max.y, min.z);
-            points[6] = new Vector3(min.x, max.y, max.z);
-            points[7] = new Vector3(max.x, max.y, max.z);
-
-            // loop not vectorized: runtime pointer checks needed.
-            // Enable vectorization of this loop with '#pragma clang loop vectorize(enable)'
-            // when compiling with -Os/-Oz
-            for (int i = 0; i < points.Length; ++i)
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory)
             {
-                points[i] = matrix.MultiplyPoint(points[i]);
-            }
+                [0] = matrix.MultiplyPoint(new Vector3(min.x, min.y, min.z)),
+                [1] = matrix.MultiplyPoint(new Vector3(max.x, min.y, min.z)),
+                [2] = matrix.MultiplyPoint(new Vector3(min.x, min.y, max.z)),
+                [3] = matrix.MultiplyPoint(new Vector3(max.x, min.y, max.z)),
+                [4] = matrix.MultiplyPoint(new Vector3(min.x, max.y, min.z)),
+                [5] = matrix.MultiplyPoint(new Vector3(max.x, max.y, min.z)),
+                [6] = matrix.MultiplyPoint(new Vector3(min.x, max.y, max.z)),
+                [7] = matrix.MultiplyPoint(new Vector3(max.x, max.y, max.z)),
+            };
 
             Vector3 newMin = points[0];
             Vector3 newMax = points[0];
@@ -350,18 +344,20 @@ namespace PKGE
                 // Only supports Y axis based capsules
                 var cccTransform = ccc.transform;
                 Vector3 local_p = cccTransform.InverseTransformPoint(p);
-                GetClosestPointOnCapsuleCollider(ref local_p, ccc.height, ccc.center, ccc.radius);
-                return cccTransform.TransformPoint(local_p);
+                GetClosestPointOnCapsuleCollider(out var output, local_p, ccc.height, ccc.center, ccc.radius);
+                return cccTransform.TransformPoint(output);
             }
 
             return c.ClosestPointOnBounds(p);
         }
         #endregion // FPSSample
 
-        [Unity.Burst.BurstCompile]
-        internal static void GetClosestPointOnCapsuleCollider(ref Vector3 local_p, float height,
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+        internal static void GetClosestPointOnCapsuleCollider(out Vector3 output, in Vector3 input, float height,
             in Vector3 center, float radius)
         {
+            var local_p = input;
+
             // Clamp inside outer cylinder top/bot
             local_p.y = Mathf.Clamp(local_p.y, -height * 0.5f, height * 0.5f);
 
@@ -381,7 +377,7 @@ namespace PKGE
                 local_p.z *= scaledown;
             }
 
-            local_p += center;
+            output = local_p + center;
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace PKGE
 {
@@ -70,12 +69,12 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/GameSystem/AppSettings.cs#L295
         #region BoatAttack
-        public static int SeedNow
+        public static uint SeedNow
         {
             get
             {
                 DateTime dt = DateTime.UtcNow;
-                return (int)(dt.Ticks % int.MaxValue);
+                return unchecked((uint)(dt.Ticks % (uint.MaxValue - 1)));
             }
         }
         
@@ -93,8 +92,13 @@ namespace PKGE
             get
             {
                 GenerateColors();
-                Random.InitState(SeedNow + Random.Range(0, 1000));
-                return ColorPalette[Random.Range(0, ColorPalette.Length)];
+#if INCLUDE_MATHEMATICS
+                var rand = new Unity.Mathematics.Random(1 + SeedNow);
+#else
+                var rand = new System.Random(unchecked((int)SeedNow));
+#endif // INCLUDE_MATHEMATICS
+                var colour = ColorPalette[rand.Range(0, ColorPalette.Length)];
+                return colour;
             }
         }
 

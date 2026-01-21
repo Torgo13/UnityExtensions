@@ -31,6 +31,41 @@ namespace PKGE
             this.g = (byte)(f.y * byte.MaxValue);
             this.b = (byte)(f.z * byte.MaxValue);
         }
+
+        public Color24(Vector3 f, float scale)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public static implicit operator Color24(Vector3 f) => new Color24(f);
+        public static implicit operator Vector3(Color24 c) => new Vector3(c.r, c.g, c.b);
+
+        public static implicit operator Color24(Vector4 f) => new Color24(f);
+        public static implicit operator Vector4(Color24 c) => new Vector4(c.r, c.g, c.b, 1f);
+
+#if INCLUDE_MATHEMATICS
+        public Color24(Unity.Mathematics.float3 f)
+        {
+            this.r = (byte)(f.x * byte.MaxValue);
+            this.g = (byte)(f.y * byte.MaxValue);
+            this.b = (byte)(f.z * byte.MaxValue);
+        }
+
+        public Color24(Unity.Mathematics.float3 f, float scale)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public static implicit operator Color24(Unity.Mathematics.float3 f) => new Color24(f);
+        public static implicit operator Unity.Mathematics.float3(Color24 c) => new Unity.Mathematics.float3(c.r, c.g, c.b);
+
+        public static implicit operator Color24(Unity.Mathematics.float4 f) => new Color24(f.x, f.y, f.z);
+        public static implicit operator Unity.Mathematics.float4(Color24 c) => new Unity.Mathematics.float4(c.r, c.g, c.b, 1f);
+#endif // INCLUDE_MATHEMATICS
     }
 
     public static class ColorExtensions

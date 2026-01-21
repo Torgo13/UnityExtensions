@@ -76,7 +76,7 @@ namespace PKGE.Packages
             return frameCount;
         }
 
-        [Unity.Burst.BurstCompile]
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         private struct BakeJob : IJob
         {
             [NativeFixedLength(1)]

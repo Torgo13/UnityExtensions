@@ -107,7 +107,7 @@ namespace PKGE
 
         public readonly bool Equals(Union1 other) => Byte == other.Byte;
         public readonly override bool Equals(object obj) => obj is Union1 other && Equals(other);
-        public readonly override int GetHashCode() => Byte;
+        public readonly override int GetHashCode() => Byte.GetHashCode();
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -116,7 +116,6 @@ namespace PKGE
     {
         [FieldOffset(0)] public short Short;
         [FieldOffset(0)] public ushort UShort;
-        [FieldOffset(0)] public char Char;
 
         [FieldOffset(0)] public BitArray16 BitArray16;
 
@@ -125,7 +124,7 @@ namespace PKGE
 
         public readonly bool Equals(Union2 other) => Short == other.Short;
         public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
-        public readonly override int GetHashCode() => Short;
+        public readonly override int GetHashCode() => Short.GetHashCode();
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -146,7 +145,7 @@ namespace PKGE
 
         public readonly bool Equals(Union4 other) => Int == other.Int;
         public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
-        public readonly override int GetHashCode() => Int;
+        public readonly override int GetHashCode() => Int.GetHashCode();
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -190,6 +189,8 @@ namespace PKGE
 
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
+
+        [FieldOffset(0)] public Union12 _12;
 
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
         public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
@@ -1777,7 +1778,7 @@ namespace PKGE.Packages
 
         public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
         public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
-        public readonly override int GetHashCode() => __0.Short;
+        public readonly override int GetHashCode() => __0.Short.GetHashCode();
     }
 
     /// <inheritdoc cref="Union2"/>
@@ -1794,7 +1795,7 @@ namespace PKGE.Packages
 
         public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
         public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
-        public readonly override int GetHashCode() => __0.Int;
+        public readonly override int GetHashCode() => __0.Int.GetHashCode();
     }
 
     /// <inheritdoc cref="Union2"/>
@@ -1830,6 +1831,8 @@ namespace PKGE.Packages
 
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
+
+        [FieldOffset(0)] public Union12 _12;
 
         public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
         public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);

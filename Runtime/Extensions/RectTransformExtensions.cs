@@ -133,7 +133,7 @@ namespace PKGE
             fourCornersArray[3] = new Vector3(xMax, y, 0f);
         }
 
-        [Unity.Burst.BurstCompile]
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         struct FourCornersJob : Unity.Jobs.IJob
         {
             [Unity.Collections.NativeFixedLength(4)]

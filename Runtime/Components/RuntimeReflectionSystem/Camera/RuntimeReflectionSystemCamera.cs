@@ -383,7 +383,7 @@ namespace PKGE
             }
 
             // Render a single cubemap face
-            _ = _reflectionCamera.RenderToCubemap(_renderTextures[_index], 1 << frameCount);
+            _ = _reflectionCamera.RenderToCubemap(_renderTextures[_index], NeighbouringFace(1 << frameCount));
 
             // Blend between the previous and current camera render textures
             float blend = frameCount / (float)BlendFrames;
@@ -408,6 +408,20 @@ namespace PKGE
 #endif // BLEND_SHADER
 
             return updated;
+        }
+
+        static int NeighbouringFace(int faceMask)
+        {
+            return (CubemapFace)faceMask switch
+            {
+                CubemapFace.PositiveX => 3,
+                CubemapFace.NegativeX => 0,
+                CubemapFace.PositiveY => 5,
+                CubemapFace.NegativeY => 2,
+                CubemapFace.PositiveZ => 4,
+                CubemapFace.NegativeZ => 1,
+                _ => -1,
+            };
         }
 
         internal bool InitialiseMaterial()
@@ -725,7 +739,10 @@ namespace PKGE
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static uint Color32Channel(uint colour, int channel)
         {
-            return colour >> (8 * channel) & 255U;
+            const int byteSize = 8 * sizeof(byte);
+            const uint byteMaxValue = byte.MaxValue;
+
+            return (colour >> (byteSize * channel)) & byteMaxValue;
         }
 
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]

@@ -106,29 +106,6 @@ namespace PKGE.Packages
         const float rec601b = 0.144f;
 
         /// <summary>
-        /// Calculate the number of mipmaps a <see cref="Texture2D"/> would have
-        /// when created with mipChain as <see langword="true"/>.
-        /// </summary>
-        [return: Unity.Burst.CompilerServices.AssumeRange(1, sizeof(ushort))]
-        public static int MipmapCount(
-            [Unity.Burst.CompilerServices.AssumeRange(1, ushort.MaxValue)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(1, ushort.MaxValue)] int height)
-        {
-            int mipmapCount = 0;
-            int s = max(width, height);
-            while (s > 1)
-            {
-                ++mipmapCount;
-                s >>= 1;
-            }
-
-            //return (int)System.Math.Floor(System.Math.Log(s, 2.0)) + 1;
-            //return (int)floor(log2(s)) + 1;
-
-            return mipmapCount;
-        }
-
-        /// <summary>
         /// Create a normal map from colour intensity.
         /// </summary>
         /// <remarks>
@@ -152,7 +129,7 @@ namespace PKGE.Packages
             const float edgeScale = (float)(1 / ((SQRT2_DBL * 2) + 2));
             normalStrength *= edgeScale;
 
-            for (int i = 0; i < mipmapCount; i++)
+            for (int i = 0; i < mipmapCount - 1; i++)
             {
                 TextureUtils.GetMipData(i, width, height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
@@ -217,7 +194,7 @@ namespace PKGE.Packages
             int height = texture.height;
             int size = width * height;
 
-            mipmapCount = MipmapCount(width, height);
+            mipmapCount = TextureUtils.MipmapCount(width, height);
             int length = TextureUtils.MipChainLength(mipmapCount, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
@@ -308,8 +285,16 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color24 NormalMap(int width, float normalStrength,
-            in NativeArray<Color32>.ReadOnly input, int x0, int y0, int xn, int yn, int xp, int yp)
+        public static Color24 NormalMap(
+            [Unity.Burst.CompilerServices.AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)] int width,
+            float normalStrength,
+            in NativeArray<Color32>.ReadOnly input,
+            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int x0,
+            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int y0,
+            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int xn,
+            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int yn,
+            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int xp,
+            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int yp)
         {
             // Obtain the colors of the eight surrounding pixels
             Color32 c_xn_yn = input[mad(yn, width, xn)];
@@ -431,8 +416,7 @@ namespace PKGE.Packages
             Color24 x0_yp = rawTextureData[mad(mipYp, mipWidth, mipX0)];
             Color24 xp_yp = rawTextureData[mad(mipYp, mipWidth, mipXp)];
 
-            float3 result =
-                  mul(xn_yn, or * scale)
+            return mul(xn_yn, or * scale)
                 + mul(x0_yn, ca * scale)
                 + mul(xp_yn, or * scale)
                 + mul(xn_y0, ca * scale)
@@ -441,15 +425,13 @@ namespace PKGE.Packages
                 + mul(xn_yp, or * scale)
                 + mul(x0_yp, ca * scale)
                 + mul(xp_yp, or * scale);
-
-            return new Color24(result.x, result.y, result.z);
         }
 
 #pragma warning disable IDE1006 // Naming Styles
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static float3 mul(Color24 input, float scale)
+        internal static float4 mul(Color24 input, float scale)
         {
-            return new float3(input.r * scale, input.g * scale, input.b * scale);
+            return new float4(input) * scale;
         }
 #pragma warning restore IDE1006 // Naming Styles
     }
@@ -721,6 +703,7 @@ namespace PKGE.Packages
         [ReadOnly] public int hn;
         [ReadOnly] public float normalStrength;
         [ReadOnly] public NativeArray<Color32>.ReadOnly input;
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<Color24> output;
 
         public void Execute(int index)
@@ -748,6 +731,7 @@ namespace PKGE.Packages
         [ReadOnly] public int hn;
         [ReadOnly] public float normalStrength;
         [ReadOnly] public NativeArray<Color32>.ReadOnly input;
+        [NativeMatchesParallelForLength]
         [WriteOnly] public NativeArray<Color24> output;
 
         public void Execute(int index)
@@ -778,7 +762,10 @@ namespace PKGE.Packages
         /// <param name="a">Input integer value.</param>
         /// <param name="b">Maximum value (i.e. texture width - 1).</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int mod(int a, int b)
+        [return: Unity.Burst.CompilerServices.AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)]
+        static int mod(
+            [Unity.Burst.CompilerServices.AssumeRange(-1, TextureUtils.maxTextureSize)] int a,
+            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int b)
         {
             return (a + b) % b;
         }
