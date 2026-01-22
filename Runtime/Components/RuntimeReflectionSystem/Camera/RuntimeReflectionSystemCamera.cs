@@ -88,7 +88,6 @@ namespace PKGE
     }
 
     //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
-    [Unity.Burst.BurstCompile]
     public class ReflectionSystem
     {
         private readonly int Tex = Shader.PropertyToID("_Tex");
@@ -115,12 +114,14 @@ namespace PKGE
         private bool _createdReflectionCamera;
 
         private Transform _mainCameraTransform;
+        private Vector3 _previousCameraPosition;
+        private Vector3 _currentCameraPosition;
 
         /// <summary>
-        /// Array of three RenderTextures for reflectionCamera to render cubemaps into.
+        /// Array of three RenderTextures for <see cref="_reflectionCamera"/> to render cubemaps into.
         /// </summary>
         /// <remarks>
-        /// While one RenderTexture is being rendered to over six frames, the previous
+        /// While one <see cref="RenderTexture"/> is being rendered to over six frames, the previous
         /// two completed RenderTextures will be blended to produce an interpolated cubemap.
         /// </remarks>
         internal RenderTexture[] _renderTextures;
@@ -128,7 +129,7 @@ namespace PKGE
 #if BLEND_SHADER
 #else
         /// <summary>
-        /// Create a fourth RenderTexture for the blended result if it's needed for
+        /// Create a fourth <see cref="RenderTexture"/> for the blended result if it's needed for
         /// more than just the skybox.
         /// </summary>
         internal RenderTexture _blendedTexture;
@@ -136,17 +137,17 @@ namespace PKGE
         private AsyncGPUReadbackRequest _readbackRequest;
 
         /// <summary>
-        /// Store the average colour of each cubemap face.
+        /// Store the average <see cref="Color32"/> of each cubemap face.
         /// </summary>
         public NativeArray<Color32> ambientColours;
 
         /// <summary>
-        /// The weighted colour in the direction of the camera.
+        /// The weighted <see cref="Color"/> in the direction of the main camera.
         /// </summary>
         public Color adaptiveColour;
 
         /// <summary>
-        /// The weighted colour in the direction of the sun.
+        /// The weighted <see cref="Color"/> in the direction of the sun.
         /// </summary>
         public Color skyColour;
 
@@ -177,10 +178,10 @@ namespace PKGE
             set { resolutionScale = System.Math.Clamp(value, 0.25f, 1.0f); }
         }
 
-        /// <summary>When true, one cubemap face is updated per frame. Otherwise, all six are updated each frame.</summary>
+        /// <summary>When true, one <see cref="CubemapFace"/> is updated per frame. Otherwise, all six are updated each frame.</summary>
         public bool timeSlice = true;
 
-        /// <summary>Increase the mip level of the skybox cubemap by one to filter out high frequency noise.</summary>
+        /// <summary>Increase the mip level of the skybox <see cref="Cubemap"/> by one to filter out high frequency noise.</summary>
         public bool noiseReduction = true;
 
         /// <summary>When <see langword="false"/>, uses the equator colour for the ground colour.</summary>
@@ -189,19 +190,19 @@ namespace PKGE
         /// <summary>Remove the blue tint from the ambient colour.</summary>
         public bool removeBlue;
 
-        /// <summary>The index of the current RenderTexture being rendered to in _renderTextures.</summary>
+        /// <summary>The index of the current RenderTexture being rendered to in <see cref="_renderTextures"/>.</summary>
         internal int _index = -1;
 
-        /// <summary>Snapshot of Time.frameCount the last time ResetFrameCount() was called.</summary>
+        /// <summary>Number of frames that have been rendered since the last time <see cref="ResetFrameCount"/> was called.</summary>
         internal int _renderedFrameCount;
 
-        /// <summary>Number of RenderTextures in _renderTextures.</summary>
+        /// <summary>Number of RenderTextures in <see cref="_renderTextures"/>.</summary>
         private const int ProbeCount = 3;
 
-        /// <summary>Resolution of each face of each RenderTexture cubemap.</summary>
+        /// <summary>Resolution of each face of each <see cref="RenderTexture"/> cubemap.</summary>
         private const int Resolution = 1024;
 
-        /// <summary>Spread the cubemap capture over six frames by rendering one face per frame.</summary>
+        /// <summary>Spread the <see cref="Cubemap"/> capture over six frames by rendering one face per frame.</summary>
         private const int BlendFrames = 6;
 
         public ReflectionSystem(Shader skyboxShader = null, Material skyboxMaterial = null, Camera reflectionCamera = null, ComputeShader texture2DArrayLerp = null)
@@ -358,11 +359,8 @@ namespace PKGE
         {
             bool updated = false;
 
-            // Calculate how many frames have been rendered since PrepareNextCubemap() was last called
-            int frameCount = Time.frameCount - _renderedFrameCount;
-
             // Return if the current cubemap still has more faces to render
-            bool finishedRendering = frameCount >= BlendFrames;
+            bool finishedRendering = ++_renderedFrameCount >= BlendFrames;
             if (finishedRendering)
             {
 #if BLEND_SHADER
@@ -378,15 +376,15 @@ namespace PKGE
 
                 PrepareNextCubemap();
 
-                frameCount = 0;
+                _renderedFrameCount = 0;
                 updated = true;
             }
 
             // Render a single cubemap face
-            _ = _reflectionCamera.RenderToCubemap(_renderTextures[_index], NeighbouringFace(1 << frameCount));
+            _ = _reflectionCamera.RenderToCubemap(_renderTextures[_index], NeighbouringFace(_renderedFrameCount));
 
             // Blend between the previous and current camera render textures
-            float blend = frameCount / (float)BlendFrames;
+            float blend = _renderedFrameCount / (float)BlendFrames;
 
 #if BLEND_SHADER
             _skyboxMaterial.SetFloat(Blend, blend);
@@ -414,13 +412,13 @@ namespace PKGE
         {
             return (CubemapFace)faceMask switch
             {
-                CubemapFace.PositiveX => 3,
-                CubemapFace.NegativeX => 0,
-                CubemapFace.PositiveY => 5,
-                CubemapFace.NegativeY => 2,
-                CubemapFace.PositiveZ => 4,
-                CubemapFace.NegativeZ => 1,
-                _ => -1,
+                CubemapFace.NegativeX => 1 << 0,
+                CubemapFace.NegativeZ => 1 << 1,
+                CubemapFace.NegativeY => 1 << 2,
+                CubemapFace.PositiveX => 1 << 3,
+                CubemapFace.PositiveZ => 1 << 4,
+                CubemapFace.PositiveY => 1 << 5,
+                _ => 63,
             };
         }
 
@@ -459,12 +457,18 @@ namespace PKGE
         internal bool FindMainCamera()
         {
             if (_mainCameraTransform != null)
+            {
+                _previousCameraPosition = _currentCameraPosition;
+                _currentCameraPosition = _mainCameraTransform.position;
                 return true;
+            }
 
             var mainCamera = Camera.main;
             if (mainCamera != null)
             {
                 _mainCameraTransform = mainCamera.transform;
+                _previousCameraPosition = _currentCameraPosition;
+                _currentCameraPosition = _mainCameraTransform.position;
                 return true;
             }
 
@@ -473,20 +477,26 @@ namespace PKGE
 
         /// <summary>
         /// Move the reflection camera to the position of the main camera.
+        /// If <see cref="timeSlice"/> is <see langword="true"/>, extrapolate the position so that
+        /// the capture is performed where the camera is likely to be six frames later.
         /// </summary>
         /// <remarks>
-        /// Do not make the reflection camera a child of the main camera, or it may move during time slicing.
+        /// Do not make the reflection camera a child of the main camera when <see cref="timeSlice"/> is <see langword="true"/>.
+        /// The reflection camera should remain in the same position while all six cubemap faces are captured.
         /// </remarks>
         internal void UpdateReflectionCameraPosition()
         {
             if (FindMainCamera())
             {
-                _reflectionCameraTransform.position = _mainCameraTransform.position;
+                const float t = 2f;
+                _reflectionCameraTransform.position = timeSlice
+                    ? Vector3.LerpUnclamped(_previousCameraPosition, _currentCameraPosition, t)
+                    : _currentCameraPosition;
             }
         }
 
         /// <summary>
-        /// Override the skybox material for the scene or the camera.
+        /// Override the skybox <see cref="Material"/> for the scene or the camera.
         /// </summary>
         internal void UpdateSkybox()
         {
@@ -511,29 +521,29 @@ namespace PKGE
         /// </summary>
         internal void ResetFrameCount()
         {
-            _renderedFrameCount = Time.frameCount;
+            _renderedFrameCount = 0;
         }
 
         /// <summary>
-        /// Get the index of the next RenderTexture in _renderTextures.
+        /// Get the index of the next <see cref="RenderTexture"/> in <see cref="_renderTextures"/>.
         /// </summary>
-        /// <returns>Index of the next RenderTexture.</returns>
+        /// <returns>Index of the next <see cref="RenderTexture"/>.</returns>
         internal int NextIndex()
         {
             return (_index + 1) % ProbeCount;
         }
 
         /// <summary>
-        /// Get the index of the previous RenderTexture in _renderTextures.
+        /// Get the index of the previous <see cref="RenderTexture"/> in <see cref="_renderTextures"/>.
         /// </summary>
-        /// <returns>Index of the previous RenderTexture.</returns>
+        /// <returns>Index of the previous <see cref="RenderTexture"/>.</returns>
         internal int PreviousIndex()
         {
             return (_index + ProbeCount - 1) % ProbeCount;
         }
 
         /// <summary>
-        /// Calculate the mipmap level to sample the skybox cubemap.
+        /// Calculate the mipmap level to sample the skybox <see cref="Cubemap"/>.
         /// </summary>
         /// <remarks>
         /// This function approximates the following formula,
@@ -567,7 +577,7 @@ namespace PKGE
         /// Check for that with the <see cref="RenderTexture.IsCreated"/> function.
         /// <see href="https://docs.unity3d.com/ScriptReference/RenderTexture.html"/>
         /// </summary>
-        /// <returns>False if any of the RenderTextures could not be recreated.</returns>
+        /// <returns><see langword="false"/> if any of the RenderTextures could not be recreated.</returns>
         internal bool EnsureCreated()
         {
             bool created = true;
@@ -588,7 +598,7 @@ namespace PKGE
         /// Check if <paramref name="rt"/> has already been created,
         /// and if not attempt to create it.
         /// </summary>
-        /// <returns>True if <paramref name="rt"/> is created.</returns>
+        /// <returns><see langword="true"/> if <paramref name="rt"/> is created.</returns>
         private static bool CreateRenderTexture(RenderTexture rt)
         {
             if (rt.IsCreated())
@@ -614,7 +624,7 @@ namespace PKGE
 #if BLEND_SHADER
 #else
         /// <summary>
-        /// Update customReflectionTexture when the scene changes.
+        /// Update <see cref="RenderSettings.customReflectionTexture"/> when the <see cref="UnityEngine.SceneManagement.Scene"/> changes.
         /// </summary>
         internal void UpdateCustomReflectionTexture(UnityEngine.SceneManagement.Scene unloadedScene, UnityEngine.SceneManagement.Scene loadedScene)
         {
@@ -623,11 +633,11 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Sample the highest mipmap level of each cubemap face.
-        /// Apply the colours to RenderSettings.
+        /// Sample the highest mipmap level of each <see cref="Cubemap"/> face.
+        /// Apply the colours to <see cref="RenderSettings"/>.
         /// </summary>
         /// <remarks>
-        /// Instead of providing a callback function, check each frame if it has completed.
+        /// Instead of providing a callback function, avoid allocating by checking each frame if it has completed.
         /// </remarks>
         internal void UpdateAmbient()
         {
@@ -638,7 +648,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Callback after AsyncGPUReadback has completed.
+        /// Callback after <see cref="AsyncGPUReadback"/> has completed.
         /// </summary>
         internal void GPUReadbackRequest()
         {
@@ -648,6 +658,7 @@ namespace PKGE
             }
 
             bool sunFound = LightUtils.GetDirectionalLight(out var sun, out var sunTransform);
+            Vector3 sunForward = sunFound ? sunTransform.forward : default;
 
             if (removeBlue)
             {
@@ -694,8 +705,8 @@ namespace PKGE
             {
                 equator = equatorArray,
                 skyEquator = skyEquatorArray,
-                ambientColourPositiveY = ambientColoursRO.Reinterpret<uint>()[(int)CubemapFace.PositiveY],
                 temp = temp,
+                ambientColourPositiveY = ambientColoursRO.Reinterpret<uint>()[(int)CubemapFace.PositiveY],
             }, 4);
 
             var equator = equatorArray.Reinterpret<Vector4>(sizeof(float))[0];
@@ -722,7 +733,6 @@ namespace PKGE
                 return;
             }
 
-            Vector3 sunForward = sunTransform.forward;
             SampleCubemapBilinear(ambientColoursRO, sunForward, out skyColour);
             SampleCubemapBilinear(ambientColoursRO, -sunForward, out var invSkyColor);
             float denominator = invSkyColor.grayscale;
@@ -731,11 +741,11 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Extract the colour value without using a switch statement.
+        /// Extract the <see cref="Color32"/> channel value without using a <see langword="switch"/> statement.
         /// </summary>
-        /// <param name="colour"></param>
-        /// <param name="channel"></param>
-        /// <returns></returns>
+        /// <param name="colour"><see cref="Color32"/> reinterpreted as a <see langword="uint"/>.</param>
+        /// <param name="channel">Use values 0 - 3 for r, g, b or a.</param>
+        /// <returns><paramref name="channel"/> of <paramref name="colour"/> without casting it back to a <see langword="byte"/>.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static uint Color32Channel(uint colour, int channel)
         {
@@ -765,20 +775,17 @@ namespace PKGE
 
             public void Execute(int index)
             {
-                temp[index] = Color32Channel(ambientColours[(int)CubemapFace.PositiveX], index)
-                        + Color32Channel(ambientColours[(int)CubemapFace.NegativeX], index)
-                        + Color32Channel(ambientColours[(int)CubemapFace.PositiveZ], index)
-                        + Color32Channel(ambientColours[(int)CubemapFace.NegativeZ], index);
+                temp[index]
+                    = Color32Channel(ambientColours[(int)CubemapFace.PositiveX], index)
+                    + Color32Channel(ambientColours[(int)CubemapFace.NegativeX], index)
+                    + Color32Channel(ambientColours[(int)CubemapFace.PositiveZ], index)
+                    + Color32Channel(ambientColours[(int)CubemapFace.NegativeZ], index);
             }
         }
 
         /// <summary>
         /// Calculate the average of the four colours at the horizon.
         /// </summary>
-        /// <remarks>
-        /// Use <see cref="Vector4"/> instead of <see cref="Color"/> to avoid colour values being clamped to 1.
-        /// </remarks>
-        /// <param name="ambientColours">Input colours.</param>
         /// <param name="equator">Average colour at the horizon.</param>
         /// <param name="skyEquator">Average colour above the horizon.</param>
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
@@ -786,8 +793,8 @@ namespace PKGE
         {
             [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> equator;
             [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> skyEquator;
-            [ReadOnly] public uint ambientColourPositiveY;
             [ReadOnly][NativeFixedLength(4)][NativeMatchesParallelForLength][DeallocateOnJobCompletion] public NativeArray<float> temp;
+            [ReadOnly] public uint ambientColourPositiveY;
 
             public void Execute(int index)
             {
@@ -803,25 +810,48 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Sum the weighted contribution of each cubemap face.
+        /// Sum the weighted contribution of each <see cref="CubemapFace"/>.
         /// </summary>
         /// <remarks>
         /// <see cref="Vector3.Distance"/> calculates the difference between two vectors.
         /// The direction is inverted to calculate the similarity instead.
         /// </remarks>
-        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal static void SampleCubemapBilinear(in NativeArray<Color32>.ReadOnly colours, in Vector3 forward,
             out Color sum)
         {
-            const float scale = 1f / 6;
-            sum = (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
-                + (Color)colours[(int)CubemapFace.PositiveX] * Vector3.Distance(Vector3.left, forward)
-                + (Color)colours[(int)CubemapFace.NegativeY] * Vector3.Distance(Vector3.up, forward)
-                + (Color)colours[(int)CubemapFace.PositiveY] * Vector3.Distance(Vector3.down, forward)
-                + (Color)colours[(int)CubemapFace.NegativeZ] * Vector3.Distance(Vector3.forward, forward)
-                + (Color)colours[(int)CubemapFace.PositiveZ] * Vector3.Distance(Vector3.back, forward);
+            var output = new NativeArray<Color>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            Unity.Jobs.IJobExtensions.Run(new SampleCubemapBilinearJob
+            {
+                output = output,
+                colours = colours,
+                forward = forward,
+            });
 
-            sum *= scale;
+            sum = output[0];
+            output.Dispose();
+        }
+
+
+        [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
+        internal struct SampleCubemapBilinearJob : Unity.Jobs.IJob
+        {
+            [WriteOnly][NativeFixedLength(1)] public NativeArray<Color> output;
+            [ReadOnly][NativeFixedLength(6)] public NativeArray<Color32>.ReadOnly colours;
+            [ReadOnly] public Vector3 forward;
+
+            public void Execute()
+            {
+                const float scale = 1f / 6;
+                var sum
+                    = (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
+                    + (Color)colours[(int)CubemapFace.PositiveX] * Vector3.Distance(Vector3.left, forward)
+                    + (Color)colours[(int)CubemapFace.NegativeY] * Vector3.Distance(Vector3.up, forward)
+                    + (Color)colours[(int)CubemapFace.PositiveY] * Vector3.Distance(Vector3.down, forward)
+                    + (Color)colours[(int)CubemapFace.NegativeZ] * Vector3.Distance(Vector3.forward, forward)
+                    + (Color)colours[(int)CubemapFace.PositiveZ] * Vector3.Distance(Vector3.back, forward);
+
+                output[0] = sum * scale;
+            }
         }
 #endif // BLEND_SHADER
 
