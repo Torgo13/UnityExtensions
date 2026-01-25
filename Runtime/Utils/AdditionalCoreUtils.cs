@@ -40,34 +40,6 @@ namespace PKGE
             ListPool<Component>.Release(components);
             return result;
         }
-
-        /// <summary>
-        /// Creates a Material with the provided shader path.
-        /// This sets hideFlags to HideFlags.HideAndDontSave.
-        /// </summary>
-        /// <param name="shaderPath">Path of the shader used for the material.</param>
-        /// <returns>A new Material instance using the shader found at the provided path.</returns>
-        public static Material CreateEngineMaterial(string shaderPath)
-        {
-            var shader = Shader.Find(shaderPath);
-            if (shader == null)
-            {
-                Debug.LogError($"Cannot create required material because shader {shaderPath} could not be found");
-                return null;
-            }
-
-            if (!shader.isSupported)
-            {
-                Debug.LogError($"Shader {shaderPath} is not supported by the current graphics hardware.");
-                return null;
-            }
-
-            var mat = new Material(shader)
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-            return mat;
-        }
         #endregion // Unity.LiveCapture
     }
 }

@@ -74,7 +74,7 @@ namespace PKGE.Editor.Tests
         {
             // Use a guaranteed built-in shader
             string shaderPath = "Sprites/Default";
-            var mat = AdditionalCoreUtils.CreateEngineMaterial(shaderPath);
+            var mat = CoreUtils.CreateEngineMaterial(shaderPath);
             _createdObjects.Add(mat);
 
             Assert.IsNotNull(mat);
@@ -87,7 +87,7 @@ namespace PKGE.Editor.Tests
         {
             LogAssert.Expect(LogType.Error, $"Cannot create required material because shader NON_EXISTENT_SHADER could not be found");
 
-            var mat = AdditionalCoreUtils.CreateEngineMaterial("NON_EXISTENT_SHADER");
+            var mat = CoreUtils.CreateEngineMaterial("NON_EXISTENT_SHADER");
             Assert.IsNull(mat);
         }
 
@@ -103,7 +103,7 @@ namespace PKGE.Editor.Tests
             if (!shader.isSupported)
             {
                 LogAssert.Expect(LogType.Error, $"Shader Sprites/Default is not supported by the current graphics hardware.");
-                var mat = AdditionalCoreUtils.CreateEngineMaterial("Sprites/Default");
+                var mat = CoreUtils.CreateEngineMaterial("Sprites/Default");
                 Assert.IsNull(mat);
             }
             else

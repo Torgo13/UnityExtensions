@@ -64,7 +64,7 @@ namespace TCGE
             return computedValue;
         }
 
-        /// <inheritdoc cref="*"/>
+        /// <inheritdoc cref="operator *"/>
         /// <exception cref="DivideByZeroException"></exception>
         public static AtomicInt operator /(AtomicInt left, AtomicInt right)
         {
@@ -88,18 +88,18 @@ namespace TCGE
         /// <summary>
         /// Atomically adds a value to this counter. The result will not be greater than a maximum value.
         /// </summary>
-        /// <param name="value">The value to add to this counter.</param>
+        /// <param name="addValue">The value to add to this counter.</param>
         /// <param name="max">The maximum which the result will not be greater than.</param>
-        /// <returns>The original value before the add.</returns>
-        public int AddSat(int value, int max = int.MaxValue)
+        /// <returns>The original value before the addition.</returns>
+        public int AddSat(int addValue, int max = int.MaxValue)
         {
             int oldVal;
-            int newVal = this.value;
+            int newVal = value;
             do
             {
                 oldVal = newVal;
-                newVal = newVal >= max ? max : Math.Min(max, newVal + value);
-                newVal = Interlocked.CompareExchange(ref this.value, newVal, oldVal);
+                newVal = newVal >= max ? max : Math.Min(max, newVal + addValue);
+                newVal = Interlocked.CompareExchange(ref value, newVal, oldVal);
             }
             while (oldVal != newVal && oldVal != max);
 
@@ -109,18 +109,18 @@ namespace TCGE
         /// <summary>
         /// Atomically subtracts a value from this counter. The result will not be less than a minimum value.
         /// </summary>
-        /// <param name="value">The value to subtract from this counter.</param>
+        /// <param name="subValue">The value to subtract from this counter.</param>
         /// <param name="min">The minimum which the result will not be less than.</param>
-        /// <returns>The original value before the subtract.</returns>
-        public int SubSat(int value, int min = int.MinValue)
+        /// <returns>The original value before the subtraction.</returns>
+        public int SubSat(int subValue, int min = int.MinValue)
         {
             int oldVal;
-            int newVal = this.value;
+            int newVal = value;
             do
             {
                 oldVal = newVal;
-                newVal = newVal <= min ? min : Math.Max(min, newVal - value);
-                newVal = Interlocked.CompareExchange(ref this.value, newVal, oldVal);
+                newVal = newVal <= min ? min : Math.Max(min, newVal - subValue);
+                newVal = Interlocked.CompareExchange(ref value, newVal, oldVal);
             }
             while (oldVal != newVal && oldVal != min);
 
@@ -133,7 +133,7 @@ namespace TCGE
             UnityEngine.Assertions.Assert.IsTrue(max > min);
 
             int oldVal;
-            int newVal = this.value;
+            int newVal = value;
             do
             {
                 oldVal = newVal++;
@@ -142,7 +142,7 @@ namespace TCGE
                     newVal = min;
                 }
 
-                newVal = Interlocked.CompareExchange(ref this.value, newVal, oldVal);
+                newVal = Interlocked.CompareExchange(ref value, newVal, oldVal);
             }
             while (oldVal != newVal && oldVal != max);
 
@@ -154,7 +154,8 @@ namespace TCGE
         public static bool operator ==(AtomicInt left, AtomicInt right) => left.value == right.value;
         public static bool operator !=(AtomicInt left, AtomicInt right) => !(left == right);
 
-        public override readonly string ToString() => value.ToString();
+        [JetBrains.Annotations.NotNull]
+        public readonly override string ToString() => value.ToString();
         public readonly override int GetHashCode() => value.GetHashCode();
     }
 }

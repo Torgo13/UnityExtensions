@@ -342,11 +342,10 @@ namespace PKGE
             if (Time.timeScale <= float.Epsilon)
                 return;
 
-            if (!resolutionScaleOverride)
-                scaleFactor = ScalableBufferManager.widthScaleFactor;
-
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(scaleFactor, scaleFactor);
+            else
+                scaleFactor = ScalableBufferManager.widthScaleFactor;
 
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
@@ -617,7 +616,7 @@ namespace PKGE
         /// and if not attempt to create it.
         /// </summary>
         /// <returns><see langword="true"/> if <paramref name="rt"/> is created.</returns>
-        private static bool CreateRenderTexture(RenderTexture rt)
+        private static bool CreateRenderTexture([JetBrains.Annotations.NotNull] RenderTexture rt)
         {
             if (rt.IsCreated())
                 return true;
@@ -850,7 +849,7 @@ namespace PKGE
         /// Sum the weighted contribution of each <see cref="CubemapFace"/>.
         /// </summary>
         /// <remarks>
-        /// <see cref="Vector3.Distance"/> calculates the difference between two vectors.
+        /// <see cref="Vector3.Distance(Vector3, Vector3)"/> calculates the difference between two vectors.
         /// The direction is inverted to calculate the similarity instead.
         /// </remarks>
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
