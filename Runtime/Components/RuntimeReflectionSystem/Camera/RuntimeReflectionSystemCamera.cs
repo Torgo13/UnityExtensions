@@ -25,6 +25,7 @@ namespace PKGE
         public float SkyRatio => Reflection.skyRatio;
 #endif // BLEND_SHADER
 
+        [SerializeField] private Transform targetOverride;
         [SerializeField] private bool skyboxOverride;
         [SerializeField] private bool cameraSkyboxOverride;
         [SerializeField] private bool resolutionScaleOverride;
@@ -54,6 +55,7 @@ namespace PKGE
         private void LateUpdate()
         {
             Reflection.ResolutionScale = resolutionScale;
+            Reflection.TargetOverride = targetOverride;
             Reflection.skyboxOverride = skyboxOverride;
             Reflection.cameraSkyboxOverride = cameraSkyboxOverride;
             Reflection.resolutionScaleOverride = resolutionScaleOverride;
@@ -113,6 +115,7 @@ namespace PKGE
         internal Transform _reflectionCameraTransform;
         private bool _createdReflectionCamera;
 
+        public Transform TargetOverride { set => _mainCameraTransform = value; }
         private Transform _mainCameraTransform;
         private Vector3 _previousCameraPosition;
         private Vector3 _currentCameraPosition;
