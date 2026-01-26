@@ -29,6 +29,7 @@ namespace PKGE
         [SerializeField] private bool skyboxOverride;
         [SerializeField] private bool cameraSkyboxOverride;
         [SerializeField] private bool resolutionScaleOverride;
+        [SerializeField] private bool extrapolatePosition = false;
         [SerializeField] private bool timeSlice = true;
         [SerializeField] private bool noiseReduction = true;
         [SerializeField] private bool groundColour;
@@ -59,6 +60,7 @@ namespace PKGE
             Reflection.skyboxOverride = skyboxOverride;
             Reflection.cameraSkyboxOverride = cameraSkyboxOverride;
             Reflection.resolutionScaleOverride = resolutionScaleOverride;
+            Reflection.extrapolatePosition = extrapolatePosition;
             Reflection.timeSlice = timeSlice;
             Reflection.noiseReduction = noiseReduction;
             Reflection.groundColour = groundColour;
@@ -187,6 +189,9 @@ namespace PKGE
             get { return resolutionScale; }
             set { resolutionScale = System.Math.Clamp(value, 0.25f, 1.0f); }
         }
+
+        /// <summary>Place the Reflection Camera ahead of its current trajectory to avoid the cubemap being 6-12 frames behind.</summary>
+        public bool extrapolatePosition = false;
 
         /// <summary>When true, one <see cref="CubemapFace"/> is updated per frame. Otherwise, all six are updated each frame.</summary>
         public bool timeSlice = true;
@@ -499,7 +504,7 @@ namespace PKGE
 
         /// <summary>
         /// Move the reflection camera to the position of the main camera.
-        /// If <see cref="timeSlice"/> is <see langword="true"/>, extrapolate the position so that
+        /// If <see cref="extrapolatePosition"/> is <see langword="true"/>, extrapolate the position so that
         /// the capture is performed where the camera is likely to be six frames later.
         /// </summary>
         /// <remarks>
@@ -511,7 +516,7 @@ namespace PKGE
             if (FindMainCamera())
             {
                 const float t = 2f;
-                _reflectionCameraTransform.position = timeSlice
+                _reflectionCameraTransform.position = extrapolatePosition
                     ? Vector3.LerpUnclamped(_previousCameraPosition, _currentCameraPosition, t)
                     : _currentCameraPosition;
             }
