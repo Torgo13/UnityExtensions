@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using Unity.Burst.CompilerServices;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -129,7 +130,8 @@ namespace PKGE.Packages
             const float edgeScale = (float)(1 / ((SQRT2_DBL * 2) + 2));
             normalStrength *= edgeScale;
 
-            for (int i = 0; i < mipmapCount - 1; i++)
+            // Only iterate to the penultimate mipmap level as the job accesses data from the current and following mip level
+            for (int i = 0, maxMipmapLevel = mipmapCount - 2; i < maxMipmapLevel; i++)
             {
                 TextureUtils.GetMipData(i, width, height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
@@ -206,7 +208,7 @@ namespace PKGE.Packages
             }
             else
             {
-                NativeArray<Color32> pixels = texture.GetPixelData<Color32>(mipLevel: 0);
+                NativeArray<Color32> pixels = texture.GetRawTextureData<Color32>();
                 NativeArray<Color32>.Copy(pixels, srcIndex: 0, colour32, dstIndex: 0, length: size);
             }
 
@@ -217,7 +219,7 @@ namespace PKGE.Packages
             int offsetn = 0;
 
             // Create mipmaps
-            for (int i = 1; i < mipmapCount; i++)
+            for (int i = 1, mipmapLength = mipmapCount - 1; i < mipmapLength; i++)
             {
                 int pow2 = 1 << i;
                 int mipWidth = width / pow2;
@@ -246,7 +248,7 @@ namespace PKGE.Packages
         public static int MaxUnlikely(int x, int y)
         {
 #if INCLUDE_BURST
-            return Unity.Burst.CompilerServices.Hint.Unlikely(x > y) ? x : y;
+            return Hint.Unlikely(x > y) ? x : y;
 #else
             return x > y ? x : y;
 #endif // INCLUDE_BURST
@@ -256,7 +258,7 @@ namespace PKGE.Packages
         public static int MinUnlikely(int x, int y)
         {
 #if INCLUDE_BURST
-            return Unity.Burst.CompilerServices.Hint.Unlikely(x < y) ? x : y;
+            return Hint.Unlikely(x < y) ? x : y;
 #else
             return x < y ? x : y;
 #endif // INCLUDE_BURST
@@ -286,15 +288,15 @@ namespace PKGE.Packages
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color24 NormalMap(
-            [Unity.Burst.CompilerServices.AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)] int width,
+            [AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)] int width,
             float normalStrength,
             in NativeArray<Color32>.ReadOnly input,
-            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int x0,
-            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int y0,
-            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int xn,
-            [Unity.Burst.CompilerServices.AssumeRange(0, TextureUtils.maxTextureSize)] int yn,
-            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int xp,
-            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int yp)
+            [AssumeRange(0, TextureUtils.maxTextureSize)] int x0,
+            [AssumeRange(0, TextureUtils.maxTextureSize)] int y0,
+            [AssumeRange(0, TextureUtils.maxTextureSize)] int xn,
+            [AssumeRange(0, TextureUtils.maxTextureSize)] int yn,
+            [AssumeRange(1, TextureUtils.maxTextureSize)] int xp,
+            [AssumeRange(1, TextureUtils.maxTextureSize)] int yp)
         {
             // Obtain the colors of the eight surrounding pixels
             Color32 c_xn_yn = input[mad(yn, width, xn)];
@@ -762,10 +764,10 @@ namespace PKGE.Packages
         /// <param name="a">Input integer value.</param>
         /// <param name="b">Maximum value (i.e. texture width - 1).</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: Unity.Burst.CompilerServices.AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)]
+        [return: AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)]
         static int mod(
-            [Unity.Burst.CompilerServices.AssumeRange(-1, TextureUtils.maxTextureSize)] int a,
-            [Unity.Burst.CompilerServices.AssumeRange(1, TextureUtils.maxTextureSize)] int b)
+            [AssumeRange(-1, TextureUtils.maxTextureSize)] int a,
+            [AssumeRange(1, TextureUtils.maxTextureSize)] int b)
         {
             return (a + b) % b;
         }

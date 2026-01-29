@@ -120,7 +120,11 @@ namespace PKGE.Unsafe.Tests
 
             gameObject.transform.position = new float3(0, 0, zPosition);
 
+#if UNITY_6000_3_OR_NEWER
+            System.Span<Plane> sourcePlanes = stackalloc Plane[6];
+#else
             Plane[] sourcePlanes = new Plane[6];
+#endif // UNITY_6000_3_OR_NEWER
 
             using (var planes = new NativeArray<float4>(6, Allocator.TempJob))
             {

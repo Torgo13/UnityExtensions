@@ -12,6 +12,7 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Mathematics.Extensions/GeneratePoints.cs
         #region Unity.Entities
+        [Unity.Burst.BurstCompile]
         struct PointsInSphere : IJob
         {
             public float Radius;
@@ -40,14 +41,12 @@ namespace PKGE.Packages
         }
 
         /// <summary>
-        /// Schedule Burst jobs to generate random points inside of a sphere
+        /// Schedule a Burst job to generate random points inside of a sphere
         /// </summary>
-        /// <param name="center">The center of the sphere</param>
-        /// <param name="radius">The radius of the sphere</param>
-        /// <param name="points">An array into which the random points are stored</param>
-        /// <param name="inputDeps">A JobHandle to wait for, before the jobs scheduled by this function</param>
+        /// <param name="inputDeps">A JobHandle to wait for, before the job scheduled by this function</param>
         /// <returns>A JobHandle of the job that was created to generate random points inside a sphere</returns>
-        public static JobHandle RandomPointsInSphere(float3 center, float radius, NativeArray<float3> points,
+        /// <inheritdoc cref="RandomPointsInSphere(NativeArray{float3}, float3, float)"/>
+        public static JobHandle RandomPointsInSphere(NativeArray<float3> points, float3 center, float radius,
             JobHandle inputDeps)
         {
             var pointsInSphereJob = new PointsInSphere
@@ -66,24 +65,20 @@ namespace PKGE.Packages
         /// A function that generates random points inside of a sphere. Schedules and completes jobs,
         /// before returning to its caller.
         /// </summary>
+        /// <param name="points">A NativeArray in which to store the randomly generated points</param>
         /// <param name="center">The center of the sphere</param>
         /// <param name="radius">The radius of the sphere</param>
-        /// <param name="points">A NativeArray in which to store the randomly generated points</param>
-        public static void RandomPointsInSphere(float3 center, float radius, NativeArray<float3> points)
+        public static void RandomPointsInSphere(NativeArray<float3> points, float3 center = default, float radius = 1.0f)
         {
-            var randomPointsInSphereJobHandle = RandomPointsInSphere(center, radius, points, new JobHandle());
-            randomPointsInSphereJobHandle.Complete();
-        }
-
-        /// <summary>
-        /// A function that generates random points inside of a unit sphere. Schedules and completes jobs,
-        /// before returning to its caller.
-        /// </summary>
-        /// <param name="points">A NativeArray in which to store the randomly generated points</param>
-        public static void RandomPointsInUnitSphere(NativeArray<float3> points)
-        {
-            var randomPointsInSphereJobHandle = RandomPointsInSphere(0.0f, 1.0f, points, new JobHandle());
-            randomPointsInSphereJobHandle.Complete();
+            var pointsInSphereJob = new PointsInSphere
+            {
+                Radius = radius,
+                Center = center,
+                Points = points,
+                Count = points.Length,
+                Seed = 0x6E624EB7u,
+            };
+            pointsInSphereJob.Run();
         }
 
         /// <summary>

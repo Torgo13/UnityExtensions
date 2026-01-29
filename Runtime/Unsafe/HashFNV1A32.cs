@@ -127,13 +127,8 @@ namespace PKGE.Unsafe
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/HashFNV1A32.cs
         #region UnityEngine.Rendering
         //Cache to prevent CompilerGeneratedAttribute extraction for known delegate
-#if UNITY_6000_3_OR_NEWER
-        static NativeHashMap<int, bool> MethodHashCodeToSkipTargetHashMap
-            = new NativeHashMap<int, bool>(30, Allocator.Domain);
-#else
         static readonly Lazy<Dictionary<int, bool>> _methodHashCodeToSkipTargetHashMap = new(() => new Dictionary<int, bool>(64));
         static Dictionary<int, bool> MethodHashCodeToSkipTargetHashMap => _methodHashCodeToSkipTargetHashMap.Value;
-#endif // UNITY_6000_3_OR_NEWER
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetFuncHashCode(Delegate del)

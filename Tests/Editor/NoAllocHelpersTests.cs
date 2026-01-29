@@ -74,6 +74,9 @@ namespace PKGE.Editor.Tests
             NoAllocHelpers.EnsureListElemCount(list, 5);
 
             Assert.AreEqual(5, list.Count);
+
+            list[3] = 4;
+            Assert.AreEqual(4, list[3]);
         }
 
         [Test]

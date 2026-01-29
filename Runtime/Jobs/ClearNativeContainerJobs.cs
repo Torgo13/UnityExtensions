@@ -8,6 +8,7 @@ namespace PKGE.Packages
     /// <summary>
     /// Utility jobs to clear native containers
     /// </summary>
+    /// <remarks>Cannot be burst compiled if <see cref="IJobFor"/> is used</remarks>
     [Unity.Burst.BurstCompile]
     public struct ClearArrayJob<T> : IJobParallelFor where T : struct
     {
@@ -111,6 +112,19 @@ namespace PKGE.Packages
     /// </remarks>
     [Unity.Burst.BurstCompile]
     public struct CopyQueueJob<T> : IJobFor where T : unmanaged
+    {
+        [ReadOnly] public NativeQueue<T>.ReadOnly input;
+        [WriteOnly] public NativeQueue<T> output;
+
+        public void Execute(int index)
+        {
+            output.Enqueue(input[index]);
+        }
+    }
+
+    /// <inheritdoc cref="CopyQueueJob{T}"/>
+    [Unity.Burst.BurstCompile]
+    public struct CopyQueueParallelJob<T> : IJobFor where T : unmanaged
     {
         [ReadOnly] public NativeQueue<T>.ReadOnly input;
         [WriteOnly] public NativeQueue<T>.ParallelWriter output;

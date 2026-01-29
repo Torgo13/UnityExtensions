@@ -3,6 +3,7 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -549,7 +550,7 @@ namespace PKGE
         public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
         #endregion // Accessors
 
-        public MipLevelParameters GetMipParameters(int mipLevel)
+        public MipLevelParameters GetMipParameters([AssumeRange(TextureUtils.minMipLevel, TextureUtils.maxMipLevel)] int mipLevel)
         {
             int offset = 0;
             int mipWidth = width;
@@ -1117,14 +1118,20 @@ namespace PKGE
         public const int maxMipLevel = maxMipCount - 1;
         public const int minMipLevel = minMipCount - 1;
 
+        public const int maxMipChainSize = maxTextureSize * maxTextureSize * 4 / 3;
+        public const int minMipChainSize = minTextureSize * minTextureSize;
+
+        public const int maxMipChainOffset = maxMipChainSize - 1;
+        public const int minMipChainOffset = minMipChainSize - 1;
+
         /// <summary>
         /// Calculates the starting index of a mip level given the
         /// original width and height of the texture.
         /// Assumes the full mip chain is present.
         /// </summary>
         /// <remarks>
-        /// Provide <paramref name="mipLevel"/> + 1 to get the total number
-        /// of pixels including that mip level.
+        /// Provide mipCount (<paramref name="mipLevel"/> + 1) to replace <paramref name="offset"/>
+        /// with the mipmap chain length, i.e. total number of pixels including that mip level.
         /// </remarks>
         /// <param name="mipLevel">Mipmap level ranging from 0 to mipCount - 1.</param>
         /// <param name="width">Full width of the texture.</param>
@@ -1134,9 +1141,9 @@ namespace PKGE
         /// <param name="mipWidth">The width of the mip level.</param>
         /// <param name="mipHeight">The height of the mip level.</param>
         public static void GetMipData(
-            [Unity.Burst.CompilerServices.AssumeRange(minMipLevel, maxMipLevel)] int mipLevel,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [AssumeRange(0, maxMipCount)] int mipLevel,
+            [AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [AssumeRange(minTextureSize, maxTextureSize)] int height,
             out int offset, out int pow2, out int mipWidth, out int mipHeight)
         {
             offset = 0;
@@ -1148,8 +1155,8 @@ namespace PKGE
             {
                 offset += mipWidth * mipHeight;
                 pow2 = 1 << i;
-                mipWidth = width / pow2;
-                mipHeight = height / pow2;
+                mipWidth = Math.Max(1, width / pow2);
+                mipHeight = Math.Max(1, height / pow2);
             }
         }
 
@@ -1161,10 +1168,11 @@ namespace PKGE
         /// <param name="width">The original width of the texture at mip 0.</param>
         /// <param name="height">The original height of the texture at mip 0.</param>
         /// <returns>The number of elements required for all given mip levels.</returns>
+        [return: AssumeRange(minMipChainOffset, maxMipChainOffset)]
         public static int MipChainLength(
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)] int mipmapCount,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height)
+            [AssumeRange(minMipCount, maxMipCount)] int mipmapCount,
+            [AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [AssumeRange(minTextureSize, maxTextureSize)] int height)
         {
             GetMipData(mipmapCount, width, height,
                 out int offset, out _, out _, out _);
@@ -1181,15 +1189,15 @@ namespace PKGE
         /// "Unity only supports textures up to a size of 16384, even if maxTextureSize returns a larger size."</remarks>
         /// <param name="width">Width of the texture.</param>
         /// <param name="height">Height of the texture.</param>
-        [return: Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)]
+        [return: AssumeRange(minMipCount, maxMipCount)]
         public static int MipmapCount(
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth = 1)
+            [AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [AssumeRange(minTextureSize, maxTextureSize)] int depth = 1)
         {
             int mipmapCount = 0;
             int s = Math.Max(Math.Max(width, height), depth);
-            while (s > 1)
+            while (s >= 1)
             {
                 ++mipmapCount;
                 s >>= 1;
@@ -1205,10 +1213,10 @@ namespace PKGE
         #region Texture3D
         /// <inheritdoc cref="GetMipData(int, int, int, out int, out int, out int, out int)"/>
         public static void GetMipData(
-            [Unity.Burst.CompilerServices.AssumeRange(minMipLevel, maxMipLevel)] int mipLevel,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth,
+            [AssumeRange(0, maxMipCount)] int mipLevel,
+            [AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [AssumeRange(minTextureSize, maxTextureSize)] int depth,
             out int offset, out int pow2, out int mipWidth, out int mipHeight, out int mipDepth)
         {
             offset = 0;
@@ -1219,21 +1227,21 @@ namespace PKGE
 
             for (int i = 1; i <= mipLevel; i++)
             {
-                offset += mipWidth * mipHeight;
+                offset += mipWidth * mipHeight * mipDepth;
                 pow2 = 1 << i;
-                mipWidth = width / pow2;
-                mipHeight = height / pow2;
-                mipDepth = depth / pow2;
+                mipWidth = Math.Max(1, width / pow2);
+                mipHeight = Math.Max(1, height / pow2);
+                mipDepth = Math.Max(1, depth / pow2);
             }
         }
 
         /// <inheritdoc cref="MipChainLength(int, int, int)"/>
-        [return: Unity.Burst.CompilerServices.AssumeRange(1, int.MaxValue)]
+        [return: AssumeRange(1, int.MaxValue)]
         public static int MipChainLength(
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxMipCount)] int mipmapCount,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int width,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int height,
-            [Unity.Burst.CompilerServices.AssumeRange(minTextureSize, maxTextureSize)] int depth)
+            [AssumeRange(minMipCount, maxMipCount)] int mipmapCount,
+            [AssumeRange(minTextureSize, maxTextureSize)] int width,
+            [AssumeRange(minTextureSize, maxTextureSize)] int height,
+            [AssumeRange(minTextureSize, maxTextureSize)] int depth)
         {
             GetMipData(mipmapCount, width, height, depth,
                 out int offset, out _, out _, out _, out _);

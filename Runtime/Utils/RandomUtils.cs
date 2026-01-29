@@ -1,5 +1,10 @@
 using System;
+
+#if INCLUDE_MATHEMATICS
+using Random = Unity.Mathematics.Random;
+#else
 using Random = System.Random;
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE
 {
@@ -10,17 +15,24 @@ namespace PKGE
     /// numbers using the Marsaglia polar method:
     /// https://en.wikipedia.org/wiki/Marsaglia_polar_method
     /// </summary>
-    public class RandomNormal
+    public struct RandomNormal
     {
         readonly double m_Mean;
         readonly double m_StdDev;
         readonly Random m_Random;
 
+#if INCLUDE_MATHEMATICS
+        public RandomNormal(uint seed, float mean = 0.0f, float stddev = 1.0f)
+#else
         public RandomNormal(int seed, float mean = 0.0f, float stddev = 1.0f)
+#endif // INCLUDE_MATHEMATICS
         {
             m_Mean = mean;
             m_StdDev = stddev;
             m_Random = new Random(seed);
+
+            m_HasSpare = false;
+            m_SpareUnscaled = 0;
         }
 
         // Each iteration produces two numbers. Hold one here for next call

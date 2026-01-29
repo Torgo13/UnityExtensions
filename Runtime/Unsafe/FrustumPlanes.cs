@@ -44,8 +44,13 @@ namespace PKGE.Unsafe
         }
 
 #if INCLUDE_MATHEMATICS
+#if UNITY_6000_3_OR_NEWER
+        /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, System.Span{Plane})"/>
+        public static void FromCamera(Camera camera, NativeArray<Vector4> planes, System.Span<Plane> sourcePlanes)
+#else
         /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, Plane[])"/>
         public static void FromCamera(Camera camera, NativeArray<Vector4> planes, Plane[] sourcePlanes)
+#endif // UNITY_6000_3_OR_NEWER
         {
             FromCamera(camera, planes.Reinterpret<float4>(), sourcePlanes);
         }
