@@ -7,6 +7,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Samples~/FullscreenSamples/Scripts/CustomizeHighlightColor.cs
         #region UnityEngine.Rendering
+        [ColorUsage(showAlpha: true, hdr: true)]
         public Color selectionColor = Color.white;
         Renderer _renderer;
         MaterialPropertyBlock _propertyBlock;

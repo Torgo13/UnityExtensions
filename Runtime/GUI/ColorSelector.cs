@@ -7,6 +7,7 @@ namespace PKGE
     #region BoatAttack.UI
     public class ColorSelector : MonoBehaviour
     {
+        [ColorUsage(showAlpha: true, hdr: true)]
         public Color value;
         public bool loop;
         public int startOption;
