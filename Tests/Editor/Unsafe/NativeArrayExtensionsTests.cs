@@ -127,7 +127,7 @@ namespace PKGE.Unsafe.Tests
         [SetUp]
         public void SetUp()
         {
-            _array = new NativeArray<int>(10, Allocator.Temp);
+            _array = new NativeArray<int>(10, Allocator.Persistent);
             _count = 0;
         }
 

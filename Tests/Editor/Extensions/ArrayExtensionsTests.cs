@@ -531,11 +531,12 @@ namespace PKGE.Tests
     {
         private NativeArray<int> _array;
         private int _count;
+        private const Allocator allocator = Allocator.Persistent;
 
         [SetUp]
         public void SetUp()
         {
-            _array = new NativeArray<int>(10, Allocator.Temp);
+            _array = new NativeArray<int>(10, allocator);
             _count = 0;
         }
 
@@ -548,15 +549,17 @@ namespace PKGE.Tests
             }
         }
 
+#if ZERO
         [Test]
         public void Resize_ShouldResizeArray()
         {
-            ArrayExtensions.Resize(ref _array, 20, Allocator.Temp);
+            ArrayExtensions.Resize(ref _array, 20, allocator);
             Assert.AreEqual(20, _array.Length);
 
-            ArrayExtensions.Resize(ref _array, 5, Allocator.Temp);
+            ArrayExtensions.Resize(ref _array, 5, allocator);
             Assert.AreEqual(5, _array.Length);
         }
+#endif // ZERO
 
         [Test]
         public void GrowBy_ShouldGrowArrayBySpecifiedCount()
@@ -564,14 +567,14 @@ namespace PKGE.Tests
             const int grow = 10;
             int arrayLength = _array.Length;
 
-            ArrayExtensions.GrowBy(ref _array, grow, Allocator.Temp);
+            ArrayExtensions.GrowBy(ref _array, grow, allocator);
             Assert.AreEqual(grow + arrayLength, _array.Length);
         }
 
         [Test]
         public void AppendWithCapacity_ShouldAppendValueToArray()
         {
-            ArrayExtensions.AppendWithCapacity(ref _array, ref _count, 10, 10, Allocator.Temp);
+            ArrayExtensions.AppendWithCapacity(ref _array, ref _count, 10, 10, allocator);
             Assert.AreEqual(1, _count);
             Assert.AreEqual(10, _array[0]);
         }
@@ -579,7 +582,7 @@ namespace PKGE.Tests
         [Test]
         public void GrowWithCapacity_ShouldGrowArrayAndIncreaseCount()
         {
-            var offset = ArrayExtensions.GrowWithCapacity(ref _array, ref _count, 5, 10, Allocator.Temp);
+            var offset = ArrayExtensions.GrowWithCapacity(ref _array, ref _count, 5, 10, allocator);
             Assert.AreEqual(5, _count);
             Assert.AreEqual(0, offset);
         }

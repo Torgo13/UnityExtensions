@@ -409,9 +409,14 @@ namespace PKGE.Tests
 
         #region MipChainLength
         [Test]
-        public void MipChainLength_2D_MatchesManualSum()
+        [TestCase(1, 1)]
+        [TestCase(2, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 4)]
+        [TestCase(1, 5)]
+        [TestCase(9, 3)]
+        public void MipChainLength_2D_MatchesManualSum(int width, int height)
         {
-            int width = 8, height = 8;
             int mipCount = TextureUtils.MipmapCount(width, height);
             int expected = 0;
             int w = width, h = height;
@@ -427,21 +432,37 @@ namespace PKGE.Tests
         }
 
         [Test]
-        public void MipmapCount_2D_ComputesCorrectly()
+        [TestCase(1, 1)]
+        [TestCase(2, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 4)]
+        [TestCase(1, 5)]
+        [TestCase(9, 3)]
+        public void MipmapCount_2D_ComputesCorrectly(int width, int height)
         {
-            Assert.AreEqual(3, TextureUtils.MipmapCount(8, 2)); // 8→4→2→1
+            var tex2D = new Texture2D(width, height);
+            Assert.AreEqual(tex2D.mipmapCount, TextureUtils.MipmapCount(width, height)); // 8->4->2->1
+            Object.DestroyImmediate(tex2D);
         }
 
         [Test]
-        public void MipChainLength_3D_MatchesManualSum()
+        [TestCase(1, 1, 1)]
+        [TestCase(2, 2, 2)]
+        [TestCase(3, 3, 3)]
+        [TestCase(4, 4, 4)]
+        [TestCase(5, 5, 5)]
+        [TestCase(1, 1, 5)]
+        [TestCase(1, 5, 1)]
+        [TestCase(9, 9, 3)]
+        [TestCase(9, 3, 3)]
+        public void MipChainLength_3D_MatchesManualSum(int width, int height, int depth)
         {
-            int width = 4, height = 4, depth = 4;
             int mipCount = TextureUtils.MipmapCount(width, height, depth);
             int expected = 0;
             int w = width, h = height, d = depth;
             for (int i = 0; i <= mipCount; i++)
             {
-                expected += w * h;
+                expected += w * h * d;
                 w = System.Math.Max(1, w / 2);
                 h = System.Math.Max(1, h / 2);
                 d = System.Math.Max(1, d / 2);
@@ -452,9 +473,22 @@ namespace PKGE.Tests
         }
 
         [Test]
-        public void MipmapCount_3D_ComputesCorrectly()
+        [TestCase(1, 1, 1)]
+        [TestCase(2, 2, 2)]
+        [TestCase(3, 3, 3)]
+        [TestCase(4, 4, 4)]
+        [TestCase(5, 5, 5)]
+        [TestCase(1, 1, 5)]
+        [TestCase(1, 5, 1)]
+        [TestCase(9, 9, 3)]
+        [TestCase(9, 3, 3)]
+        public void MipmapCount_3D_ComputesCorrectly(int width, int height, int depth)
         {
-            Assert.AreEqual(2, TextureUtils.MipmapCount(4, 2, 2)); // 4→2→1
+            var tex3D = new Texture3D(width, height, depth,
+                UnityEngine.Experimental.Rendering.DefaultFormat.LDR,
+                UnityEngine.Experimental.Rendering.TextureCreationFlags.MipChain);
+            Assert.AreEqual(tex3D.mipmapCount, TextureUtils.MipmapCount(width, height, depth)); // 4->2->1
+            Object.DestroyImmediate(tex3D);
         }
         #endregion // MipChainLength
     }

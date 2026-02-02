@@ -12,7 +12,7 @@ namespace PKGE.Packages.Tests
         [SetUp]
         public void SetUp()
         {
-            _nativeList = new NativeList<int>(Allocator.Temp);
+            _nativeList = new NativeList<int>(Allocator.Persistent);
         }
 
         [TearDown]

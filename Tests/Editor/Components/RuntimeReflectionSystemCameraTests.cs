@@ -31,11 +31,11 @@ namespace PKGE.Tests
         public void GetMipLevel_NoiseReduction_AdjustsResult()
         {
             sysCam.noiseReduction = true;
-            // >0.7 → start at 1, +1 → clamped to [2,3]
+            // >0.7 -> start at 1, +1 -> clamped to [2,3]
             Assert.AreEqual(2, sysCam.GetMipLevel(0.8f));
-            // Mid range → start at 2, +1 → clamped to [2,3]
+            // Mid range -> start at 2, +1 -> clamped to [2,3]
             Assert.AreEqual(3, sysCam.GetMipLevel(0.5f));
-            // <0.32 → start at 3, +1 → clamped to 3
+            // <0.32 -> start at 3, +1 -> clamped to 3
             Assert.AreEqual(3, sysCam.GetMipLevel(0.1f));
         }
 
