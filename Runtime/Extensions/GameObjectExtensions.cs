@@ -21,7 +21,7 @@ namespace PKGE
         /// </remarks>
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
-        public static void SetHideFlagsRecursively(this GameObject gameObject, HideFlags hideFlags)
+        public static void SetHideFlagsRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, HideFlags hideFlags)
         {
             gameObject.hideFlags = hideFlags;
             foreach (Transform child in gameObject.transform)
@@ -38,7 +38,7 @@ namespace PKGE
         /// </remarks>
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene or modifiable by the user?</param>
-        public static void AddToHideFlagsRecursively(this GameObject gameObject, HideFlags hideFlags)
+        public static void AddToHideFlagsRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, HideFlags hideFlags)
         {
             gameObject.hideFlags |= hideFlags;
             foreach (Transform child in gameObject.transform)
@@ -52,7 +52,7 @@ namespace PKGE
         /// </summary>
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="layer">The layer to recursively assign GameObjects to.</param>
-        public static void SetLayerRecursively(this GameObject gameObject, int layer)
+        public static void SetLayerRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, int layer)
         {
             gameObject.layer = layer;
             foreach (Transform child in gameObject.transform)
@@ -70,7 +70,7 @@ namespace PKGE
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="layer">The layer to recursively assign GameObjects to.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
-        public static void SetLayerAndAddToHideFlagsRecursively(this GameObject gameObject, int layer, HideFlags hideFlags)
+        public static void SetLayerAndAddToHideFlagsRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, int layer, HideFlags hideFlags)
         {
             gameObject.layer = layer;
             gameObject.hideFlags |= hideFlags;
@@ -89,7 +89,7 @@ namespace PKGE
         /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
         /// <param name="layer">The layer to recursively assign GameObjects to.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
-        public static void SetLayerAndHideFlagsRecursively(this GameObject gameObject, int layer, HideFlags hideFlags)
+        public static void SetLayerAndHideFlagsRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, int layer, HideFlags hideFlags)
         {
             gameObject.layer = layer;
             gameObject.hideFlags = hideFlags;
@@ -136,13 +136,13 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities.Hybrid/GameObjectConversion/UnityEngineExtensions.cs
         #region Unity.Entities.Conversion
-        public static bool IsPrefab(this GameObject @this) =>
+        public static bool IsPrefab([System.Diagnostics.CodeAnalysis.NotNull] this GameObject @this) =>
             !@this.scene.IsValid();
 
         public static bool IsAsset(this UnityEngine.Object @this) =>
             !(@this is GameObject) && !(@this is Component);
 
-        public static bool IsActiveIgnorePrefab(this GameObject @this)
+        public static bool IsActiveIgnorePrefab([System.Diagnostics.CodeAnalysis.NotNull] this GameObject @this)
         {
             if (!@this.IsPrefab())
                 return @this.activeInHierarchy;
@@ -176,7 +176,7 @@ namespace PKGE
             return false;
         }
 
-        public static bool GetComponentsBaking(this GameObject gameObject, List<Component> componentsCache)
+        public static bool GetComponentsBaking([System.Diagnostics.CodeAnalysis.NotNull] this GameObject gameObject, [System.Diagnostics.CodeAnalysis.NotNull] List<Component> componentsCache)
         {
             int outputIndex = 0;
             gameObject.GetComponents(componentsCache);
@@ -205,7 +205,7 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent GameObject that we will want to get the child GameObjects on.</param>
         /// <param name="childGameObjects">The direct children of a GameObject.</param>
-        public static void GetChildGameObjects(this GameObject go, List<GameObject> childGameObjects)
+        public static void GetChildGameObjects([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, [System.Diagnostics.CodeAnalysis.NotNull] List<GameObject> childGameObjects)
         {
             var goTransform = go.transform;
             var childCount = goTransform.childCount;
@@ -216,12 +216,12 @@ namespace PKGE
             }
         }
 
-        public static void GetChildInstanceIDs(this GameObject go, List<int> childInstanceIDs)
+        public static void GetChildInstanceIDs([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, List<int> childInstanceIDs)
         {
             go.transform.GetChildInstanceIDs(childInstanceIDs);
         }
 
-        public static void SetActiveRecursively(this GameObject go, bool active)
+        public static void SetActiveRecursively([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, bool active)
         {
             go.transform.SetActiveRecursively(active);
         }
@@ -233,7 +233,8 @@ namespace PKGE
         /// <param name="name">Name of child to be found.</param>
         /// <param name="found">True if a descendant GameObject with the specified name was found.</param>
         /// <returns>The returned child GameObject or null if no child is found.</returns>
-        public static GameObject GetNamedChild(this GameObject go, string name, out bool found)
+        [JetBrains.Annotations.CanBeNull]
+        public static GameObject GetNamedChild([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, string name, out bool found)
         {
             found = false;
             var transforms = ListPool<Transform>.Get();
@@ -262,7 +263,7 @@ namespace PKGE
         /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{UnityEngine.GameObject}"/> to store the results</param>
         /// <param name="destinationScene">Optionally specify the destination <see cref="UnityEngine.SceneManagement.Scene"/></param>
         /// <exception cref="System.InvalidOperationException">EnsureRunningOnMainThread can only be called from the main thread</exception>
-        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,
+        public static void InstantiateGameObjects([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, int count, [System.Diagnostics.CodeAnalysis.NotNull] List<GameObject> instances,
             UnityEngine.SceneManagement.Scene destinationScene = default)
         {
             Assert.IsTrue(count > 0);

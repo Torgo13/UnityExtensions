@@ -131,7 +131,7 @@ namespace PKGE.Unsafe
         static Dictionary<int, bool> MethodHashCodeToSkipTargetHashMap => _methodHashCodeToSkipTargetHashMap.Value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetFuncHashCode(Delegate del)
+        public static int GetFuncHashCode([System.Diagnostics.CodeAnalysis.NotNull] Delegate del)
         {
             //Get MethodInfo hash code as the main one to be used
             var methodHashCode = del.Method.GetHashCode();

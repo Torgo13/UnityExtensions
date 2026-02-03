@@ -250,7 +250,7 @@ namespace PKGE
         /// </summary>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
-        public void UpdateData(CommandBuffer cmd, in CBType data)
+        public void UpdateData([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, in CBType data)
         {
             _data[0] = data;
 #if UNITY_2021_1_OR_NEWER
@@ -275,7 +275,7 @@ namespace PKGE
         /// </summary>
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void SetGlobal(CommandBuffer cmd, int shaderId)
+        public void SetGlobal([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, int shaderId)
         {
             _globalBindings.Add(shaderId);
             cmd.SetGlobalConstantBuffer(_gpuConstantBuffer, shaderId, 0, _gpuConstantBuffer.stride);
@@ -297,7 +297,7 @@ namespace PKGE
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void Set(CommandBuffer cmd, ComputeShader cs, int shaderId)
+        public void Set([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, ComputeShader cs, int shaderId)
         {
             cmd.SetComputeConstantBufferParam(cs, shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
@@ -307,7 +307,7 @@ namespace PKGE
         /// </summary>
         /// <param name="cs">Compute shader to which the constant buffer should be bound.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void Set(ComputeShader cs, int shaderId)
+        public void Set([System.Diagnostics.CodeAnalysis.NotNull] ComputeShader cs, int shaderId)
         {
             cs.SetConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
@@ -317,7 +317,7 @@ namespace PKGE
         /// </summary>
         /// <param name="mat">Material to which the constant buffer should be bound.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void Set(Material mat, int shaderId)
+        public void Set([System.Diagnostics.CodeAnalysis.NotNull] Material mat, int shaderId)
         {
             // This isn't done via command buffer because as long as the buffer itself is not destroyed,
             // the binding stays valid. Only the commit of data needs to go through the command buffer.
@@ -330,7 +330,7 @@ namespace PKGE
         /// </summary>
         /// <param name="mpb">Material property block to which the constant buffer should be bound.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void Set(MaterialPropertyBlock mpb, int shaderId)
+        public void Set([System.Diagnostics.CodeAnalysis.NotNull] MaterialPropertyBlock mpb, int shaderId)
         {
             mpb.SetConstantBuffer(shaderId, _gpuConstantBuffer, 0, _gpuConstantBuffer.stride);
         }
@@ -341,7 +341,7 @@ namespace PKGE
         /// <param name="cmd">Command Buffer used to execute the graphic commands.</param>
         /// <param name="data">Input data of the constant buffer.</param>
         /// <param name="shaderId">Shader property id to bind the constant buffer to.</param>
-        public void PushGlobal(CommandBuffer cmd, in CBType data, int shaderId)
+        public void PushGlobal([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, in CBType data, int shaderId)
         {
             UpdateData(cmd, data);
             SetGlobal(cmd, shaderId);
@@ -377,6 +377,7 @@ namespace PKGE
     class ConstantBufferSingleton<CBType> : ConstantBuffer<CBType> where CBType : struct
     {
         static ConstantBufferSingleton<CBType> _instance;
+        [System.Diagnostics.CodeAnalysis.NotNull]
         internal static ConstantBufferSingleton<CBType> instance
         {
             get

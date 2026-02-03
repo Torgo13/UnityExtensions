@@ -46,7 +46,7 @@ namespace PKGE
         /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
         /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
-        public static void CopyFromReadOnlyList<T>(IReadOnlyList<T> source, NativeArray<T> destination)
+        public static void CopyFromReadOnlyList<T>([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> source, NativeArray<T> destination)
             where T : struct
         {
             if (source.Count != destination.Length)
@@ -72,7 +72,7 @@ namespace PKGE
         /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
         /// <remarks> Prefer IReadOnlyList over IReadOnlyCollection for copy performance where possible.</remarks>
         /// <seealso cref="CopyFromReadOnlyList{T}"/>
-        public static void CopyFromReadOnlyCollection<T>(IReadOnlyCollection<T> source, NativeArray<T> destination)
+        public static void CopyFromReadOnlyCollection<T>([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyCollection<T> source, NativeArray<T> destination)
             where T : struct
         {
             if (source.Count != destination.Length)

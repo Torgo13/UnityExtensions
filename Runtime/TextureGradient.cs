@@ -32,9 +32,11 @@ namespace PKGE
         bool _precise;
 
         /// <summary>All color keys defined in the gradient.</summary>
+        [System.Diagnostics.CodeAnalysis.MaybeNull]
         public GradientColorKey[] colorKeys => gradient?.colorKeys;
 
         /// <summary>All alpha keys defined in the gradient.</summary>
+        [System.Diagnostics.CodeAnalysis.MaybeNull]
         public GradientAlphaKey[] alphaKeys => gradient?.alphaKeys;
 
         /// <summary>Controls how the gradient colors are interpolated.</summary>
@@ -49,7 +51,7 @@ namespace PKGE
         /// Creates a new <see cref="TextureGradient"/> from an existing <c>Gradient</c>.
         /// </summary>
         /// <param name="baseCurve">The source <c>Gradient</c>.</param>
-        public TextureGradient(Gradient baseCurve)
+        public TextureGradient([System.Diagnostics.CodeAnalysis.NotNull] Gradient baseCurve)
             : this(baseCurve.colorKeys, baseCurve.alphaKeys)
         {
             mode = baseCurve.mode;
@@ -178,6 +180,7 @@ namespace PKGE
         /// Gets the texture representation of this Gradient.
         /// </summary>
         /// <returns>A texture.</returns>
+        [JetBrains.Annotations.NotNull]
         public Texture2D GetTexture()
         {
             float step = 1.0f / (textureSize - 1);

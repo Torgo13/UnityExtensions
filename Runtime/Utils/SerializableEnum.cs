@@ -15,20 +15,21 @@ namespace PKGE
         [SerializeField] private string enumTypeAsString;
 
         /// <summary> Value as enum </summary>
+        [JetBrains.Annotations.CanBeNull]
         public Enum value
         {
             get => !string.IsNullOrEmpty(enumTypeAsString)
                    && Enum.TryParse(Type.GetType(enumTypeAsString), enumValueAsString, out object result)
                 ? (Enum)result
-                : default;
-            set => enumValueAsString = value.ToString();
+                : null;
+            set => enumValueAsString = value?.ToString();
         }
 
         /// <summary>
         /// Construct an enum to be serialized with a type
         /// </summary>
         /// <param name="enumType">The underlying type of the enum</param>
-        public SerializableEnum(Type enumType)
+        public SerializableEnum([System.Diagnostics.CodeAnalysis.NotNull] Type enumType)
         {
             enumTypeAsString = enumType.AssemblyQualifiedName;
             enumValueAsString = Enum.GetNames(enumType)[0];

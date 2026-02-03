@@ -13,7 +13,7 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/AnimationCurveReducer.cs
         #region CurveSampler
-        static public float ReduceWithMaximumAbsoluteError(AnimationCurve curve, float maxError)
+        static public float ReduceWithMaximumAbsoluteError([System.Diagnostics.CodeAnalysis.NotNull] AnimationCurve curve, float maxError)
         {
             Keyframe[] keys = curve.keys;
             float error = ReduceWithMaximumAbsoluteError(ref keys, maxError);
@@ -21,7 +21,7 @@ namespace PKGE.Packages
             return error;
         }
 
-        static public float ReduceWithMaximumAbsoluteError(ref Keyframe[] keyframes, float maxError)
+        static public float ReduceWithMaximumAbsoluteError([System.Diagnostics.CodeAnalysis.NotNull] ref Keyframe[] keyframes, float maxError)
         {
             int numKeys = keyframes.Length;
             using var _0 = ListPool<Keyframe>.Get(out var newKeyFrames);
@@ -59,7 +59,7 @@ namespace PKGE.Packages
             return conversionError;
         }
 
-        static public float ReduceWithMaximumLocalRelativeError(ref Keyframe[] keyframes, float maxError)
+        static public float ReduceWithMaximumLocalRelativeError([System.Diagnostics.CodeAnalysis.NotNull] ref Keyframe[] keyframes, float maxError)
         {
             int numKeys = keyframes.Length;
             using var _0 = ListPool<Keyframe>.Get(out var newKeyFrames);
@@ -99,7 +99,7 @@ namespace PKGE.Packages
             return conversionError;
         }
 
-        static public float ReduceWithMaximumRelativeError(ref Keyframe[] keyframes, float maxError)
+        static public float ReduceWithMaximumRelativeError([System.Diagnostics.CodeAnalysis.NotNull] ref Keyframe[] keyframes, float maxError)
         {
             int numKeys = keyframes.Length;
             using var _0 = ListPool<Keyframe>.Get(out var newKeyFrames);

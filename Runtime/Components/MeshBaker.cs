@@ -138,7 +138,7 @@ namespace PKGE
             public Vector2 uv;
         }
 
-        void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
+        void GetSlice([System.Diagnostics.CodeAnalysis.NotNull] List<PointWithUV> slice, int idx, out float sliceLength)
         {
             var vertices = ListPool<Vector3>.Get();
             var colors = ListPool<Color>.Get();

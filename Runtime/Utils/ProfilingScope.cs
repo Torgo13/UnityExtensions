@@ -120,7 +120,7 @@ namespace PKGE
         /// Begin the profiling block.
         /// </summary>
         /// <param name="cmd">Command buffer used by the profiling block.</param>
-        public void Begin(CommandBuffer cmd)
+        public void Begin([System.Diagnostics.CodeAnalysis.MaybeNull] CommandBuffer cmd)
         {
             if (cmd != null)
 #if UNITY_USE_RECORDER
@@ -138,7 +138,7 @@ namespace PKGE
         /// End the profiling block.
         /// </summary>
         /// <param name="cmd">Command buffer used by the profiling block.</param>
-        public void End(CommandBuffer cmd)
+        public void End([System.Diagnostics.CodeAnalysis.MaybeNull] CommandBuffer cmd)
         {
             if (cmd != null)
 #if UNITY_USE_RECORDER

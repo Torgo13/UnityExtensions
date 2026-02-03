@@ -12,7 +12,7 @@ namespace PKGE
             return GetDescription<T>(EnumValues<T>.Name(val));
         }
 
-        public static string GetDescription<T>(string name) where T : Enum
+        public static string GetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name) where T : Enum
         {
             if (TryGetDescription<T>(name, out var description))
                 return description;
@@ -20,7 +20,7 @@ namespace PKGE
             return string.Empty;
         }
 
-        public static bool TryGetDescription<T>(string name, out string description) where T : Enum
+        public static bool TryGetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name, out string description) where T : Enum
         {
             System.Reflection.MemberInfo[] memberInfo = typeof(T).GetMember(name);
             foreach (var member in memberInfo)
@@ -40,7 +40,8 @@ namespace PKGE
             return false;
         }
 
-        public static List<string> GetAllDescriptions<T>(List<string> list = default) where T : Enum
+        [JetBrains.Annotations.NotNull]
+        public static List<string> GetAllDescriptions<T>(List<string> list = null) where T : Enum
         {
             list ??= new List<string>();
             list.Clear();
@@ -59,6 +60,7 @@ namespace PKGE
             return list;
         }
 
+        [JetBrains.Annotations.NotNull]
         public static string[] GetDescriptions<T>() where T : Enum
         {
             var list = UnityEngine.Pool.ListPool<string>.Get();
@@ -67,7 +69,7 @@ namespace PKGE
             return descriptions;
         }
 
-        public static bool GetDescription(this Type type, int val, out string description)
+        public static bool GetDescription([System.Diagnostics.CodeAnalysis.NotNull] this Type type, int val, out string description)
         {
             var memInfo = type.GetMember(type.GetEnumName(val));
             var customAttributes = memInfo[0]
@@ -129,6 +131,7 @@ namespace PKGE
         #endregion // Unity.LiveCapture.Editor
 
         /// <inheritdoc cref="GetDisplayName{T}(T)"/>
+        [JetBrains.Annotations.NotNull]
         public static string[] GetDisplayNames<T>() where T : Enum
         {
             var displayNames = new string[EnumValues<T>.Values.Length];
@@ -198,6 +201,7 @@ namespace PKGE
 
         public static int Length => Values.Length;
 
+        [JetBrains.Annotations.NotNull]
         private static T[] SortValues()
         {
             var sortedValues = new T[Length];

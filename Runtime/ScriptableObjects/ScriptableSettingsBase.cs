@@ -50,7 +50,7 @@ namespace PKGE
         /// <param name="settingsType">The type that refers to a singleton class,
         /// which implements an 'Instance' property.</param>
         /// <returns>The actual singleton instance of the specified class.</returns>
-        public static ScriptableSettingsBase GetInstanceByType(Type settingsType)
+        public static ScriptableSettingsBase GetInstanceByType([System.Diagnostics.CodeAnalysis.NotNull] Type settingsType)
         {
             var instanceProperty = settingsType.GetProperty("Instance",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.FlattenHierarchy);
@@ -88,7 +88,7 @@ namespace PKGE
         {
         }
 
-        internal static bool ValidatePath(string path, out string cleanedPath)
+        internal static bool ValidatePath(string path, [System.Diagnostics.CodeAnalysis.MaybeNull] out string cleanedPath)
         {
             cleanedPath = path;
 
@@ -271,6 +271,7 @@ namespace PKGE
         /// Get the filename for this ScriptableSettings.
         /// </summary>
         /// <returns>The filename.</returns>
+        [JetBrains.Annotations.NotNull]
         protected static string GetFilePath()
         {
             var type = typeof(T);
@@ -278,7 +279,7 @@ namespace PKGE
         }
 
 #if UNITY_EDITOR
-        static void CreateInstanceAsset(string savePath)
+        static void CreateInstanceAsset([System.Diagnostics.CodeAnalysis.NotNull] string savePath)
         {
             var folderPath = Path.GetDirectoryName(savePath);
             if (folderPath == null)

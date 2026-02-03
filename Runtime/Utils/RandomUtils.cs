@@ -19,7 +19,7 @@ namespace PKGE
     {
         readonly double m_Mean;
         readonly double m_StdDev;
-        readonly Random m_Random;
+        Random m_Random;
 
 #if INCLUDE_MATHEMATICS
         public RandomNormal(uint seed, float mean = 0.0f, float stddev = 1.0f)

@@ -18,7 +18,7 @@ namespace PKGE
         /// <param name="transform">The Transform to calculate the path to.</param>
         /// <param name="path">The calculated path.</param>
         /// <returns>True if the path is valid; false otherwise.</returns>
-        public static bool TryGetAnimationPath(this Animator animator, Transform transform, out string path)
+        public static bool TryGetAnimationPath(this Animator animator, Transform transform, [System.Diagnostics.CodeAnalysis.NotNull] out string path)
         {
             path = string.Empty;
 

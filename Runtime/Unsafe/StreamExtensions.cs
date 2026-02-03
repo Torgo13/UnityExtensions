@@ -45,7 +45,7 @@ namespace PKGE.Unsafe
         /// <param name="data">The struct to write.</param>
         /// <typeparam name="T">A blittable struct type.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteStruct<T>(this Stream stream, T data) where T : struct
+        public static void WriteStruct<T>([System.Diagnostics.CodeAnalysis.NotNull] this Stream stream, T data) where T : struct
         {
             stream.WriteStruct(ref data);
         }
@@ -57,7 +57,7 @@ namespace PKGE.Unsafe
         /// <param name="data">The struct to write.</param>
         /// <typeparam name="T">A blittable struct type.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteStruct<T>(this Stream stream, ref T data) where T : struct
+        public static void WriteStruct<T>([System.Diagnostics.CodeAnalysis.NotNull] this Stream stream, ref T data) where T : struct
         {
             var size = SizeOfCache<T>.Size;
 
@@ -89,7 +89,7 @@ namespace PKGE.Unsafe
         /// <param name="stream">The stream to write the string into.</param>
         /// <param name="str">The string to write.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteString(this Stream stream, string str)
+        public static void WriteString([System.Diagnostics.CodeAnalysis.NotNull] this Stream stream, [System.Diagnostics.CodeAnalysis.NotNull] string str)
         {
             var strLen = s_Encoding.GetByteCount(str);
             var size = sizeof(int) + strLen;
@@ -107,6 +107,7 @@ namespace PKGE.Unsafe
         /// <param name="stream">The stream to read the string from.</param>
         /// <returns>The read struct.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [JetBrains.Annotations.NotNull]
         public static string ReadString(this Stream stream)
         {
             var strLen = stream.ReadStruct<int>();
@@ -154,7 +155,7 @@ namespace PKGE.Unsafe
         /// <param name="array">The array to write.</param>
         /// <typeparam name="T">The type of data in the native array.</typeparam>
         /// <returns><see langword="true"/> if the array was successfully written into the stream; otherwise, <see langword="false"/>.</returns>
-        public static bool WriteArray<T>(this MemoryStream stream, NativeArray<T> array) where T : struct
+        public static bool WriteArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this MemoryStream stream, NativeArray<T> array) where T : struct
         {
             if (!stream.TryGetBuffer(out var buffer) || buffer.Array == null)
             {
@@ -166,7 +167,7 @@ namespace PKGE.Unsafe
         }
         #endregion // Unity.LiveCapture.Networking
 
-        public static Span<byte> AsSpan(this MemoryStream stream)
+        public static Span<byte> AsSpan([System.Diagnostics.CodeAnalysis.NotNull] this MemoryStream stream)
         {
             if (!stream.TryGetBuffer(out var buffer))
                 return new Span<byte>();

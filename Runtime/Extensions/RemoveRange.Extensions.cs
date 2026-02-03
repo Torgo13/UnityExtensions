@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 
 namespace PKGE
 {
@@ -21,9 +20,9 @@ namespace PKGE
         /// <param name="error">The exception raised by the implementation</param>
         /// <typeparam name="TValue">The value type stored on the list</typeparam>
         /// <returns>True if it succeeded, false otherwise</returns>
-        [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-        [MustUseReturnValue]
-        public static bool TryRemoveElementsInRange<TValue>([DisallowNull] this IList<TValue> list, int index, int count, [NotNullWhen(false)] out Exception error)
+        [JetBrains.Annotations.CollectionAccess(JetBrains.Annotations.CollectionAccessType.ModifyExistingContent)]
+        [JetBrains.Annotations.MustUseReturnValue]
+        public static bool TryRemoveElementsInRange<TValue>([DisallowNull] this IList<TValue> list, int index, int count, [NotNullWhen(false)] [System.Diagnostics.CodeAnalysis.MaybeNull] out Exception error)
         {
             try
             {

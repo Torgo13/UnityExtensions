@@ -29,7 +29,7 @@ namespace PKGE.Packages
         /// Generates tangents and applies them on the specified mesh.
         /// </summary>
         /// <param name="mesh">The <see cref="Mesh"/> mesh target.</param>
-        public static void GenerateTangent(Mesh mesh)
+        public static void GenerateTangent([System.Diagnostics.CodeAnalysis.NotNull] Mesh mesh)
         {
             if (mesh == null)
                 throw new ArgumentNullException(nameof(mesh));
@@ -131,6 +131,7 @@ namespace PKGE.Packages
         /// </summary>
         /// <param name="source">The mesh to copy from.</param>
         /// <returns>A new <see cref="Mesh"/> object with the same values as the source mesh.</returns>
+        [JetBrains.Annotations.NotNull]
         public static Mesh DeepCopy(Mesh source)
         {
             Mesh m = new Mesh();
@@ -144,7 +145,7 @@ namespace PKGE.Packages
         /// <param name="source">The mesh from which to copy attribute values.</param>
         /// <param name="destination">The destination mesh to copy attribute values to.</param>
         /// <exception cref="ArgumentNullException">Throws if source or destination is null.</exception>
-        public static void CopyTo(Mesh source, Mesh destination)
+        public static void CopyTo([System.Diagnostics.CodeAnalysis.NotNull] Mesh source, [System.Diagnostics.CodeAnalysis.NotNull] Mesh destination)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
@@ -210,7 +211,8 @@ namespace PKGE.Packages
         /// <param name="gameObject">The GameObject with the MeshFilter and (optional) MeshRenderer to search for mesh attributes.</param>
         /// <param name="attributeGetter">The function used to extract mesh attribute.</param>
         /// <returns>A List of the mesh attribute values from the Additional Vertex Streams mesh if it exists and contains the attribute, or the MeshFilter.sharedMesh attribute values.</returns>
-        public static T GetMeshChannel<T>(GameObject gameObject, Func<Mesh, T> attributeGetter) where T : IList
+        [JetBrains.Annotations.CanBeNull]
+        public static T GetMeshChannel<T>([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject, [System.Diagnostics.CodeAnalysis.NotNull] Func<Mesh, T> attributeGetter) where T : IList
         {
             if (gameObject == null)
                 throw new ArgumentNullException(nameof(gameObject));
@@ -241,7 +243,7 @@ namespace PKGE.Packages
             return res != null && res.Count == vertexCount ? res : default(T);
         }
 
-        static void PrintAttribute<T>(StringBuilder sb, string title, List<T> attrib, string fmt)
+        static void PrintAttribute<T>([System.Diagnostics.CodeAnalysis.NotNull] StringBuilder sb, string title, [System.Diagnostics.CodeAnalysis.MaybeNull] List<T> attrib, string fmt)
         {
             if (attrib == null)
             {
@@ -289,7 +291,8 @@ namespace PKGE.Packages
         /// </summary>
         /// <param name="mesh">The mesh to print information for.</param>
         /// <returns>A tab-delimited string (positions, normals, colors, tangents, and UV coordinates).</returns>
-        public static string Print(Mesh mesh)
+        [JetBrains.Annotations.NotNull]
+        public static string Print([System.Diagnostics.CodeAnalysis.NotNull] Mesh mesh)
         {
             if (mesh == null)
                 throw new ArgumentNullException(nameof(mesh));
@@ -461,7 +464,7 @@ namespace PKGE.Packages
 
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/master/Runtime/Core/MeshHandles.cs
         #region UnityEngine.ProBuilder
-        public static void CreatePointMesh(List<Vector3> positions, List<int> indexes, Mesh target)
+        public static void CreatePointMesh([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> positions, List<int> indexes, [System.Diagnostics.CodeAnalysis.NotNull] Mesh target)
         {
             int vertexCount = positions.Count;
             target.Clear();
@@ -473,7 +476,7 @@ namespace PKGE.Packages
             target.SetIndices(indexes, MeshTopology.Points, 0);
         }
 
-        public static void CreatePointBillboardMesh(List<Vector3> positions, Mesh target)
+        public static void CreatePointBillboardMesh([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> positions, [System.Diagnostics.CodeAnalysis.NotNull] Mesh target)
         {
             var pointCount = positions.Count;
             var vertexCount = pointCount * 4;
@@ -513,7 +516,7 @@ namespace PKGE.Packages
             target.SetIndices(indexList, MeshTopology.Quads, 0);
         }
 
-        public static void CreatePointBillboardMesh(List<Vector3> positions, List<int> indexes, Mesh target)
+        public static void CreatePointBillboardMesh(List<Vector3> positions, [System.Diagnostics.CodeAnalysis.NotNull] List<int> indexes, [System.Diagnostics.CodeAnalysis.NotNull] Mesh target)
         {
             var pointCount = indexes.Count;
             var vertexCount = pointCount * 4;
@@ -628,57 +631,57 @@ namespace PKGE.Packages
 #if INCLUDE_COLLECTIONS
         #region NativeList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices(this Mesh mesh, NativeList<Vector3> inVertices)
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inVertices)
         {
             mesh.SetVertices(inVertices.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices(this Mesh mesh, NativeList<float3> inVertices)
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inVertices)
         {
             mesh.SetVertices(inVertices.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetIndices<T>(this Mesh mesh, NativeList<T> inIndices, MeshTopology topology, int submesh)
+        public static void SetIndices<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> inIndices, MeshTopology topology, int submesh)
             where T : unmanaged
         {
             mesh.SetIndices(inIndices.AsArray(), topology, submesh);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>(this Mesh mesh, int channel, NativeList<T> uvs)
+        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, int channel, NativeList<T> uvs)
             where T : unmanaged
         {
             mesh.SetUVs(channel, uvs.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals(this Mesh mesh, NativeList<Vector3> inNormals)
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inNormals)
         {
             mesh.SetNormals(inNormals.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals(this Mesh mesh, NativeList<float3> inNormals)
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inNormals)
         {
             mesh.SetNormals(inNormals.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors(this Mesh mesh, NativeList<Color> inColors)
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color> inColors)
         {
             mesh.SetColors(inColors.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors(this Mesh mesh, NativeList<Color32> inColors)
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color32> inColors)
         {
             mesh.SetColors(inColors.AsArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>(this Mesh mesh, NativeList<T> triangles,
+        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
             where T : unmanaged
         {
@@ -686,14 +689,14 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, NativeList<int> triangles,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<int> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, NativeList<ushort> triangles,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<ushort> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
@@ -702,25 +705,25 @@ namespace PKGE.Packages
 #endif // INCLUDE_COLLECTIONS
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetVertices(this Mesh mesh, List<float3> vertices)
+        public static void GetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> vertices)
         {
             mesh.GetVertices(vertices.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices(this Mesh mesh, List<float3> inVertices)
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inVertices)
         {
             mesh.SetVertices(inVertices.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals(this Mesh mesh, List<float3> inNormals)
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inNormals)
         {
             mesh.SetNormals(inNormals.As<float3, Vector3>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>(this Mesh mesh, NativeArray<T> triangles,
+        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<T> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
             where T : unmanaged
         {
@@ -728,14 +731,14 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, NativeArray<int> triangles,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<int> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, NativeArray<ushort> triangles,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<ushort> triangles,
             int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);

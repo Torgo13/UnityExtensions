@@ -52,7 +52,7 @@ namespace PKGE.Collections
         /// <param name="list">The list to wrap.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.
         /// </exception>
-        public ReadOnlyListSpan(IReadOnlyList<T> list)
+        public ReadOnlyListSpan([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
@@ -70,7 +70,7 @@ namespace PKGE.Collections
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException"> Thrown if
         /// start or length are outside the bounds of the list.</exception>
-        public ReadOnlyListSpan(IReadOnlyList<T> list, int start, int length)
+        public ReadOnlyListSpan([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list, int start, int length)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
@@ -190,6 +190,7 @@ namespace PKGE.Collections
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>The string.</returns>
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -246,7 +247,7 @@ namespace PKGE.Collections
             internal readonly IReadOnlyList<T> List;
             int _currentIndex;
 
-            internal Enumerator(IReadOnlyList<T> list) : this(list, 0, list.Count) { }
+            internal Enumerator([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list) : this(list, 0, list.Count) { }
 
             /// <summary>
             /// Provides an enumerator for a slice of the elements of a list beginning with the

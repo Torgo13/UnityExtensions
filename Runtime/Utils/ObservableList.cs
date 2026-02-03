@@ -105,7 +105,7 @@ namespace PKGE
         /// </summary>
         /// <param name="capacity">Allocation size.</param>
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
-        public ObservableList(int capacity, Comparison<T> comparison = null)
+        public ObservableList(int capacity, [System.Diagnostics.CodeAnalysis.MaybeNull] Comparison<T> comparison = null)
         {
             _list = new List<T>(capacity);
             _comparison = comparison;
@@ -116,14 +116,14 @@ namespace PKGE
         /// </summary>
         /// <param name="collection">Input list.</param>
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
-        public ObservableList(IEnumerable<T> collection, Comparison<T> comparison = null)
+        public ObservableList([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<T> collection, [System.Diagnostics.CodeAnalysis.MaybeNull] Comparison<T> comparison = null)
         {
             _list = new List<T>(collection);
             _comparison = comparison;
             Sort(); // Make sure the given list is sorted
         }
 
-        void OnEvent(ListChangedEventHandler<T> e, int index, T item)
+        void OnEvent([System.Diagnostics.CodeAnalysis.MaybeNull] ListChangedEventHandler<T> e, int index, T item)
         {
             if (e != null)
                 e(this, new ListChangedEventArgs<T>(index, item));
@@ -166,6 +166,12 @@ namespace PKGE
         /// <param name="items">Items to add to the list.</param>
         public void Add(params T[] items)
         {
+            Add(items.AsSpan());
+        }
+        
+        /// <inheritdoc cref="Add(T[])"/>
+        public void Add(ReadOnlySpan<T> items)
+        {
             foreach (var i in items)
                 Add(i);
         }
@@ -202,6 +208,12 @@ namespace PKGE
         /// <param name="items">Items to remove from the list.</param>
         /// <returns>The number of removed items.</returns>
         public int Remove(params T[] items)
+        {
+            return Remove(items.AsSpan());
+        }
+        
+        /// <inheritdoc cref="Remove(T[])"/>
+        public int Remove(ReadOnlySpan<T> items)
         {
             if (items == null)
                 return 0;

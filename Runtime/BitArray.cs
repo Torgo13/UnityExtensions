@@ -71,6 +71,7 @@ namespace PKGE
         /// <summary>True if all bits are 1.</summary>
         public readonly bool allTrue => data == byte.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public readonly string humanizedData => String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0');
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace PKGE
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-        public BitArray8(IEnumerable<uint> bitIndexTrue)
+        public BitArray8([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data = (byte)0u;
             if (bitIndexTrue == null)
@@ -137,17 +138,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray8)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray8)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray8)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray8)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
@@ -221,7 +225,7 @@ namespace PKGE
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-        public BitArray16(IEnumerable<uint> bitIndexTrue)
+        public BitArray16([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data = (ushort)0u;
             if (bitIndexTrue == null)
@@ -265,17 +269,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray16)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray16)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray16)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray16)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
@@ -324,7 +331,7 @@ namespace PKGE
         public readonly bool allFalse => data == 0u;
         /// <summary>True if all bits are 1.</summary>
         public readonly bool allTrue => data == uint.MaxValue;
-        readonly string humanizedVersion => Convert.ToString(data, 2);
+        [System.Diagnostics.CodeAnalysis.NotNull] readonly string humanizedVersion => Convert.ToString(data, 2);
         /// <summary>Returns the bit array in a human-readable form.</summary>
         public readonly string humanizedData => System.Text.RegularExpressions.Regex.Replace(
             String.Format("{0, " + capacity + "}", Convert.ToString(data, 2)).Replace(' ', '0'), ".{8}", "$0.",
@@ -351,7 +358,7 @@ namespace PKGE
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-        public BitArray32(IEnumerable<uint> bitIndexTrue)
+        public BitArray32([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data = 0u;
             if (bitIndexTrue == null)
@@ -374,17 +381,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray32)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray32)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray32)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray32)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
@@ -485,7 +495,7 @@ namespace PKGE
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
 
-        public BitArray64(IEnumerable<uint> bitIndexTrue)
+        public BitArray64([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data = 0L;
             if (bitIndexTrue == null)
@@ -529,17 +539,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray64)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray64)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray64)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray64)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
@@ -592,6 +605,7 @@ namespace PKGE
         /// <summary>True if all bits are 1.</summary>
         public readonly bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public readonly string humanizedData =>
             System.Text.RegularExpressions.Regex.Replace(
                 String.Format("{0, " + 64u + "}", Convert.ToString((long)data2, 2)).Replace(' ', '0'), ".{8}", "$0.",
@@ -636,7 +650,7 @@ namespace PKGE
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
 
-        public BitArray128(IEnumerable<uint> bitIndexTrue)
+        public BitArray128([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data1 = data2 = 0uL;
             if (bitIndexTrue == null)
@@ -682,17 +696,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray128)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray128)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray128)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray128)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>
@@ -758,6 +775,7 @@ namespace PKGE
         /// <summary>True if all bits are 1.</summary>
         public readonly bool allTrue => data1 == ulong.MaxValue && data2 == ulong.MaxValue && data3 == ulong.MaxValue && data4 == ulong.MaxValue;
         /// <summary>Returns the bit array in a human-readable form.</summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public readonly string humanizedData =>
             System.Text.RegularExpressions.Regex.Replace(
                 String.Format("{0, " + 64u + "}", Convert.ToString((long)data4, 2)).Replace(' ', '0'), ".{8}", "$0.",
@@ -802,7 +820,7 @@ namespace PKGE
         /// Constructor.
         /// </summary>
         /// <param name="bitIndexTrue">List of indices where bits should be set to true.</param>
-        public BitArray256(IEnumerable<uint> bitIndexTrue)
+        public BitArray256([System.Diagnostics.CodeAnalysis.MaybeNull] IEnumerable<uint> bitIndexTrue)
         {
             data1 = data2 = data3 = data4 = 0uL;
             if (bitIndexTrue == null)
@@ -852,17 +870,20 @@ namespace PKGE
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitAnd(IBitArray other) => this & (BitArray256)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitAnd([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this & (BitArray256)other;
         /// <summary>
         /// Bit-wise Or
         /// </summary>
         /// <param name="other">Bit array with which to do the operation.</param>
         /// <returns>The resulting bit array.</returns>
-        public readonly IBitArray BitOr(IBitArray other) => this | (BitArray256)other;
+        [JetBrains.Annotations.NotNull]
+        public readonly IBitArray BitOr([System.Diagnostics.CodeAnalysis.NotNull] IBitArray other) => this | (BitArray256)other;
         /// <summary>
         /// Bit-wise Not
         /// </summary>
         /// <returns>The resulting bit array.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly IBitArray BitNot() => ~this;
 
         /// <summary>

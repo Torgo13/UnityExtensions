@@ -77,6 +77,7 @@ namespace PKGE
         /// for more details.
         /// </summary>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly override string ToString() => Guid.ToString();
 
         /// <summary>
@@ -86,6 +87,7 @@ namespace PKGE
         /// See <a href="https://docs.microsoft.com/en-us/dotnet/api/system.guid.tostring?view=netframework-4.7.2#System_Guid_ToString_System_String_">Microsoft's documentation</a>
         /// for more details.</param>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly string ToString(string format) => Guid.ToString(format);
 
         /// <summary>
@@ -96,6 +98,7 @@ namespace PKGE
         /// for more details.</param>
         /// <param name="provider">An object that supplies culture-specific formatting information.</param>
         /// <returns>A string representation of the <c>Guid</c>.</returns>
+        [JetBrains.Annotations.NotNull]
         public readonly string ToString(string format, IFormatProvider provider) => Guid.ToString(format, provider);
 
         /// <summary>

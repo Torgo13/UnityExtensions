@@ -123,7 +123,7 @@ namespace PKGE
         /// </summary>
         /// <param name="componentList">The array of objects to use.</param>
         /// <param name="includeDisabled">Whether to include components on disabled objects.</param>
-        public CachedComponentFilter(TFilterType[] componentList, bool includeDisabled = true)
+        public CachedComponentFilter([System.Diagnostics.CodeAnalysis.MaybeNull] TFilterType[] componentList, bool includeDisabled = true)
         {
             if (componentList == null)
                 return;
@@ -154,6 +154,7 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="TChildType">The type for which to search. Must inherit from or be TFilterType.</typeparam>
         /// <returns>The array of matching components.</returns>
+        [JetBrains.Annotations.NotNull]
         public TChildType[] GetMatchingComponents<TChildType>() where TChildType : class, TFilterType
         {
             var componentCount = 0;

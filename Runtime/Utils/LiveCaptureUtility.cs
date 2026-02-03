@@ -19,7 +19,7 @@ namespace PKGE
         /// <param name="item">The item to add.</param>
         /// <typeparam name="T">The list element type.</typeparam>
         /// <returns>True if a new item was added; false otherwise.</returns>
-        public static bool AddUnique<T>(this List<T> list, T item)
+        public static bool AddUnique<T>([System.Diagnostics.CodeAnalysis.NotNull] this List<T> list, T item)
         {
             if (!list.Contains(item))
             {
@@ -33,7 +33,7 @@ namespace PKGE
         /// <summary>
         /// Determine the index of a specific item in the current instance.
         /// </summary>
-        public static int FindIndex<T>(this IReadOnlyList<T> list, Func<T, bool> predicate)
+        public static int FindIndex<T>([System.Diagnostics.CodeAnalysis.NotNull] this IReadOnlyList<T> list, Func<T, bool> predicate)
         {
             int i = 0;
             foreach (var element in list)

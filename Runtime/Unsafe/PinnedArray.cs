@@ -30,7 +30,7 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray(T[] array, int start, int length)
+        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int start, int length)
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(start >= 0);
@@ -50,7 +50,7 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray(T[] array, int length)
+        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int length)
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(length >= 0);
@@ -65,7 +65,7 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray(T[] array)
+        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array)
         {
             Assert.IsNotNull(array);
             managedArray = array;
@@ -79,7 +79,7 @@ namespace PKGE.Unsafe
 #endif
         }
         
-        public PinnedArray(List<T> list)
+        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] List<T> list)
         {
             Assert.IsNotNull(list);
             managedArray = list.ExtractArrayFromList();
@@ -108,7 +108,7 @@ namespace PKGE.Unsafe
 
     public static partial class ArrayExtensions
     {
-        public static PinnedArray<T> AsNativeArray<T>(this T[] array, int start, int length, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int start, int length, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array, start, length);
@@ -116,7 +116,7 @@ namespace PKGE.Unsafe
             return pinnedArray;
         }
 
-        public static PinnedArray<T> AsNativeArray<T>(this T[] array, int length, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int length, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array, length);
@@ -124,7 +124,7 @@ namespace PKGE.Unsafe
             return pinnedArray;
         }
 
-        public static PinnedArray<T> AsNativeArray<T>(this T[] array, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array);
@@ -135,7 +135,7 @@ namespace PKGE.Unsafe
 
     public static partial class ListExtensions
     {
-        public static PinnedArray<T> AsNativeArray<T>(this List<T> list, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this List<T> list, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(list);

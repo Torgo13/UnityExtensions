@@ -34,14 +34,14 @@ namespace PKGE.Collections
             additionalValues = null;
         }
 
-        public InlinedArray(TValue firstValue, params TValue[] additionalValues)
+        public InlinedArray(TValue firstValue, [System.Diagnostics.CodeAnalysis.NotNull] params TValue[] additionalValues)
         {
             length = 1 + additionalValues.Length;
             this.firstValue = firstValue;
             this.additionalValues = additionalValues;
         }
 
-        public InlinedArray(IEnumerable<TValue> values)
+        public InlinedArray([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<TValue> values)
             : this()
         {
 #if USING_LINQ
@@ -147,6 +147,7 @@ namespace PKGE.Collections
             return ArrayExtensions.Join(firstValue, additionalValues);
         }
 
+        [JetBrains.Annotations.CanBeNull]
         public TOther[] ToArray<TOther>(Func<TValue, TOther> mapFunction)
         {
             if (length == 0)
@@ -230,7 +231,7 @@ namespace PKGE.Collections
                 Array.Copy(values.additionalValues, additionalValues, length - 1);
         }
 
-        public void Append(IEnumerable<TValue> values)
+        public void Append([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<TValue> values)
         {
             foreach (var value in values)
                 Append(value);
@@ -316,7 +317,7 @@ namespace PKGE.Collections
             }
             else
             {
-                Debug.Assert(additionalValues != null);
+                UnityEngine.Assertions.Assert.IsNotNull(additionalValues);
 
                 var numAdditionalValues = length - 1;
                 if (numAdditionalValues == 1)

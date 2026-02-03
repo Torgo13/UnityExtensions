@@ -25,11 +25,13 @@ namespace PKGE.Unsafe
     /// so 7 float4 per mesh.
     /// </summary>
     /// <remarks>Do not forget data is stored in SoA.</remarks>
+    sealed
     public class BRG_Container
     {
         //https://github.com/Unity-Technologies/brg-shooter/blob/f55f6e985bf73b0a3c23b95030e890874e552c45/Assets/Scripts/BRG_Container.cs
         #region brg-shooter
         /// <summary>In GLES mode, BRG raw buffer is a constant buffer (UBO) </summary>
+        static
         private bool UseConstantBuffer => BatchRendererGroup.BufferTarget == BatchBufferTarget.ConstantBuffer;
         private bool m_castShadows;
 

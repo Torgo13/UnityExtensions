@@ -10,11 +10,11 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/6feca3f03e6a8cb62665b394599d2d17d5848c65/Packages/com.unity.render-pipelines.core/Editor/CoreEditorUtils.cs
         #region UnityEditor.Rendering
         static System.Func<float> _getGUIStatePixelsPerPoint;
-        static System.Func<float> GetGUIStatePixelsPerPoint => _getGUIStatePixelsPerPoint ??= GetGUIStatePixelsPerPointDelegate();
-        static System.Func<float> GetGUIStatePixelsPerPointDelegate() =>
+        [System.Diagnostics.CodeAnalysis.NotNull] static System.Func<float> GetGUIStatePixelsPerPoint => _getGUIStatePixelsPerPoint ??= GetGUIStatePixelsPerPointDelegate();
+        [JetBrains.Annotations.NotNull] static System.Func<float> GetGUIStatePixelsPerPointDelegate() =>
             System.Linq.Expressions.Expression.Lambda<System.Func<float>>(
                 System.Linq.Expressions.Expression.Property(null, typeof(GUIUtility).GetProperty("pixelsPerPoint",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))).Compile();
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!)).Compile();
         #endregion // UnityEditor.Rendering
 
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/GUI/ScreenGUIUtils.cs

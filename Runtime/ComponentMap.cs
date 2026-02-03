@@ -24,7 +24,7 @@ namespace PKGE
         readonly Dictionary<TKey, TValue> _keyToValueMap = new Dictionary<TKey, TValue>();
         readonly Dictionary<TValue, TKey> _valueToKeyMap = new Dictionary<TValue, TKey>();
 
-        void Add(TKey key, TValue value)
+        void Add([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue value)
         {
             _keyToValueMap.Add(key, value);
             _valueToKeyMap.Add(value, key);
@@ -38,7 +38,7 @@ namespace PKGE
             }
         }
 
-        void Remove(TValue value)
+        void Remove([System.Diagnostics.CodeAnalysis.NotNull] TValue value)
         {
             if (_valueToKeyMap.TryGetValue(value, out var key))
             {
@@ -47,7 +47,7 @@ namespace PKGE
             }
         }
 
-        void UpdateMap(TKey key, TValue instance)
+        void UpdateMap([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
         {
             Assert.IsNotNull(key);
             Assert.IsNotNull(instance);
@@ -75,7 +75,7 @@ namespace PKGE
             Add(key, instance);
         }
 
-        public void RemoveInstance(TValue instance)
+        public void RemoveInstance([System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
         {
             Assert.IsNotNull(instance);
             Remove(instance);
@@ -86,7 +86,7 @@ namespace PKGE
         /// </summary>
         /// <param name="key">The key component.</param>
         /// <param name="instance">The value component.</param>
-        public void AddUniqueInstance(TKey key, TValue instance)
+        public void AddUniqueInstance([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
         {
             Assert.IsNotNull(key);
             Assert.IsNotNull(instance);
@@ -99,7 +99,7 @@ namespace PKGE
         /// <param name="key">The key component.</param>
         /// <param name="instance">The value component.</param>
         /// <returns>Indicates whether a corresponding value component was found.</returns>
-        public bool TryGetInstance(TKey key, out TValue instance)
+        public bool TryGetInstance([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.MaybeNull] out TValue instance)
         {
             return _keyToValueMap.TryGetValue(key, out instance);
         }

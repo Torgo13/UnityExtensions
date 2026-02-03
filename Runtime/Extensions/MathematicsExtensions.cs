@@ -769,7 +769,7 @@ namespace PKGE
         }
 #endif // INCLUDE_MATHEMATICS
 
-        public static AffineTransform Convert(Transform transform)
+        public static AffineTransform Convert([System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
         {
             return new AffineTransform(transform.position, transform.rotation);
         }

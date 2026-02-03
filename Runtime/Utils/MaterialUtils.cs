@@ -28,7 +28,7 @@ namespace PKGE
         /// <seealso cref="Renderer.material"/>
         /// <param name="renderer">The renderer assigned the material to clone.</param>
         /// <returns>The cloned material.</returns>
-        public static Material GetMaterialClone(Renderer renderer)
+        public static Material GetMaterialClone([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer)
         {
             // The following is equivalent to renderer.material, but gets rid of the error messages in edit mode
             return renderer.material = UnityObject.Instantiate(renderer.sharedMaterial);
@@ -47,7 +47,7 @@ namespace PKGE
         /// <seealso cref="Graphic.material"/>
         /// <param name="graphic">The Graphic object assigned the material to clone.</param>
         /// <returns>Cloned material</returns>
-        public static Material GetMaterialClone(Graphic graphic)
+        public static Material GetMaterialClone([System.Diagnostics.CodeAnalysis.NotNull] Graphic graphic)
         {
             // The following is equivalent to graphic.material, but gets rid of the error messages in edit mode
             return graphic.material = UnityObject.Instantiate(graphic.material);
@@ -65,7 +65,8 @@ namespace PKGE
         /// <seealso cref="Renderer.materials"/>
         /// <param name="renderer">Renderer assigned the materials to clone and replace.</param>
         /// <returns>Cloned materials</returns>
-        public static Material[] CloneMaterials(Renderer renderer)
+        [JetBrains.Annotations.NotNull]
+        public static Material[] CloneMaterials([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer)
         {
             var sharedMaterials = ListPool<Material>.Get();
             CloneMaterials(sharedMaterials, renderer);
@@ -84,7 +85,7 @@ namespace PKGE
         /// <seealso cref="Renderer.materials"/>
         /// <param name="sharedMaterials">Cloned materials.</param>
         /// <param name="renderer">Renderer assigned the materials to clone and replace.</param>
-        public static void CloneMaterials(List<Material> sharedMaterials, Renderer renderer)
+        public static void CloneMaterials([System.Diagnostics.CodeAnalysis.NotNull] List<Material> sharedMaterials, [System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer)
         {
             renderer.GetSharedMaterials(sharedMaterials);
             for (var i = 0; i < sharedMaterials.Count; i++)
@@ -100,7 +101,7 @@ namespace PKGE
         /// </summary>
         /// <param name="hex">The formatted string, with an optional "0x" or "#" prefix.</param>
         /// <returns>The color value represented by the formatted string.</returns>
-        public static Color32 HexToColor(string hex)
+        public static Color32 HexToColor([System.Diagnostics.CodeAnalysis.NotNull] string hex)
         {
             int startIndex = 0;
             if (hex.StartsWith('#'))
@@ -136,7 +137,7 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/d09b723d5d286217529e9f34a507015046b2a8a2/Runtime/Core/MaterialUtility.cs
         #region UnityEngine.ProBuilder
-        public static int GetMaterialCount(Renderer renderer)
+        public static int GetMaterialCount([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer)
         {
             var materials = ListPool<Material>.Get();
             renderer.GetSharedMaterials(materials);
@@ -145,7 +146,7 @@ namespace PKGE
             return materialsCount;
         }
 
-        public static Material GetSharedMaterial(Renderer renderer, int index)
+        public static Material GetSharedMaterial([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer, int index)
         {
             using var _0 = ListPool<Material>.Get(out var materials);
             renderer.GetSharedMaterials(materials);

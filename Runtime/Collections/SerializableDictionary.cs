@@ -50,7 +50,7 @@ namespace PKGE.Collections
         /// <paramref name="input"/> dictionary.
         /// </summary>
         /// <param name="input">The dictionary from which to copy the elements.</param>
-        public SerializableDictionary(IDictionary<TKey, TValue> input) : base(input) { }
+        public SerializableDictionary([System.Diagnostics.CodeAnalysis.NotNull] IDictionary<TKey, TValue> input) : base(input) { }
 
         /// <summary>
         /// See <see cref="ISerializationCallbackReceiver"/>

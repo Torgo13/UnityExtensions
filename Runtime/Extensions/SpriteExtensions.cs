@@ -6,7 +6,7 @@ namespace PKGE
 {
     public static class SpriteExtensions
     {
-        public static Mesh GenerateMeshFromSprite(this Sprite sprite)
+        public static Mesh GenerateMeshFromSprite([System.Diagnostics.CodeAnalysis.NotNull] this Sprite sprite)
         {
             var mesh = new Mesh
             {
@@ -18,7 +18,7 @@ namespace PKGE
             return mesh;
         }
         
-        public static void GenerateMeshFromSprite(this Sprite sprite, ref Mesh mesh)
+        public static void GenerateMeshFromSprite([System.Diagnostics.CodeAnalysis.NotNull] this Sprite sprite, [System.Diagnostics.CodeAnalysis.NotNull] ref Mesh mesh)
         {
             Vector2[] spriteVertices = sprite.vertices;
             var vertices = new NativeArray<Vector3>(spriteVertices.Length, Allocator.Temp,

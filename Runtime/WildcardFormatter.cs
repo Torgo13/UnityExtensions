@@ -10,6 +10,7 @@ namespace PKGE
         #region Unity.LiveCapture
         protected readonly Dictionary<string, string> Replacements = new Dictionary<string, string>(System.StringComparer.Ordinal);
 
+        [JetBrains.Annotations.NotNull]
         protected string Format(string str)
         {
             using var _0 = StringBuilderPool.Get(out var stringBuilder);

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using UnityEngine.Assertions;
 
 namespace PKGE
@@ -22,10 +21,10 @@ namespace PKGE
         /// <param name="error">The exception raised by the implementation</param>
         /// <typeparam name="TValue">The value type stored on the list</typeparam>
         /// <returns>True if it succeeded, false otherwise</returns>
-        [CollectionAccess(CollectionAccessType.ModifyExistingContent)]
-        [MustUseReturnValue]
+        [JetBrains.Annotations.CollectionAccess(JetBrains.Annotations.CollectionAccessType.ModifyExistingContent)]
+        [JetBrains.Annotations.MustUseReturnValue]
         public static bool TrySwap<TValue>([DisallowNull] this IList<TValue> list, int from, int to,
-            [NotNullWhen(false)] out Exception error)
+            [NotNullWhen(false)] [System.Diagnostics.CodeAnalysis.MaybeNull] out Exception error)
         {
             error = null;
             if (list == null)

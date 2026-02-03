@@ -202,7 +202,7 @@ namespace PKGE.Unsafe
         /// Thrown when either <paramref name="height"/> or <paramref name="width"/> are invalid.
         /// </exception>
         /// <remarks>The total area must match the length of <paramref name="array"/>.</remarks>
-        public Span2D(T[] array, int height, int width)
+        public Span2D([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int height, int width)
             : this(array, 0, height, width, 0)
         {
         }
@@ -224,7 +224,7 @@ namespace PKGE.Unsafe
         /// <exception cref="ArgumentException">
         /// Thrown when the requested area is outside of bounds for <paramref name="array"/>.
         /// </exception>
-        public Span2D(T[] array, int offset, int height, int width, int pitch)
+        public Span2D([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int offset, int height, int width, int pitch)
         {
             if (array.IsCovariant())
             {
@@ -1065,6 +1065,7 @@ namespace PKGE.Unsafe
 #endif // ZERO
 
         /// <inheritdoc/>
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             return $"CommunityToolkit.HighPerformance.Span2D<{typeof(T)}>[{Height}, {this.width}]";

@@ -27,6 +27,7 @@ namespace PKGE
         /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <returns>The new GameObject.</returns>
+        [JetBrains.Annotations.NotNull]
         public static GameObject Create()
         {
             var gameObject = new GameObject();
@@ -40,6 +41,7 @@ namespace PKGE
         /// </summary>
         /// <param name="name">The name to be given to the new GameObject.</param>
         /// <returns>The new GameObject.</returns>
+        [JetBrains.Annotations.NotNull]
         public static GameObject Create(string name)
         {
             var gameObject = new GameObject(name);
@@ -58,7 +60,7 @@ namespace PKGE
         /// which places it in the same position as the cloned GameObject,
         /// or to offset the new object from <paramref name="parent"/>.</param>
         /// <returns>The instantiated clone.</returns>
-        public static GameObject Instantiate([DisallowNull] GameObject original, Transform parent = null, bool worldPositionStays = true)
+        public static GameObject Instantiate([DisallowNull] GameObject original, [AllowNull] Transform parent = null, bool worldPositionStays = true)
         {
             var gameObject = UnityObject.Instantiate(original, parent, worldPositionStays);
             OnGameObjectInstantiated?.Invoke(gameObject);
@@ -104,7 +106,8 @@ namespace PKGE
         /// <param name="original">The Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>
-        public static GameObject CloneWithHideFlags([DisallowNull] GameObject original, Transform parent = null)
+        [JetBrains.Annotations.NotNull]
+        public static GameObject CloneWithHideFlags([DisallowNull] GameObject original, [AllowNull] Transform parent = null)
         {
             var copy = UnityObject.Instantiate(original, parent);
             CopyHideFlagsRecursively(original, copy);
@@ -120,7 +123,8 @@ namespace PKGE
         /// <param name="prefab">The Prefab Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>
-        public static GameObject ClonePrefabWithHideFlags(GameObject prefab, Transform parent = null)
+        [JetBrains.Annotations.NotNull]
+        public static GameObject ClonePrefabWithHideFlags([DisallowNull] GameObject prefab, [AllowNull] Transform parent = null)
         {
             var copy = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
             CopyHideFlagsRecursively(prefab, copy);
@@ -279,6 +283,7 @@ namespace PKGE
         /// <typeparam name="T">The type of component to retrieve</typeparam>
         /// <param name="scene">The scene to search</param>
         /// <returns>The first component found in the active scene, or null if none exists</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static T GetComponentInScene<T>(Scene scene) where T : Component
         {
             using var _0 = ListPool<GameObject>.Get(out var gameObjects);
@@ -300,7 +305,7 @@ namespace PKGE
         /// <param name="scene">The scene to search</param>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
+        public static void GetComponentsInScene<T>(Scene scene, [DisallowNull] List<T> components, bool includeInactive = false)
             where T : Component
         {
             UnityEngine.Assertions.Assert.IsNotNull(components);
@@ -327,6 +332,7 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The type of component to retrieve</typeparam>
         /// <returns>The first component found in the active scene, or null if none exists</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static T GetComponentInActiveScene<T>() where T : Component
         {
             return GetComponentInScene<T>(SceneManager.GetActiveScene());
@@ -338,7 +344,7 @@ namespace PKGE
         /// <typeparam name="T">The type of components to retrieve</typeparam>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInActiveScene<T>(List<T> components, bool includeInactive = false)
+        public static void GetComponentsInActiveScene<T>([DisallowNull] List<T> components, bool includeInactive = false)
             where T : Component
         {
             GetComponentsInScene(SceneManager.GetActiveScene(), components, includeInactive);
@@ -368,6 +374,7 @@ namespace PKGE
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
         /// <returns>The returned child GameObject or null if no child is found.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static GameObject GetNamedChild([DisallowNull] this GameObject go, string name)
         {
             List<Transform> transforms = ListPool<Transform>.Get();

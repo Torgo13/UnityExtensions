@@ -20,7 +20,7 @@ namespace PKGE
         /// <param name="color">Color of the line.</param>
         /// <param name="duration">How long the line should be visible for.</param>
         [Conditional("DEBUG")]
-        public static void Polygon(List<Vector3> vertices, Color color, float duration = 10f)
+        public static void Polygon([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices, Color color, float duration = 10f)
         {
             var vertexCount = vertices.Count;
             if (vertexCount < 2)
@@ -48,7 +48,7 @@ namespace PKGE
         /// <param name="color">Color of the line.</param>
         /// <param name="duration">How long the line should be visible for.</param>
         [Conditional("DEBUG")]
-        public static void Polygon(Vector3[] vertices, Color color, float duration = 10f)
+        public static void Polygon([System.Diagnostics.CodeAnalysis.NotNull] Vector3[] vertices, Color color, float duration = 10f)
         {
             var vertexCount = vertices.Length;
             if (vertexCount < 2)

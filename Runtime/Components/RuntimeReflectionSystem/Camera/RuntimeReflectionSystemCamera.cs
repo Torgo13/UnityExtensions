@@ -220,7 +220,11 @@ namespace PKGE
         /// <summary>Spread the <see cref="Cubemap"/> capture over six frames by rendering one face per frame.</summary>
         private const int BlendFrames = 6;
 
-        public ReflectionSystem(Shader skyboxShader = null, Material skyboxMaterial = null, Camera reflectionCamera = null, ComputeShader texture2DArrayLerp = null)
+        public ReflectionSystem(
+            [System.Diagnostics.CodeAnalysis.MaybeNull] Shader skyboxShader = null,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] Material skyboxMaterial = null,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] Camera reflectionCamera = null,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] ComputeShader texture2DArrayLerp = null)
         {
             _skyboxShader = skyboxShader;
             _skyboxMaterial = skyboxMaterial;
@@ -626,7 +630,7 @@ namespace PKGE
         /// and if not attempt to create it.
         /// </summary>
         /// <returns><see langword="true"/> if <paramref name="rt"/> is created.</returns>
-        private static bool CreateRenderTexture([JetBrains.Annotations.NotNull] RenderTexture rt)
+        private static bool CreateRenderTexture([System.Diagnostics.CodeAnalysis.NotNull] RenderTexture rt)
         {
             if (rt.IsCreated())
                 return true;

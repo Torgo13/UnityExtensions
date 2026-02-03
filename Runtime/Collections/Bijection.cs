@@ -27,7 +27,7 @@ namespace PKGE.Collections
             /// </summary>
             /// <param name="dictionary">The dictionary instance defining the mapping.</param>
             /// <exception cref="ArgumentNullException"></exception>
-            public Indexer(Dictionary<T2, T3> dictionary)
+            public Indexer([System.Diagnostics.CodeAnalysis.NotNull] Dictionary<T2, T3> dictionary)
             {
                 if (dictionary == null)
                     throw new ArgumentNullException(nameof(dictionary));
@@ -40,7 +40,7 @@ namespace PKGE.Collections
             /// </summary>
             /// <param name="key">The value to map from.</param>
             /// <returns>The mapped value.</returns>
-            public T3 this[T2 key]
+            public T3 this[[System.Diagnostics.CodeAnalysis.NotNull] T2 key]
             {
                 get => _dictionary[key];
                 set => _dictionary[key] = value;
@@ -52,7 +52,7 @@ namespace PKGE.Collections
             /// <param name="key">The value to map from.</param>
             /// <param name="value">Returns the mapped value.</param>
             /// <returns>True if the key has a mapping defined; false otherwise.</returns>
-            public bool TryGetValue(T2 key, out T3 value) => _dictionary.TryGetValue(key, out value);
+            public bool TryGetValue([System.Diagnostics.CodeAnalysis.NotNull] T2 key, [System.Diagnostics.CodeAnalysis.MaybeNull] out T3 value) => _dictionary.TryGetValue(key, out value);
         }
 
         readonly Dictionary<T0, T1> _forward = new Dictionary<T0, T1>();
@@ -90,7 +90,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="key">The value to check.</param>
         /// <returns>True if the value is mapped; false otherwise.</returns>
-        public bool ContainsKey(T0 key)
+        public bool ContainsKey([System.Diagnostics.CodeAnalysis.MaybeNull] T0 key)
         {
             return key != null && _forward.ContainsKey(key);
         }
@@ -100,7 +100,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="value">The value to check.</param>
         /// <returns>True if the value is mapped; false otherwise.</returns>
-        public bool ContainsValue(T1 value)
+        public bool ContainsValue([System.Diagnostics.CodeAnalysis.MaybeNull] T1 value)
         {
             return value != null && _reverse.ContainsKey(value);
         }
@@ -111,7 +111,7 @@ namespace PKGE.Collections
         /// <param name="key">The first value in the mapping.</param>
         /// <param name="value">The second value in the mapping.</param>
         /// <returns>True if the mapping exists; false otherwise.</returns>
-        public bool Contains(T0 key, T1 value)
+        public bool Contains([System.Diagnostics.CodeAnalysis.MaybeNull] T0 key, [System.Diagnostics.CodeAnalysis.MaybeNull] T1 value)
         {
             return key != null && value != null && _forward.TryGetValue(key, out var mapped) && value.Equals(mapped);
         }
@@ -128,7 +128,7 @@ namespace PKGE.Collections
         /// <paramref name="value"/> are null.</exception>
         /// <exception cref="ArgumentException">Thrown if the bijection already contains a mapping for
         /// <paramref name="key"/> or <paramref name="value"/>.</exception>
-        public void Add(T0 key, T1 value)
+        public void Add([System.Diagnostics.CodeAnalysis.NotNull] T0 key, [System.Diagnostics.CodeAnalysis.NotNull] T1 value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -151,7 +151,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="key">The value to remove the mapping for.</param>
         /// <returns>True if a mapping was removed; false otherwise.</returns>
-        public bool RemoveKey(T0 key)
+        public bool RemoveKey([System.Diagnostics.CodeAnalysis.MaybeNull] T0 key)
         {
             if (key != null && _forward.Remove(key, out var v1))
             {
@@ -167,7 +167,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="value">The value to remove the mapping for.</param>
         /// <returns>True if a mapping was removed; false otherwise.</returns>
-        public bool RemoveValue(T1 value)
+        public bool RemoveValue([System.Diagnostics.CodeAnalysis.MaybeNull] T1 value)
         {
             if (value != null && _reverse.TryGetValue(value, out var v0))
             {

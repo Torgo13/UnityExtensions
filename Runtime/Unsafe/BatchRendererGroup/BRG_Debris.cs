@@ -19,6 +19,7 @@ using float3x3 = UnityEngine.Matrix4x4;
 
 namespace PKGE.Unsafe
 {
+    sealed
     public class BRG_Debris : MonoBehaviour
     {
 #if INCLUDE_RENDER_PIPELINE_CORE

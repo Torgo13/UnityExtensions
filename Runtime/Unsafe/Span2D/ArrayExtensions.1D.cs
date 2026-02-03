@@ -23,7 +23,7 @@ namespace PKGE.Unsafe
         /// <returns>A reference to the element within <paramref name="array"/> at the index specified by <paramref name="i"/>.</returns>
         /// <remarks>This method doesn't do any bounds checks, therefore it is responsibility of the caller to ensure the <paramref name="i"/> parameter is valid.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T DangerousGetReferenceAt<T>(this T[] array, int i)
+        public static ref T DangerousGetReferenceAt<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int i)
         {
             return ref array[i];
         }

@@ -7,6 +7,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/TimeSpanExtensions.cs
         #region Unity.Entities.Editor
+        [JetBrains.Annotations.NotNull]
         public static string ToShortString(this TimeSpan timeSpan, uint decimals = 2)
         {
             if (timeSpan.TotalSeconds < 1.0)

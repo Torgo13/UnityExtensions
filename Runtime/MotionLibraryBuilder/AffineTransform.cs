@@ -35,7 +35,7 @@ namespace PKGE.Packages
             return new AffineTransform(t, q);
         }
 
-        public static AffineTransform CreateGlobal(Transform transform)
+        public static AffineTransform CreateGlobal([System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
         {
             return Create(transform.position, transform.rotation);
         }

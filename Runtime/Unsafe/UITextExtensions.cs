@@ -71,21 +71,21 @@ namespace PKGE.Unsafe
 #endif // INCLUDE_TEXTMESH_PRO
 #endif // PKGE_USING_UNSAFE
 
-        public static void Set(this Text me, char[] text, int length)
+        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this Text me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
         {
             if (Set(me.text, text, length))
                 me.text = new string(text, 0, length);
         }
 
 #if INCLUDE_TEXTMESH_PRO
-        public static void Set(this TMPro.TextMeshProUGUI me, char[] text, int length)
+        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this TMPro.TextMeshProUGUI me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
         {
             if (Set(me.text, text, length))
                 me.SetText(text, 0, length);
         }
 #endif // INCLUDE_TEXTMESH_PRO
 
-        private static bool Set(string old, char[] text, int length)
+        private static bool Set([System.Diagnostics.CodeAnalysis.MaybeNull] string old, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
         {
             Assert.IsNotNull(text);
             Assert.IsTrue(length >= 0);
@@ -105,7 +105,7 @@ namespace PKGE.Unsafe
             return false;
         }
 
-        public static void SetRGB(this Graphic graphic, Color color)
+        public static void SetRGB([System.Diagnostics.CodeAnalysis.NotNull] this Graphic graphic, Color color)
         {
             var c = graphic.color;
             graphic.color = new Color(color.r, color.g, color.b, c.a);

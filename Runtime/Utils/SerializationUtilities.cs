@@ -22,12 +22,12 @@ namespace PKGE
             JsonObject
         }
 
-        public static int ReadInt32FromByteArray(this byte[] data, int offset)
+        public static int ReadInt32FromByteArray([System.Diagnostics.CodeAnalysis.NotNull] this byte[] data, int offset)
         {
             return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
         }
 
-        public static int WriteInt32ToByteArray(this byte[] data, int val, int offset)
+        public static int WriteInt32ToByteArray([System.Diagnostics.CodeAnalysis.NotNull] this byte[] data, int val, int offset)
         {
             data[offset] = (byte)(val & 0xFF);
             data[offset + 1] = (byte)((val >> 8) & 0xFF);
@@ -36,12 +36,12 @@ namespace PKGE
             return offset + 4;
         }
 
-        public static ushort ReadUInt16FromByteArray(this byte[] data, int offset)
+        public static ushort ReadUInt16FromByteArray([System.Diagnostics.CodeAnalysis.NotNull] this byte[] data, int offset)
         {
             return (ushort)(data[offset] | (data[offset + 1] << 8));
         }
 
-        public static int WriteUInt16ToByteArray(this byte[] data, ushort val, int offset)
+        public static int WriteUInt16ToByteArray([System.Diagnostics.CodeAnalysis.NotNull] this byte[] data, ushort val, int offset)
         {
             data[offset] = (byte)(val & 0xFF);
             data[offset + 1] = (byte)((val >> 8) & 0xFF);
@@ -113,7 +113,7 @@ namespace PKGE
         /// <param name="obj">The object to write.</param>
         /// <param name="buffer">The list of bytes to write to.</param>
         /// <returns>The number of bytes written.</returns>
-        public static int WriteObjectToByteList(object obj, List<byte> buffer)
+        public static int WriteObjectToByteList([System.Diagnostics.CodeAnalysis.NotNull] object obj, List<byte> buffer)
         {
             var objectType = obj.GetType();
             if (objectType == typeof(string))

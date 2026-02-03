@@ -9,7 +9,7 @@ namespace PKGE.Unsafe
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Utility/FunctionPointerUtility.cs
         #region Unity.Kinematica
-        public static FunctionPointer<TDelegate> CompileStaticMemberFunction<TDelegate>(Type type, string methodName) where TDelegate : class
+        public static FunctionPointer<TDelegate> CompileStaticMemberFunction<TDelegate>([System.Diagnostics.CodeAnalysis.NotNull] Type type, [System.Diagnostics.CodeAnalysis.NotNull] string methodName) where TDelegate : class
         {
             if (type.GetCustomAttribute<BurstCompileAttribute>() == null)
             {

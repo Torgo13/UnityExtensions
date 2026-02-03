@@ -18,7 +18,7 @@ namespace PKGE
         /// <param name="self">The set from which to remove elements.</param>
         /// <param name="other">The set of elements to remove.</param>
         /// <typeparam name="T">The type contained in the set.</typeparam>
-        public static void ExceptWithNonAlloc<T>(this HashSet<T> self, HashSet<T> other)
+        public static void ExceptWithNonAlloc<T>(this HashSet<T> self, [System.Diagnostics.CodeAnalysis.NotNull] HashSet<T> other)
         {
             foreach (var entry in other)
                 self.Remove(entry);
@@ -33,7 +33,8 @@ namespace PKGE
         /// <param name="set">Set to retrieve the element from</param>
         /// <typeparam name="T">Type contained in the set</typeparam>
         /// <returns>The first element in the set</returns>
-        public static T First<T>(this HashSet<T> set)
+        [JetBrains.Annotations.CanBeNull]
+        public static T First<T>([System.Diagnostics.CodeAnalysis.NotNull] this HashSet<T> set)
         {
             var enumerator = set.GetEnumerator();
             var value = enumerator.MoveNext() ? enumerator.Current : default;
@@ -44,7 +45,7 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/HashSetExtensions.cs
         #region Unity.FilmInternalUtilities
-        public static void Loop<T>(this HashSet<T> collection, System.Action<T> eachAction)
+        public static void Loop<T>([System.Diagnostics.CodeAnalysis.NotNull] this HashSet<T> collection, System.Action<T> eachAction)
         {
             using var enumerator = collection.GetEnumerator();
             while (enumerator.MoveNext())

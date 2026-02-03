@@ -50,6 +50,7 @@ namespace PKGE
         /// <summary>
         /// Black cubemap texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static Cubemap blackCubeTexture
         {
             get
@@ -71,6 +72,7 @@ namespace PKGE
         /// <summary>
         /// Magenta cubemap texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static Cubemap magentaCubeTexture
         {
             get
@@ -92,6 +94,7 @@ namespace PKGE
         /// <summary>
         /// Black cubemap array texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static CubemapArray magentaCubeTextureArray
         {
             get
@@ -118,6 +121,7 @@ namespace PKGE
         /// <summary>
         /// White cubemap texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static Cubemap whiteCubeTexture
         {
             get
@@ -139,6 +143,7 @@ namespace PKGE
         /// <summary>
         /// Empty 1x1 texture usable as a dummy UAV.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static RenderTexture emptyUav
         {
             get
@@ -158,6 +163,7 @@ namespace PKGE
         /// <summary>
         /// Empty 4-Byte buffer resource usable as a dummy.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static GraphicsBuffer emptyBuffer
         {
             get
@@ -175,6 +181,7 @@ namespace PKGE
         /// <summary>
         /// Black 3D texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public static Texture3D blackVolumeTexture
         {
             get
@@ -197,6 +204,7 @@ namespace PKGE
         /// <summary>
         /// White 3D texture.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         internal static Texture3D whiteVolumeTexture
         {
             get
@@ -225,18 +233,21 @@ namespace PKGE
         /// <param name="mips">True if the texture has mip maps.</param>
         /// <param name="depth">Depth of the texture.</param>
         /// <returns>Generated names based on the provided parameters.</returns>
+        [JetBrains.Annotations.NotNull]
         public static string GetTextureAutoName(int width, int height, TextureFormat format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
             => GetTextureAutoName(width, height, EnumValues<TextureFormat>.Name(format), dim, name, mips, depth);
 
         /// <inheritdoc cref="GetTextureAutoName(int,int,UnityEngine.TextureFormat,UnityEngine.Rendering.TextureDimension,string,bool,int)"/>
+        [JetBrains.Annotations.NotNull]
         public static string GetTextureAutoName(int width, int height, GraphicsFormat format,
             TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
             => GetTextureAutoName(width, height, EnumValues<GraphicsFormat>.Name(format), dim, name, mips, depth);
 
         /// <inheritdoc cref="GetTextureAutoName(int,int,UnityEngine.TextureFormat,UnityEngine.Rendering.TextureDimension,string,bool,int)"/>
+        [JetBrains.Annotations.NotNull]
         static string GetTextureAutoName(int width, int height, string format,
-            TextureDimension dim = TextureDimension.None, string name = "", bool mips = false, int depth = 0)
+            TextureDimension dim = TextureDimension.None, [System.Diagnostics.CodeAnalysis.MaybeNull] string name = "", bool mips = false, int depth = 0)
         {
             using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);
             sb.Append(string.IsNullOrEmpty(name) ? "Texture" : name);
@@ -273,8 +284,8 @@ namespace PKGE
         /// <param name="material">Material used on the full screen triangle.</param>
         /// <param name="properties">Optional material property block for the provided material.</param>
         /// <param name="shaderPassId">Index of the material pass.</param>
-        public static void DrawFullScreen(CommandBuffer commandBuffer, Material material,
-            MaterialPropertyBlock properties = null, int shaderPassId = 0)
+        public static void DrawFullScreen([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer commandBuffer, Material material,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] MaterialPropertyBlock properties = null, int shaderPassId = 0)
         {
             commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles,
                 3, 1, properties);
@@ -288,9 +299,9 @@ namespace PKGE
         /// <param name="colorBuffer">RenderTargetIdentifier of the color buffer that needs to be set before drawing the full screen triangle.</param>
         /// <param name="properties">Optional material property block for the provided material.</param>
         /// <param name="shaderPassId">Index of the material pass.</param>
-        public static void DrawFullScreen(CommandBuffer commandBuffer, Material material,
+        public static void DrawFullScreen([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer commandBuffer, Material material,
             RenderTargetIdentifier colorBuffer,
-            MaterialPropertyBlock properties = null, int shaderPassId = 0)
+            [System.Diagnostics.CodeAnalysis.MaybeNull] MaterialPropertyBlock properties = null, int shaderPassId = 0)
         {
             commandBuffer.SetRenderTarget(colorBuffer, 0, CubemapFace.Unknown, -1);
             commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles,
@@ -306,9 +317,9 @@ namespace PKGE
         /// <param name="depthStencilBuffer">RenderTargetIdentifier of the depth buffer that needs to be set before drawing the full screen triangle.</param>
         /// <param name="properties">Optional material property block for the provided material.</param>
         /// <param name="shaderPassId">Index of the material pass.</param>
-        public static void DrawFullScreen(CommandBuffer commandBuffer, Material material,
+        public static void DrawFullScreen([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer commandBuffer, Material material,
             RenderTargetIdentifier colorBuffer, RenderTargetIdentifier depthStencilBuffer,
-            MaterialPropertyBlock properties = null, int shaderPassId = 0)
+            [System.Diagnostics.CodeAnalysis.MaybeNull] MaterialPropertyBlock properties = null, int shaderPassId = 0)
         {
             commandBuffer.SetRenderTarget(colorBuffer, depthStencilBuffer, 0, CubemapFace.Unknown, -1);
             commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles,
@@ -324,9 +335,9 @@ namespace PKGE
         /// <param name="depthStencilBuffer">RenderTargetIdentifier of the depth buffer that needs to be set before drawing the full screen triangle.</param>
         /// <param name="properties">Optional material property block for the provided material.</param>
         /// <param name="shaderPassId">Index of the material pass.</param>
-        public static void DrawFullScreen(CommandBuffer commandBuffer, Material material,
+        public static void DrawFullScreen([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer commandBuffer, Material material,
             RenderTargetIdentifier[] colorBuffers, RenderTargetIdentifier depthStencilBuffer,
-            MaterialPropertyBlock properties = null, int shaderPassId = 0)
+            [System.Diagnostics.CodeAnalysis.MaybeNull] MaterialPropertyBlock properties = null, int shaderPassId = 0)
         {
             commandBuffer.SetRenderTarget(colorBuffers, depthStencilBuffer, 0, CubemapFace.Unknown, -1);
             commandBuffer.DrawProcedural(Matrix4x4.identity, material, shaderPassId, MeshTopology.Triangles,
@@ -343,9 +354,9 @@ namespace PKGE
         /// <param name="colorBuffers">RenderTargetIdentifier array of the color buffers that needs to be set before drawing the full screen triangle.</param>
         /// <param name="properties">Optional material property block for the provided material.</param>
         /// <param name="shaderPassId">Index of the material pass.</param>
-        public static void DrawFullScreen(CommandBuffer commandBuffer, Material material,
-            RenderTargetIdentifier[] colorBuffers,
-            MaterialPropertyBlock properties = null, int shaderPassId = 0)
+        public static void DrawFullScreen([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer commandBuffer, Material material,
+            [System.Diagnostics.CodeAnalysis.NotNull] RenderTargetIdentifier[] colorBuffers,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] MaterialPropertyBlock properties = null, int shaderPassId = 0)
         {
             // It is currently not possible to have MRT without also setting a depth target.
             // To work around this deficiency of the CommandBuffer.SetRenderTarget() API,
@@ -381,7 +392,8 @@ namespace PKGE
         /// </summary>
         /// <param name="shaderPath">Path of the shader used for the material.</param>
         /// <returns>A new Material instance using the shader found at the provided path.</returns>
-        public static Material CreateEngineMaterial(string shaderPath)
+        [JetBrains.Annotations.CanBeNull]
+        public static Material CreateEngineMaterial([System.Diagnostics.CodeAnalysis.NotNull] string shaderPath)
         {
             if (string.IsNullOrEmpty(shaderPath))
                 throw new ArgumentException(nameof(shaderPath));
@@ -402,6 +414,7 @@ namespace PKGE
         /// </summary>
         /// <param name="shader">Shader used for the material.</param>
         /// <returns>A new Material instance using the provided shader.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static Material CreateEngineMaterial(Shader shader)
         {
             if (shader == null)
@@ -429,7 +442,7 @@ namespace PKGE
             var flagInt = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumToInt(flag);
             return (maskInt & flagInt) != 0;
         }
-
+        
         /// <inheritdoc cref="HasFlag{T}(T, T)"/>
         public static bool HasFlagSafe<T>(T mask, T flag) where T : struct, IConvertible
         {
@@ -479,7 +492,7 @@ namespace PKGE
         /// <param name="cmd">CommandBuffer on which to set the global keyword.</param>
         /// <param name="keyword">Keyword to be set.</param>
         /// <param name="state">Value of the keyword to be set.</param>
-        public static void SetKeyword(CommandBuffer cmd, string keyword, bool state)
+        public static void SetKeyword([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, string keyword, bool state)
         {
             if (state)
                 cmd.EnableShaderKeyword(keyword);
@@ -494,7 +507,7 @@ namespace PKGE
         /// <param name="cs">Compute Shader on which to set the keyword.</param>
         /// <param name="keyword">Keyword to be set.</param>
         /// <param name="state">Value of the keyword to be set.</param>
-        public static void SetKeyword(CommandBuffer cmd, ComputeShader cs, string keyword, bool state)
+        public static void SetKeyword([System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd, ComputeShader cs, string keyword, bool state)
         {
             var kw = new LocalKeyword(cs, keyword);
             if (state)
@@ -510,7 +523,7 @@ namespace PKGE
         /// <param name="material">Material on which to set the keyword.</param>
         /// <param name="keyword">Keyword to set on the material.</param>
         /// <param name="state">Value of the keyword to set on the material.</param>
-        public static void SetKeyword(Material material, string keyword, bool state)
+        public static void SetKeyword([System.Diagnostics.CodeAnalysis.NotNull] Material material, string keyword, bool state)
         {
             if (state)
                 material.EnableKeyword(keyword);
@@ -519,7 +532,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="SetKeyword(UnityEngine.Rendering.CommandBuffer,string,bool)"/>
-        public static void SetKeyword(Material material, LocalKeyword keyword, bool state)
+        public static void SetKeyword([System.Diagnostics.CodeAnalysis.NotNull] Material material, LocalKeyword keyword, bool state)
         {
             if (state)
                 material.EnableKeyword(keyword);
@@ -534,7 +547,7 @@ namespace PKGE
         /// <param name="cs">Compute Shader on which to set the keyword.</param>
         /// <param name="keyword">Keyword to be set.</param>
         /// <param name="state">Value of the keyword to be set.</param>
-        public static void SetKeyword(ComputeShader cs, string keyword, bool state)
+        public static void SetKeyword([System.Diagnostics.CodeAnalysis.NotNull] ComputeShader cs, string keyword, bool state)
         {
             if (state)
                 cs.EnableKeyword(keyword);
@@ -604,8 +617,8 @@ namespace PKGE
         }
 
         /// <remarks>Also sets the <paramref name="obj"/> to <see langword="null"/>.</remarks>
-        /// <inheritdoc cref="Destroy(UnityObject, bool, bool, bool, float)"/>
-        public static void Destroy<T>(ref T obj, bool withUndo = false,
+        /// <inheritdoc cref="Destroy(UnityObject, bool, bool, bool, bool, float)"/>
+        public static void Destroy<T>([System.Diagnostics.CodeAnalysis.MaybeNull] ref T obj, bool withUndo = false,
             bool skipNullCheck = false, bool allowDestroyingAssets = false,
             bool destroyGameObject = false, float delay = 0f)
             where T : UnityObject
@@ -622,7 +635,7 @@ namespace PKGE
         /// Safely release a Graphics Buffer.
         /// </summary>
         /// <param name="buffer">Graphics Buffer that needs to be released.</param>
-        public static void SafeRelease(GraphicsBuffer buffer)
+        public static void SafeRelease([System.Diagnostics.CodeAnalysis.MaybeNull] GraphicsBuffer buffer)
         {
             if (buffer != null)
                 buffer.Release();
@@ -632,7 +645,7 @@ namespace PKGE
         /// Safely release a Compute Buffer.
         /// </summary>
         /// <param name="buffer">Compute Buffer that needs to be released.</param>
-        public static void SafeRelease(ComputeBuffer buffer)
+        public static void SafeRelease([System.Diagnostics.CodeAnalysis.MaybeNull] ComputeBuffer buffer)
         {
             if (buffer != null)
                 buffer.Release();
@@ -644,6 +657,7 @@ namespace PKGE
         /// <param name="min">Minimum corner coordinates in local space.</param>
         /// <param name="max">Maximum corner coordinates in local space.</param>
         /// <returns>A new instance of a cube Mesh.</returns>
+        [JetBrains.Annotations.NotNull]
         public static Mesh CreateCubeMesh(Vector3 min, Vector3 max)
         {
             Mesh mesh = new Mesh();
@@ -682,7 +696,7 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">Input camera.</param>
         /// <returns>True if "Post Processes" are enabled for the view associated with the given camera.</returns>
-        public static bool ArePostProcessesEnabled(Camera camera)
+        public static bool ArePostProcessesEnabled([System.Diagnostics.CodeAnalysis.NotNull] Camera camera)
         {
             bool enabled = true;
 
@@ -715,7 +729,7 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">Input camera.</param>
         /// <returns>True if "Animated Materials" are enabled for the view associated with the given camera.</returns>
-        public static bool AreAnimatedMaterialsEnabled(Camera camera)
+        public static bool AreAnimatedMaterialsEnabled([System.Diagnostics.CodeAnalysis.NotNull] Camera camera)
         {
             bool animateMaterials = true;
 
@@ -774,7 +788,7 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">Input camera.</param>
         /// <returns>True if "Scene Lighting" is enabled for the view associated with the given camera.</returns>
-        public static bool IsSceneLightingDisabled(Camera camera)
+        public static bool IsSceneLightingDisabled([System.Diagnostics.CodeAnalysis.NotNull] Camera camera)
         {
             bool disabled = false;
 
@@ -801,7 +815,7 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">Input camera.</param>
         /// <returns>True if "Light Overlap" is enabled in the scene view associated with the input camera.</returns>
-        public static bool IsLightOverlapDebugEnabled(Camera camera)
+        public static bool IsLightOverlapDebugEnabled([System.Diagnostics.CodeAnalysis.NotNull] Camera camera)
         {
             bool enabled = false;
 
@@ -828,7 +842,7 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">Input camera.</param>
         /// <returns>True if "Fog" is enabled for the view associated with the given camera.</returns>
-        public static bool IsSceneViewFogEnabled(Camera camera)
+        public static bool IsSceneViewFogEnabled([System.Diagnostics.CodeAnalysis.NotNull] Camera camera)
         {
             bool fogEnable = true;
 
@@ -875,6 +889,7 @@ namespace PKGE
 #if UNITY_EDITOR
         static Func<int> _getSceneViewPrefabStageContextFunc;
 
+        [JetBrains.Annotations.NotNull]
         static Func<int> LoadSceneViewMethods()
         {
             var stageNavigatorManager = typeof(UnityEditor.SceneManagement.PrefabStage).Assembly
@@ -915,7 +930,7 @@ namespace PKGE
         /// <param name="renderContext">Current Scriptable Render Context.</param>
         /// <param name="cmd">Command Buffer used for rendering.</param>
         /// <param name="rendererList">Renderer List to render.</param>
-        public static void DrawRendererList(ScriptableRenderContext renderContext, CommandBuffer cmd,
+        public static void DrawRendererList(ScriptableRenderContext renderContext, [System.Diagnostics.CodeAnalysis.NotNull] CommandBuffer cmd,
             UnityEngine.Rendering.RendererList rendererList)
         {
 #if DEBUG
@@ -930,7 +945,7 @@ namespace PKGE
         /// </summary>
         /// <param name="texture"> Source texture.</param>
         /// <returns>Returns hash of texture properties.</returns>
-        public static int GetTextureHash(Texture texture)
+        public static int GetTextureHash([System.Diagnostics.CodeAnalysis.NotNull] Texture texture)
         {
             int hash = texture.GetHashCode();
 
@@ -1006,7 +1021,7 @@ namespace PKGE
         /// <returns>Last value of the enum</returns>
         public static T GetLastEnumValue<T>() where T : Enum
             => EnumValues<T>.Values[^1];
-
+            
         public static T GetSmallestEnumValue<T>() where T : Enum
             => EnumValues<T>.SortedValues[0];
 
@@ -1026,7 +1041,8 @@ namespace PKGE
         /// <param name="extension">Extension of files to search in</param>
         /// <param name="allowSubTypes">Allows to retrieve type inheriting from T.</param>
         /// <returns>List of all asset of type T or implementing interface T.</returns>
-        public static IEnumerable<T> LoadAllAssets<T>(string extension = "asset", bool allowSubTypes = true)
+        [JetBrains.Annotations.ItemCanBeNull]
+        public static IEnumerable<T> LoadAllAssets<T>([System.Diagnostics.CodeAnalysis.NotNull] string extension = "asset", bool allowSubTypes = true)
             where T : class
         {
             if (string.IsNullOrEmpty(extension))
@@ -1054,7 +1070,7 @@ namespace PKGE
         /// Create any missing folders in the file path given.
         /// </summary>
         /// <param name="filePath">File or folder (ending with '/') path to ensure existence of each subfolder in. </param>
-        public static void EnsureFolderTreeInAssetFilePath(string filePath)
+        public static void EnsureFolderTreeInAssetFilePath([System.Diagnostics.CodeAnalysis.NotNull] string filePath)
         {
             var path = filePath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
             if (!path.StartsWith("Assets" + Path.DirectorySeparatorChar, StringComparison.CurrentCultureIgnoreCase))
@@ -1101,31 +1117,35 @@ namespace PKGE
             outCornersArray.AsReadOnlySpan().CopyTo(outCorners);
             outCornersArray.Dispose();
         }
-
-        [Unity.Burst.BurstCompile]
+        
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         public struct CalculateViewSpaceCornersJob : Unity.Jobs.IJob
         {
-            public Matrix4x4 proj;
-            public float z;
+            [ReadOnly] public Matrix4x4 proj;
+            [ReadOnly] public float z;
             [NativeFixedLength(4)]
-            public NativeArray<Vector3> outCorners;
-
+            [WriteOnly] public NativeArray<Vector3> outCorners;
+            
             public void Execute()
             {
                 Matrix4x4 invProj = Matrix4x4.Inverse(proj);
+
+                var temp = new NativeArray<Vector4>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 
                 // We transform a point further than near plane and closer than far plane, for precision reasons.
                 // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
                 // 5 units from the camera.
                 const float projZ = 0.95f;
-                outCorners[0] = invProj.MultiplyPoint(new Vector3(-1, -1, projZ));
-                outCorners[1] = invProj.MultiplyPoint(new Vector3(1, -1, projZ));
-                outCorners[2] = invProj.MultiplyPoint(new Vector3(1, 1, projZ));
-                outCorners[3] = invProj.MultiplyPoint(new Vector3(-1, 1, projZ));
+                temp[0] = invProj.MultiplyPoint(new Vector3(-1, -1, projZ));
+                temp[1] = invProj.MultiplyPoint(new Vector3(1, -1, projZ));
+                temp[2] = invProj.MultiplyPoint(new Vector3(1, 1, projZ));
+                temp[3] = invProj.MultiplyPoint(new Vector3(-1, 1, projZ));
 
                 // Rescale vectors to have the desired z distance.
                 for (int r = 0; r < 4; ++r)
-                    outCorners[r] *= z / (-outCorners[r].z);
+                    outCorners[r] = temp[r] * (z / (-temp[r].z));
+
+                temp.Dispose();
             }
         }
 

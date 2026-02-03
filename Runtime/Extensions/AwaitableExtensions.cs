@@ -8,12 +8,12 @@ namespace PKGE
 #if UNITY_6000_0_OR_NEWER
         //https://docs.unity3d.com/Documentation/Manual/async-awaitable-examples.html
         #region Unity
-        public static async Task AsTask(this Awaitable a)
+        public static async Task AsTask([System.Diagnostics.CodeAnalysis.NotNull] this Awaitable a)
         {
             await a;
         }
 
-        public static async Task<T> AsTask<T>(this Awaitable<T> a)
+        public static async Task<T> AsTask<T>([System.Diagnostics.CodeAnalysis.NotNull] this Awaitable<T> a)
         {
             return await a;
         }

@@ -65,7 +65,7 @@ namespace PKGE.Unsafe
         /// <exception cref="System.ArgumentNullException">Is thrown if the planes are empty.</exception>
         /// <exception cref="System.ArgumentException">Is thrown if the planes size is not equal to 6.</exception>
 #if UNITY_6000_3_OR_NEWER
-        public static void FromCamera(Camera camera, NativeArray<float4> planes, System.Span<Plane> sourcePlanes)
+        public static void FromCamera([System.Diagnostics.CodeAnalysis.NotNull] Camera camera, NativeArray<float4> planes, System.Span<Plane> sourcePlanes)
 #else
         public static void FromCamera(Camera camera, NativeArray<float4> planes, Plane[] sourcePlanes)
 #endif // UNITY_6000_3_OR_NEWER

@@ -31,8 +31,10 @@ namespace PKGE
         static Dictionary<Type, string> _genericTypeNames;
         static Dictionary<Assembly, string> _assemblyTypeFullNames;
 
+        [JetBrains.Annotations.NotNull]
         public static Assembly[] GetCachedAssemblies() { return _assemblies ??= AppDomain.CurrentDomain.GetAssemblies(); }
 
+        [JetBrains.Annotations.NotNull]
         public static List<Type[]> GetCachedTypesPerAssembly()
         {
             if (_typesPerAssembly == null)
@@ -47,6 +49,7 @@ namespace PKGE
             return _typesPerAssembly;
         }
 
+        [JetBrains.Annotations.NotNull]
         public static Dictionary<Assembly, Type[]> GetCachedTypesDictionary()
         {
             if (_typesPerAssemblyDictionary == null)
@@ -86,6 +89,7 @@ namespace PKGE
             return _typesPerAssemblyDictionary;
         }
 
+        [JetBrains.Annotations.NotNull]
         public static List<Dictionary<string, Type>> GetCachedAssemblyTypeMaps()
         {
             if (_assemblyTypeMaps == null)
@@ -118,7 +122,7 @@ namespace PKGE
         /// </summary>
         public static void PreWarmTypeCache() { GetCachedAssemblyTypeMaps(); }
 
-        public static string GetGenericTypeName(Type type)
+        public static string GetGenericTypeName([System.Diagnostics.CodeAnalysis.NotNull] Type type)
         {
             _genericTypeNames ??= new Dictionary<Type, string>();
             
@@ -177,7 +181,8 @@ namespace PKGE
             }
         }
 
-        public static List<Type> GetAllTypes(List<Type> types)
+        [JetBrains.Annotations.NotNull]
+        public static List<Type> GetAllTypes([System.Diagnostics.CodeAnalysis.NotNull] List<Type> types)
         {
             Assert.IsNotNull(types);
 
@@ -242,7 +247,7 @@ namespace PKGE
         /// for the type that matches the search and should only match one type.</param>
         /// <param name="resultList">The list to which found types will be added. The list must have
         /// the same number of elements as the <paramref name="predicates"/> list.</param>
-        public static void FindTypesBatch(List<Func<Type, bool>> predicates, List<Type> resultList)
+        public static void FindTypesBatch([System.Diagnostics.CodeAnalysis.NotNull] List<Func<Type, bool>> predicates, List<Type> resultList)
         {
             var typesPerAssembly = GetCachedTypesDictionary();
             for (var i = 0; i < predicates.Count; i++)
@@ -270,7 +275,7 @@ namespace PKGE
         /// <param name="resultList">An empty list to which any matching <see cref="Type"/> objects are added. A
         /// result in <paramref name="resultList"/> has the same index as corresponding name
         /// in <paramref name="typeNames"/>.</param>
-        public static void FindTypesByFullNameBatch(List<string> typeNames, List<Type> resultList)
+        public static void FindTypesByFullNameBatch([System.Diagnostics.CodeAnalysis.NotNull] List<string> typeNames, List<Type> resultList)
         {
             var assemblyTypeMap = GetCachedAssemblyTypeMaps();
             foreach (var typeName in typeNames)
@@ -326,6 +331,7 @@ namespace PKGE
         /// </summary>
         /// <param name="name">The variable name to clean up.</param>
         /// <returns>The display name for the variable.</returns>
+        [JetBrains.Annotations.NotNull]
         public static string NicifyVariableName(string name)
         {
             if (name.StartsWith("m_"))
@@ -353,7 +359,7 @@ namespace PKGE
         /// <param name="methodName">The method name</param>
         /// <param name="args">The arguments to pass to the method</param>
         /// <returns>The return value from the static method invoked, or null for methods returning void.</returns>
-        public static object InvokeStatic(this Type targetType, string methodName, params object[] args)
+        public static object InvokeStatic([System.Diagnostics.CodeAnalysis.NotNull] this Type targetType, [System.Diagnostics.CodeAnalysis.NotNull] string methodName, params object[] args)
         {
             Assert.IsNotNull(targetType, "Invalid Type");
             Assert.IsFalse(string.IsNullOrEmpty(methodName), "The methodName to set cannot be null");
@@ -370,7 +376,7 @@ namespace PKGE
         /// <param name="methodName">The method name</param>
         /// <param name="args">The arguments to pass to the method</param>
         /// <returns>The return value from the invoked method, or null if the method does not return a value.</returns>
-        public static object Invoke(this object target, string methodName, params object[] args)
+        public static object Invoke([System.Diagnostics.CodeAnalysis.NotNull] this object target, [System.Diagnostics.CodeAnalysis.NotNull] string methodName, params object[] args)
         {
             Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(methodName), "The method name to set cannot be null");
@@ -380,7 +386,8 @@ namespace PKGE
             return mi.Invoke(target, args);
         }
 
-        private static FieldInfo FindField(this Type type, string fieldName)
+        [JetBrains.Annotations.NotNull]
+        private static FieldInfo FindField(this Type type, [System.Diagnostics.CodeAnalysis.NotNull] string fieldName)
         {
             FieldInfo fi = null;
 
@@ -401,7 +408,7 @@ namespace PKGE
         /// <param name="target">The object instance that contains the field to be set.</param>
         /// <param name="fieldName">The field to change</param>
         /// <param name="value">The new value</param>
-        public static void SetField(this object target, string fieldName, object value)
+        public static void SetField([System.Diagnostics.CodeAnalysis.NotNull] this object target, [System.Diagnostics.CodeAnalysis.NotNull] string fieldName, object value)
         {
             Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(fieldName), "The field to set cannot be null");
@@ -415,7 +422,7 @@ namespace PKGE
         /// <param name="target">The object instance that contains the field to be retrieved.</param>
         /// <param name="fieldName">The name of the private field to get the value from.</param>
         /// <returns>The value of the specified field from the target object.</returns>
-        public static object GetField(this object target, string fieldName)
+        public static object GetField([System.Diagnostics.CodeAnalysis.NotNull] this object target, [System.Diagnostics.CodeAnalysis.NotNull] string fieldName)
         {
             Assert.IsNotNull(target, "The target cannot be null");
             Assert.IsFalse(string.IsNullOrEmpty(fieldName), "The field to set cannot be null");
@@ -429,7 +436,8 @@ namespace PKGE
         /// <param name="target">The object instance from which to get the fields.</param>
         /// <returns>An ordered enumeration of FieldInfo objects representing each field defined within
         /// the typeof the target object.</returns>
-        public static IEnumerable<FieldInfo> GetFields(this object target)
+        [JetBrains.Annotations.NotNull]
+        public static IEnumerable<FieldInfo> GetFields([System.Diagnostics.CodeAnalysis.NotNull] this object target)
         {
             Assert.IsNotNull(target, "The target cannot be null");
 
@@ -449,7 +457,7 @@ namespace PKGE
 #if USING_LINQ
 #else
         static FieldInfoComparer _fieldInfoComparer;
-        class FieldInfoComparer : IComparer<FieldInfo>
+        sealed class FieldInfoComparer : IComparer<FieldInfo>
         {
             public int Compare(FieldInfo x, FieldInfo y)
             {
@@ -462,7 +470,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/Utility/ReflectionUtils.cs#L8
         #region UnityEngine.Rendering.HighDefinition
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="instance"/> is null.</exception>
-        public static void ForEachFieldOfType<T>(this object instance, Action<T> callback,
+        public static void ForEachFieldOfType<T>([System.Diagnostics.CodeAnalysis.NotNull] this object instance, Action<T> callback,
             BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance)
         {
             if (instance == null)

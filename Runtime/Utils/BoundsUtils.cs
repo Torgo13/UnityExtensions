@@ -18,7 +18,7 @@ namespace PKGE
         /// </summary>
         /// <param name="gameObjects">The list of GameObjects.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds(List<GameObject> gameObjects)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<GameObject> gameObjects)
         {
             Bounds? bounds = null;
             foreach (var gameObject in gameObjects)
@@ -36,7 +36,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
-        public static Bounds GetBounds(GameObject[] gameObjects)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] GameObject[] gameObjects)
         {
             using var _0 = ListPool<GameObject>.Get(out var list);
             list.AddRange(gameObjects);
@@ -48,7 +48,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transforms">The list of transforms.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds(List<Transform> transforms)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Transform> transforms)
         {
             Bounds? bounds = null;
             foreach (var t in transforms)
@@ -66,7 +66,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
-        public static Bounds GetBounds(Transform[] transforms)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] Transform[] transforms)
         {
             using var _0 = ListPool<Transform>.Get(out var list);
             list.AddRange(transforms);
@@ -78,7 +78,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The transform.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds(Transform transform)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
         {
             List<Renderer> renderers = ListPool<Renderer>.Get();
 
@@ -112,7 +112,7 @@ namespace PKGE
         /// </summary>
         /// <param name="renderers">The list of renderers.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds(List<Renderer> renderers)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Renderer> renderers)
         {
             if (renderers.Count > 0)
             {
@@ -137,7 +137,7 @@ namespace PKGE
         /// <param name="colliders">The list of colliders.</param>
         /// <typeparam name="T">The type of object in the list of colliders.</typeparam>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds<T>(List<T> colliders) where T : Collider
+        public static Bounds GetBounds<T>([System.Diagnostics.CodeAnalysis.NotNull] List<T> colliders) where T : Collider
         {
             if (colliders.Count > 0)
             {
@@ -161,7 +161,7 @@ namespace PKGE
         /// </summary>
         /// <param name="points">The list of points to encapsulate.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds(List<Vector3> points)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> points)
         {
             var bounds = default(Bounds);
             if (points.Count < 1)
@@ -198,7 +198,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/Utils/BoundsUtils.cs
         #region Unity.HLODSystem.Utils
-        public static void CalcLocalBounds(Renderer renderer, Transform transform,
+        public static void CalcLocalBounds([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer, [System.Diagnostics.CodeAnalysis.NotNull] Transform transform,
             out Bounds newBounds)
         {
             Bounds bounds = renderer.bounds;
@@ -206,7 +206,7 @@ namespace PKGE
             CalcLocalBounds(bounds.min, bounds.max, ref matrix, out newBounds);
         }
         
-        public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
+        public static Bounds CalcLocalBounds([System.Diagnostics.CodeAnalysis.NotNull] Renderer renderer, [System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
         {
             CalcLocalBounds(renderer, transform, out var newBounds);
             return newBounds;
@@ -257,7 +257,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
         #region Unity.HLODSystem
-        public static Bounds GetBounds(List<MeshRenderer> renderers, Transform transform)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<MeshRenderer> renderers, Transform transform)
         {
             Bounds ret = new Bounds();
             if (renderers.Count == 0)
@@ -284,7 +284,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Editor/SpaceManager/QuadTreeSpaceSplitter.cs
         #region Unity.HLODSystem.SpaceManager
-        public static bool CalculateBounds(GameObject obj, Transform transform, out Bounds result)
+        public static bool CalculateBounds([System.Diagnostics.CodeAnalysis.NotNull] GameObject obj, Transform transform, out Bounds result)
         {
             using var _0 = ListPool<MeshRenderer>.Get(out var renderers);
             obj.GetComponentsInChildren(renderers);
@@ -307,7 +307,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/PhysicsUtils.cs
         #region FPSSample
-        public static Vector3 GetClosestPointOnCollider(this Collider c, Vector3 p)
+        public static Vector3 GetClosestPointOnCollider([System.Diagnostics.CodeAnalysis.NotNull] this Collider c, Vector3 p)
         {
             if (c is SphereCollider csc)
             {

@@ -47,7 +47,8 @@ namespace PKGE
 
     static class Filtering
     {
-        public static ImagePixels Convolve(ImagePixels texture, Kernel kernel)
+        [JetBrains.Annotations.NotNull]
+        public static ImagePixels Convolve([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels texture, [System.Diagnostics.CodeAnalysis.NotNull] Kernel kernel)
         {
             var width = texture.Width;
             var height = texture.Height;
@@ -110,7 +111,8 @@ namespace PKGE
             return outputTexture;
         }
 
-        public static ImagePixels Subtract(ImagePixels sourceA, ImagePixels sourceB)
+        [JetBrains.Annotations.NotNull]
+        public static ImagePixels Subtract([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels sourceA, [System.Diagnostics.CodeAnalysis.NotNull] ImagePixels sourceB)
         {
             if (sourceA.Height != sourceB.Height || sourceA.Width != sourceB.Width)
                 throw new ArgumentException("Images don't have the same size");
@@ -156,7 +158,7 @@ namespace PKGE
         public readonly int Height;
         public readonly Color[] Pixels;
 
-        public ImagePixels(Texture2D texture)
+        public ImagePixels([System.Diagnostics.CodeAnalysis.NotNull] Texture2D texture)
         {
             Width = texture.width;
             Height = texture.height;
@@ -181,7 +183,7 @@ namespace PKGE
 
     class SobelXFilter : IImageFilter
     {
-        public ImagePixels Apply(ImagePixels source)
+        public ImagePixels Apply([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels source)
         {
             var edge = Filtering.Convolve(source, SobelFilter.SobelX);
             var stretchedImage = ImageUtils.StretchImage(edge, 0f, 1f);
@@ -191,7 +193,7 @@ namespace PKGE
 
     class SobelYFilter : IImageFilter
     {
-        public ImagePixels Apply(ImagePixels source)
+        public ImagePixels Apply([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels source)
         {
             var edge = Filtering.Convolve(source, SobelFilter.SobelY);
             var stretchedImage = ImageUtils.StretchImage(edge, 0f, 1f);
@@ -213,7 +215,8 @@ namespace PKGE
             this.Threshold = threshold;
         }
 
-        public ImagePixels Apply(ImagePixels source)
+        [JetBrains.Annotations.NotNull]
+        public ImagePixels Apply([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels source)
         {
             var edgeX = Filtering.Convolve(source, SobelX);
             var edgeY = Filtering.Convolve(source, SobelY);
@@ -296,7 +299,8 @@ namespace PKGE
             RebuildKernels(size, sigma);
         }
 
-        public ImagePixels Apply(ImagePixels source)
+        [JetBrains.Annotations.NotNull]
+        public ImagePixels Apply([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels source)
         {
             var resultX = Filtering.Convolve(source, _kernelX);
             return Filtering.Convolve(resultX, _kernelY);
@@ -366,7 +370,7 @@ namespace PKGE
             this.stretchImageForViewing = stretchImageForViewing;
         }
 
-        public ImagePixels Apply(ImagePixels source)
+        public ImagePixels Apply([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels source)
         {
             var sourceA = _smallFilter.Apply(source);
             var sourceB = _largeFilter.Apply(source);
@@ -386,6 +390,7 @@ namespace PKGE
         public uint Color;
         public double Ratio;
 
+        [JetBrains.Annotations.NotNull]
         public override readonly string ToString()
         {
             return $"{ImageUtils.IntToColor32(Color)} [{(Ratio * 100)}%]";
@@ -428,7 +433,7 @@ namespace PKGE
             }
         }
 
-        public void Normalize(int[] totalPixels)
+        public void Normalize([System.Diagnostics.CodeAnalysis.NotNull] int[] totalPixels)
         {
             if (totalPixels.Length != 3)
                 throw new ArgumentException($"Array size should be {channels}", nameof(totalPixels));
@@ -467,6 +472,7 @@ namespace PKGE
             }
         }
 
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -679,7 +685,7 @@ namespace PKGE
             }
         }
 
-        public void Combine(ColorCluster cluster)
+        public void Combine([System.Diagnostics.CodeAnalysis.NotNull] ColorCluster cluster)
         {
             if (cluster.count == 0)
                 return;
@@ -723,6 +729,7 @@ namespace PKGE
             return color / BucketSize;
         }
 
+        [JetBrains.Annotations.NotNull]
         public IEnumerable<ColorCluster> GetBestClusters(int count)
         {
             _clusters.Sort((cluster1, cluster2) => cluster2.count.CompareTo(cluster1.count));
@@ -807,7 +814,7 @@ namespace PKGE
             return Mathf.Sqrt(ColorSquareDistance(colorA, colorB));
         }
 
-        public static void RGBToXYZ(Color rgb, out float[] xyz)
+        public static void RGBToXYZ(Color rgb, [System.Diagnostics.CodeAnalysis.NotNull] out float[] xyz)
         {
             Span<float> scaledColors = stackalloc float[3];
             for (var i = 0; i < 3; ++i)
@@ -824,7 +831,7 @@ namespace PKGE
             xyz[2] = scaledColors[0] * 0.0193f + scaledColors[1] * 0.1192f + scaledColors[2] * 0.9505f;
         }
 
-        public static void XYZToCIELab(float[] xyz, out float[] lab, Vector3 reference)
+        public static void XYZToCIELab(float[] xyz, [System.Diagnostics.CodeAnalysis.NotNull] out float[] lab, Vector3 reference)
         {
             Span<float> scaledXYZ = stackalloc float[3];
             for (var i = 0; i < 3; ++i)
@@ -840,7 +847,7 @@ namespace PKGE
             lab[2] = 200f * (scaledXYZ[1] - scaledXYZ[2]);
         }
 
-        public static void RGBToYUV(Color rgb, out float[] yuv)
+        public static void RGBToYUV(Color rgb, [System.Diagnostics.CodeAnalysis.NotNull] out float[] yuv)
         {
             yuv = new float[3];
             yuv[0] = 0.299f * rgb.r + 0.587f * rgb.g + 0.114f * rgb.b;
@@ -848,7 +855,7 @@ namespace PKGE
             yuv[2] = 0.615f * rgb.r + -0.51499f * rgb.g + -0.10001f * rgb.b;
         }
 
-        public static float DeltaECIE(float[] lab1, float[] lab2)
+        public static float DeltaECIE([System.Diagnostics.CodeAnalysis.NotNull] float[] lab1, [System.Diagnostics.CodeAnalysis.NotNull] float[] lab2)
         {
             var diffs = new NativeArray<float>(3, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             diffs[0] = lab1[0] - lab2[0];
@@ -857,7 +864,7 @@ namespace PKGE
             return Mathf.Sqrt((diffs[0] * diffs[0]) + (diffs[1] * diffs[1]) + (diffs[2] * diffs[2]));
         }
 
-        public static float DeltaE1994(float[] lab1, float[] lab2)
+        public static float DeltaE1994([System.Diagnostics.CodeAnalysis.NotNull] float[] lab1, [System.Diagnostics.CodeAnalysis.NotNull] float[] lab2)
         {
             const float WHTL = 1.0f;
             const float WHTC = 1.0f;
@@ -930,7 +937,7 @@ namespace PKGE
             return ratio * (1.0f - distance);
         }
 
-        public static void ComputeHistogram(NativeArray<Color32> pixels, Histogram histogram)
+        public static void ComputeHistogram(NativeArray<Color32> pixels, [System.Diagnostics.CodeAnalysis.NotNull] Histogram histogram)
         {
             foreach (var pixel in pixels)
             {
@@ -940,7 +947,7 @@ namespace PKGE
             histogram.Normalize(pixels.Length);
         }
 
-        public static void ComputeHistogram(Texture2D texture, Histogram histogram)
+        public static void ComputeHistogram([System.Diagnostics.CodeAnalysis.NotNull] Texture2D texture, [System.Diagnostics.CodeAnalysis.NotNull] Histogram histogram)
         {
             var pixels = texture.GetPixelData<Color32>(mipLevel: 0);
             ComputeHistogram(pixels, histogram);
@@ -960,7 +967,7 @@ namespace PKGE
             }
         }
 
-        public static void ComputeBestColorsAndHistogram(Color32[] pixels, ColorInfo[] bestColors, ColorInfo[] bestShades, Histogram histogram)
+        public static void ComputeBestColorsAndHistogram([System.Diagnostics.CodeAnalysis.NotNull] Color32[] pixels, ColorInfo[] bestColors, ColorInfo[] bestShades, [System.Diagnostics.CodeAnalysis.NotNull] Histogram histogram)
         {
             var nbPixels = pixels.Length;
             using var _0 = DictionaryPool<uint, long>.Get(out var colorMap);
@@ -1001,7 +1008,7 @@ namespace PKGE
             }
         }
 
-        public static void ComputeBestColorsAndHistogram_Parallel(Color32[] pixels, ColorInfo[] bestColors, ColorInfo[] bestShades, Histogram histogram)
+        public static void ComputeBestColorsAndHistogram_Parallel([System.Diagnostics.CodeAnalysis.NotNull] Color32[] pixels, ColorInfo[] bestColors, ColorInfo[] bestShades, [System.Diagnostics.CodeAnalysis.NotNull] Histogram histogram)
         {
             var nbPixels = pixels.Length;
             using var _0 = DictionaryPool<uint, long>.Get(out var colorMap);
@@ -1078,7 +1085,7 @@ namespace PKGE
             }
         }
 
-        public static void ComputeEdgesHistogramAndDensity(Color[] pixels, int width, int height, EdgeHistogram histogram, double[] edgeDensities)
+        public static void ComputeEdgesHistogramAndDensity(Color[] pixels, int width, int height, [System.Diagnostics.CodeAnalysis.NotNull] EdgeHistogram histogram, double[] edgeDensities)
         {
             var imagePixels = new ImagePixels(width, height, pixels);
             var filter = new SobelFilter(0.25f);
@@ -1150,7 +1157,7 @@ namespace PKGE
             return 1.0f;
         }
 
-        public static float CityBlockDistance(IHistogram histogramA, IHistogram histogramB)
+        public static float CityBlockDistance([System.Diagnostics.CodeAnalysis.NotNull] IHistogram histogramA, IHistogram histogramB)
         {
             var distances = new float[histogramA.channels];
             for (var c = 0; c < histogramA.channels; ++c)
@@ -1167,7 +1174,7 @@ namespace PKGE
             return distances.Sum() / (2 * histogramA.channels);
         }
 
-        public static float EuclideanDistance(IHistogram histogramA, IHistogram histogramB)
+        public static float EuclideanDistance([System.Diagnostics.CodeAnalysis.NotNull] IHistogram histogramA, IHistogram histogramB)
         {
             var distances = new float[histogramA.channels];
             for (var c = 0; c < histogramA.channels; ++c)
@@ -1185,7 +1192,7 @@ namespace PKGE
             return Mathf.Sqrt(distances.Sum()) / (histogramA.channels * Mathf.Sqrt(2));
         }
 
-        public static float BhattacharyyaDistance(IHistogram histogramA, IHistogram histogramB)
+        public static float BhattacharyyaDistance([System.Diagnostics.CodeAnalysis.NotNull] IHistogram histogramA, IHistogram histogramB)
         {
             var distances = new float[histogramA.channels];
             for (var c = 0; c < histogramA.channels; ++c)
@@ -1204,7 +1211,7 @@ namespace PKGE
             return 1 - distances.Sum() / histogramA.channels;
         }
 
-        public static float MDPA(IHistogram histogramA, IHistogram histogramB)
+        public static float MDPA([System.Diagnostics.CodeAnalysis.NotNull] IHistogram histogramA, IHistogram histogramB)
         {
             var distances = new float[histogramA.channels];
             for (var c = 0; c < histogramA.channels; ++c)
@@ -1269,7 +1276,8 @@ namespace PKGE
 
         /// <exception cref="ArgumentException">Thrown if <paramref name="centroids"/> does not have a Count of 3.
         /// </exception>
-        static IList<double[]> ComputeCentralMoments(Color[] pixels, int width, int height, in IList<MomentOrder> momentOrders, in IList<Centroid> centroids)
+        [JetBrains.Annotations.NotNull]
+        static IList<double[]> ComputeCentralMoments(Color[] pixels, int width, int height, [System.Diagnostics.CodeAnalysis.NotNull] in IList<MomentOrder> momentOrders, [System.Diagnostics.CodeAnalysis.NotNull] in IList<Centroid> centroids)
         {
             if (centroids.Count != 3)
                 throw new ArgumentException("There should be 3 centroids, one for each channel", nameof(centroids));
@@ -1315,7 +1323,8 @@ namespace PKGE
 
         /// <exception cref="ArgumentException">Thrown if <paramref name="centroids"/> does not have a Count of 3.
         /// </exception>
-        static IList<double[]> ComputeCentralMoments_Parallel(Color[] pixels, int width, int height, IList<MomentOrder> momentOrders, IList<Centroid> centroids)
+        [JetBrains.Annotations.NotNull]
+        static IList<double[]> ComputeCentralMoments_Parallel(Color[] pixels, int width, int height, [System.Diagnostics.CodeAnalysis.NotNull] IList<MomentOrder> momentOrders, [System.Diagnostics.CodeAnalysis.NotNull] IList<Centroid> centroids)
         {
             if (centroids.Count != 3)
                 throw new ArgumentException("There should be 3 centroids, one for each channel", nameof(centroids));
@@ -1386,11 +1395,12 @@ namespace PKGE
             return allSums;
         }
 
-        static double[] ComputeCentralMoment(Color[] pixels, int width, int height, int p, int q, in List<Centroid> centroids)
+        static double[] ComputeCentralMoment(Color[] pixels, int width, int height, int p, int q, [System.Diagnostics.CodeAnalysis.NotNull] in List<Centroid> centroids)
         {
             return ComputeCentralMoments(pixels, width, height, new[] { new MomentOrder(p, q) }, centroids)[0];
         }
 
+        [JetBrains.Annotations.NotNull]
         static IList<Centroid> ComputeCentroidsAndAreas(Color[] pixels, int width, int height, out double[] areas)
         {
             var moments = ComputeRawMoments(pixels, width, height,
@@ -1409,6 +1419,7 @@ namespace PKGE
             return centroids;
         }
 
+        [JetBrains.Annotations.NotNull]
         static double[] CentralMomentToScaleInvariant(double[] centralMoment, double[] area, in MomentOrder momentOrder)
         {
             var scaleInvariant = new double[3];
@@ -1417,7 +1428,7 @@ namespace PKGE
             return scaleInvariant;
         }
 
-        public static void ComputeFirstOrderInvariant(Color[] pixels, int width, int height, double[] geometricMoments)
+        public static void ComputeFirstOrderInvariant(Color[] pixels, int width, int height, [System.Diagnostics.CodeAnalysis.NotNull] double[] geometricMoments)
         {
             var centroids = ComputeCentroidsAndAreas(pixels, width, height, out var areas);
             var moment20 = new MomentOrder(2, 0);
@@ -1436,7 +1447,7 @@ namespace PKGE
             }
         }
 
-        public static void ComputeSecondOrderInvariant(Color[] pixels, int width, int height, double[] geometricMoments)
+        public static void ComputeSecondOrderInvariant(Color[] pixels, int width, int height, [System.Diagnostics.CodeAnalysis.NotNull] double[] geometricMoments)
         {
             var centroids = ComputeCentroidsAndAreas(pixels, width, height, out var areas);
             var moment20 = new MomentOrder(2, 0);
@@ -1466,7 +1477,7 @@ namespace PKGE
             diff.Dispose();
         }
 
-        public static MinMaxColor GetMinMax(ImagePixels image)
+        public static MinMaxColor GetMinMax([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels image)
         {
             var min = new Color(float.MaxValue, float.MaxValue, float.MaxValue);
             var max = new Color(float.MinValue, float.MinValue, float.MinValue);
@@ -1484,7 +1495,8 @@ namespace PKGE
             return new MinMaxColor(min, max);
         }
 
-        public static ImagePixels StretchImage(ImagePixels image, float newMin, float newMax)
+        [JetBrains.Annotations.NotNull]
+        public static ImagePixels StretchImage([System.Diagnostics.CodeAnalysis.NotNull] ImagePixels image, float newMin, float newMax)
         {
             var newMinColor = new Color(newMin, newMin, newMin);
             var newColors = new Color[image.Height * image.Width];

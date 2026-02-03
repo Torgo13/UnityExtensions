@@ -8,7 +8,7 @@ namespace PKGE.Unsafe
     {
         /// <exception cref="IndexOutOfRangeException"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T AsRef<T>(this T[] array, int index) where T : struct
+        public static ref T AsRef<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int index) where T : struct
         {
             Assert.IsNotNull(array);
 
@@ -27,7 +27,7 @@ namespace PKGE.Unsafe
         #endregion // Unity.Collections.LowLevel.Unsafe
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrEmpty(this Array array)
+        public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.MaybeNull] this Array array)
         {
             return array == null || array.Length == 0;
         }

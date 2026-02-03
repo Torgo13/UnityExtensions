@@ -23,7 +23,7 @@ namespace PKGE.Packages
         [MarshalAs(UnmanagedType.U1)]
         private readonly bool owner;
 
-        public Curve(AnimationCurve c, Allocator alloc)
+        public Curve([System.Diagnostics.CodeAnalysis.NotNull] AnimationCurve c, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(c.keys, alloc);
             owner = true;

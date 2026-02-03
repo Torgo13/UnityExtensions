@@ -248,7 +248,7 @@ namespace PKGE.Unsafe
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
-        public static void MergeSort(uint[] arr, int sortSize, ref uint[] supportArray)
+        public static void MergeSort([System.Diagnostics.CodeAnalysis.MaybeNull] uint[] arr, int sortSize, ref uint[] supportArray)
         {
             if (arr == null)
                 return;
@@ -300,7 +300,7 @@ namespace PKGE.Unsafe
         /// </summary>
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
-        public static void InsertionSort(uint[] arr, int sortSize)
+        public static void InsertionSort([System.Diagnostics.CodeAnalysis.MaybeNull] uint[] arr, int sortSize)
         {
             if (arr == null)
                 return;
@@ -366,7 +366,7 @@ namespace PKGE.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Array of uints that is used for support data. The algorithm will automatically allocate it if necessary.</param>
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
-        public static void RadixSort(uint[] arr, int sortSize, ref uint[] supportArray, int radixBits = 8)
+        public static void RadixSort([System.Diagnostics.CodeAnalysis.MaybeNull] uint[] arr, int sortSize, ref uint[] supportArray, int radixBits = 8)
         {
             if (arr == null)
                 return;

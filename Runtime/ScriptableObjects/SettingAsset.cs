@@ -41,6 +41,7 @@ namespace PKGE
             }
         }
 
+        [JetBrains.Annotations.NotNull]
         static T CreateOrLoad()
         {
 #if UNITY_EDITOR
@@ -133,7 +134,7 @@ namespace PKGE
         #region Unity.LiveCapture
         internal string FilePath { get; }
 
-        public SettingFilePathAttribute(string relativePath, Location location)
+        public SettingFilePathAttribute([System.Diagnostics.CodeAnalysis.NotNull] string relativePath, Location location)
         {
             if (string.IsNullOrEmpty(relativePath))
                 throw new ArgumentException("Path is empty.", nameof(relativePath));
@@ -141,6 +142,7 @@ namespace PKGE
             FilePath = CombineFilePath(relativePath, location);
         }
 
+        [JetBrains.Annotations.NotNull]
         static string CombineFilePath(string relativePath, Location location)
         {
             if (relativePath[0] == '/')

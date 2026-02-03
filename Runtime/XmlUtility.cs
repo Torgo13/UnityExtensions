@@ -13,7 +13,7 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Utility/XmlUtility.cs
         #region Unity.Kinematica
-        public static void CreateAttribute(this XmlNode node, string name, string value)
+        public static void CreateAttribute([System.Diagnostics.CodeAnalysis.NotNull] this XmlNode node, [System.Diagnostics.CodeAnalysis.NotNull] string name, string value)
         {
             var document = node.OwnerDocument;
             var attribute = document.CreateAttribute(name);
@@ -21,17 +21,17 @@ namespace PKGE.Packages
             _ = node.Attributes.Append(attribute);
         }
 
-        public static void CreateAttribute(this XmlNode node, string name, int value)
+        public static void CreateAttribute([System.Diagnostics.CodeAnalysis.NotNull] this XmlNode node, [System.Diagnostics.CodeAnalysis.NotNull] string name, int value)
         {
             node.CreateAttribute(name, value.ToString());
         }
 
-        public static void CreateAttribute(this XmlNode node, string name, float value)
+        public static void CreateAttribute([System.Diagnostics.CodeAnalysis.NotNull] this XmlNode node, [System.Diagnostics.CodeAnalysis.NotNull] string name, float value)
         {
             node.CreateAttribute(name, value.ToString());
         }
 
-        public static void CreateVector3Node(this XmlNode parentNode, string name, float3 position)
+        public static void CreateVector3Node([System.Diagnostics.CodeAnalysis.NotNull] this XmlNode parentNode, [System.Diagnostics.CodeAnalysis.NotNull] string name, float3 position)
         {
             var document = parentNode.OwnerDocument;
             var node = document.CreateElement(name);
@@ -41,7 +41,7 @@ namespace PKGE.Packages
             _ = parentNode.AppendChild(node);
         }
 
-        public static void CreateQuaternionNode(this XmlNode parentNode, string name, quaternion rotation)
+        public static void CreateQuaternionNode([System.Diagnostics.CodeAnalysis.NotNull] this XmlNode parentNode, [System.Diagnostics.CodeAnalysis.NotNull] string name, quaternion rotation)
         {
             var document = parentNode.OwnerDocument;
             var node = document.CreateElement(name);

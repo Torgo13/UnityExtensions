@@ -46,6 +46,7 @@ namespace PKGE
             return new ResizableArrayPool<T>(minimumLength);
         }
 
+        [JetBrains.Annotations.NotNull]
         public T[] Resize(int minimumLength)
         {
             UnityEngine.Assertions.Assert.IsTrue(minimumLength > 0);
@@ -79,7 +80,7 @@ namespace PKGE
         /// <param name="copyArray">Indicates whether the contents of the array should be copied to the resized array.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="newSize"/> is less than 0.</exception>
         /// <remarks>When this method returns, the caller must not use any references to the old array anymore.</remarks>
-        public static void Resize<T>(this ArrayPool<T> pool, [NotNull] ref T[]? array, int newSize, bool clearArray = false,
+        public static void Resize<T>(this ArrayPool<T> pool, [System.Diagnostics.CodeAnalysis.NotNull] ref T[]? array, int newSize, bool clearArray = false,
             bool copyArray = true)
         {
             // If the old array is null, just create a new one with the requested size
@@ -125,7 +126,7 @@ namespace PKGE
         /// <param name="clearArray">Indicates whether the contents of the array should be cleared if returned to the pool.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="capacity"/> is less than 0.</exception>
         /// <remarks>When this method returns, the caller must not use any references to the old array anymore.</remarks>
-        public static void EnsureCapacity<T>(this ArrayPool<T> pool, [NotNull] ref T[]? array, int capacity, bool clearArray = false)
+        public static void EnsureCapacity<T>(this ArrayPool<T> pool, [System.Diagnostics.CodeAnalysis.NotNull] ref T[]? array, int capacity, bool clearArray = false)
         {
             if (capacity < 0)
             {
@@ -167,7 +168,7 @@ namespace PKGE
         /// <param name="clearArray">Indicates whether the contents of the array should be cleared before reuse.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="newSize"/> is less than 0.</exception>
         /// <remarks>When this method returns, the caller must not use any references to the old array anymore.</remarks>
-        public static void Resize<T>([NotNull] ref T[]? array, int newSize, bool clearArray = false)
+        public static void Resize<T>([System.Diagnostics.CodeAnalysis.NotNull] ref T[]? array, int newSize, bool clearArray = false)
         {
             ArrayPool<T>.Shared.Resize(ref array, newSize, clearArray);
         }

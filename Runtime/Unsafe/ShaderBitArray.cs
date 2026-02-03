@@ -59,6 +59,7 @@ namespace PKGE.Unsafe
             bitOffset = index & ElementMask;
         }
 
+        readonly
         public bool this[int index]
         {
             get
@@ -82,6 +83,7 @@ namespace PKGE.Unsafe
             }
         }
 
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             unsafe

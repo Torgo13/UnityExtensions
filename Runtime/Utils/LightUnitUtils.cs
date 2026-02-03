@@ -5,7 +5,7 @@ namespace PKGE
 {
     public static class LightUtils
     {
-        public static bool GetDirectionalLight(out Light sun, out Transform sunTransform)
+        public static bool GetDirectionalLight(out Light sun, [System.Diagnostics.CodeAnalysis.MaybeNull] out Transform sunTransform)
         {
             sun = RenderSettings.sun;
             if (sun != null)

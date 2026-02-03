@@ -10,7 +10,7 @@ namespace PKGE
         #region UnityEngine.XR.ARFoundation.Samples
         static readonly Vector2 s_TopCenterAnchorPosition = new Vector2(.5f, 1);
 
-        public static void SetSize(this RectTransform rt, Vector2 size)
+        public static void SetSize([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, Vector2 size)
         {
             var oldSize = rt.rect.size;
             var deltaSize = size - oldSize;
@@ -19,27 +19,27 @@ namespace PKGE
             rt.offsetMax += new Vector2(deltaSize.x * (1f - pivot.x), deltaSize.y * (1f - pivot.y));
         }
 
-        public static float GetWidth(this RectTransform rt)
+        public static float GetWidth([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt)
         {
             return rt.rect.width;
         }
 
-        public static void SetWidth(this RectTransform rt, float width)
+        public static void SetWidth([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, float width)
         {
             SetSize(rt, new Vector2(width, rt.rect.size.y));
         }
 
-        public static float GetHeight(this RectTransform rt)
+        public static float GetHeight([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt)
         {
             return rt.rect.height;
         }
 
-        public static void SetHeight(this RectTransform rt, float height)
+        public static void SetHeight([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, float height)
         {
             SetSize(rt, new Vector2(rt.rect.size.x, height));
         }
 
-        public static void SetTopLeftPosition(this RectTransform rt, Vector2 pos)
+        public static void SetTopLeftPosition([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, Vector2 pos)
         {
             rt.localPosition = new Vector3(
                 pos.x + (rt.pivot.x * rt.rect.width),
@@ -47,7 +47,7 @@ namespace PKGE
                 rt.localPosition.z);
         }
 
-        public static void SetTopCenterPosition(this RectTransform rt, Vector2 pos)
+        public static void SetTopCenterPosition([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, Vector2 pos)
         {
             rt.localPosition = new Vector3(
                 pos.x + (rt.pivot.x * rt.rect.width / 2),
@@ -55,7 +55,7 @@ namespace PKGE
                 rt.localPosition.z);
         }
 
-        public static void TranslateX(this RectTransform rt, float x)
+        public static void TranslateX([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, float x)
         {
             Vector3 pos = rt.localPosition;
             rt.localPosition = new Vector3(
@@ -64,7 +64,7 @@ namespace PKGE
                 pos.z);
         }
 
-        public static void TranslateY(this RectTransform rt, float y)
+        public static void TranslateY([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, float y)
         {
             Vector3 pos = rt.localPosition;
             rt.localPosition = new Vector3(
@@ -73,7 +73,7 @@ namespace PKGE
                 pos.z);
         }
 
-        public static void Translate(this RectTransform rt, Vector2 translation)
+        public static void Translate([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt, Vector2 translation)
         {
             Vector3 pos = rt.localPosition;
             rt.localPosition = new Vector3(
@@ -82,7 +82,7 @@ namespace PKGE
                 pos.z);
         }
 
-        public static void AnchorToTopCenter(this RectTransform rt)
+        public static void AnchorToTopCenter([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rt)
         {
             rt.anchorMin = s_TopCenterAnchorPosition;
             rt.anchorMax = s_TopCenterAnchorPosition;
@@ -105,7 +105,7 @@ namespace PKGE
             }
         }
 
-        public static void GetWorldCorners(this RectTransform rectTransform, Unity.Collections.NativeArray<Vector3> fourCornersArray)
+        public static void GetWorldCorners([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rectTransform, Unity.Collections.NativeArray<Vector3> fourCornersArray)
         {
             UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.IsCreated);
             UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.Length >= 4);

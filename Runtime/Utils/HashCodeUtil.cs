@@ -12,7 +12,7 @@ namespace PKGE
             }
         }
 
-        public static int ReferenceHash(object obj) => obj != null ? obj.GetHashCode() : 0;
+        public static int ReferenceHash([System.Diagnostics.CodeAnalysis.MaybeNull] object obj) => obj != null ? obj.GetHashCode() : 0;
 
         public static int Combine(int hash1, int hash2, int hash3) => Combine(Combine(hash1, hash2), hash3);
         public static int Combine(int hash1, int hash2, int hash3, int hash4) => Combine(Combine(hash1, hash2, hash3), hash4);

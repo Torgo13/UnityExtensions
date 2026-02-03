@@ -37,6 +37,7 @@ namespace PKGE.Packages
             InstanceIDs.Dispose();
         }
 
+        [JetBrains.Annotations.NotNull]
         public UnityEngine.Object[] ToObjectArray()
         {
             using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Object>.Get(out var objects);
@@ -190,6 +191,7 @@ namespace PKGE.Packages
         /// <summary>
         /// Object being referenced by this <see cref="UnityObjectRef{T}"/>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.NotNull]
         public T Value
         {
             [ExcludeFromBurstCompatTesting("Returns managed object")]

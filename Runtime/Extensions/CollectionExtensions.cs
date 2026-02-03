@@ -24,7 +24,8 @@ namespace PKGE
         /// <param name="collection">The collection to create a string from.</param>
         /// <typeparam name="T">The type of objects in the collection.</typeparam>
         /// <returns>A string with all elements in the collection converted to strings and separated by commas.</returns>
-        public static string Stringify<T>(this ICollection<T> collection)
+        [JetBrains.Annotations.NotNull]
+        public static string Stringify<T>([JetBrains.Annotations.NotNull] this ICollection<T> collection)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
             var endIndex = collection.Count - 1;
@@ -119,7 +120,8 @@ namespace PKGE
         /// <typeparam name="T"></typeparam>
         /// <returns>The first element if the list was sorted or default</returns>
         /// <exception cref="ArgumentNullException">Can throw exception if list is null</exception>
-        public static T FirstOrDefaultSorted<T>(this IEnumerable<T> collection, IComparer<T> comparer = null)
+        [JetBrains.Annotations.CanBeNull]
+        public static T FirstOrDefaultSorted<T>([JetBrains.Annotations.NotNull] this IEnumerable<T> collection, IComparer<T> comparer = null)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");
@@ -152,6 +154,7 @@ namespace PKGE
         /// <typeparam name="T">Collection type</typeparam>
         /// <returns>Serialized collection</returns>
         /// <exception cref="ArgumentNullException">Can produce exception if collection or serialize method is null</exception>
+        [JetBrains.Annotations.NotNull]
         public static string SerializedView<T>([DisallowNull] this IEnumerable<T> collection, [DisallowNull] Func<T, string> serializeElement)
         {
             if (collection == null)

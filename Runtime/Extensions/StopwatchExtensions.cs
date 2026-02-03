@@ -14,7 +14,7 @@ namespace PKGE
         /// Restarts the stopwatch by stopping, resetting, and then starting it.
         /// </summary>
         /// <param name="stopwatch">The stopwatch to restart.</param>
-        public static void Restart(this Stopwatch stopwatch)
+        public static void Restart([System.Diagnostics.CodeAnalysis.NotNull] this Stopwatch stopwatch)
         {
             stopwatch.Stop();
             stopwatch.Reset();
@@ -29,7 +29,7 @@ namespace PKGE
             return stopWatch.GetTicksDeltaAsSeconds(previousTicks) * 1000;
         }
 
-        public static double GetTicksDeltaAsSeconds(this Stopwatch stopWatch, long previousTicks)
+        public static double GetTicksDeltaAsSeconds([System.Diagnostics.CodeAnalysis.NotNull] this Stopwatch stopWatch, long previousTicks)
         {
             return (double)(stopWatch.ElapsedTicks - previousTicks) / Stopwatch.Frequency;
         }

@@ -12,7 +12,7 @@ namespace PKGE
         /// </summary>
         /// <param name="renderer">The renderer on which to add the material.</param>
         /// <param name="material">The material to add.</param>
-        public static void AddMaterial(this Renderer renderer, Material material)
+        public static void AddMaterial([System.Diagnostics.CodeAnalysis.NotNull] this Renderer renderer, Material material)
         {
             var materials = ListPool<Material>.Get();
             renderer.GetSharedMaterials(materials);

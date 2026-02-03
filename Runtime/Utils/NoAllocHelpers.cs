@@ -17,7 +17,7 @@ namespace PKGE
         /// <inheritdoc cref="QuickSortSampler"/>
         static readonly ProfilingSampler InsertionSortSampler = new ProfilingSampler(nameof(InsertionSort));
 
-        public static void QuickSort<T>(T[] data, Func<T, T, int> compare)
+        public static void QuickSort<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] data, Func<T, T, int> compare)
         {
             using var scope = new ProfilingScope(QuickSortSampler);
             QuickSort(data, 0, data.Length - 1, compare);
@@ -71,7 +71,7 @@ namespace PKGE
             }
         }
 
-        static T Median3Pivot<T>(T[] data, int start, int pivot, int end, Func<T, T, int> compare)
+        static T Median3Pivot<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] data, int start, int pivot, int end, [System.Diagnostics.CodeAnalysis.NotNull] Func<T, T, int> compare)
         {
             if (compare(data[end], data[start]) < 0)
                 Swap(start, end);
@@ -90,7 +90,7 @@ namespace PKGE
             }
         }
 
-        static int Partition<T>(T[] data, int start, int end, Func<T, T, int> compare)
+        static int Partition<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] data, int start, int end, [System.Diagnostics.CodeAnalysis.NotNull] Func<T, T, int> compare)
         {
             int diff = end - start;
             int pivot = start + diff / 2;
@@ -116,7 +116,7 @@ namespace PKGE
             }
         }
 
-        public static void InsertionSort<T>(T[] data, Func<T, T, int> compare)
+        public static void InsertionSort<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] data, Func<T, T, int> compare)
         {
             using var scope = new ProfilingScope(InsertionSortSampler);
             InsertionSort(data, 0, data.Length - 1, compare);
@@ -131,7 +131,7 @@ namespace PKGE
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="compare"></param>
-        public static void InsertionSort<T>(T[] data, int start, int end, Func<T, T, int> compare)
+        public static void InsertionSort<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] data, int start, int end, Func<T, T, int> compare)
         {
             Assert.IsTrue((uint)start < data.Length);
             Assert.IsTrue((uint)end < data.Length);
@@ -194,8 +194,8 @@ namespace PKGE
         }
 
         // tiny helpers
-        public static int SafeLength(this Array values) { return values != null ? values.Length : 0; }
-        public static int SafeLength<T>(this List<T> values) { return values != null ? values.Count : 0; }
+        public static int SafeLength([System.Diagnostics.CodeAnalysis.MaybeNull] this Array values) { return values != null ? values.Length : 0; }
+        public static int SafeLength<T>([System.Diagnostics.CodeAnalysis.MaybeNull] this List<T> values) { return values != null ? values.Count : 0; }
 
         /// <remarks>
         /// Returned array will be invalid if the Capacity of the List is modified.
@@ -240,7 +240,7 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ResetListSizeNoResize<T>(this List<T> list, int size)
+        public static void ResetListSizeNoResize<T>([System.Diagnostics.CodeAnalysis.NotNull] this List<T> list, int size)
         {
             Assert.IsNotNull(list);
             Assert.IsTrue(size >= 0);

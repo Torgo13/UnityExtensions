@@ -7,7 +7,8 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Runtime/Extensions/AssemblyExtensions.cs
         #region UnityEngine.GraphToolsFoundation.Overdrive
-        public static Type[] GetTypesSafe(this Assembly assembly)
+        [JetBrains.Annotations.NotNull]
+        public static Type[] GetTypesSafe([System.Diagnostics.CodeAnalysis.NotNull] this Assembly assembly)
         {
             try
             {

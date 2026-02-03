@@ -78,7 +78,7 @@ namespace PKGE
         /// Constructor. This constructor allocates memory and does a deep copy of the provided array.
         /// </summary>
         /// <param name="deepCopy">Array to be copied</param>
-        public DynamicArray(DynamicArray<T> deepCopy)
+        public DynamicArray([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> deepCopy)
         {
             Array = new T[deepCopy.size];
             size = deepCopy.size;
@@ -133,7 +133,7 @@ namespace PKGE
         /// Adds the elements of the specified collection to the end of the DynamicArray.
         /// </summary>
         /// <param name="array">The array whose elements should be added to the end of the DynamicArray. The array itself cannot be null, but it can contain elements that are null, if type T is a reference type.</param>
-        public void AddRange(DynamicArray<T> array)
+        public void AddRange([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> array)
         {
             // Save the size before reserve. Otherwise, things break when self-appending i.e. `a.AddRange(a)`
             var addedSize = array.size;
@@ -376,14 +376,14 @@ namespace PKGE
         /// </summary>
         /// <param name="array">Input DynamicArray.</param>
         /// <returns>The internal array.</returns>
-        public static implicit operator ReadOnlySpan<T>(DynamicArray<T> array) => new ReadOnlySpan<T>(array.Array, 0, array.size);
+        public static implicit operator ReadOnlySpan<T>([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> array) => new ReadOnlySpan<T>(array.Array, 0, array.size);
 
         /// <summary>
         /// Implicit conversion to Span.
         /// </summary>
         /// <param name="array">Input DynamicArray.</param>
         /// <returns>The internal array.</returns>
-        public static implicit operator Span<T>(DynamicArray<T> array) => new Span<T>(array.Array, 0, array.size);
+        public static implicit operator Span<T>([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> array) => new Span<T>(array.Array, 0, array.size);
 
         /// <summary>
         /// IEnumerator-like struct used to loop over this entire array. See the IEnumerator docs for more info:
@@ -409,7 +409,7 @@ namespace PKGE
             /// </summary>
             /// <param name="setOwner">The array to iterate over.</param>
             /// <exception cref="ArgumentNullException">Thrown if the array is null.</exception>
-            public Iterator(DynamicArray<T> setOwner)
+            public Iterator([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> setOwner)
             {
 #if DEBUG
                 if (setOwner == null)
@@ -516,7 +516,7 @@ namespace PKGE
                 /// <param name="first">The index of the first item in the array.</param>
                 /// <param name="numItems">The number of array members to iterate through.</param>
                 /// <exception cref="ArgumentNullException">Thrown if the array is null.</exception>
-                public RangeIterator(DynamicArray<T> setOwner, int first, int numItems)
+                public RangeIterator([System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T> setOwner, int first, int numItems)
                 {
 #if DEBUG
                     if (setOwner == null)
@@ -703,7 +703,7 @@ namespace PKGE
         // Had to copy and paste because it's apparently impossible to pass a sort delegate where T is Comparable<T>,
         // otherwise some boxing happens and allocates...
         // So two identical versions of the function, one with delegate but no Comparable and the other with just the comparable.
-        static int Partition<T>(Span<T> data, int left, int right, DynamicArray<T>.SortComparer comparer) where T : new()
+        static int Partition<T>(Span<T> data, int left, int right, [System.Diagnostics.CodeAnalysis.NotNull] DynamicArray<T>.SortComparer comparer) where T : new()
         {
             var pivot = data[left];
 
@@ -769,7 +769,7 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">Type of the array.</typeparam>
         /// <param name="array">Array on which to perform the quick sort.</param>
-        public static void QuickSort<T>(this DynamicArray<T> array) where T : IComparable<T>, new()
+        public static void QuickSort<T>([System.Diagnostics.CodeAnalysis.NotNull] this DynamicArray<T> array) where T : IComparable<T>, new()
         {
             QuickSort<T>(array, 0, array.size - 1);
             array.BumpVersion();
@@ -781,7 +781,7 @@ namespace PKGE
         /// <typeparam name="T">Type of the array.</typeparam>
         /// <param name="array">Array on which to perform the quick sort.</param>
         /// <param name="comparer">Comparer used for sorting.</param>
-        public static void QuickSort<T>(this DynamicArray<T> array, DynamicArray<T>.SortComparer comparer) where T : new()
+        public static void QuickSort<T>([System.Diagnostics.CodeAnalysis.NotNull] this DynamicArray<T> array, DynamicArray<T>.SortComparer comparer) where T : new()
         {
             QuickSort(array, 0, array.size - 1, comparer);
             array.BumpVersion();

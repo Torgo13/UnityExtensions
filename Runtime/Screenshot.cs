@@ -9,7 +9,8 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/Screenshot.cs
         #region Unity.LiveCapture
-        public static Texture2D Take(this Camera camera, float scale = 1f, bool hdr = false)
+        [JetBrains.Annotations.NotNull]
+        public static Texture2D Take([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, float scale = 1f, bool hdr = false)
         {
             if (camera == null)
                 throw new ArgumentNullException(nameof(camera));
@@ -42,7 +43,8 @@ namespace PKGE
             return texture;
         }
 
-        public static string SaveAsPNG(this Texture2D texture, string filename, string directory)
+        [JetBrains.Annotations.NotNull]
+        public static string SaveAsPNG([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -61,7 +63,7 @@ namespace PKGE
         }
         #endregion // Unity.LiveCapture
 
-        public static async ValueTask<string> SaveAsPNGAsync(this Texture2D texture, string filename, string directory)
+        public static async ValueTask<string> SaveAsPNGAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -80,7 +82,8 @@ namespace PKGE
         }
 
         #region EXR
-        public static string SaveAsEXR(this Texture2D texture, string filename, string directory,
+        [JetBrains.Annotations.NotNull]
+        public static string SaveAsEXR([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -99,7 +102,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async ValueTask<string> SaveAsEXRAsync(this Texture2D texture, string filename, string directory,
+        public static async ValueTask<string> SaveAsEXRAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -119,7 +122,8 @@ namespace PKGE
         }
         #endregion // EXR
 
-        public static string Save(this Texture2D texture, string filename, string directory,
+        [JetBrains.Annotations.NotNull]
+        public static string Save([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -134,7 +138,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async ValueTask<string> SaveAsync(this Texture2D texture, string filename, string directory,
+        public static async ValueTask<string> SaveAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -149,7 +153,7 @@ namespace PKGE
             return assetPath;
         }
 
-        static string CreatePath(string filename, string directory, string textureExtension)
+        static string CreatePath(string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory, string textureExtension)
         {
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.{textureExtension}";
@@ -215,6 +219,7 @@ namespace PKGE
             TGA,
         }
 
+        [JetBrains.Annotations.NotNull]
         public static string GetTextureExtension(this TextureFileType textureFile)
         {
             switch (textureFile)

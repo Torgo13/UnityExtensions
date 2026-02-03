@@ -9,43 +9,43 @@ namespace PKGE.Unsafe
     {
         #region UnsafeList
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices(this Mesh mesh, UnsafeList<Vector3> inVertices)
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<Vector3> inVertices)
         {
             mesh.SetVertices(inVertices.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals(this Mesh mesh, UnsafeList<Vector3> inNormals)
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<Vector3> inNormals)
         {
             mesh.SetNormals(inNormals.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTangents(this Mesh mesh, UnsafeList<Vector4> inTangents)
+        public static void SetTangents([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<Vector4> inTangents)
         {
             mesh.SetTangents(inTangents.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors(this Mesh mesh, UnsafeList<Color> inColors)
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<Color> inColors)
         {
             mesh.SetColors(inColors.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors(this Mesh mesh, UnsafeList<Color32> inColors)
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<Color32> inColors)
         {
             mesh.SetColors(inColors.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>(this Mesh mesh, int channel, UnsafeList<T> uvs) where T : unmanaged
+        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, int channel, UnsafeList<T> uvs) where T : unmanaged
         {
             mesh.SetUVs(channel, uvs.AsNativeArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetIndices(this Mesh mesh, UnsafeList<int> indices, MeshTopology topology,
+        public static void SetIndices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<int> indices, MeshTopology topology,
             int submesh, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
@@ -53,7 +53,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetIndices(this Mesh mesh, UnsafeList<ushort> indices, MeshTopology topology,
+        public static void SetIndices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<ushort> indices, MeshTopology topology,
             int submesh, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, topology,
@@ -61,7 +61,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>(this Mesh mesh, UnsafeList<T> indices,
+        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<T> indices,
             int submesh, bool calculateBounds = true, int baseVertex = 0)
             where T : unmanaged
         {
@@ -70,7 +70,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, UnsafeList<int> indices,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<int> indices,
             int submesh, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, MeshTopology.Triangles,
@@ -78,7 +78,7 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles(this Mesh mesh, UnsafeList<ushort> indices,
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, UnsafeList<ushort> indices,
             int submesh, bool calculateBounds = true, int baseVertex = 0)
         {
             mesh.SetIndices(indices.AsNativeArray(), indicesStart: 0, indices.Length, MeshTopology.Triangles,

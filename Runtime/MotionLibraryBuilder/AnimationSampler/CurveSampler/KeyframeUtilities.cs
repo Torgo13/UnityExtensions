@@ -54,7 +54,7 @@ namespace PKGE.Packages
             ClampedAuto,
         };
 
-        public static float StartTime(Keyframe[] frames)
+        public static float StartTime([System.Diagnostics.CodeAnalysis.NotNull] Keyframe[] frames)
         {
             return frames[0].time;
         }
@@ -64,7 +64,7 @@ namespace PKGE.Packages
             return frames[0].time;
         }
 
-        public static float EndTime(Keyframe[] frames)
+        public static float EndTime([System.Diagnostics.CodeAnalysis.NotNull] Keyframe[] frames)
         {
             return frames[frames.Length - 1].time;
         }

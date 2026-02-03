@@ -19,6 +19,7 @@ using float4 = UnityEngine.Vector4;
 namespace PKGE.Unsafe
 {
     [BurstCompile]
+    sealed
     public class BRG_Background : MonoBehaviour
     {
 #if INCLUDE_RENDER_PIPELINE_CORE
@@ -45,6 +46,7 @@ namespace PKGE.Unsafe
         private BRG_Container m_brgContainer;
         private JobHandle m_updateJobFence;
 
+        readonly
         private List<int> m_magnetCells = new List<int>();
 
         private int m_itemCount;

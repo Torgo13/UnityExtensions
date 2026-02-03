@@ -42,7 +42,7 @@ namespace PKGE
         }
         #endregion // Unity.XR.CoreUtils
         
-        public static bool Contains(this LayerMask mask, GameObject gameObject)
+        public static bool Contains(this LayerMask mask, [System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject)
         {
             return mask.Contains(gameObject.layer);
         }

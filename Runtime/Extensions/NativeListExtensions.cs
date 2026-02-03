@@ -43,7 +43,7 @@ namespace PKGE.Packages
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsTrue(count >= 0);
@@ -55,13 +55,13 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array) where T : unmanaged
         {
             nativeList.AddRange(array, array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, System.Collections.Generic.List<T> list) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] System.Collections.Generic.List<T> list) where T : unmanaged
         {
             nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
         }

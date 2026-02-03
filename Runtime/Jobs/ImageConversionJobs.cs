@@ -113,7 +113,7 @@ namespace PKGE.Packages
         /// Must use <see cref="Texture2D.Apply()"/> on <paramref name="normal"/>
         /// after calling <see cref="JobHandle.Complete"/>.
         /// </remarks>
-        public static JobHandle CreateNormalMap(this Texture2D texture, out Texture2D normal,
+        public static JobHandle CreateNormalMap([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, [System.Diagnostics.CodeAnalysis.NotNull] out Texture2D normal,
             bool layered = false, bool wrap = false, float normalStrength = 8f, JobHandle handle = default)
         {
             int width = texture.width;
@@ -180,7 +180,7 @@ namespace PKGE.Packages
         /// <see cref="Texture2D.GetPixels32(int)"/> is used when the input <see cref="Texture2D"/>
         /// is not <see cref="TextureFormat.RGBA32"/>, which allocates a <see cref="Color32"/>[].
         /// </summary>
-        public static JobHandle GetPixelData32(this Texture2D texture, out NativeArray<Color32> colour32,
+        public static JobHandle GetPixelData32([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, out NativeArray<Color32> colour32,
             out bool dispose, out int mipmapCount, JobHandle handle = default)
         {
             mipmapCount = texture.mipmapCount;

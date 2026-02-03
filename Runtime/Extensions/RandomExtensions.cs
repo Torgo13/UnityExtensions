@@ -8,13 +8,13 @@ namespace PKGE
             => random.NextInt(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static int Int(this System.Random random, int minInclusive = 0, int maxExclusive = 1)
+        public static int Int([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
             => random.Next(minInclusive, maxExclusive);
 
         public static int Int(int minInclusive = 0, int maxExclusive = 1)
             => UnityEngine.Random.Range(minInclusive, maxExclusive);
 
-        public static int NextInt(this System.Random random, int minInclusive = 0, int maxExclusive = 1)
+        public static int NextInt([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
             => random.Int(minInclusive, maxExclusive);
 
         public static int NextInt(int minInclusive = 0, int maxExclusive = 1)
@@ -33,7 +33,7 @@ namespace PKGE
             => random.Int(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static int Range(this System.Random random, int minInclusive = 0, int maxExclusive = 1)
+        public static int Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
             => random.Int(minInclusive, maxExclusive);
         #endregion // int
 
@@ -43,13 +43,13 @@ namespace PKGE
             => random.NextFloat(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static float Float(this System.Random random, float minInclusive = 0, float maxExclusive = 1)
+        public static float Float([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
             => (float)random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
 
         public static float Float(float minInclusive = 0, float maxExclusive = 1)
             => UnityEngine.Random.Range(minInclusive, maxInclusive: maxExclusive - float.Epsilon);
 
-        public static float NextFloat(this System.Random random, float minInclusive = 0, float maxExclusive = 1)
+        public static float NextFloat([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
             => random.Float(minInclusive, maxExclusive);
 
         public static float NextFloat(float minInclusive = 0, float maxExclusive = 1)
@@ -60,7 +60,7 @@ namespace PKGE
             => random.Float(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static float Range(this System.Random random, float minInclusive = 0, float maxExclusive = 1)
+        public static float Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
             => random.Float(minInclusive, maxExclusive);
         #endregion // float
 
@@ -70,7 +70,7 @@ namespace PKGE
             => random.NextDouble(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static double Double(this System.Random random, double minInclusive = 0, double maxExclusive = 1)
+        public static double Double([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
             => random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
 
         public static double Double(double minInclusive = 0, double maxExclusive = 1)
@@ -81,10 +81,10 @@ namespace PKGE
             => random.Double(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static double Range(this System.Random random, double minInclusive = 0, double maxExclusive = 1)
+        public static double Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
             => random.Double(minInclusive, maxExclusive);
 
-        public static double NextDouble(this System.Random random, double minInclusive = 0, double maxExclusive = 1)
+        public static double NextDouble([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
             => random.Double(minInclusive, maxExclusive);
 
         public static double NextDouble(double minInclusive = 0, double maxExclusive = 1)

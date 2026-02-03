@@ -39,7 +39,7 @@ namespace PKGE.Collections
         /// </summary>
         /// <param name="list">The list to wrap.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.</exception>
-        public ReadOnlyList(List<T> list)
+        public ReadOnlyList([System.Diagnostics.CodeAnalysis.NotNull] List<T> list)
         {
             _list = list ?? throw new ArgumentNullException(nameof(list));
         }
@@ -51,6 +51,7 @@ namespace PKGE.Collections
         /// <remarks>
         /// This method caches an empty read-only list that you can re-use throughout the life cycle of your app.
         /// </remarks>
+        [JetBrains.Annotations.NotNull]
         public static ReadOnlyList<T> Empty()
         {
             if (_emptyList == null)
@@ -126,7 +127,7 @@ namespace PKGE.Collections
         /// <param name="lhs">The left-hand side of the comparison.</param>
         /// <param name="rhs">The right-hand side of the comparison.</param>
         /// <returns>`true` if objects are equal. Otherwise, `false`.</returns>
-        public static bool operator ==(ReadOnlyList<T> lhs, ReadOnlyList<T> rhs)
+        public static bool operator ==([System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> lhs, [System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> rhs)
         {
             if (lhs is null && rhs is null)
                 return true;
@@ -140,7 +141,7 @@ namespace PKGE.Collections
         /// <param name="lhs">The left-hand side of the comparison.</param>
         /// <param name="rhs">The right-hand side of the comparison.</param>
         /// <returns>`false` if objects are equal. Otherwise, `true`.</returns>
-        public static bool operator !=(ReadOnlyList<T> lhs, ReadOnlyList<T> rhs) => !(lhs == rhs);
+        public static bool operator !=([System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> lhs, [System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> rhs) => !(lhs == rhs);
 
         /// <summary>
         /// Get a hash code for this object.
@@ -152,6 +153,7 @@ namespace PKGE.Collections
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>The string.</returns>
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);

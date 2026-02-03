@@ -21,7 +21,7 @@ namespace PKGE
         /// <param name="list">The list to which assignable types are appended.</param>
         /// <param name="predicate">Custom delegate to filter the type list.
         /// Return false to ignore given type.</param>
-        public static void GetAssignableTypes(this Type type, List<Type> list, Func<Type, bool> predicate = null)
+        public static void GetAssignableTypes(this Type type, List<Type> list, [System.Diagnostics.CodeAnalysis.MaybeNull] Func<Type, bool> predicate = null)
         {
             foreach (var types in ReflectionUtils.GetCachedTypesDictionary())
             {
@@ -39,7 +39,7 @@ namespace PKGE
         /// </summary>
         /// <param name="type">The interface type whose implementors are to be found.</param>
         /// <param name="list">The list to which implementors are to be appended.</param>
-        public static void GetImplementationsOfInterface(this Type type, List<Type> list)
+        public static void GetImplementationsOfInterface([System.Diagnostics.CodeAnalysis.NotNull] this Type type, List<Type> list)
         {
             if (type.IsInterface)
                 GetAssignableTypes(type, list);
@@ -51,7 +51,7 @@ namespace PKGE
         /// </summary>
         /// <param name="type">The class type of whom list will be found.</param>
         /// <param name="list">The list to which extension types will be appended.</param>
-        public static void GetExtensionsOfClass(this Type type, List<Type> list)
+        public static void GetExtensionsOfClass([System.Diagnostics.CodeAnalysis.NotNull] this Type type, List<Type> list)
         {
             if (type.IsClass)
                 GetAssignableTypes(type, list);
@@ -64,7 +64,7 @@ namespace PKGE
         /// <param name="type">The type whose interfaces will be searched.</param>
         /// <param name="genericInterface">The generic interface used to match implemented interfaces.</param>
         /// <param name="interfaces">The list to which generic interfaces will be appended.</param>
-        public static void GetGenericInterfaces(this Type type, Type genericInterface, List<Type> interfaces)
+        public static void GetGenericInterfaces([System.Diagnostics.CodeAnalysis.NotNull] this Type type, Type genericInterface, List<Type> interfaces)
         {
             foreach (var typeInterface in type.GetInterfaces())
             {
@@ -84,6 +84,7 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, `null`.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static PropertyInfo GetPropertyRecursively(this Type type, string name,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
@@ -107,6 +108,7 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, `null`.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static FieldInfo GetFieldRecursively(this Type type, string name,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
@@ -166,8 +168,8 @@ namespace PKGE
         /// <param name="bindingAttr">Binding flags of fields.</param>
         /// <exception cref="ArgumentException"><paramref name="interfaceTypes"/> contains a <see cref="Type"/> that is not an interface.</exception>
         /// <exception cref="ArgumentException"><paramref name="classes"/> contains a <see cref="Type"/> that is not a class.</exception>
-        public static void GetInterfaceFieldsFromClasses(this IEnumerable<Type> classes, List<FieldInfo> fields,
-            List<Type> interfaceTypes, BindingFlags bindingAttr)
+        public static void GetInterfaceFieldsFromClasses([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<Type> classes, List<FieldInfo> fields,
+            [System.Diagnostics.CodeAnalysis.NotNull] List<Type> interfaceTypes, BindingFlags bindingAttr)
         {
             foreach (var type in interfaceTypes)
             {
@@ -204,7 +206,7 @@ namespace PKGE
         /// <param name="type">The type whose attribute will be returned.</param>
         /// <param name="inherit">Whether to search this type's inheritance chain to find the attribute.</param>
         /// <returns>The first <typeparamref name="TAttribute"/> found.</returns>
-        public static TAttribute GetAttribute<TAttribute>(this Type type, bool inherit = false)
+        public static TAttribute GetAttribute<TAttribute>([System.Diagnostics.CodeAnalysis.NotNull] this Type type, bool inherit = false)
             where TAttribute : Attribute
         {
             Assert.IsTrue(type.IsDefined(typeof(TAttribute), inherit), "Attribute not found");
@@ -237,6 +239,7 @@ namespace PKGE
         /// <param name="type">The type to search.</param>
         /// <param name="fieldName">The name of the field to search for.</param>
         /// <returns>The field, if found.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static FieldInfo GetFieldInTypeOrBaseType(this Type type, string fieldName)
         {
             while (type != null)
@@ -260,6 +263,7 @@ namespace PKGE
         /// </summary>
         /// <param name="type">The type to get a name for.</param>
         /// <returns>The human-readable name.</returns>
+        [JetBrains.Annotations.NotNull]
         public static string GetNameWithGenericArguments(this Type type)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -267,7 +271,8 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="GetNameWithGenericArguments(Type)"/>
-        public static StringBuilder GetNameWithGenericArguments(this Type type, StringBuilder sb)
+        [JetBrains.Annotations.NotNull]
+        public static StringBuilder GetNameWithGenericArguments([System.Diagnostics.CodeAnalysis.NotNull] this Type type, [System.Diagnostics.CodeAnalysis.NotNull] StringBuilder sb)
         {
             var name = type.Name;
 
@@ -297,6 +302,7 @@ namespace PKGE
         /// </summary>
         /// <param name="type">The type to get a name for.</param>
         /// <returns>The human-readable name.</returns>
+        [JetBrains.Annotations.NotNull]
         public static string GetNameWithFullGenericArguments(this Type type)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -304,7 +310,8 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="GetNameWithFullGenericArguments(Type)"/>
-        public static StringBuilder GetNameWithFullGenericArguments(this Type type, StringBuilder sb)
+        [JetBrains.Annotations.NotNull]
+        public static StringBuilder GetNameWithFullGenericArguments([System.Diagnostics.CodeAnalysis.NotNull] this Type type, [System.Diagnostics.CodeAnalysis.NotNull] StringBuilder sb)
         {
             var name = type.Name;
 
@@ -335,6 +342,7 @@ namespace PKGE
         /// </summary>
         /// <param name="type">The type to get a name for.</param>
         /// <returns>The human-readable name.</returns>
+        [JetBrains.Annotations.NotNull]
         public static string GetFullNameWithGenericArguments(this Type type)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -342,7 +350,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="GetFullNameWithGenericArguments(Type)"/>
-        public static StringBuilder GetFullNameWithGenericArguments(this Type type, StringBuilder sb)
+        public static StringBuilder GetFullNameWithGenericArguments([System.Diagnostics.CodeAnalysis.NotNull] this Type type, StringBuilder sb)
         {
             if (type.IsGenericParameter)
                 return type.GetFullNameWithGenericArgumentsInternal(sb);
@@ -384,13 +392,14 @@ namespace PKGE
             return type.GetFullNameWithGenericArgumentsInternal(sb);
         }
 
+        [JetBrains.Annotations.NotNull]
         static string GetFullNameWithGenericArgumentsInternal(this Type type)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
             return type.GetFullNameWithGenericArgumentsInternal(sb).ToString();
         }
 
-        static StringBuilder GetFullNameWithGenericArgumentsInternal(this Type type, StringBuilder sb)
+        static StringBuilder GetFullNameWithGenericArgumentsInternal([System.Diagnostics.CodeAnalysis.NotNull] this Type type, StringBuilder sb)
         {
             var name = type.FullName;
 
@@ -423,7 +432,7 @@ namespace PKGE
         /// <param name="checkType">type wanting to check.</param>
         /// <param name="baseType">type wanting to check against.</param>
         /// <returns>True if IsAssignableFrom or IsSubclassOf.</returns>
-        public static bool IsAssignableFromOrSubclassOf(this Type checkType, Type baseType)
+        public static bool IsAssignableFromOrSubclassOf([System.Diagnostics.CodeAnalysis.NotNull] this Type checkType, Type baseType)
         {
             return checkType.IsAssignableFrom(baseType) || checkType.IsSubclassOf(baseType);
         }
@@ -435,6 +444,7 @@ namespace PKGE
         /// <param name="name">The name of the method for which to search.</param>
         /// <param name="bindingAttr">BindingFlags passed to Type.GetMethod.</param>
         /// <returns>MethodInfo for the first matching method found. Null if no method is found.</returns>
+        [JetBrains.Annotations.CanBeNull]
         public static MethodInfo GetMethodRecursively(this Type type, string name, BindingFlags bindingAttr)
         {
             MethodInfo method = null;

@@ -31,6 +31,7 @@ namespace PKGE
             }
         }
 
+        [JetBrains.Annotations.NotNull]
         static T CreateAndLoad()
         {
             Assert.IsNull(BaseInstance);

@@ -126,7 +126,7 @@ namespace PKGE.Packages
         /// <param name="camera">The camera to calculate LOD parameters from.</param>
         /// <param name="overrideLODBias">An optional LOD bias to apply.</param>
         /// <returns>Returns the calculated LOD parameters.</returns>
-        public static LODParams CalculateLODParams(Camera camera, float overrideLODBias = 0.0f)
+        public static LODParams CalculateLODParams([System.Diagnostics.CodeAnalysis.NotNull] Camera camera, float overrideLODBias = 0.0f)
         {
             LODParams lodParams;
             lodParams.cameraPos = camera.transform.position;
@@ -149,12 +149,12 @@ namespace PKGE.Packages
         /// </summary>
         /// <param name="lodGroup">The LOD group.</param>
         /// <returns>Returns the calculated world size of the LOD group.</returns>
-        public static float GetWorldSpaceSize(LODGroup lodGroup)
+        public static float GetWorldSpaceSize([System.Diagnostics.CodeAnalysis.NotNull] LODGroup lodGroup)
         {
             return GetWorldSpaceScale(lodGroup.transform) * lodGroup.size;
         }
 
-        public static float GetWorldSpaceScale(Transform t)
+        public static float GetWorldSpaceScale([System.Diagnostics.CodeAnalysis.NotNull] Transform t)
         {
             var scale = t.lossyScale;
             float largestAxis = math.abs(scale.x);
@@ -273,7 +273,7 @@ namespace PKGE.Packages
         /// </summary>
         /// <param name="group">The LOD group.</param>
         /// <returns>Returns the world position of the LOD group.</returns>
-        public static float3 GetWorldPosition(LODGroup group)
+        public static float3 GetWorldPosition([System.Diagnostics.CodeAnalysis.NotNull] LODGroup group)
         {
             return group.GetComponent<Transform>().TransformPoint(group.localReferencePoint);
         }
@@ -285,7 +285,7 @@ namespace PKGE.Packages
         /// <param name="group">The LOD group.</param>
         /// <param name="lodIndex">The LOD index to use.</param>
         /// <returns>Returns the LOD switch distance.</returns>
-        public static float CalculateLODSwitchDistance(float fieldOfView, LODGroup group, int lodIndex)
+        public static float CalculateLODSwitchDistance(float fieldOfView, [System.Diagnostics.CodeAnalysis.NotNull] LODGroup group, int lodIndex)
         {
             float halfAngle = math.tan(math.radians(fieldOfView) * 0.5F);
             return GetWorldSpaceSize(group) / (2 * group.GetLODs()[lodIndex].screenRelativeTransitionHeight * halfAngle);

@@ -24,7 +24,7 @@ namespace PKGE
         /// <typeparam name="TSystem">The system to add the subsystem to.</typeparam>
         /// <typeparam name="TSubSystem">The system to add the <paramref name="update"/> callback to.</typeparam>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="update"/> is null.</exception>
-        public static bool RegisterUpdate<TSystem, TSubSystem>(PlayerLoopSystem.UpdateFunction update, int index = -1)
+        public static bool RegisterUpdate<TSystem, TSubSystem>([System.Diagnostics.CodeAnalysis.NotNull] PlayerLoopSystem.UpdateFunction update, int index = -1)
         {
             if (update == null)
                 throw new ArgumentNullException(nameof(update));
@@ -70,7 +70,7 @@ namespace PKGE
         /// <param name="update">The update callback to deregister.</param>
         /// <typeparam name="TSubSystem">The system to remove the <paramref name="update"/> callback from.</typeparam>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="update"/> is null.</exception>
-        public static void DeregisterUpdate<TSubSystem>(PlayerLoopSystem.UpdateFunction update)
+        public static void DeregisterUpdate<TSubSystem>([System.Diagnostics.CodeAnalysis.NotNull] PlayerLoopSystem.UpdateFunction update)
         {
             if (update == null)
                 throw new ArgumentNullException(nameof(update));
@@ -220,7 +220,7 @@ namespace PKGE
         /// <param name="system">The system to use for the search.</param>
         /// <param name="subsystemType">The type of the subsystem to search for.</param>
         /// <returns>The index of the subsystem if found; otherwise, -1.</returns>
-        public static int IndexOf(this ref PlayerLoopSystem system, Type subsystemType)
+        public static int IndexOf(this ref PlayerLoopSystem system, [System.Diagnostics.CodeAnalysis.MaybeNull] Type subsystemType)
         {
             if (subsystemType != null && system.subSystemList != null)
             {

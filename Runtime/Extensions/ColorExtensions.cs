@@ -304,7 +304,7 @@ namespace PKGE
             return Mathf.Sqrt(xDL * xDL + xDC * xDC + xDH * xDH);
         }
 
-        public static (Color, Color) GetMinMax(Texture2D image)
+        public static (Color, Color) GetMinMax([System.Diagnostics.CodeAnalysis.NotNull] Texture2D image)
         {
             return GetMinMax(image.GetPixelData<Color>(mipLevel: 0));
         }
@@ -328,7 +328,7 @@ namespace PKGE
             return (min, max);
         }
 
-        public static (Color32, Color32) GetMinMax32(Texture2D image)
+        public static (Color32, Color32) GetMinMax32([System.Diagnostics.CodeAnalysis.NotNull] Texture2D image)
         {
             return GetMinMax32(image.GetPixelData<Color32>(mipLevel: 0));
         }

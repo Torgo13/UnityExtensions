@@ -318,6 +318,7 @@ namespace PKGE.Unsafe
         /// This method will allocate a new <typeparamref name="T"/> array, so only
         /// use it if you really need to copy the target items in a new memory location.
         /// </remarks>
+        [JetBrains.Annotations.NotNull]
         public T[] ToArray()
         {
             int length = this.Span.Length;

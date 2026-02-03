@@ -20,7 +20,7 @@ namespace PKGE
         /// Create a DynamicString given a string.
         /// </summary>
         /// <param name="s">The string to initialize with.</param>
-        public DynamicString(string s) : base(s.Length, true)
+        public DynamicString([System.Diagnostics.CodeAnalysis.NotNull] string s) : base(s.Length, true)
         {
             for (int i = 0; i < s.Length; ++i)
                 Array[i] = s[i];
@@ -36,7 +36,7 @@ namespace PKGE
         /// Append a string to the DynamicString. This will not allocate memory if the capacity is still sufficient.
         /// </summary>
         /// <param name="s">The string to append.</param>
-        public void Append(string s)
+        public void Append([System.Diagnostics.CodeAnalysis.NotNull] string s)
         {
             int offset = size;
             Reserve(size + s.Length, true);
@@ -50,12 +50,13 @@ namespace PKGE
         /// Append a DynamicString to this DynamicString.
         /// </summary>
         /// <param name="s">The string to append.</param>
-        public void Append(DynamicString s) => AddRange(s);
+        public void Append([System.Diagnostics.CodeAnalysis.NotNull] DynamicString s) => AddRange(s);
 
         /// <summary>
         /// Convert the DynamicString back to a regular c# string.
         /// </summary>
         /// <returns>A new string with the same contents at the dynamic string.</returns>
+        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             return new string(Array, 0, size);

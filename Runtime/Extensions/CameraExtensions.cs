@@ -22,7 +22,7 @@ namespace PKGE
         /// <param name="camera">The camera to get the aspect ratio from.</param>
         /// <param name="aspectNeutralFieldOfView"> The "aspect neutral" field of view, which is the diagonal field of view.</param>
         /// <returns>The vertical field of view calculated.</returns>
-        public static float GetVerticalFieldOfView(this Camera camera, float aspectNeutralFieldOfView)
+        public static float GetVerticalFieldOfView([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, float aspectNeutralFieldOfView)
         {
             var verticalHalfFieldOfViewTangent = Mathf.Tan(aspectNeutralFieldOfView * 0.5f * Mathf.Deg2Rad) *
                 OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
@@ -30,7 +30,7 @@ namespace PKGE
         }
         
         /// <inheritdoc cref="GetVerticalFieldOfView"/>
-        public static double GetVerticalFieldOfViewRad(this Camera camera, double aspectNeutralFieldOfView)
+        public static double GetVerticalFieldOfViewRad([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, double aspectNeutralFieldOfView)
         {
             var verticalHalfFieldOfViewTangent = System.Math.Tan(aspectNeutralFieldOfView * 0.5) *
                 OneOverSqrt2 / System.Math.Sqrt(camera.aspect);
@@ -42,14 +42,14 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">The camera to get the aspect ratio and vertical field of view from.</param>
         /// <returns>The horizontal field of view of the camera.</returns>
-        public static float GetHorizontalFieldOfView(this Camera camera)
+        public static float GetHorizontalFieldOfView([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera)
         {
             var halfFieldOfView = camera.fieldOfView * 0.5f;
             return Mathf.Rad2Deg * Mathf.Atan(Mathf.Tan(halfFieldOfView * Mathf.Deg2Rad) * camera.aspect);
         }
         
         /// <inheritdoc cref="GetHorizontalFieldOfView"/>
-        public static double GetHorizontalFieldOfViewRad(this Camera camera)
+        public static double GetHorizontalFieldOfViewRad([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera)
         {
             var halfFieldOfView = camera.fieldOfView * 0.5 * Mathf.Deg2Rad;
             return System.Math.Atan(System.Math.Tan(halfFieldOfView) * camera.aspect);
@@ -61,7 +61,7 @@ namespace PKGE
         /// <param name="camera">The camera to get the aspect ratio from.</param>
         /// <param name="size">The diagonal orthographic size.</param>
         /// <returns>The vertical orthographic size calculated.</returns>
-        public static float GetVerticalOrthographicSize(this Camera camera, float size)
+        public static float GetVerticalOrthographicSize([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, float size)
         {
             return size * OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
         }
@@ -131,6 +131,7 @@ namespace PKGE
             return default;
         }
 
+        [JetBrains.Annotations.CanBeNull]
         public static Camera GetCamera(string identifier, bool compareTag = false)
         {
             using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);

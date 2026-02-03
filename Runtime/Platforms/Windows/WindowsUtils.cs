@@ -80,7 +80,7 @@ namespace PKGE
             height: lpRect.Bottom - lpRect.Top
         );
 
-        private static void GetProcessRect(Process process, ref LpRect rect, ref bool gotProcessRect)
+        private static void GetProcessRect([System.Diagnostics.CodeAnalysis.NotNull] Process process, ref LpRect rect, ref bool gotProcessRect)
         {
             gotProcessRect = false;
 
@@ -100,7 +100,7 @@ namespace PKGE
 #endif // WINDOWS
 
         [Conditional("WINDOWS")]
-        public static void GetProcessRect(Process process, ref RectInt rectInt, ref bool gotProcessRect)
+        public static void GetProcessRect([System.Diagnostics.CodeAnalysis.NotNull] Process process, ref RectInt rectInt, ref bool gotProcessRect)
         {
 #if WINDOWS
             var rect = RectIntToLpRect(rectInt);

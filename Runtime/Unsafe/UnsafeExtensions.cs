@@ -19,7 +19,7 @@ namespace PKGE.Unsafe
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         #region Blittable
-        public static bool IsBlittableValueType(Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
+        public static bool IsBlittableValueType([System.Diagnostics.CodeAnalysis.NotNull] Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
 
 #if USING_REFLECTION
         public static string GetReasonForTypeNonBlittableImpl(Type t, string name)
@@ -49,7 +49,7 @@ namespace PKGE.Unsafe
         //   instead of "only if we fail check for is-blittable"
         // that's why we provide the means to implement this pattern on your code (but not function itself)
 
-        public static bool IsArrayBlittable(Array arr)
+        public static bool IsArrayBlittable([System.Diagnostics.CodeAnalysis.NotNull] Array arr)
         {
             return IsBlittableValueType(arr.GetType().GetElementType());
         }

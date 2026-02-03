@@ -10,12 +10,13 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Editor/Mono/Scripting/ScriptCompilation/EnumerableExtensions.cs
         #region UnityEngine
-        public static string SeparateWith(this IEnumerable<string> values, string separator)
+        [JetBrains.Annotations.NotNull]
+        public static string SeparateWith([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<string> values, string separator)
         {
             return string.Join(separator, values);
         }
 
-        public static (List<T> True, List<T> False) SplitBy<T>(this ICollection<T> collection, Func<T, bool> predicate)
+        public static (List<T> True, List<T> False) SplitBy<T>([System.Diagnostics.CodeAnalysis.NotNull] this ICollection<T> collection, Func<T, bool> predicate)
         {
             (List<T> True, List<T> False)result = (new List<T>(collection.Count), new List<T>(collection.Count));
             collection.SplitBy(predicate, result.True, result.False);
@@ -23,7 +24,7 @@ namespace PKGE
         }
         #endregion // UnityEngine
         
-        public static void SplitBy<T>(this ICollection<T> collection, Func<T, bool> predicate,
+        public static void SplitBy<T>([System.Diagnostics.CodeAnalysis.NotNull] this ICollection<T> collection, Func<T, bool> predicate,
             List<T> True, List<T> False)
         {
             foreach (var item in collection)
@@ -35,7 +36,7 @@ namespace PKGE
             }
         }
 
-        public static PooledObject<List<T>> ToListPooled<T>(this IEnumerable<T> collection, out List<T> pooledList)
+        public static PooledObject<List<T>> ToListPooled<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> collection, [System.Diagnostics.CodeAnalysis.NotNull] out List<T> pooledList)
         {
             var pooledObject = ListPool<T>.Get(out pooledList);
             pooledList.AddRange(collection);
@@ -45,7 +46,7 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/EnumerableExtensions.cs
         #region Unity.FilmInternalUtilities
         //Returns false with ret set to default(T) if not found
-        public static bool FindElementAt<T>(this IEnumerable<T> collection, int index, out T ret)
+        public static bool FindElementAt<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> collection, int index, [System.Diagnostics.CodeAnalysis.MaybeNull] out T ret)
         {
             int i = 0;
             using var enumerator = collection.GetEnumerator();
@@ -64,7 +65,7 @@ namespace PKGE
             return false;
         }
 
-        public static void Loop<T>(this IEnumerable<T> collection, Action<T> eachAction)
+        public static void Loop<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> collection, Action<T> eachAction)
         {
             using var enumerator = collection.GetEnumerator();
             while (enumerator.MoveNext())
@@ -76,7 +77,8 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.purchasing/blob/5.0.0-pre.3/Runtime/Utilities/EnumerableExtensions.cs
         #region UnityEngine.Purchasing
-        public static IEnumerable<T> NonNull<T>(this IEnumerable<T> enumerable) where T : class
+        [JetBrains.Annotations.NotNull]
+        public static IEnumerable<T> NonNull<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> enumerable) where T : class
         {
 #if USING_LINQ
             return enumerable.Where(obj => obj != null);
@@ -118,7 +120,7 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Runtime/Extensions/IEnumerableExtensions.cs
         #region UnityEngine.GraphToolsFoundation.Overdrive
-        public static int IndexOf<T>(this IEnumerable<T> source, T element)
+        public static int IndexOf<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> source, T element)
         {
             if (source is IList<T> list)
                 return list.IndexOf(element);
@@ -134,7 +136,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfIEquatable<T>(this IEnumerable<T> source, T element)
+        public static int IndexOfIEquatable<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> source, T element)
             where T : IEquatable<T>
         {
             if (source is IList<T> list)
@@ -152,7 +154,7 @@ namespace PKGE
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
-        public static double Sum(this double[] enumerable)
+        public static double Sum([System.Diagnostics.CodeAnalysis.NotNull] this double[] enumerable)
         {
             double sum = 0;
             
@@ -162,7 +164,7 @@ namespace PKGE
             return sum;
         }
         
-        public static float Sum(this float[] enumerable)
+        public static float Sum([System.Diagnostics.CodeAnalysis.NotNull] this float[] enumerable)
         {
             float sum = 0;
             
@@ -172,7 +174,7 @@ namespace PKGE
             return sum;
         }
 
-        public static int Max(this int[] enumerable)
+        public static int Max([System.Diagnostics.CodeAnalysis.NotNull] this int[] enumerable)
         {
             int max = int.MaxValue;
             
