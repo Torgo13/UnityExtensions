@@ -353,6 +353,22 @@ namespace PKGE
         }
         #endregion // com.unity.search.extensions
 
+        public static string GetColorHex(this Color32 color)
+        {
+            System.Span<char> hex = stackalloc char[8];      
+            
+            return color.GetColorHexSpan(hex).ToString();
+        }
+
+        public static string GetColorTextCode(this Color32 color)
+        {
+            System.Span<char> hex = stackalloc char[17] { '<', 'c', 'o', 'l', 'o', 'r', '=', '#', 'R', 'r', 'G', 'g', 'B', 'b', 'A', 'a', '>' };
+            
+            _ = color.GetColorHexSpan(hex.Slice(start: 8, length: 8));
+
+            return hex.ToString();
+        }
+
         public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
         {
             (hex[0], hex[1]) = ByteToHex(color.r);
@@ -363,26 +379,7 @@ namespace PKGE
             return hex;
         }
 
-        public static string GetColorHex(this Color32 color)
-        {
-            System.Span<char> hex = stackalloc char[8];      
-            
-            return color.GetColorHexSpan(hex).ToString();
-        }
-
-        public static string GetColorTextCode(this Color32 color)
-        {
-            System.Span<char> hex = stackalloc char[17];
-            hex[^1] = '>';
-
-            System.ReadOnlySpan<char> prefix = "<color=#";
-            prefix.CopyTo(hex);
-            _ = color.GetColorHexSpan(hex.Slice(prefix.Length, 8));
-
-            return hex.ToString();
-        }
-
-        public static (char, char) ByteToHex(byte b)
+        public static (char, char) ByteToHex(int b)
         {
             return (NibbleToHex(b >> 4), NibbleToHex(b & 15));
         }

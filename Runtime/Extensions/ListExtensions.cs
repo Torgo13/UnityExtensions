@@ -269,7 +269,6 @@ namespace PKGE
             var container = new NativeList<T>(count, allocator);
             container.ResizeUninitialized(count);
             list.AsSpan(start: 0, length: count).CopyTo(container.AsArray().AsSpan());
-            container.Length = count;
 
             return container;
         }

@@ -1121,5 +1121,19 @@ namespace PKGE.Unsafe
             return new Span2D<T>(array.AsSpan(),
                 offset, height, width, pitch);
         }
+
+        public static Span2D<T> AsSpan2D<T>(this Unity.Collections.NativeSlice<T> array,
+            int height, int width, int pitch = 0) where T : struct
+        {
+            return new Span2D<T>(array.AsSpan(),
+                offset: 0, height, width, pitch);
+        }
+
+        public static Span2D<T> AsSpan2D<T>(this Unity.Collections.NativeSlice<T> array,
+            int offset, int height, int width, int pitch) where T : struct
+        {
+            return new Span2D<T>(array.AsSpan(),
+                offset, height, width, pitch);
+        }
     }
 }

@@ -63,6 +63,18 @@ namespace PKGE.Unsafe
         {
             nativeList.AddRangeNoResize(nativeArrayRO.GetUnsafeReadOnlyPtr(), nativeArrayRO.Length);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddRange<T>(this NativeList<T> nativeList, NativeSlice<T> nativeSlice) where T : unmanaged
+        {
+            nativeList.AddRange(nativeSlice.GetUnsafeReadOnlyPtr(), nativeSlice.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void AddRangeNoResize<T>(this NativeList<T> nativeList, NativeSlice<T> nativeSlice) where T : unmanaged
+        {
+            nativeList.AddRangeNoResize(nativeSlice.GetUnsafeReadOnlyPtr(), nativeSlice.Length);
+        }
     }
 }
 #endif // INCLUDE_COLLECTIONS

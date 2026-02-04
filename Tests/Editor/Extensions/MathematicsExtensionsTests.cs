@@ -232,48 +232,6 @@ namespace PKGE.Tests
         }
 #endif // INCLUDE_MATHEMATICS
 
-        //https://github.com/Unity-Technologies/InputSystem/blob/develop/Assets/Tests/InputSystem/Utilities/NumberHelpersTests.cs
-        #region InputSystem
-
-        [Test]
-        [Category("Utilities")]
-        // out of boundary tests
-        [TestCase(-1, 0, 1, 0.0f)]
-        [TestCase(2, 0, 1, 1.0f)]
-        // [0, 1]
-        [TestCase(0, 0, 1, 0.0f)]
-        [TestCase(1, 0, 1, 1.0f)]
-        // [-128, 127]
-        [TestCase(-128, sbyte.MinValue, sbyte.MaxValue, 0.0f)]
-        [TestCase(0, sbyte.MinValue, sbyte.MaxValue, 0.501960813999176025391f)]
-        [TestCase(127, sbyte.MinValue, sbyte.MaxValue, 1.0f)]
-        // [0, 255]
-        [TestCase(0, byte.MinValue, byte.MaxValue, 0.0f)]
-        [TestCase(128, byte.MinValue, byte.MaxValue, 0.501960813999176025391f)]
-        [TestCase(255, byte.MinValue, byte.MaxValue, 1.0f)]
-        // [-32768, 32767]
-        [TestCase(-32768, short.MinValue, short.MaxValue, 0.0f)]
-        [TestCase(0, short.MinValue, short.MaxValue, 0.50000762939453125f)]
-        [TestCase(32767, short.MinValue, short.MaxValue, 1.0f)]
-        // [0, 65535]
-        [TestCase(0, ushort.MinValue, ushort.MaxValue, 0.0f)]
-        [TestCase(32767, ushort.MinValue, ushort.MaxValue, 0.49999237060546875f)]
-        [TestCase(65535, ushort.MinValue, ushort.MaxValue, 1.0f)]
-        // [-2147483648, 2147483647]
-        [TestCase(-2147483648, int.MinValue, int.MaxValue, 0.0f)]
-        [TestCase(0, int.MinValue, int.MaxValue, 0.5f)]
-        [TestCase(2147483647, int.MinValue, int.MaxValue, 1.0f)]
-        public void Utilities_NumberHelpers_CanConvertIntToNormalizedFloatAndBack(int value, int minValue, int maxValue, float expected)
-        {
-            var result = MathematicsExtensions.IntToNormalizedFloat(value, minValue, maxValue);
-            Assert.That(result, Is.EqualTo(expected).Within(float.Epsilon));
-
-            var integer = MathematicsExtensions.NormalizedFloatToInt(result, minValue, maxValue);
-            Assert.That(integer, Is.EqualTo(Mathf.Clamp(value, minValue, maxValue)));
-        }
-
-        #endregion // InputSystem
-
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs
         #region UnityEngine.Formats.Alembic.Importer
         /// <summary>

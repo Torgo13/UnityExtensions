@@ -1658,7 +1658,7 @@ namespace PKGE
                 totalPointsCount = totalPointsCount,
                 angleIncrement = angleIncrement,
                 radius = radius,
-                points = points.AsArray().GetSubArray(initialPointsCount, totalPointsCount - initialPointsCount),
+                points = points.AsArray().Slice(initialPointsCount, totalPointsCount - initialPointsCount),
             };
 
             var jobHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
@@ -1688,7 +1688,7 @@ namespace PKGE
             [ReadOnly] public float angleIncrement;
             [ReadOnly] public float radius;
 
-            [WriteOnly] public NativeArray<float3> points;
+            [WriteOnly] public NativeSlice<float3> points;
 
             public void Execute(int index)
             {

@@ -643,7 +643,7 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetIndices<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> inIndices, MeshTopology topology, int submesh)
+        public static void SetIndices<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> inIndices, MeshTopology topology = MeshTopology.Triangles, int submesh = 0)
             where T : unmanaged
         {
             mesh.SetIndices(inIndices.AsArray(), topology, submesh);
@@ -651,6 +651,13 @@ namespace PKGE.Packages
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, int channel, NativeList<T> uvs)
+            where T : unmanaged
+        {
+            mesh.SetUVs(channel, uvs.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> uvs, int channel = 0)
             where T : unmanaged
         {
             mesh.SetUVs(channel, uvs.AsArray());

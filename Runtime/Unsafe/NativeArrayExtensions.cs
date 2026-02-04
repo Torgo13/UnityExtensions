@@ -204,6 +204,37 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.InputSystem.Utilities
     }
 
+    public static class NativeSliceExtensions
+    {
+        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
+        #region UnityEngine.Rendering.Universal
+        /// <summary>
+        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAt<T>(this NativeSlice<T> array, int index) where T : struct
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafeReadOnlyPtr(), index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeSlice<T> array, int index) where T : struct
+        {
+            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), index);
+        }
+        #endregion // UnityEngine.Rendering.Universal
+
+        public static unsafe Span<T> AsSpan<T>(this NativeSlice<T> array) where T : struct
+        {
+            return new Span<T>(array.GetUnsafePtr(), array.Length);
+        }
+
+        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this NativeSlice<T> array) where T : struct
+        {
+            return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
+        }
+    }
+
     public static class NativeReferenceExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
