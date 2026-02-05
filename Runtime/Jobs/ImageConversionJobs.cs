@@ -638,7 +638,6 @@ namespace PKGE.Packages
         [ReadOnly] public int height;
         [ReadOnly] public int mipmapCount;
 
-        [NativeDisableParallelForRestriction]
         public NativeArray<Color24> rawTextureData;
 
         public void Execute(int index)
@@ -672,7 +671,6 @@ namespace PKGE.Packages
         [ReadOnly] public int height;
         [ReadOnly] public int mipmapCount;
 
-        [NativeDisableParallelForRestriction]
         public NativeArray<Color24> rawTextureData;
 
         public void Execute(int index)

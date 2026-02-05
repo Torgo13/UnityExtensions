@@ -40,7 +40,7 @@ namespace PKGE.Unsafe
             Assert.IsTrue(index < unsafeList.Capacity);
 
             if (index >= unsafeList.Length)
-                unsafeList.Length = index;
+                unsafeList.Length = 1 + index;
 
             return ref unsafeList.ElementAt(index);
         }

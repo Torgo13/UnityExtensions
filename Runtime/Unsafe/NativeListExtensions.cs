@@ -40,7 +40,7 @@ namespace PKGE.Unsafe
             Assert.IsTrue(index < nativeList.Capacity);
 
             if (index >= nativeList.Length)
-                nativeList.ResizeUninitialized(index);
+                nativeList.ResizeUninitialized(1 + index);
 
             return ref nativeList.ElementAt(index);
         }

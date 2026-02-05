@@ -899,7 +899,7 @@ namespace PKGE
             {
                 // Copy contents from old array.
                 if (newSize < oldSize)
-                    newArray.CopyFrom(array.GetSubArray(0, newSize));
+                    array.Slice(0, newSize).CopyTo(newArray);
                 else
                     array.CopyTo(newArray.GetSubArray(0, oldSize));
 
@@ -940,7 +940,7 @@ namespace PKGE
             if (index < count - 1)
             {
                 var length = count - index - 1;
-                array.GetSubArray(index + 1, length).CopyTo(array.GetSubArray(index, length));
+                array.Slice(index + 1, length).CopyTo(array.GetSubArray(index, length));
             }
 
             --count;
@@ -989,6 +989,21 @@ namespace PKGE
                 % SizeOfCache<TTo>.Size == 0);
 
             return MemoryMarshal.Cast<TFrom, TTo>(array.AsSpan());
+        }
+
+        /// <exception cref="IndexOutOfRangeException"/>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref T AsRef<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int index) where T : struct
+        {
+            Assert.IsNotNull(array);
+
+            return ref array[index];
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.MaybeNull] this Array array)
+        {
+            return array == null || array.Length == 0;
         }
     }
 }
