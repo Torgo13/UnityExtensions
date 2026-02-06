@@ -158,6 +158,9 @@ namespace PKGE.Packages
             return result;
         }
 
+        [ThreadStatic]
+        static readonly List<Object> objects = new List<Object>(1);
+
         /// <summary>
         /// Implicitly converts an <see cref="UnityObjectRef{T}"/> to an <see cref="UnityEngine.Object"/>.
         /// </summary>
@@ -179,10 +182,11 @@ namespace PKGE.Packages
             };
 
             // Cannot use ListPool in a background thread
-            var objects = new List<Object>(1);
             Resources.EntityIdsToObjectList(entityIds, objects);
             entityIds.Dispose();
-            return (T)objects[0];
+            var o = (T)objects[0];
+            objects.Clear();
+            return o;
 #else
             return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
 #endif // UNITY_6000_3_OR_NEWER

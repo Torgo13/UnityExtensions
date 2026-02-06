@@ -3,18 +3,22 @@
     "rootNamespace": "",
     "references": [
         "GUID:7dabed3724aa64f438f2ac84f705af03",
-        "GUID:1427a2291daa26248ae50ca4b4271389"
-    ],
-    "optionalUnityReferences": [
-      "TestAssemblies"
+        "GUID:1427a2291daa26248ae50ca4b4271389",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:e0cd26848372d4e5c891c569017e11f1"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
     "autoReferenced": false,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
     "versionDefines": [
         {
             "name": "com.unity.modules.physics",
@@ -30,6 +34,11 @@
             "name": "com.unity.modules.ui",
             "expression": "1.0.0",
             "define": "INCLUDE_IMGUI"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "1.0.0",
+            "define": "INCLUDE_COLLECTIONS"
         }
     ],
     "noEngineReferences": false

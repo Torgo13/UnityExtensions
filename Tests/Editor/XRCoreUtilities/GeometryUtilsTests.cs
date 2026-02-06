@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#if INCLUDE_COLLECTIONS
+using PKGE.Packages;
+#endif // INCLUDE_COLLECTIONS
+
 namespace PKGE.Editor.Tests
 {
     class GeometryUtilsTests
@@ -155,7 +159,11 @@ namespace PKGE.Editor.Tests
         Vector3 m_End;
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
+#if INCLUDE_COLLECTIONS
+        static readonly Unity.Collections.NativeList<Vector3> k_ConvexHull = new Unity.Collections.NativeList<Vector3>(Unity.Collections.AllocatorManager.Persistent);
+#else
         static readonly List<Vector3> k_ConvexHull = new List<Vector3>();
+#endif // INCLUDE_COLLECTIONS
         static readonly List<Vector3> k_ReversedPolygon = new List<Vector3>();
 
         [SetUp]
@@ -164,13 +172,24 @@ namespace PKGE.Editor.Tests
             k_ConvexHull.Clear();
         }
 
+#if INCLUDE_COLLECTIONS
+        [TearDown]
+        public void TearDown()
+        {
+            if (k_ConvexHull.IsCreated)
+            {
+                k_ConvexHull.Dispose();
+            }
+        }
+#endif // INCLUDE_COLLECTIONS
+
         [Test]
         // in this test the closest approach is vertex-to-edge
         public void ClosestApproach_TestOne()
         {
             DebugDraw.Polygon(k_IrregularPolygon, Color.yellow, 5f);
             DebugDraw.Polygon(k_ExampleIrregularHexagon, Color.red, 5f);
-            GeometryUtils.ClosestPolygonApproach(k_IrregularPolygon, k_ExampleIrregularHexagon, out m_Start, out m_End);
+            GeometryUtils.ClosestPolygonApproach(k_IrregularPolygon.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan(), out m_Start, out m_End);
             Debug.DrawLine(m_Start, m_End, Color.green, 5f);
         }
 
@@ -179,7 +198,7 @@ namespace PKGE.Editor.Tests
         {
             DebugDraw.Polygon(k_IrregularPolygon, Color.yellow, 5f);
             DebugDraw.Polygon(k_ExampleHexagon, Color.red, 5f);
-            GeometryUtils.ClosestPolygonApproach(k_IrregularPolygon, k_ExampleHexagon, out m_Start, out m_End);
+            GeometryUtils.ClosestPolygonApproach(k_IrregularPolygon.AsReadOnlySpan(), k_ExampleHexagon.AsReadOnlySpan(), out m_Start, out m_End);
             Debug.DrawLine(m_Start, m_End, Color.green, 5f);
 
             // in this test the closest approach is vertex-to-vertex
@@ -191,15 +210,20 @@ namespace PKGE.Editor.Tests
         public void ConvexHull2D_InsufficientPoints()
         {
             // Need at least 3 points to compute convex hull
-            Assert.False(GeometryUtils.ConvexHull2D(new List<Vector3> { Vector3.zero, Vector3.zero }, k_ConvexHull));
+            Assert.False(GeometryUtils.ConvexHull2D(new List<Vector3> { Vector3.zero, Vector3.zero }.AsReadOnlySpan(), k_ConvexHull));
         }
 
         [Test]
         public void ConvexHull2D_SufficientPoints()
         {
-            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull, k_ConvexHull));
+            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull.AsReadOnlySpan(), k_ConvexHull));
+#if INCLUDE_COLLECTIONS
+            Assert.AreEqual(k_ConvexHull.Length, k_ExampleConvexHullIndices.Count);
+            for (var i = 0; i < k_ConvexHull.Length; ++i)
+#else
             Assert.AreEqual(k_ConvexHull.Count, k_ExampleConvexHullIndices.Count);
             for (var i = 0; i < k_ConvexHull.Count; ++i)
+#endif // INCLUDE_COLLECTIONS
             {
                 var expectedIndex = k_ExampleConvexHullIndices[i];
                 Assert.AreEqual(k_ExamplePointsInConvexHull[expectedIndex], k_ConvexHull[i]);
@@ -213,7 +237,7 @@ namespace PKGE.Editor.Tests
             // If the chosen starting point lies in the middle of a line of leftmost points, it will end up being
             // skipped over during traversal and the algorithm will enter an infinite loop since it never returns
             // to the starting point. This tests that we do not pick such a point as a starting point.
-            Assert.True(GeometryUtils.ConvexHull2D(k_EdgeCasePointsInConvexHull, k_ConvexHull));
+            Assert.True(GeometryUtils.ConvexHull2D(k_EdgeCasePointsInConvexHull.AsReadOnlySpan(), k_ConvexHull));
         }
 
         [Test]
@@ -221,31 +245,36 @@ namespace PKGE.Editor.Tests
         {
             // This tests that we do not get into an infinite loop by revisiting points that we've already added to the hull,
             // which can happen if a collinearity check fails due to floating point error.
-            Assert.True(GeometryUtils.ConvexHull2D(k_ConvexHullRevisitPointsTest, k_ConvexHull));
+            Assert.True(GeometryUtils.ConvexHull2D(k_ConvexHullRevisitPointsTest.AsReadOnlySpan(), k_ConvexHull));
         }
 
         [Test]
         public void PolygonCentroid2D_WithConvexHull()
         {
             // first get the convex hull as we do above
-            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull, k_ConvexHull));
+            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull.AsReadOnlySpan(), k_ConvexHull));
 
-            var centroidPoint = GeometryUtils.PolygonCentroid2D(k_ConvexHull);
+            var centroidPoint = GeometryUtils.PolygonCentroid2D(k_ConvexHull.AsReadOnlySpan());
 
+#if INCLUDE_COLLECTIONS
+            var convexHull = new List<Vector3>(k_ConvexHull);
+            DebugDraw.Polygon(convexHull, Color.blue, 5f);
+#else
             DebugDraw.Polygon(k_ConvexHull, Color.blue, 5f);
+#endif // INCLUDE_COLLECTIONS
             foreach (var hullVertex in k_ConvexHull)
             {
                 Debug.DrawLine(centroidPoint, hullVertex, Color.green, 5f);
             }
 
             Assert.AreEqual(0f, centroidPoint.y);
-            Assert.True(GeometryUtils.PointInPolygon(centroidPoint, k_ConvexHull));
+            Assert.True(GeometryUtils.PointInPolygon(centroidPoint, k_ConvexHull.AsReadOnlySpan()));
         }
 
         [TestCaseSource(typeof(Polygon2DData), nameof(Polygon2DData.SimpleConvex))]
         public void PolygonCentroid2D_WithSimpleRegularPolygons(List<Vector3> vertices)
         {
-            var centroidPoint = GeometryUtils.PolygonCentroid2D(vertices);
+            var centroidPoint = GeometryUtils.PolygonCentroid2D(vertices.AsReadOnlySpan());
 
             DebugDraw.Polygon(vertices, Color.blue, 5f);
             foreach (var hullVertex in vertices)
@@ -254,19 +283,24 @@ namespace PKGE.Editor.Tests
             }
 
             Assert.AreEqual(0f, centroidPoint.y);
-            Assert.True(GeometryUtils.PointInPolygon(centroidPoint, vertices));
+            Assert.True(GeometryUtils.PointInPolygon(centroidPoint, vertices.AsReadOnlySpan()));
         }
 
         [Test]
         public void OrientedMinimumBoundingBox_WithConvexHull2D()
         {
             // first, get our convex hull from the set of points
-            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull, k_ConvexHull));
+            Assert.True(GeometryUtils.ConvexHull2D(k_ExamplePointsInConvexHull.AsReadOnlySpan(), k_ConvexHull));
 
             var boxPoints = new Vector3[4];
-            var bounds2D = GeometryUtils.OrientedMinimumBoundingBox2D(k_ConvexHull, boxPoints);
+            var bounds2D = GeometryUtils.OrientedMinimumBoundingBox2D(k_ConvexHull.AsReadOnlySpan(), boxPoints);
 
+#if INCLUDE_COLLECTIONS
+            var convexHull = new List<Vector3>(k_ConvexHull);
+            DebugDraw.Polygon(convexHull, k_HalfRed);
+#else
             DebugDraw.Polygon(k_ConvexHull, k_HalfRed);
+#endif // INCLUDE_COLLECTIONS
             DebugDraw.Polygon(boxPoints, Color.black);
 
             // did we properly calculate the size of the bounding box?
@@ -280,11 +314,11 @@ namespace PKGE.Editor.Tests
             foreach (var vertex in k_ConvexHull)
             {
                 // This test uses a larger epsilon than the other OMBB tests since this polygon encompasses a larger area
-                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList, k_PointOnBoundsLargeEpsilon);
+                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList.AsReadOnlySpan(), k_PointOnBoundsLargeEpsilon);
                 if (onBounds)
                     pointsOnBounds.Add(vertex);
 
-                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList);
+                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList.AsReadOnlySpan());
 
                 // If this is bounding box then all points in the hull must either lie inside the box or lie on its bounds
                 Assert.True(onBounds || inPolygon);
@@ -300,7 +334,7 @@ namespace PKGE.Editor.Tests
         public void OrientedMinimumBoundingBox_WithSimplePolygons(List<Vector3> vertices)
         {
             var boxPoints = new Vector3[4];
-            GeometryUtils.OrientedMinimumBoundingBox2D(vertices, boxPoints);
+            GeometryUtils.OrientedMinimumBoundingBox2D(vertices.AsReadOnlySpan(), boxPoints);
 
             Random.InitState(0);
             DebugDraw.Polygon(vertices, Random.ColorHSV(), 2.5f);
@@ -310,11 +344,11 @@ namespace PKGE.Editor.Tests
             var pointsOnBounds = new List<Vector3>();
             foreach (var vertex in vertices)
             {
-                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList, k_PointOnBoundsSmallEpsilon);
+                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList.AsReadOnlySpan(), k_PointOnBoundsSmallEpsilon);
                 if (onBounds)
                     pointsOnBounds.Add(vertex);
 
-                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList);
+                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList.AsReadOnlySpan());
                 Assert.True(onBounds || inPolygon);
             }
 
@@ -325,7 +359,7 @@ namespace PKGE.Editor.Tests
         public void OrientedMinimumBoundingBox_WithIrregularPolygon()
         {
             var boxPoints = new Vector3[4];
-            GeometryUtils.OrientedMinimumBoundingBox2D(k_IrregularConvexPolygon, boxPoints);
+            GeometryUtils.OrientedMinimumBoundingBox2D(k_IrregularConvexPolygon.AsReadOnlySpan(), boxPoints);
 
             Random.InitState(0);
             DebugDraw.Polygon(k_IrregularConvexPolygon, Random.ColorHSV(), 2.5f);
@@ -335,11 +369,11 @@ namespace PKGE.Editor.Tests
             var pointsOnBounds = new List<Vector3>();
             foreach (var vertex in k_IrregularConvexPolygon)
             {
-                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList, k_PointOnBoundsSmallEpsilon);
+                var onBounds = GeometryUtils.PointOnPolygonBoundsXZ(vertex, boxPointsList.AsReadOnlySpan(), k_PointOnBoundsSmallEpsilon);
                 if (onBounds)
                     pointsOnBounds.Add(vertex);
 
-                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList);
+                var inPolygon = GeometryUtils.PointInPolygon(vertex, boxPointsList.AsReadOnlySpan());
                 Assert.True(onBounds || inPolygon);
             }
 
@@ -349,7 +383,7 @@ namespace PKGE.Editor.Tests
         [TestCaseSource(typeof(Polygon2DData), nameof(Polygon2DData.SimpleConvexAreas))]
         public void ConvexPolygonArea(List<Vector3> vertices, float expectedArea)
         {
-            var area = GeometryUtils.ConvexPolygonArea(vertices);
+            var area = GeometryUtils.ConvexPolygonArea(vertices.AsReadOnlySpan());
             Assert.AreEqual(expectedArea, area, Mathf.Epsilon);
 
             // Area should be the same regardless of winding order
@@ -359,72 +393,72 @@ namespace PKGE.Editor.Tests
                 k_ReversedPolygon.Add(vertices[i]);
             }
 
-            var reversedArea = GeometryUtils.ConvexPolygonArea(k_ReversedPolygon);
+            var reversedArea = GeometryUtils.ConvexPolygonArea(k_ReversedPolygon.AsReadOnlySpan());
             Assert.AreEqual(expectedArea, reversedArea, Mathf.Epsilon);
         }
 
         [Test]
         public void PolygonInPolygon()
         {
-            Assert.True(GeometryUtils.PolygonInPolygon(k_ExampleTri, k_ExampleOctagon));
+            Assert.True(GeometryUtils.PolygonInPolygon(k_ExampleTri.AsReadOnlySpan(), k_ExampleOctagon.AsReadOnlySpan()));
         }
 
         [Test]
         public void PolygonPartiallyInPolygon()
         {
-            Assert.False(GeometryUtils.PolygonInPolygon(k_ExampleHexagon, k_ExampleIrregularHexagon));
+            Assert.False(GeometryUtils.PolygonInPolygon(k_ExampleHexagon.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
         public void PolygonOutsidePolygon()
         {
-            Assert.False(GeometryUtils.PolygonInPolygon(k_ExampleHexagon, k_ExampleQuad));
+            Assert.False(GeometryUtils.PolygonInPolygon(k_ExampleHexagon.AsReadOnlySpan(), k_ExampleQuad.AsReadOnlySpan()));
         }
 
         [Test]
         public void PolygonsWithinRange_JustInRange()
         {
             const float distance = k_PolygonsWithinRangeDistance + k_PolygonsWithinRangeDelta;
-            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleQuad, k_ExampleIrregularHexagon, distance));
+            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleQuad.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan(), distance));
         }
 
         [Test]
         public void PolygonsWithinRange_JustOutOfRange()
         {
             const float distance = k_PolygonsWithinRangeDistance - k_PolygonsWithinRangeDelta;
-            Assert.False(GeometryUtils.PolygonsWithinRange(k_ExampleQuad, k_ExampleIrregularHexagon, distance));
+            Assert.False(GeometryUtils.PolygonsWithinRange(k_ExampleQuad.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan(), distance));
         }
 
         [Test]
         public void PolygonsWithinRange_InfiniteRange()
         {
             // Should be trivially within range if range is positive infinity
-            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleQuad, k_ExampleIrregularHexagon, float.PositiveInfinity));
+            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleQuad.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan(), float.PositiveInfinity));
         }
 
         [Test]
         public void PolygonsWithinRange_Overlapping()
         {
             // Distance should be zero if polygons overlap, so we can use a max distance of epsilon
-            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleHexagon, k_ExampleIrregularHexagon, Mathf.Epsilon));
+            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleHexagon.AsReadOnlySpan(), k_ExampleIrregularHexagon.AsReadOnlySpan(), Mathf.Epsilon));
         }
 
         [Test]
         public void PolygonsWithinRange_PolygonInsideOther()
         {
-            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleTri, k_ExampleOctagon, Mathf.Epsilon));
+            Assert.True(GeometryUtils.PolygonsWithinRange(k_ExampleTri.AsReadOnlySpan(), k_ExampleOctagon.AsReadOnlySpan(), Mathf.Epsilon));
         }
 
         [Test]
         public void PointInPolygon_PointOutside()
         {
-            Assert.False(GeometryUtils.PointInPolygon(Vector3.zero, k_ExampleIrregularHexagon));
+            Assert.False(GeometryUtils.PointInPolygon(Vector3.zero, k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
         public void PointInPolygon_PointInside()
         {
-            Assert.True(GeometryUtils.PointInPolygon(new Vector3(4f, 0f, 1f), k_ExampleIrregularHexagon));
+            Assert.True(GeometryUtils.PointInPolygon(new Vector3(4f, 0f, 1f), k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
@@ -433,7 +467,7 @@ namespace PKGE.Editor.Tests
             // Part of this algorithm involves checking when an edge crosses the given point's horizontal axis, so this
             // tests what happens when an inside point shares a horizontal axis with the algorithm's starting vertex
             // (which is the last vertex of the polygon).
-            Assert.True(GeometryUtils.PointInPolygon(new Vector3(5f, 0f, 4f), k_ExampleIrregularHexagon));
+            Assert.True(GeometryUtils.PointInPolygon(new Vector3(5f, 0f, 4f), k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
@@ -442,19 +476,19 @@ namespace PKGE.Editor.Tests
             // Since the way this algorithm works is by testing how many "collisions" happen to the right of the point,
             // one thing we test for is what happens when a point is to the left of a top or bottom vertex,
             // since that "collision" should not count.
-            Assert.False(GeometryUtils.PointInPolygon(Vector3.forward * 6f, k_ExampleIrregularHexagon));
+            Assert.False(GeometryUtils.PointInPolygon(Vector3.forward * 6f, k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
         public void PointInPolygon_PointOnVertex()
         {
-            Assert.True(GeometryUtils.PointInPolygon(k_ExampleIrregularHexagon[1], k_ExampleIrregularHexagon));
+            Assert.True(GeometryUtils.PointInPolygon(k_ExampleIrregularHexagon[1], k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         [Test]
         public void PointInPolygon_PointOnEdge()
         {
-            Assert.True(GeometryUtils.PointInPolygon(new Vector3(3.5f, 0f, 0f), k_ExampleIrregularHexagon));
+            Assert.True(GeometryUtils.PointInPolygon(new Vector3(3.5f, 0f, 0f), k_ExampleIrregularHexagon.AsReadOnlySpan()));
         }
 
         static class Polygon2DData

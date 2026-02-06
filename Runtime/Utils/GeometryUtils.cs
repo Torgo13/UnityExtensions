@@ -31,10 +31,10 @@ namespace PKGE
         /// <param name="vertexA">The coordinates of the first vertex of the nearest side is assigned to this `out` parameter.</param>
         /// <param name="vertexB">The coordinates of the second vertex of the nearest side is assigned to this `out` parameter.</param>
         /// <returns>True if the nearest edge could be found.</returns>
-        public static bool FindClosestEdge([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices, Vector3 point,
+        public static bool FindClosestEdge([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices, Vector3 point,
             out Vector3 vertexA, out Vector3 vertexB)
         {
-            var vertexCount = vertices.Count;
+            var vertexCount = vertices.Length;
             if (vertexCount < 1)
             {
                 vertexA = Vector3.zero;
@@ -48,7 +48,7 @@ namespace PKGE
             for (var i = 0; i < vertexCount; i++)
             {
                 var vert = vertices[i];
-                var nextVert = vertices[(i + 1) % vertices.Count];
+                var nextVert = vertices[(i + 1) % vertices.Length];
 
                 var closestPointOnEdge = ClosestPointOnLineSegment(point, vert, nextVert);
                 var sqrDistanceToEdge = Vector3.SqrMagnitude(point - closestPointOnEdge);
@@ -72,11 +72,11 @@ namespace PKGE
         /// <param name="point">The position in world space to find the furthest intersection point.</param>
         /// <returns>A world space position of a point on the polygon that is as far from the input point as possible.
         /// Returns <see cref="Vector3.zero"/> if <paramref name="vertices"/> contains less than three points.</returns>
-        public static Vector3 PointOnOppositeSideOfPolygon([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices, Vector3 point)
+        public static Vector3 PointOnOppositeSideOfPolygon([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices, Vector3 point)
         {
             const float oppositeSideBufferScale = 100.0f;
 
-            var vertexCount = vertices.Count;
+            var vertexCount = vertices.Length;
             if (vertexCount < 3)
                 return Vector3.zero;
 
@@ -362,14 +362,14 @@ namespace PKGE
         /// <param name="pointA">The point on polygon A closest to an edge of polygon B.</param>
         /// <param name="pointB">The point on polygon B closest to an edge of polygon A.</param>
         /// <param name="parallelTest">The minimum distance between the closest approaches used to detect parallel line segments.</param>
-        public static void ClosestPolygonApproach([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> verticesA, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> verticesB,
+        public static void ClosestPolygonApproach([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> verticesA, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> verticesB,
             out Vector3 pointA, out Vector3 pointB, float parallelTest = 0f)
         {
             pointA = default;
             pointB = default;
             var closest = float.MaxValue;
-            var aCount = verticesA.Count;
-            var bCount = verticesB.Count;
+            var aCount = verticesA.Length;
+            var bCount = verticesB.Length;
             var aCountMinusOne = aCount - 1;
             var bCountMinusOne = bCount - 1;
             var firstVertexA = verticesA[0];
@@ -417,17 +417,17 @@ namespace PKGE
         /// <param name="testPoint">The point to test.</param>
         /// <param name="vertices">Vertices defining the outline of a polygon.</param>
         /// <returns>True if the point is inside the polygon, false otherwise.</returns>
-        public static bool PointInPolygon(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices)
+        public static bool PointInPolygon(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices)
         {
             // Sanity check - not enough bounds vertices = nothing to be inside of
-            if (vertices.Count < 3)
+            if (vertices.Length < 3)
                 return false;
 
             // Check how many lines this test point collides with going in one direction
             // Odd = Inside, Even = Outside
             var collisions = 0;
             var vertexCounter = 0;
-            var startPoint = vertices[vertices.Count - 1];
+            var startPoint = vertices[vertices.Length - 1];
 
             // We recenter the test point around the origin to simplify the math a bit
             startPoint.x -= testPoint.x;
@@ -442,7 +442,7 @@ namespace PKGE
             {
                 // We need a definitive side of the horizontal axis to start with (since we need to know when we
                 // cross it), so we go backwards through the vertices until we find one that does not lie on the horizontal
-                for (var i = vertices.Count - 2; i >= 0; --i)
+                for (var i = vertices.Length - 2; i >= 0; --i)
                 {
                     var vertZ = vertices[i].z;
                     vertZ -= testPoint.z;
@@ -454,7 +454,7 @@ namespace PKGE
                 }
             }
 
-            while (vertexCounter < vertices.Count)
+            while (vertexCounter < vertices.Length)
             {
                 var endPoint = vertices[vertexCounter];
                 endPoint.x -= testPoint.x;
@@ -497,18 +497,18 @@ namespace PKGE
         /// <param name="vertices">Vertices defining the outline of the polygon. The polygon must be convex.
         /// The vertices must be coplanar, but can lie on any arbitrary plane.</param>
         /// <returns>True if the point is inside the polygon and coplanar, false otherwise.</returns>
-        public static bool PointInPolygon3D(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices)
+        public static bool PointInPolygon3D(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices)
         {
             // Not enough bounds vertices = nothing to be inside of
-            if (vertices.Count < 3)
+            if (vertices.Length < 3)
                 return false;
 
             // Compute the sum of the angles between the test point and each pair of edge points
             double angleSum = 0;
-            for (var vertIndex = 0; vertIndex < vertices.Count; vertIndex++)
+            for (var vertIndex = 0; vertIndex < vertices.Length; vertIndex++)
             {
                 var toA = vertices[vertIndex] - testPoint;
-                var toB = vertices[(vertIndex + 1) % vertices.Count] - testPoint;
+                var toB = vertices[(vertIndex + 1) % vertices.Length] - testPoint;
                 var sqrDistances = toA.sqrMagnitude * toB.sqrMagnitude; // Use sqrMagnitude, take sqrt of result later
                 if (sqrDistances <= MathUtility.EpsilonScaled) // On a vertex
                 {
@@ -537,6 +537,7 @@ namespace PKGE
             return point + planeNormal.normalized * distance;
         }
 
+#if INCLUDE_COLLECTIONS
         /// <summary>
         /// Finds the smallest convex polygon in the XZ plane that contains <paramref name="points"/>.
         /// </summary>
@@ -548,13 +549,30 @@ namespace PKGE
         /// <param name="points">Points used to find the convex hull. The y coordinates of these points are ignored.</param>
         /// <param name="hull">The vertices that define the smallest convex polygon are assigned to this list. The list is not cleared.</param>
         /// <returns>True if <paramref name="points"/> has at least 3 elements, false otherwise.</returns>
-        public static bool ConvexHull2D([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> points, List<Vector3> hull)
+        public static bool ConvexHull2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> points, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> hull)
         {
-            if (points.Count < 3)
+            var nativeHull = new NativeList<Vector3>(hull.Count, AllocatorManager.TempJob);
+            Packages.NativeListExtensions.AddRange(nativeHull, hull);
+            bool convexHull2D = ConvexHull2D(points, nativeHull);
+            nativeHull.Dispose();
+            return convexHull2D;
+        }
+
+        /// <inheritdoc cref="ConvexHull2D(ReadOnlySpan{Vector3}, List{Vector3})"/>
+        public static bool ConvexHull2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> points, NativeList<Vector3> hull)
+#else
+        public static bool ConvexHull2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> points, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> hull)
+#endif // INCLUDE_COLLECTIONS
+        {
+            if (points.Length < 3)
                 return false;
 
+#if INCLUDE_COLLECTIONS
+            var hullIndices = new NativeHashSet<int>(4, AllocatorManager.Temp);
+#else
             HashSet<int> hullIndices = HashSetPool<int>.Get();
-            var pointsCount = points.Count;
+#endif // INCLUDE_COLLECTIONS
+            var pointsCount = points.Length;
             var leftmostPointIndex = 0;
             for (var i = 1; i < pointsCount; ++i)
             {
@@ -634,7 +652,11 @@ namespace PKGE
                 currentIndex = pIndex;
             } while (currentIndex != leftmostPointIndex);
 
+#if INCLUDE_COLLECTIONS
+            hullIndices.Dispose();
+#else
             HashSetPool<int>.Release(hullIndices);
+#endif // INCLUDE_COLLECTIONS
 
             return true;
         }
@@ -645,9 +667,9 @@ namespace PKGE
         /// </summary>
         /// <param name="vertices">Vertices defining the outline of a 2D polygon.</param>
         /// <returns>The centroid point for the polygon.</returns>
-        public static Vector3 PolygonCentroid2D([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices)
+        public static Vector3 PolygonCentroid2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices)
         {
-            var vertexCount = vertices.Count;
+            var vertexCount = vertices.Length;
             double partialSignedArea, signedArea = 0;
             double centroidX = 0, centroidZ = 0;
             double currentX, currentZ;
@@ -703,7 +725,7 @@ namespace PKGE
         /// <param name="boundingBox">An array of length 4 to fill with the vertex positions of the bounding box,
         /// in the order `{ top left, bottom left, bottom right, top right }`.</param>
         /// <returns>The size of the bounding box on each axis. Y here maps to the Z axis.</returns>
-        public static Vector2 OrientedMinimumBoundingBox2D([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> convexHull, [System.Diagnostics.CodeAnalysis.NotNull] Vector3[] boundingBox)
+        public static Vector2 OrientedMinimumBoundingBox2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> convexHull, [System.Diagnostics.CodeAnalysis.NotNull] Span<Vector3> boundingBox)
         {
             // Caliper lines start axis-aligned as shown before we orient
             //        top
@@ -723,7 +745,7 @@ namespace PKGE
             int leftIndex = 0, rightIndex = 0, topIndex = 0, bottomIndex = 0;
 
             // find the indices of the 'extreme points' in the hull to use as starting edge indices
-            var vertexCount = convexHull.Count;
+            var vertexCount = convexHull.Length;
             for (var i = 0; i < vertexCount; i++)
             {
                 var vertex = convexHull[i];
@@ -859,12 +881,12 @@ namespace PKGE
             return new Vector2(leftRightDistance, topBottomDistance);
         }
 
-        static void RotateCalipers(Vector3 alignEdge, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices,
+        static void RotateCalipers(Vector3 alignEdge, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices,
             ref int indexA, out int indexB, out int indexC, out int indexD,
             out Vector3 caliperA, out Vector3 caliperB, out Vector3 caliperC, out Vector3 caliperD,
             out Vector3 caliperAEndCorner, out Vector3 caliperBEndCorner, out Vector3 caliperCEndCorner, out Vector3 caliperDEndCorner)
         {
-            var vertexCount = vertices.Count;
+            var vertexCount = vertices.Length;
             caliperA = alignEdge;
             caliperB = new Vector3(caliperA.z, 0f, -caliperA.x); // orthogonal
             caliperC = -caliperA; // opposite
@@ -930,7 +952,7 @@ namespace PKGE
         /// `{ top left, bottom left, bottom right, top right }`.</param>
         /// <returns>The rotation of the box, with the horizontal side aligned to the x-axis and the
         /// vertical side aligned to the z axis</returns>
-        public static Quaternion RotationForBox([System.Diagnostics.CodeAnalysis.NotNull] Vector3[] vertices)
+        public static Quaternion RotationForBox([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices)
         {
             var topLeft = vertices[0];
             var topRight = vertices[3];
@@ -944,9 +966,9 @@ namespace PKGE
         /// <param name="vertices">Vertices defining the outline of a polygon.
         /// The polygon must be convex, but can be in either winding order.</param>
         /// <returns>The area of the polygon.</returns>
-        public static float ConvexPolygonArea([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices)
+        public static float ConvexPolygonArea([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices)
         {
-            var count = vertices.Count;
+            var count = vertices.Length;
             if (count < 3)
                 return 0f;
 
@@ -972,9 +994,9 @@ namespace PKGE
         /// <param name="polygonB">The polygon to test for containing <paramref name="polygonA"/>.
         /// Must be convex and coplanar with <paramref name="polygonA"/>.</param>
         /// <returns>True if <paramref name="polygonA"/> lies completely inside <paramref name="polygonB"/>, false otherwise.</returns>
-        public static bool PolygonInPolygon([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> polygonA, List<Vector3> polygonB)
+        public static bool PolygonInPolygon([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> polygonA, ReadOnlySpan<Vector3> polygonB)
         {
-            if (polygonA.Count < 1)
+            if (polygonA.Length < 1)
                 return false;
 
             foreach (var vertex in polygonA)
@@ -994,7 +1016,7 @@ namespace PKGE
         /// <param name="polygonB">The second polygon to test. Must be convex and coplanar with <paramref name="polygonA"/>.</param>
         /// <param name="maxDistance">The maximum distance allowed between the two polygons.</param>
         /// <returns>True if the polygons are within the specified distance from each other, false otherwise.</returns>
-        public static bool PolygonsWithinRange(List<Vector3> polygonA, List<Vector3> polygonB, float maxDistance)
+        public static bool PolygonsWithinRange(ReadOnlySpan<Vector3> polygonA, ReadOnlySpan<Vector3> polygonB, float maxDistance)
         {
             return PolygonsWithinSqRange(polygonA, polygonB, maxDistance * maxDistance);
         }
@@ -1006,7 +1028,7 @@ namespace PKGE
         /// <param name="polygonB">The second polygon to test. Must be convex and coplanar with <paramref name="polygonA"/>.</param>
         /// <param name="maxSqDistance">The square of the maximum distance allowed between the two polygons.</param>
         /// <returns>True if the polygons are within the specified distance from each other, false otherwise.</returns>
-        public static bool PolygonsWithinSqRange([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> polygonA, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> polygonB, float maxSqDistance)
+        public static bool PolygonsWithinSqRange([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> polygonA, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> polygonB, float maxSqDistance)
         {
             ClosestPolygonApproach(polygonA, polygonB, out var pointA, out var pointB);
             return Vector3.SqrMagnitude(pointB - pointA) <= maxSqDistance ||
@@ -1020,9 +1042,9 @@ namespace PKGE
         /// <param name="vertices">Vertices defining the outline of a polygon.</param>
         /// <param name="epsilon">Custom epsilon value used when testing if the point lies on an edge.</param>
         /// <returns>True if the point lies on any edge of the polygon, false otherwise.</returns>
-        public static bool PointOnPolygonBoundsXZ(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> vertices, float epsilon = float.Epsilon)
+        public static bool PointOnPolygonBoundsXZ(Vector3 testPoint, [System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> vertices, float epsilon = float.Epsilon)
         {
-            var verticesCount = vertices.Count;
+            var verticesCount = vertices.Length;
 
             // No edge for the point to lie on
             if (verticesCount < 2)

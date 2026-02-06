@@ -116,7 +116,7 @@ namespace PKGE
         #endregion // Unity.FilmInternalUtilities
 
         [JetBrains.Annotations.NotNull]
-        public static Dictionary<K, V> RemoveKeys<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, List<K> remove)
+        public static Dictionary<K, V> RemoveKeys<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, ReadOnlySpan<K> remove) where K : IEquatable<K>
         {
             using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
 
@@ -137,7 +137,7 @@ namespace PKGE
         }
 
         [JetBrains.Annotations.NotNull]
-        public static Dictionary<K, V> RemoveValues<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, List<V> remove)
+        public static Dictionary<K, V> RemoveValues<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, ReadOnlySpan<V> remove) where V : IEquatable<V>
         {
             using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
 

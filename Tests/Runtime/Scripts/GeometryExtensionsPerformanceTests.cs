@@ -26,7 +26,7 @@ namespace PKGE.Tests
             foreach (var p in m_TestPoints)
             {
                 m_Timer.Restart();
-                GeometryUtils.PointInPolygon(p, k_TestHexagon);
+                GeometryUtils.PointInPolygon(p, k_TestHexagon.AsReadOnlySpan());
                 m_Timer.Stop();
                 m_ElapsedTicks += m_Timer.ElapsedTicks;
             }
@@ -69,7 +69,7 @@ namespace PKGE.Tests
             foreach (var c in m_Cases)
             {
                 m_Timer.Restart();
-                GeometryUtils.ConvexHull2D(c, m_Hull);
+                GeometryUtils.ConvexHull2D(c.AsReadOnlySpan(), m_Hull);
                 m_Timer.Stop();
                 m_ElapsedTicks += m_Timer.ElapsedTicks;
             }

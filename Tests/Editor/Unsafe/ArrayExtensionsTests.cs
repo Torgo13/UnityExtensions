@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace PKGE.Unsafe.Tests
+namespace PKGE.Tests
 {
     [TestFixture]
     public class ArrayExtensionsTests
@@ -14,7 +14,7 @@ namespace PKGE.Unsafe.Tests
             int[] array = { 1, 2, 3, 4, 5 };
             int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.GetByteSpanFromArray(array, elementSize);
+            var byteSpan = ArrayExtensions.AsBytes(array);
 
             Assert.AreEqual(array.Length * elementSize, byteSpan.Length);
             unsafe
@@ -35,7 +35,7 @@ namespace PKGE.Unsafe.Tests
             int[] array = null;
             int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.GetByteSpanFromArray(array, elementSize);
+            var byteSpan = ArrayExtensions.AsBytes(array);
 
             Assert.AreEqual(0, byteSpan.Length);
         }
@@ -46,11 +46,18 @@ namespace PKGE.Unsafe.Tests
             int[] array = new int[0];
             int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.GetByteSpanFromArray(array, elementSize);
+            var byteSpan = ArrayExtensions.AsBytes(array);
 
             Assert.AreEqual(0, byteSpan.Length);
         }
+    }
+}
 
+namespace PKGE.Unsafe.Tests
+{
+    [TestFixture]
+    public class ArrayExtensionsTests
+    {
 #if PKGE_USING_UNSAFE
         [Test]
         public void CalculateOffset_ShouldReturnCorrectOffset()

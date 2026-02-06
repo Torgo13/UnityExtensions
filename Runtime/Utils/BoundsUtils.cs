@@ -18,7 +18,7 @@ namespace PKGE
         /// </summary>
         /// <param name="gameObjects">The list of GameObjects.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<GameObject> gameObjects)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<GameObject> gameObjects)
         {
             Bounds? bounds = null;
             foreach (var gameObject in gameObjects)
@@ -35,20 +35,12 @@ namespace PKGE
             return bounds ?? new Bounds();
         }
 
-        /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] GameObject[] gameObjects)
-        {
-            using var _0 = ListPool<GameObject>.Get(out var list);
-            list.AddRange(gameObjects);
-            return GetBounds(list);
-        }
-
         /// <summary>
         /// Get the aggregated bounds of an array of transforms and their children.
         /// </summary>
         /// <param name="transforms">The list of transforms.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Transform> transforms)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<Transform> transforms)
         {
             Bounds? bounds = null;
             foreach (var t in transforms)
@@ -65,14 +57,6 @@ namespace PKGE
             return bounds ?? new Bounds();
         }
 
-        /// <inheritdoc cref="GetBounds(System.Collections.Generic.List{UnityEngine.GameObject})"/>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] Transform[] transforms)
-        {
-            using var _0 = ListPool<Transform>.Get(out var list);
-            list.AddRange(transforms);
-            return GetBounds(list);
-        }
-
         /// <summary>
         /// Get the aggregated bounds of a transform and its children.
         /// </summary>
@@ -83,7 +67,7 @@ namespace PKGE
             List<Renderer> renderers = ListPool<Renderer>.Get();
 
             transform.GetComponentsInChildren(renderers);
-            var b = GetBounds(renderers);
+            var b = GetBounds(renderers.AsReadOnlySpan());
 
             ListPool<Renderer>.Release(renderers);
 
@@ -112,9 +96,9 @@ namespace PKGE
         /// </summary>
         /// <param name="renderers">The list of renderers.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Renderer> renderers)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<Renderer> renderers)
         {
-            if (renderers.Count > 0)
+            if (renderers.Length > 0)
             {
                 var first = renderers[0];
                 var b = new Bounds(first.transform.position, Vector3.zero);
@@ -137,9 +121,9 @@ namespace PKGE
         /// <param name="colliders">The list of colliders.</param>
         /// <typeparam name="T">The type of object in the list of colliders.</typeparam>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds<T>([System.Diagnostics.CodeAnalysis.NotNull] List<T> colliders) where T : Collider
+        public static Bounds GetBounds<T>([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<T> colliders) where T : Collider
         {
-            if (colliders.Count > 0)
+            if (colliders.Length > 0)
             {
                 var first = colliders[0];
                 var b = new Bounds(first.transform.position, Vector3.zero);
@@ -161,15 +145,15 @@ namespace PKGE
         /// </summary>
         /// <param name="points">The list of points to encapsulate.</param>
         /// <returns>The aggregated bounds.</returns>
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> points)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<Vector3> points)
         {
             var bounds = default(Bounds);
-            if (points.Count < 1)
+            if (points.Length < 1)
                 return bounds;
 
             var minPoint = points[0];
             var maxPoint = minPoint;
-            for (var i = 1; i < points.Count; ++i)
+            for (var i = 1; i < points.Length; ++i)
             {
                 var point = points[i];
                 if (point.x < minPoint.x)
@@ -257,10 +241,10 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
         #region Unity.HLODSystem
-        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] List<MeshRenderer> renderers, Transform transform)
+        public static Bounds GetBounds([System.Diagnostics.CodeAnalysis.NotNull] System.ReadOnlySpan<MeshRenderer> renderers, Transform transform)
         {
             Bounds ret = new Bounds();
-            if (renderers.Count == 0)
+            if (renderers.Length == 0)
             {
                 ret.center = Vector3.zero;
                 ret.size = Vector3.zero;
@@ -268,7 +252,7 @@ namespace PKGE
             }
 
             CalcLocalBounds(renderers[0], transform, out var bounds);
-            for (int i = 1; i < renderers.Count; ++i)
+            for (int i = 1; i < renderers.Length; ++i)
             {
                 CalcLocalBounds(renderers[i], transform, out var temp);
                 bounds.Encapsulate(temp);

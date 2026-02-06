@@ -202,4 +202,20 @@ namespace PKGE
         }
         #endregion // Unity.Collections
     }
+
+    public static class SpanExtensions
+    {
+        public static bool Contains<T>(this Span<T> span, T item) where T : IEquatable<T>
+        {
+            return -1 != span.IndexOf(item);
+        }
+    }
+
+    public static class ReadOnlySpanExtensions
+    {
+        public static bool Contains<T>(this ReadOnlySpan<T> span, T item) where T : IEquatable<T>
+        {
+            return -1 != span.IndexOf(item);
+        }
+    }
 }
