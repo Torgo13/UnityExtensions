@@ -11,7 +11,7 @@ namespace PKGE
     /// </summary>
     public static class ReflectionUtils
     {
-        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Init()
         {
             _assemblies = null;

@@ -589,6 +589,15 @@ namespace PKGE
             return default;
 #endif // UNITY_EDITOR
         }
+
+        public static string GUIDToString(Union16 guid)
+        {
+#if UNITY_EDITOR
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid).ToString();
+#else
+            return string.Empty;
+#endif // UNITY_EDITOR
+        }
         #endregion // UnityEditor
     }
 }

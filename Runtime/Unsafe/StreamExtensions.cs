@@ -162,7 +162,7 @@ namespace PKGE.Unsafe
                 return false;
             }
 
-            stream.Write(array.Reinterpret<byte>(SizeOfCache<T>.Size));
+            stream.Write(array.Reinterpret<byte>(SizeOfCache<T>.Size).AsReadOnlySpan());
             return true;
         }
         #endregion // Unity.LiveCapture.Networking
