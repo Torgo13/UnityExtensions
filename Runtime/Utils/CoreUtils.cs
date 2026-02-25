@@ -1053,8 +1053,8 @@ namespace PKGE
                 throw new Exception("T must be an interface or inherit UnityEngine.Object.");
 
             Func<Type, bool> needsLoad = (allowSubTypes || isInterface)
-                ? (type) => typeof(T).IsAssignableFrom(type)
-                : (type) => typeof(T) == type;
+                ? static type => typeof(T).IsAssignableFrom(type)
+                : static type => typeof(T) == type;
 
             string[] guids = UnityEditor.AssetDatabase.FindAssets($"glob:\"*.{extension}\"");
             foreach (string guid in guids)

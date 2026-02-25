@@ -4,8 +4,13 @@ namespace PKGE.Tests
 {
     public class RandomNormalTest
     {
+#if INCLUDE_MATHEMATICS
+        const float k_FirstValue = 0.27865908699308078f;
+        const float k_SecondValue = -0.36536631752896848f;
+#else
         const float k_FirstValue = -1.19580f;
         const float k_SecondValue = -0.97345f;
+#endif // INCLUDE_MATHEMATICS
         const double k_Epsilon = 0.0001;
 
         [Test]

@@ -160,7 +160,7 @@ namespace PKGE.Editor.Tests
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
 #if INCLUDE_COLLECTIONS
-        static readonly Unity.Collections.NativeList<Vector3> k_ConvexHull = new Unity.Collections.NativeList<Vector3>(Unity.Collections.AllocatorManager.Persistent);
+        Unity.Collections.NativeList<Vector3> k_ConvexHull;
 #else
         static readonly List<Vector3> k_ConvexHull = new List<Vector3>();
 #endif // INCLUDE_COLLECTIONS
@@ -169,6 +169,13 @@ namespace PKGE.Editor.Tests
         [SetUp]
         public void BeforeEach()
         {
+#if INCLUDE_COLLECTIONS
+            if (!k_ConvexHull.IsCreated)
+            {
+                k_ConvexHull = new Unity.Collections.NativeList<Vector3>(Unity.Collections.AllocatorManager.TempJob);
+            }
+#endif // INCLUDE_COLLECTIONS
+
             k_ConvexHull.Clear();
         }
 
@@ -257,7 +264,12 @@ namespace PKGE.Editor.Tests
             var centroidPoint = GeometryUtils.PolygonCentroid2D(k_ConvexHull.AsReadOnlySpan());
 
 #if INCLUDE_COLLECTIONS
-            var convexHull = new List<Vector3>(k_ConvexHull);
+            var convexHull = new List<Vector3>(k_ConvexHull.Length);
+            foreach (var point in k_ConvexHull)
+            {
+                convexHull.Add(point);
+            }
+
             DebugDraw.Polygon(convexHull, Color.blue, 5f);
 #else
             DebugDraw.Polygon(k_ConvexHull, Color.blue, 5f);
@@ -296,7 +308,12 @@ namespace PKGE.Editor.Tests
             var bounds2D = GeometryUtils.OrientedMinimumBoundingBox2D(k_ConvexHull.AsReadOnlySpan(), boxPoints);
 
 #if INCLUDE_COLLECTIONS
-            var convexHull = new List<Vector3>(k_ConvexHull);
+            var convexHull = new List<Vector3>(k_ConvexHull.Length);
+            foreach (var point in k_ConvexHull)
+            {
+                convexHull.Add(point);
+            }
+
             DebugDraw.Polygon(convexHull, k_HalfRed);
 #else
             DebugDraw.Polygon(k_ConvexHull, k_HalfRed);

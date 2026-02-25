@@ -81,7 +81,7 @@ namespace PKGE
         public static IEnumerable<T> NonNull<T>([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<T> enumerable) where T : class
         {
 #if USING_LINQ
-            return enumerable.Where(obj => obj != null);
+            return enumerable.Where(static obj => obj != null);
 #else
             var list = new List<T>(enumerable);
             list.RemoveNull();

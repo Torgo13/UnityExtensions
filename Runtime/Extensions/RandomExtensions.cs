@@ -90,5 +90,29 @@ namespace PKGE
         public static double NextDouble(double minInclusive = 0, double maxExclusive = 1)
             => Double(minInclusive, maxExclusive);
         #endregion // double
+
+#if INCLUDE_MATHEMATICS
+        /// <summary>
+        /// Constructs a <see cref="Unity.Mathematics.Random"/> instance with a given seed value.
+        /// <paramref name="seed"/> can be any <see langword="uint"/> value
+        /// because it is wrapped between 1 and <see cref="uint.MaxValue"/>.
+        /// </summary>
+        /// <inheritdoc cref="Unity.Mathematics.Random(uint)"/>
+        public static Unity.Mathematics.Random CreateSafe(uint seed)
+        {
+            return new Unity.Mathematics.Random(1u + seed % uint.MaxValue);
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="Unity.Mathematics.Random"/> instance with an index that gets hashed.
+        /// <paramref name="index"/> can be any <see langword="uint"/> value
+        /// because it is wrapped between 0 and <see cref="uint.MaxValue"/> - 1.
+        /// </summary>
+        /// <inheritdoc cref="Unity.Mathematics.Random.CreateFromIndex(uint)"/>
+        public static Unity.Mathematics.Random CreateFromIndexSafe(uint index)
+        {
+            return Unity.Mathematics.Random.CreateFromIndex(index % uint.MaxValue);
+        }
+#endif // INCLUDE_MATHEMATICS
     }
 }

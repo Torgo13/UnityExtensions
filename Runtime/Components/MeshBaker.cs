@@ -169,7 +169,7 @@ namespace PKGE
             ListPool<Color>.Release(colors);
             ListPool<Vector2>.Release(uvs);
 
-            slice.Sort((a, b) => a.uv.x > b.uv.x ? 1 : -1);
+            slice.Sort(static (a, b) => a.uv.x > b.uv.x ? 1 : -1);
 
             // Compute Length
             sliceLength = 0.0f;

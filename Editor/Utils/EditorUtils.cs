@@ -248,8 +248,7 @@ namespace PKGE.Editor
         // TODO: expose internal SerializedProperty.ValidateObjectReferenceValue to remove this hack
         public static Type TypeNameToType(string name)
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
+            foreach (var assembly in ReflectionUtils.GetCachedAssemblies())
             {
                 try
                 {

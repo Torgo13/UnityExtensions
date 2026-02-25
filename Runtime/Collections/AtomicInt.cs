@@ -32,43 +32,43 @@ namespace TCGE
         /// <summary>
         /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.interlocked.compareexchange?view=netstandard-2.1#system-threading-interlocked-compareexchange(system-int32@-system-int32-system-int32)"/>
         /// </summary>
-        public static AtomicInt operator *(AtomicInt left, AtomicInt right)
+        public int Mul(int mul)
         {
             int initialValue, computedValue;
             do
             {
                 // Save the current running total in a local variable.
-                initialValue = left.value;
+                initialValue = value;
 
                 // Add the new value to the running total.
-                computedValue = initialValue * right.value;
+                computedValue = initialValue * mul;
 
-                // CompareExchange compares totalValue to initialValue. If
+                // CompareExchange compares value to initialValue. If
                 // they are not equal, then another thread has updated the
                 // running total since this loop started. CompareExchange
-                // does not update totalValue. CompareExchange returns the
-                // contents of totalValue, which do not equal initialValue,
+                // does not update value. CompareExchange returns the
+                // contents of value, which do not equal initialValue,
                 // so the loop executes again.
             } while (initialValue != Interlocked.CompareExchange(
-                ref left.value, computedValue, initialValue));
+                ref value, computedValue, initialValue));
             // If no other thread updated the running total, then 
-            // totalValue and initialValue are equal when CompareExchange
-            // compares them, and computedValue is stored in totalValue.
-            // CompareExchange returns the value that was in totalValue
+            // value and initialValue are equal when CompareExchange
+            // compares them, and computedValue is stored in value.
+            // CompareExchange returns the value that was in value
             // before the update, which is equal to initialValue, so the 
             // loop ends.
 
-            // The function returns computedValue, not totalValue, because
-            // totalValue could be changed by another thread between
+            // The function returns computedValue, not value, because
+            // value could be changed by another thread between
             // the time the loop ends and the function returns.
             return computedValue;
         }
 
-        /// <inheritdoc cref="operator *"/>
+        /// <inheritdoc cref="Mul(int)"/>
         /// <exception cref="DivideByZeroException"></exception>
-        public static AtomicInt operator /(AtomicInt left, AtomicInt right)
+        public int Div(int div)
         {
-            if (right.value == 0)
+            if (div == 0)
             {
                 throw new DivideByZeroException();
             }
@@ -76,10 +76,10 @@ namespace TCGE
             int initialValue, computedValue;
             do
             {
-                initialValue = left.value;
-                computedValue = initialValue / right.value;
+                initialValue = value;
+                computedValue = initialValue / div;
             } while (initialValue != Interlocked.CompareExchange(
-                ref left.value, computedValue, initialValue));
+                ref value, computedValue, initialValue));
 
             return computedValue;
         }

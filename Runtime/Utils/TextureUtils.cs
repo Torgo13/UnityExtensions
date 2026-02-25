@@ -1208,7 +1208,7 @@ namespace PKGE
             return mipmapCount;
         }
 
-        /// <inheritdoc cref="MipmapCount(int, int)"/>
+        /// <inheritdoc cref="MipmapCount(int, int, int)"/>
         public static int MipmapCount([System.Diagnostics.CodeAnalysis.NotNull] Texture2D tex) => MipmapCount(tex.width, tex.height);
         #endregion // Texture2D
         

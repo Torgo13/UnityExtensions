@@ -63,6 +63,8 @@ namespace PKGE.Unsafe
         /// <param name="value">The value with which to fill the array.</param>
         public static void FillArrayWithValue<T>(this NativeArray<T> array, T value) where T : struct
         {
+            Assert.IsTrue(array.IsCreated);
+            
 #if PKGE_USING_UNSAFE
             // Early out if array is zero, or iOS will crash in MemCpyReplicate.
             if (array.Length == 0)
@@ -166,12 +168,20 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
         {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+            
             return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafeReadOnlyPtr(), index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
         {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+            
             return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), index);
         }
         #endregion // UnityEngine.Rendering.Universal

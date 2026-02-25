@@ -34,7 +34,7 @@ namespace TCGE.Tests
         public void AtomicInt_Multiply()
         {
             const int testValue = 15;
-            AtomicInt counter = new AtomicInt { value = testValue };
+            AtomicInt counter = testValue;
             Assert.That(counter.value, Is.EqualTo(testValue));
 
             counter *= 5;
@@ -48,7 +48,7 @@ namespace TCGE.Tests
             Task[] tasks = new Task[16];
             for (int i = 0; i < tasks.Length; i++)
             {
-                tasks[i] = Task.Run(() => { counter *= 2; });
+                tasks[i] = Task.Run(() => { _ = counter.Mul(2); });
             }
 
             Task.WhenAll(tasks).Wait();

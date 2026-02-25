@@ -185,14 +185,14 @@ namespace PKGE.Unsafe
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "arrayLength is unused.")]
-        private static unsafe void CalculateRadixSortSupportArrays(
+        private static void CalculateRadixSortSupportArrays(
             int bitStates, int arrayLength, Span<uint> supportArray,
-            out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput)
+            out Span<uint> bucketIndices, out Span<uint> bucketSizes, out Span<uint> bucketPrefix, out Span<uint> arrayOutput)
         {
-            bucketIndices = (uint*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref supportArray[0]);
-            bucketSizes = bucketIndices + bitStates;
-            bucketPrefix = bucketSizes + bitStates;
-            arrayOutput = bucketPrefix + bitStates;
+            bucketIndices = supportArray;
+            bucketSizes = bucketIndices.Slice(bitStates);
+            bucketPrefix = bucketSizes.Slice(bitStates);
+            arrayOutput = bucketPrefix.Slice(bitStates);
         }
 
         private static void MergeSort(Span<uint> array, Span<uint> support, int length)
@@ -248,7 +248,7 @@ namespace PKGE.Unsafe
         /// <param name="arr">Array to sort.</param>
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Secondary array reference, used to store intermediate merge results.</param>
-        public static void MergeSort([System.Diagnostics.CodeAnalysis.MaybeNull] uint[] arr, int sortSize, ref uint[] supportArray)
+        public static void MergeSort(Span<uint> arr, int sortSize, ref Span<uint> supportArray)
         {
             if (arr == null)
                 return;
@@ -326,14 +326,14 @@ namespace PKGE.Unsafe
             InsertionSort(arr.AsSpan(), sortSize);
         }
 
-        private static unsafe void RadixSort(Span<uint> array, Span<uint> support, int radixBits, int bitStates, int length)
+        private static void RadixSort(Span<uint> array, Span<uint> support, int radixBits, int bitStates, int length)
         {
             uint mask = (uint)(bitStates - 1);
-            CalculateRadixSortSupportArrays(bitStates, length, support, out uint* bucketIndices, out uint* bucketSizes, out uint* bucketPrefix, out uint* arrayOutput);
+            CalculateRadixSortSupportArrays(bitStates, length, support, out var bucketIndices, out var bucketSizes, out var bucketPrefix, out var arrayOutput);
 
             int buckets = (sizeof(uint) * 8) / radixBits;
-            uint* targetBuffer = arrayOutput;
-            uint* inputBuffer = (uint*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref array[0]);
+            var targetBuffer = arrayOutput;
+            var inputBuffer = array;
             for (int b = 0; b < buckets; ++b)
             {
                 int shift = b * radixBits;
@@ -341,7 +341,7 @@ namespace PKGE.Unsafe
                     bucketIndices[s] = 0;//bucketSizes and bucketPrefix get zeroed, since we walk 3x the bit states
 
                 for (int i = 0; i < length; ++i)
-                    bucketSizes[((inputBuffer[i] >> shift) & mask)]++;
+                    bucketSizes[(int)((inputBuffer[i] >> shift) & mask)]++;
 
                 for (int s = 1; s < bitStates; ++s)
                     bucketPrefix[s] = bucketPrefix[s - 1] + bucketSizes[s - 1];
@@ -349,11 +349,11 @@ namespace PKGE.Unsafe
                 for (int i = 0; i < length; ++i)
                 {
                     uint val = inputBuffer[i];
-                    uint bucket = (val >> shift) & mask;
-                    targetBuffer[bucketPrefix[bucket] + bucketIndices[bucket]++] = val;
+                    int bucket = (int)((val >> shift) & mask);
+                    targetBuffer[(int)(bucketPrefix[bucket] + bucketIndices[bucket]++)] = val;
                 }
 
-                uint* tmp = inputBuffer;
+                var tmp = inputBuffer;
                 inputBuffer = targetBuffer;
                 targetBuffer = tmp;
             }
@@ -366,7 +366,7 @@ namespace PKGE.Unsafe
         /// <param name="sortSize">Size of the array to sort. If greater than array capacity, it will get clamped.</param>
         /// <param name="supportArray">Array of uints that is used for support data. The algorithm will automatically allocate it if necessary.</param>
         /// <param name="radixBits">Number of bits to use for each bucket. Can only be 8, 4 or 2.</param>
-        public static void RadixSort([System.Diagnostics.CodeAnalysis.MaybeNull] uint[] arr, int sortSize, ref uint[] supportArray, int radixBits = 8)
+        public static void RadixSort(Span<uint> arr, int sortSize, ref Span<uint> supportArray, int radixBits = 8)
         {
             if (arr == null)
                 return;
@@ -415,6 +415,9 @@ namespace PKGE.Unsafe
         public static int IndexOf<T>(Span<T> data, int count, T v)
             where T : struct, IEquatable<T>
         {
+            UnityEngine.Assertions.Assert.IsFalse(data == null);
+            UnityEngine.Assertions.Assert.IsTrue(count < data.Length);
+            
             for (int i = 0; i < count; ++i)
             {
                 if (data[i].Equals(v))

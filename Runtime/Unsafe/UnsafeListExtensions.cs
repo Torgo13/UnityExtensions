@@ -106,6 +106,9 @@ namespace PKGE.Unsafe
         {
             Assert.IsTrue(unsafeList.IsCreated);
             Assert.IsFalse(span == null);
+            
+            if (span.Length == 0)
+                return;
 
             unsafeList.AddRange(UnsafeUtility.AddressOf(ref span[0]), span.Length);
         }
@@ -131,6 +134,8 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
         {
+            Assert.IsTrue(nativeArray.IsCreated);
+            
             return new UnsafeList<T>((T*)nativeArray.GetUnsafePtr(), nativeArray.Length);
         }
     }

@@ -118,7 +118,7 @@ namespace PKGE.Editor.Unsafe.Tests
             supportArray.Dispose();
 
 
-            var managedSupportArray = new uint[values.Length];
+            var managedSupportArray = new uint[values.Length].AsSpan();
             CoreUnsafeUtils.MergeSort(values, values.Length, ref managedSupportArray);
             for (int i = 0; i < values.Length - 1; ++i)
                 Assert.LessOrEqual(values[i], values[i + 1]);
@@ -138,7 +138,7 @@ namespace PKGE.Editor.Unsafe.Tests
             supportArray.Dispose();
 
 
-            var managedSupportArray = new uint[values.Length];
+            var managedSupportArray = new uint[values.Length].AsSpan();
             CoreUnsafeUtils.RadixSort(values, values.Length, ref managedSupportArray);
             for (int i = 0; i < values.Length - 1; ++i)
                 Assert.LessOrEqual(values[i], values[i + 1]);
