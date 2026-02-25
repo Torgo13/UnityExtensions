@@ -170,9 +170,7 @@ namespace PKGE
             where TFrom : struct
             where TTo : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(
-                list.Count * SizeOfCache<TFrom>.Size
-                % SizeOfCache<TTo>.Size == 0);
+            Assert.AreEqual(0, list.Count * SizeOfCache<TFrom>.Size % SizeOfCache<TTo>.Size);
 
             return MemoryMarshal.Cast<TFrom, TTo>(list.AsSpan());
         }

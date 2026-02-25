@@ -984,9 +984,7 @@ namespace PKGE
             where TFrom : struct
             where TTo : struct
         {
-            Assert.IsTrue(
-                array.Length * SizeOfCache<TFrom>.Size
-                % SizeOfCache<TTo>.Size == 0);
+            Assert.AreEqual(0, array.Length * SizeOfCache<TFrom>.Size % SizeOfCache<TTo>.Size);
 
             return MemoryMarshal.Cast<TFrom, TTo>(array.AsSpan());
         }

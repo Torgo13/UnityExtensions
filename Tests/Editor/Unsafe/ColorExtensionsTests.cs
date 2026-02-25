@@ -30,6 +30,16 @@ namespace PKGE.Unsafe.Tests
                     int index = (y + radius) * (radius * 2) + (x + radius);
                     Assert.AreEqual(color, textureData[index]);
                 }
+
+                // Check every pixel
+                for (int x = -radius; x < radius; x++)
+                {
+                    int index = (y + radius) * (radius * 2) + (x + radius);
+                    if (x >= -currentHalfWidth && x < currentHalfWidth)
+                        Assert.AreEqual(color, textureData[index]);
+                    else
+                        Assert.AreEqual(default(Color32), textureData[index]);
+                }
             }
         }
 
