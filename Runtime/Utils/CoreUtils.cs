@@ -1105,15 +1105,16 @@ namespace PKGE
             Assert.IsTrue(outCorners != null);
             Assert.IsTrue(outCorners.Length >= 4);
 
-            var outCornersArray = new NativeArray<Vector3>(4, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var calculateViewSpaceCornersJob = new CalculateViewSpaceCornersJob
+            var outCornersArray = new NativeArray<Vector3>(4,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
+            Unity.Jobs.IJobExtensions.Run(new CalculateViewSpaceCornersJob
             {
                 proj = proj,
                 z = z,
                 outCorners = outCornersArray,
-            };
+            });
 
-            Unity.Jobs.IJobExtensions.RunByRef(ref calculateViewSpaceCornersJob);
             outCornersArray.AsReadOnlySpan().CopyTo(outCorners);
             outCornersArray.Dispose();
         }
@@ -1130,7 +1131,7 @@ namespace PKGE
             {
                 Matrix4x4 invProj = Matrix4x4.Inverse(proj);
 
-                var temp = new NativeArray<Vector4>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+                Span<Vector4> temp = stackalloc Vector4[4];
 
                 // We transform a point further than near plane and closer than far plane, for precision reasons.
                 // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
@@ -1144,8 +1145,6 @@ namespace PKGE
                 // Rescale vectors to have the desired z distance.
                 for (int r = 0; r < 4; ++r)
                     outCorners[r] = temp[r] * (z / (-temp[r].z));
-
-                temp.Dispose();
             }
         }
 

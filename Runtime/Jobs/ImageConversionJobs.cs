@@ -167,6 +167,7 @@ namespace PKGE.Packages
                     width = width,
                     height = height,
                     mipmapCount = mipmapCount,
+                    mipmapCountInv = rcp(mipmapCount * byte.MaxValue),
                 }.Schedule(width * height, handle);
             }
 
@@ -670,6 +671,7 @@ namespace PKGE.Packages
         [ReadOnly] public int width;
         [ReadOnly] public int height;
         [ReadOnly] public int mipmapCount;
+        [ReadOnly] public float mipmapCountInv;
 
         public NativeArray<Color24> rawTextureData;
 
@@ -692,7 +694,7 @@ namespace PKGE.Packages
                 rgb += new float4(m.r, m.g, m.b, 0);
             }
 
-            rawTextureData[index] = new Color24((rgb * rcp(mipmapCount * byte.MaxValue)).xyz);
+            rawTextureData[index] = new Color24((rgb * mipmapCountInv).xyz);
         }
     }
 

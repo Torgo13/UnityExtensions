@@ -139,8 +139,6 @@ namespace PKGE
 
         static void CopyHideFlagsRecursively([DisallowNull] Component copyFrom, [DisallowNull] Component copyTo)
         {
-            copyTo.hideFlags = copyFrom.hideFlags;
-
             var copyFromChildren = ListPool<Transform>.Get();
             var copyToChildren = ListPool<Transform>.Get();
             copyFrom.GetComponentsInChildren(copyFromChildren);
@@ -149,7 +147,7 @@ namespace PKGE
             UnityEngine.Assertions.Assert.AreEqual(copyFromChildren.Count, copyToChildren.Count);
             
             var childCount = copyFromChildren.Count;
-            for (var i = 1; i < childCount; ++i)
+            for (var i = 0; i < childCount; ++i)
             {
                 copyToChildren[i].hideFlags = copyFromChildren[i].hideFlags;
             }

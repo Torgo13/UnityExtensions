@@ -97,45 +97,34 @@ namespace PKGE
                 return;
             }
 
-            GetLocalCorners(rectTransform.rect, fourCornersArray);
-            Matrix4x4 matrix4x = rectTransform.localToWorldMatrix;
-            for (int i = 0; i < 4; i++)
-            {
-                fourCornersArray[i] = matrix4x.MultiplyPoint(fourCornersArray[i]);
-            }
+            var fourCorners = new Unity.Collections.NativeArray<Vector3>(4,
+                Unity.Collections.Allocator.TempJob, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            GetWorldCorners(rectTransform, fourCorners);
+            fourCorners.AsReadOnlySpan().CopyTo(fourCornersArray);
+
+            fourCorners.Dispose();
         }
 
-        public static void GetWorldCorners([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rectTransform, Unity.Collections.NativeArray<Vector3> fourCornersArray)
+        public static void GetWorldCorners([System.Diagnostics.CodeAnalysis.NotNull] this RectTransform rectTransform,
+            Unity.Collections.NativeArray<Vector3> fourCornersArray)
         {
             UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.IsCreated);
             UnityEngine.Assertions.Assert.IsTrue(fourCornersArray.Length >= 4);
             UnityEngine.Assertions.Assert.IsNotNull(rectTransform);
 
-            var fourCornersJob = new FourCornersJob
+            Unity.Jobs.IJobExtensions.Run(new FourCornersJob
             {
                 fourCornersArray = fourCornersArray,
                 matrix4x = rectTransform.localToWorldMatrix,
                 rect = rectTransform.rect,
-            };
-
-            Unity.Jobs.IJobExtensions.RunByRef(ref fourCornersJob);
-        }
-
-        private static void GetLocalCorners(Rect rect, System.Span<Vector3> fourCornersArray)
-        {
-            float x = rect.x;
-            float y = rect.y;
-            float xMax = rect.xMax;
-            float yMax = rect.yMax;
-            fourCornersArray[0] = new Vector3(x, y, 0f);
-            fourCornersArray[1] = new Vector3(x, yMax, 0f);
-            fourCornersArray[2] = new Vector3(xMax, yMax, 0f);
-            fourCornersArray[3] = new Vector3(xMax, y, 0f);
+            });
         }
 
         [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         struct FourCornersJob : Unity.Jobs.IJob
         {
+            [Unity.Collections.WriteOnly]
             [Unity.Collections.NativeFixedLength(4)]
             public Unity.Collections.NativeArray<Vector3> fourCornersArray;
             public Matrix4x4 matrix4x;
@@ -143,11 +132,25 @@ namespace PKGE
 
             public void Execute()
             {
-                GetLocalCorners(rect, fourCornersArray);
+                System.Span<Vector2> fourCorners = stackalloc Vector2[4];
+                GetLocalCorners(rect, fourCorners);
                 for (int i = 0; i < 4; i++)
                 {
-                    fourCornersArray[i] = matrix4x.MultiplyPoint(fourCornersArray[i]);
+                    fourCornersArray[i] = matrix4x.MultiplyPoint(fourCorners[i]);
                 }
+            }
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            static void GetLocalCorners(Rect rect, System.Span<Vector2> fourCornersArray)
+            {
+                float x = rect.x;
+                float y = rect.y;
+                float xMax = rect.xMax;
+                float yMax = rect.yMax;
+                fourCornersArray[0] = new Vector2(x, y);
+                fourCornersArray[1] = new Vector2(x, yMax);
+                fourCornersArray[2] = new Vector2(xMax, yMax);
+                fourCornersArray[3] = new Vector2(xMax, y);
             }
         }
     }
