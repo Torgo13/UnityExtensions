@@ -9,6 +9,51 @@ namespace PKGE.Editor
 {
     public static class AssetDatabaseUtility
     {
+        [MenuItem("Assets/AssetDatabase/Force Reserialize/Assets")]
+        public static void ForceReserializeAssets()
+        {
+            ForceReserialize(ForceReserializeAssetsOptions.ReserializeAssets);
+        }
+
+        [MenuItem("Assets/AssetDatabase/Force Reserialize/Metadata")]
+        public static void ForceReserializeMetadata()
+        {
+            ForceReserialize(ForceReserializeAssetsOptions.ReserializeMetadata);
+        }
+
+        [MenuItem("Assets/AssetDatabase/Force Reserialize/Assets and Metadata")]
+        public static void ForceReserializeAssetsAndMetadata()
+        {
+            ForceReserialize(ForceReserializeAssetsOptions.ReserializeAssetsAndMetadata);
+        }
+
+        static void ForceReserialize(ForceReserializeAssetsOptions options)
+        {
+            var searchInFolders = new string[] { "Assets/", };
+
+#if UNITY_6000_3_OR_NEWER
+            var assetGuids = AssetDatabase.FindAssetGUIDs(filter: "", searchInFolders);
+            var assetPaths = GUIDsToAssetPath(assetGuids);
+#else
+            var assetGuids = AssetDatabase.FindAssets(filter: "", searchInFolders);
+            var assetPaths = GUIDsToAssetPath(assetGuids);
+#endif // UNITY_6000_3_OR_NEWER
+
+            AssetDatabase.ForceReserializeAssets(assetPaths, options);
+        }
+
+#if UNITY_6000_3_OR_NEWER
+        static IEnumerable<string> GUIDsToAssetPath(GUID[] guids)
+#else
+        static IEnumerable<string> GUIDsToAssetPath(string[] guids)
+#endif // UNITY_6000_3_OR_NEWER
+        {
+            foreach (var guid in guids)
+            {
+                yield return AssetDatabase.GUIDToAssetPath(guid);
+            }
+        }
+
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/AssetDatabaseUtility.cs
         #region Unity.LiveCapture
         /// <summary>

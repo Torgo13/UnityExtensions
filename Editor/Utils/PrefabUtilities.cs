@@ -9,7 +9,7 @@ namespace PKGE.Editor
         /// <summary>
         /// Helper function to allow reverting prefab changes from selection
         /// </summary>
-        [MenuItem("Tools/Prefabs/Revert Selection")]
+        [MenuItem("Assets/Prefabs/Revert Selection")]
         static void RevertSelection()
         {
             var gameObjectSelection = Selection.gameObjects;
@@ -24,7 +24,7 @@ namespace PKGE.Editor
             }
         }
 
-        [MenuItem("Prefabs/Revert Selection (preserve scale)")]
+        [MenuItem("Assets/Prefabs/Revert Selection (Preserve Scale)")]
         static void RevertSelectionPreserveScale()
         {
             var gameObjectSelection = Selection.gameObjects;

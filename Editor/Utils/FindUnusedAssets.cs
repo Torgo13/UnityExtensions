@@ -15,7 +15,7 @@ namespace PKGE.Editor
         private List<string> unusedAssets = new List<string>();
         private List<string> excludedPaths = new List<string> { "Packages" };
 
-        [MenuItem("Tools/Check Unused Assets")]
+        [MenuItem("Assets/AssetDatabase/Check Unused Assets")]
         static void Init()
         {
             FindUnusedAssets window = (FindUnusedAssets)EditorWindow.GetWindow(typeof(FindUnusedAssets));
@@ -36,6 +36,8 @@ namespace PKGE.Editor
                 {
                     GUILayout.Label(assetPath);
                 }
+
+                GUIUtility.systemCopyBuffer = string.Join(System.Environment.NewLine, unusedAssets);
             }
             else
             {
@@ -48,18 +50,31 @@ namespace PKGE.Editor
             usedAssets.Clear();
             unusedAssets.Clear();
 
+#if UNITY_6000_3_OR_NEWER
+            GUID[] guids = AssetDatabase.FindAssetGUIDs("t:Object", searchInFolders: null);
+            foreach (GUID guid in guids)
+#else
             string[] guids = AssetDatabase.FindAssets("t:Object", null);
             foreach (string guid in guids)
+#endif // UNITY_6000_3_OR_NEWER
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
+#if UNITY_6000_3_OR_NEWER
+                var type = AssetDatabase.GetMainAssetTypeFromGUID(guid);
+                if (type == null)
+                    continue;
 
-                if (path == null)
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(path))
+                    continue;
+#else
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(path))
                     continue;
 
                 var type = AssetDatabase.GetMainAssetTypeAtPath(path);
-
                 if (type == null)
                     continue;
+#endif // UNITY_6000_3_OR_NEWER
 
                 string assetType = type.Name;
                 if (assetTypes.Contains(assetType) && !excludedPaths.Any(p => path.Contains(p)))
@@ -114,31 +129,37 @@ namespace PKGE.Editor
 
         void CheckObject(GameObject gameObject)
         {
-            foreach (var component in gameObject.GetComponents<Component>())
+            CheckTransform(gameObject.transform);
+        }
+
+        void CheckTransform(Transform t)
+        {
+            var components = UnityEngine.Pool.ListPool<Component>.Get();
+            t.GetComponents(components);
+            foreach (var component in components)
             {
                 SerializedObject so = new SerializedObject(component);
                 var sp = so.GetIterator();
                 while (sp.NextVisible(true))
                 {
-                    if (sp.propertyType == SerializedPropertyType.ObjectReference)
+                    if (sp.propertyType != SerializedPropertyType.ObjectReference)
+                        continue;
+
+                    string assetPath = AssetDatabase.GetAssetPath(sp.objectReferenceValue);
+                    if (!string.IsNullOrEmpty(assetPath) && usedAssets.ContainsKey(assetPath))
                     {
-                        if (sp.objectReferenceValue != null)
-                        {
-                            string assetPath = AssetDatabase.GetAssetPath(sp.objectReferenceValue);
-                            if (usedAssets.ContainsKey(assetPath))
-                            {
-                                usedAssets[assetPath] = true;
-                            }
-                        }
+                        usedAssets[assetPath] = true;
                     }
                 }
             }
 
-            foreach (Transform child in gameObject.transform)
+            UnityEngine.Pool.ListPool<Component>.Release(components);
+
+            foreach (Transform child in t)
             {
-                CheckObject(child.gameObject);
+                CheckTransform(child);
             }
         }
-        #endregion // Unity.Megacity.EditorTools
+#endregion // Unity.Megacity.EditorTools
     }
 }

@@ -7,7 +7,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Utils/Editor/InvertMeshNormals.cs
         #region Unity.Megacity.EditorTools
-        [MenuItem("Tools/Invert Mesh Normals")]
+        [MenuItem("Assets/AssetDatabase/Invert Mesh Normals")]
         public static void ShowWindow()
         {
             GetWindow(typeof(InvertMeshNormals));

@@ -12,7 +12,7 @@ namespace PKGE.Editor
         // the maximum number of swatches for this example
         private const int k_MaxPaletteSize = 10;
 
-        [MenuItem("Window/Color Swatch Example")]
+        [MenuItem("Window/Accessibility/Color Swatch")]
         private static void CreateWindow()
         {
             var window = GetWindow<ColorSwatchExample>();

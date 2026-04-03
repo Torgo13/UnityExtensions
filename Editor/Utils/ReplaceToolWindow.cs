@@ -25,7 +25,7 @@ namespace PKGE.Editor
 
         private Vector2 scrollView = Vector2.zero;
 
-        [MenuItem("Assets/Replace object...")]
+        [MenuItem("Assets/AssetDatabase/Replace object...")]
 
         static void Init()
         {
@@ -164,7 +164,7 @@ namespace PKGE.Editor
         }
 
         //Right CLick Shortcuts
-        [MenuItem("Assets/Replace scene selection by this prefab", true)]
+        [MenuItem("Assets/AssetDatabase/Replace scene selection by this prefab", true)]
         private static bool ReplaceSelPrefabValidation()
         {
             // This returns true when the selected object is a Variable (the menu item will be disabled otherwise).
@@ -194,7 +194,7 @@ namespace PKGE.Editor
             return true;
         }
 
-        [MenuItem("Assets/Replace scene selection by this prefab", false)]
+        [MenuItem("Assets/AssetDatabase/Replace scene selection by this prefab", false)]
         private static void ReplaceSelPrefab(MenuCommand menuCommand)
         {
             GameObject ReplaceSource = null;
