@@ -1,3 +1,4 @@
+#if ENABLED_ANDROID_JNI
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,3 +22,4 @@ namespace PKGE.Platforms.Android
         #endregion // UnityEngine.Purchasing.Models
     }
 }
+#endif // ENABLED_ANDROID_JNI

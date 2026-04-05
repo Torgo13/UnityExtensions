@@ -11,6 +11,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.androidjni",
+            "expression": "1.0.0",
+            "define": "ENABLED_ANDROID_JNI"
+        }
+    ],
     "noEngineReferences": false
 }
