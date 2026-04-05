@@ -21,7 +21,7 @@ namespace PKGE.Packages
 
         public readonly bool IsCreated => InstanceIDs.IsCreated && InstanceIDMap.IsCreated;
 
-        public UnityObjectRefMap(Allocator allocator)
+        public UnityObjectRefMap(AllocatorManager.AllocatorHandle allocator)
         {
             InstanceIDMap = new NativeHashMap<int, int>(0, allocator);
 #if UNITY_6000_3_OR_NEWER
@@ -82,7 +82,11 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Serialization/UnityObjectRef.cs
         #region Unity.Entities
         [SerializeField]
+#if UNITY_6000_3_OR_NEWER
+        internal EntityId instanceId;
+#else
         internal int instanceId;
+#endif // UNITY_6000_3_OR_NEWER
 
         public readonly bool Equals(UntypedUnityObjectRef other)
         {
@@ -135,7 +139,7 @@ namespace PKGE.Packages
         {
             int instanceId;
 
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
+#if DEBUG // Log a warning each time a UnityObjectRef<T> is created from a background thread
             try
             {
                 instanceId = instance == null ? 0 : instance.GetInstanceID();
@@ -147,7 +151,7 @@ namespace PKGE.Packages
             }
 #else
             instanceId = instance == null ? 0 : instance.GetHashCode();
-#endif // ENABLE_UNITY_COLLECTIONS_CHECKS
+#endif // DEBUG
 
             return FromInstanceID(instanceId);
         }
@@ -158,9 +162,6 @@ namespace PKGE.Packages
             return result;
         }
 
-        [ThreadStatic]
-        static readonly List<Object> objects = new List<Object>(1);
-
         /// <summary>
         /// Implicitly converts an <see cref="UnityObjectRef{T}"/> to an <see cref="UnityEngine.Object"/>.
         /// </summary>
@@ -168,11 +169,12 @@ namespace PKGE.Packages
         /// <returns>The instance of type T referenced by unityObjectRef.</returns>
         public static implicit operator T(UnityObjectRef<T> unityObjectRef)
         {
-            if (unityObjectRef.Id.instanceId == 0)
+            if (unityObjectRef.Id.instanceId == default)
                 return null;
 
-#if UNITY_6000_3_OR_NEWER
-            if (!System.Threading.Thread.CurrentThread.IsBackground)
+#if UNITY_6000_3_OR_NEWER // EntityIdToObject() cannot be used in a background thread because it calls GetInstanceID()
+            var currentThread = System.Threading.Thread.CurrentThread;
+            if (!currentThread.IsThreadPoolThread && !currentThread.IsBackground)
                 return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
 
             // Cannot use Allocator.Temp in a background thread
@@ -182,11 +184,10 @@ namespace PKGE.Packages
             };
 
             // Cannot use ListPool in a background thread
+            var objects = new List<Object>(1);
             Resources.EntityIdsToObjectList(entityIds, objects);
             entityIds.Dispose();
-            var o = (T)objects[0];
-            objects.Clear();
-            return o;
+            return (T)objects[0];
 #else
             return (T)Resources.InstanceIDToObject(unityObjectRef.Id.instanceId);
 #endif // UNITY_6000_3_OR_NEWER
