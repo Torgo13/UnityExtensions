@@ -45,6 +45,9 @@ namespace PKGE
         public static implicit operator Color24(Vector4 f) => new Color24(f);
         public static implicit operator Vector4(Color24 c) => new Vector4(c.r, c.g, c.b, 1f);
 
+        public static implicit operator Color24(Color32 c32) => new Color24(c32.r, c32.g, c32.b);
+        public static implicit operator Color32(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
 #if INCLUDE_MATHEMATICS
         public Color24(Unity.Mathematics.float3 f)
         {
