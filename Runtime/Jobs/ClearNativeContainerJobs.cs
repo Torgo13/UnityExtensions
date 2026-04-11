@@ -5,22 +5,6 @@ namespace PKGE.Packages
 {
     //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Gameplay/Traffic/UtilityJobs.cs
     #region Unity.Megacity.Traffic
-    /// <summary>
-    /// Utility jobs to clear native containers
-    /// </summary>
-    /// <remarks>Cannot be burst compiled if <see cref="IJobFor"/> is used</remarks>
-    [Unity.Burst.BurstCompile]
-    public struct ClearArrayJob<T> : IJobParallelFor where T : struct
-    {
-        [NativeMatchesParallelForLength]
-        [WriteOnly] public NativeArray<T> Data;
-
-        public void Execute(int index)
-        {
-            Data[index] = default;
-        }
-    }
-
 #if INCLUDE_COLLECTIONS
     [Unity.Burst.BurstCompile]
     public struct ClearHashJob<T> : IJob where T : unmanaged
@@ -33,17 +17,6 @@ namespace PKGE.Packages
         }
     }
 #endif // INCLUDE_COLLECTIONS
-
-    [Unity.Burst.BurstCompile]
-    public struct DisposeArrayJob<T> : IJob where T : struct
-    {
-        [WriteOnly] [DeallocateOnJobCompletion]
-        public NativeArray<T> Data;
-
-        public readonly void Execute()
-        {
-        }
-    }
     #endregion // Unity.Megacity.Traffic
 
     [Unity.Burst.BurstCompile]

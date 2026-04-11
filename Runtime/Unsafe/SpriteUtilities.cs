@@ -31,9 +31,10 @@ namespace PKGE.Unsafe
 
             var colours = texture.GetRawTextureData<Color32>();
 
-            Unity.Jobs.IJobParallelForExtensions.Run(new Packages.ClearArrayJob<Color32>
+            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<Color32>
             {
-                Data = colours,
+                src = default,
+                dst = colours,
             }, colours.Length);
 
             Unity.Jobs.IJobForExtensions.Run(new CreateCircleSpriteJob

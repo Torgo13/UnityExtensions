@@ -30,20 +30,20 @@ namespace PKGE.Editor
             }
         }
 
-        private static Dictionary<Color, Texture2D> _singleColorTextures;
+        private static Dictionary<Color32, Texture2D> _singleColorTextures;
 
         /// <summary>
         /// Returns a 1 by 1 Texture that is the color that you pass in.
         /// </summary>
         /// <param name="color">The color that Unity uses to create the Texture.</param>
         /// <returns></returns>
-        public static Texture2D TextureFromColor(Color color)
+        public static Texture2D TextureFromColor(Color32 color)
         {
-            if (color == Color.white) return Texture2D.whiteTexture;
-            if (color == Color.black) return Texture2D.blackTexture;
+            if (color.Equals(Color.white)) return Texture2D.whiteTexture;
+            if (color.Equals(Color.black)) return Texture2D.blackTexture;
 
             if (_singleColorTextures == null)
-                _singleColorTextures = new Dictionary<Color, Texture2D>();
+                _singleColorTextures = new Dictionary<Color32, Texture2D>();
 
             if (!_singleColorTextures.TryGetValue(color, out Texture2D tex))
             {
@@ -67,7 +67,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">The name of the Texture property.</param>
         /// <param name="fallback">The fallback color that Unity uses to create a Texture if it could not find the Texture property on the Material.</param>
         /// <returns></returns>
-        public static Texture GetTextureSafe(Material srcMaterial, string propertyName, Color fallback)
+        public static Texture GetTextureSafe(Material srcMaterial, string propertyName, Color32 fallback)
         {
             return GetTextureSafe(srcMaterial, propertyName, TextureFromColor(fallback));
         }

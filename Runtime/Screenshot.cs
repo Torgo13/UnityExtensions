@@ -49,6 +49,9 @@ namespace PKGE
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
+            if (string.IsNullOrEmpty(filename))
+                filename = DateTime.UtcNow.ToString();
+
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
             if (!Directory.Exists(directory))
@@ -67,6 +70,9 @@ namespace PKGE
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
+
+            if (string.IsNullOrEmpty(filename))
+                filename = DateTime.UtcNow.ToString();
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
@@ -89,6 +95,9 @@ namespace PKGE
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
 
+            if (string.IsNullOrEmpty(filename))
+                filename = DateTime.UtcNow.ToString();
+
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
             if (!Directory.Exists(directory))
@@ -107,6 +116,9 @@ namespace PKGE
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
+
+            if (string.IsNullOrEmpty(filename))
+                filename = DateTime.UtcNow.ToString();
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
@@ -155,6 +167,9 @@ namespace PKGE
 
         static string CreatePath(string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory, string textureExtension)
         {
+            if (string.IsNullOrEmpty(filename))
+                filename = DateTime.UtcNow.ToString();
+
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.{textureExtension}";
             if (!Directory.Exists(directory))
