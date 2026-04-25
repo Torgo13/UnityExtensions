@@ -1285,7 +1285,7 @@ namespace PKGE.Packages
 
             return sb.ToString();
 #else
-            return sb.ToString().TrimEnd();
+            return trimEnd ? sb.ToString().TrimEnd() : sb.ToString();
 #endif // INCLUDE_STRINGBUILDER_EXTENSIONS
         }
     }
