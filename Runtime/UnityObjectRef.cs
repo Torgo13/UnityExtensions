@@ -146,7 +146,7 @@ namespace PKGE.Packages
             }
             catch (InvalidOperationException ex)
             {
-                Debug.LogWarning(ex.Message);
+                Debug.LogWarning(ex.Message, instance);
                 instanceId = instance.GetHashCode();
             }
 #else

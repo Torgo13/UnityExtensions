@@ -121,45 +121,6 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Formats.Alembic.Importer
 #endif // PKGE_USING_UNSAFE
 
-        //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
-        #region UnityEngine.Rendering
-        /// <summary>
-        /// Fills an array with the same value.
-        /// </summary>
-        /// <typeparam name="T">The type of the array</typeparam>
-        /// <param name="array">Target array to fill</param>
-        /// <param name="value">Value to fill</param>
-        /// <param name="startIndex">Start index to fill</param>
-        /// <param name="length">The number of entries to write, or -1 to fill until the end of the array</param>
-        public static void FillArray<T>(this NativeArray<T> array, in T value, int startIndex = 0, int length = -1)
-            where T : unmanaged
-        {
-            if (!array.IsCreated)
-                throw new InvalidOperationException(nameof(array));
-            if (startIndex < 0)
-                throw new IndexOutOfRangeException(nameof(startIndex));
-            if (startIndex + length >= array.Length)
-                throw new IndexOutOfRangeException(nameof(length));
-
-#if PKGE_USING_UNSAFE
-            unsafe
-            {
-                T* ptr = (T*)array.GetUnsafePtr();
-
-                int endIndex = length == -1 ? array.Length : startIndex + length;
-
-                for (int i = startIndex; i < endIndex; ++i)
-                    ptr[i] = value;
-            }
-#else
-            int endIndex = length == -1 ? array.Length : startIndex + length;
-
-            for (int i = endIndex - 1; i >= startIndex; --i)
-                array[i] = value;
-#endif // PKGE_USING_UNSAFE
-        }
-        #endregion // UnityEngine.Rendering
-
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         /// <summary>

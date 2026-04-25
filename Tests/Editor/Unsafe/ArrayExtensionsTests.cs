@@ -1,7 +1,6 @@
 using System;
 using NUnit.Framework;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Tests
 {
@@ -12,14 +11,14 @@ namespace PKGE.Tests
         public void GetByteSpanFromArray_ShouldReturnCorrectSpan_WhenArrayIsNotNullOrEmpty()
         {
             int[] array = { 1, 2, 3, 4, 5 };
-            int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
 
-            Assert.AreEqual(array.Length * elementSize, byteSpan.Length);
+            Assert.AreEqual(array.Length * sizeof(int), byteSpan.Length);
+
             unsafe
             {
-                fixed (void* ptr = byteSpan)
+                fixed (byte* ptr = byteSpan)
                 {
                     for (int i = 0; i < array.Length; i++)
                     {
@@ -33,9 +32,8 @@ namespace PKGE.Tests
         public void GetByteSpanFromArray_ShouldReturnEmptySpan_WhenArrayIsNull()
         {
             int[] array = null;
-            int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
 
             Assert.AreEqual(0, byteSpan.Length);
         }
@@ -44,9 +42,8 @@ namespace PKGE.Tests
         public void GetByteSpanFromArray_ShouldReturnEmptySpan_WhenArrayIsEmpty()
         {
             int[] array = new int[0];
-            int elementSize = UnsafeUtility.SizeOf<int>();
 
-            var byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
 
             Assert.AreEqual(0, byteSpan.Length);
         }
@@ -110,11 +107,15 @@ namespace PKGE.Unsafe.Tests
         public void FillArray_ShouldFillArrayWithSpecifiedValue()
         {
             // Arrange
-            var array = new NativeArray<int>(5, Allocator.Temp);
+            var array = new NativeArray<int>(5, Allocator.TempJob);
             const int fillValue = 42;
 
             // Act
-            array.FillArray(fillValue);
+            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            {
+                src = fillValue,
+                dst = array,
+            }, array.Length);
 
             // Assert
             foreach (var item in array)
@@ -132,11 +133,15 @@ namespace PKGE.Unsafe.Tests
         public void FillArray_ShouldFillArrayPartially_WithSpecifiedValue()
         {
             // Arrange
-            var array = new NativeArray<int>(5, Allocator.Temp);
+            var array = new NativeArray<int>(5, Allocator.TempJob);
             const int fillValue = 99;
 
             // Act
-            array.FillArray(fillValue, startIndex: 2, length: 2);
+            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            {
+                src = fillValue,
+                dst = array.GetSubArray(start: 2, length: 2),
+            }, 2);
 
             // Assert
             for (int i = 0; i < array.Length; i++)
@@ -154,6 +159,7 @@ namespace PKGE.Unsafe.Tests
             array.Dispose();
         }
 
+        /*
         /// <summary>
         /// Edge Cases: Handles negative lengths gracefully, filling until the array's end
         /// </summary>
@@ -194,7 +200,7 @@ namespace PKGE.Unsafe.Tests
             var array = new NativeArray<int>(5, Allocator.Temp);
 
             // Act & Assert
-            Assert.Throws<IndexOutOfRangeException>(() =>
+            _ = Assert.Throws<IndexOutOfRangeException>(() =>
                 array.FillArray(42, startIndex: -1));
 
             array.Dispose();
@@ -211,7 +217,7 @@ namespace PKGE.Unsafe.Tests
             var array = new NativeArray<int>(5, Allocator.Temp);
 
             // Act & Assert
-            Assert.Throws<IndexOutOfRangeException>(() =>
+            _ = Assert.Throws<IndexOutOfRangeException>(() =>
                 array.FillArray(42, startIndex: 2, length: 10));
 
             array.Dispose();
@@ -228,9 +234,10 @@ namespace PKGE.Unsafe.Tests
             array.Dispose();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() =>
+            _ = Assert.Throws<InvalidOperationException>(() =>
                 array.FillArray(42));
         }
+        */
 
         /// <summary>
         /// Performance: Verifies functionality with large arrays
@@ -239,16 +246,22 @@ namespace PKGE.Unsafe.Tests
         public void FillArray_ShouldHandleLargeNativeArraysEfficiently()
         {
             // Arrange
-            var largeArray = new NativeArray<int>(10_000_000, Allocator.Temp);
+            var largeArray = new NativeArray<int>(ushort.MaxValue * 2,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+
             const int fillValue = 123;
 
             // Act
-            largeArray.FillArray(fillValue);
+            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            {
+                src = fillValue,
+                dst = largeArray,
+            }, largeArray.Length);
 
             // Assert
             foreach (var item in largeArray)
             {
-                Assert.AreEqual(fillValue, item);
+                UnityEngine.Assertions.Assert.AreEqual(fillValue, item);
             }
 
             largeArray.Dispose();

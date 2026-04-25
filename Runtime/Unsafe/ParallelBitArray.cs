@@ -156,14 +156,39 @@ namespace PKGE.Unsafe
             int chunkIndex = length / 64;
             int remainder = length & 63;
 
-            _bits.FillArray(0, 0, chunkIndex);
+            _bits.AsSpan().Slice(0, chunkIndex).Fill(0);
 
-            if(remainder > 0)
+            if (remainder > 0)
             {
                 long lastChunkMask = (1L << remainder) - 1;
                 _bits[chunkIndex] &= ~lastChunkMask;
             }
         }
         #endregion // UnityEngine.Rendering
+
+        public JobHandle FillZeroesJob(int length, JobHandle handle = default)
+        {
+            if (_allocator <= Allocator.Temp)
+            {
+                FillZeroes(length);
+                return handle;
+            }
+
+            length = System.Math.Min(length, _length);
+            int chunkIndex = length / 64;
+            int remainder = length & 63;
+
+            if (remainder > 0)
+            {
+                long lastChunkMask = (1L << remainder) - 1;
+                _bits[chunkIndex] &= ~lastChunkMask;
+            }
+
+            return new Packages.SetArrayJob<long>
+            {
+                src = 0,
+                dst = _bits,
+            }.Schedule(chunkIndex, handle);
+        }
     }
 }
