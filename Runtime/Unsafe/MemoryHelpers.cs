@@ -3,7 +3,6 @@ using System;
 using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine.Assertions;
 using static Unity.Mathematics.math;
 
@@ -70,7 +69,7 @@ namespace PKGE.Unsafe
                     long size, int align)
                 {
                     // Make the alignment multiple of cacheline size
-                    var alignment = Unity.Mathematics.math.max(JobsUtility.CacheLineSize, align);
+                    var alignment = Unity.Mathematics.math.max(Unity.Jobs.LowLevel.Unsafe.JobsUtility.CacheLineSize, align);
 
                     if (IsCustom(allocator))
                         return CustomResize(oldPointer, oldCount, newCount, allocator, size, alignment);

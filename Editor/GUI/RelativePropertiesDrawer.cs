@@ -1,7 +1,5 @@
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace PKGE.GUI.Editor
 {
@@ -17,19 +15,21 @@ namespace PKGE.GUI.Editor
         /// </summary>
         protected abstract string[] relativePropertiesNames { get; }
 
+#if PACKAGE_UITOOLKIT
         /// <inheritdoc/>
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        public override UnityEngine.UIElements.VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var container = new VisualElement();
+            var container = new UnityEngine.UIElements.VisualElement();
             for (int i = 0; i < relativePropertiesNames.Length; ++i)
             {
                 var relativeProperty = property.FindPropertyRelative(relativePropertiesNames[i]);
                 if (relativeProperty == null)
                     continue;
-                container.Add(new PropertyField(relativeProperty));
+                container.Add(new UnityEditor.UIElements.PropertyField(relativeProperty));
             }
             return container;
         }
+#endif // PACKAGE_UITOOLKIT
 
         /// <inheritdoc/>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)

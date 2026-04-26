@@ -1,6 +1,5 @@
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Accessibility;
 
 namespace PKGE.Editor
 {
@@ -150,7 +149,7 @@ namespace PKGE.Editor
         {
             m_Palette = new Color[m_PaletteSize];
             m_NumUniqueColors =
-                VisionUtility.GetColorBlindSafePalette(m_Palette, m_DesiredLuminance.x, m_DesiredLuminance.y);
+                UnityEngine.Accessibility.VisionUtility.GetColorBlindSafePalette(m_Palette, m_DesiredLuminance.x, m_DesiredLuminance.y);
         }
     }
 }

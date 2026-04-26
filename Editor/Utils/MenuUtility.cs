@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 using PKGE.Attributes;
 
 namespace PKGE.Editor
@@ -89,8 +88,9 @@ namespace PKGE.Editor
             return menu;
         }
 
+#if PACKAGE_UITOOLKIT
         public static void SetupMenu<TMember, TAttribute>(
-            DropdownMenu menu,
+            UnityEngine.UIElements.DropdownMenu menu,
             IEnumerable<(TMember, TAttribute[])> attributes,
             Func<TMember, bool> isEnabled,
             Action<TMember, TAttribute> menuFunction
@@ -102,12 +102,13 @@ namespace PKGE.Editor
                 menu.AppendAction(
                     attribute.ItemName,
                     action => menuFunction?.Invoke(member, attribute),
-                    action => isEnabled(member) ? DropdownMenuAction.Status.Normal : DropdownMenuAction.Status.Disabled
+                    action => isEnabled(member) ? UnityEngine.UIElements.DropdownMenuAction.Status.Normal : UnityEngine.UIElements.DropdownMenuAction.Status.Disabled
                 );
             };
 
             CreateMenu(attributes, addMenuItem, menu.AppendSeparator);
         }
+#endif // PACKAGE_UITOOLKIT
         #endregion // Unity.LiveCapture.Editor
     }
 }

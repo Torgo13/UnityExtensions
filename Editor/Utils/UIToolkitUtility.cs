@@ -1,3 +1,4 @@
+#if PACKAGE_UITOOLKIT
 using System;
 using System.Linq;
 using UnityEngine.UIElements;
@@ -41,3 +42,4 @@ namespace PKGE.Editor
         #endregion // Unity.LiveCapture.Editor
     }
 }
+#endif // PACKAGE_UITOOLKIT

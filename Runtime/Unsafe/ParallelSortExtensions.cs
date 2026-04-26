@@ -4,7 +4,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine.Assertions;
 
 namespace PKGE.Unsafe
@@ -115,7 +114,7 @@ namespace PKGE.Unsafe
             public void Execute(int index)
             {
                 int start = index * BatchSize;
-                int end = math.min(start + BatchSize, Array.Length);
+                int end = UnityEngine.Mathf.Min(start + BatchSize, Array.Length);
 
                 int jobBuckets = index * 256;
 
@@ -247,7 +246,7 @@ namespace PKGE.Unsafe
             public void Execute(int index)
             {
                 int start = index * BatchSize;
-                int end = math.min(start + BatchSize, Array.Length);
+                int end = UnityEngine.Mathf.Min(start + BatchSize, Array.Length);
 
                 int jobIndices = index * 256;
 

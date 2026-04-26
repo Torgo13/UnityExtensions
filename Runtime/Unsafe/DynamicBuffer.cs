@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
 
 namespace PKGE.Unsafe
 {
@@ -445,7 +444,7 @@ namespace PKGE.Unsafe
             ref var l = ref m_Buffer->Length;
             byte* basePtr = BufferHeader.GetElementPointer(m_Buffer);
             int elemSize = SizeOfCache<T>.Size;
-            int copyFrom = math.max(l - count, index + count);
+            int copyFrom = UnityEngine.Mathf.Max(l - count, index + count);
             void* dst = basePtr + index * elemSize;
             void* src = basePtr + copyFrom * elemSize;
             UnsafeUtility.MemMove(dst, src, (l - copyFrom) * elemSize);

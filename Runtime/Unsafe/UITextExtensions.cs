@@ -1,7 +1,6 @@
 ﻿using System.Buffers;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UI;
 
 namespace PKGE.Unsafe
 {
@@ -71,11 +70,13 @@ namespace PKGE.Unsafe
 #endif // INCLUDE_TEXTMESH_PRO
 #endif // PKGE_USING_UNSAFE
 
-        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this Text me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
+#if INCLUDE_UGUI
+        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this UnityEngine.UI.Text me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
         {
             if (Set(me.text, text, length))
                 me.text = new string(text, 0, length);
         }
+#endif // INCLUDE_UGUI
 
 #if INCLUDE_TEXTMESH_PRO
         public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this TMPro.TextMeshProUGUI me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
@@ -105,11 +106,13 @@ namespace PKGE.Unsafe
             return false;
         }
 
-        public static void SetRGB([System.Diagnostics.CodeAnalysis.NotNull] this Graphic graphic, Color color)
+#if INCLUDE_UGUI
+        public static void SetRGB([System.Diagnostics.CodeAnalysis.NotNull] this UnityEngine.UI.Graphic graphic, Color color)
         {
             var c = graphic.color;
             graphic.color = new Color(color.r, color.g, color.b, c.a);
         }
+#endif // INCLUDE_UGUI
         #endregion // FPSSample
     }
 }

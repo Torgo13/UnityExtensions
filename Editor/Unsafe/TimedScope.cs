@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Editor.Unsafe
 {
@@ -59,7 +58,7 @@ namespace PKGE.Editor.Unsafe
         /// <returns>A <see cref="TimedScope"/></returns>
         public static TimedScope FromRef(ref double durationMs)
         {
-            return new TimedScope((double*)UnsafeUtility.AddressOf(ref durationMs));
+            return new TimedScope((double*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref durationMs));
         }
         #endregion // UnityEditor.Rendering
     }

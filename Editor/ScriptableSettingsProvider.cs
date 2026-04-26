@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEngine.UIElements;
 
 namespace PKGE.Editor
 {
@@ -50,6 +49,7 @@ namespace PKGE.Editor
         protected ScriptableSettingsProvider(string path, SettingsScope scope = SettingsScope.User)
             : base(path, scope) { }
 
+#if PACKAGE_UITOOLKIT
         /// <summary>
         /// Use this function to implement a handler for when the user clicks on the Settings in the Settings window.
         /// You can fetch a settings Asset or set up UIElements UI from this function.
@@ -58,7 +58,8 @@ namespace PKGE.Editor
         /// <param name="rootElement">Root of the UIElements tree. If you add to this root, the SettingsProvider uses
         /// UIElements instead of calling SettingsProvider.OnGUI to build the UI. If you do not add to this
         /// VisualElement, then you must use the IMGUI to build the UI.</param>
-        public abstract override void OnActivate(string searchContext, VisualElement rootElement);
+        public abstract override void OnActivate(string searchContext, UnityEngine.UIElements.VisualElement rootElement);
+#endif // PACKAGE_UITOOLKIT
 
         /// <summary>
         /// Use this function to draw the UI based on IMGUI. This assumes you haven't added any children to the

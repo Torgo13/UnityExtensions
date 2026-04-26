@@ -50,6 +50,11 @@
             "name": "com.unity.render-pipelines.core",
             "expression": "",
             "define": "INCLUDE_RENDER_PIPELINE_CORE"
+        },
+        {
+            "name": "com.unity.ugui",
+            "expression": "",
+            "define": "INCLUDE_UGUI"
         }
     ],
     "noEngineReferences": false

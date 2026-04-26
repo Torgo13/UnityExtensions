@@ -305,6 +305,7 @@ namespace PKGE.Unsafe
                 m_phase -= 1.0f;
             }
 
+#if !ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER
             if (Input.touchCount == 3)
             {
                 if ((Input.GetTouch(0).phase == TouchPhase.Began) &&
@@ -315,6 +316,7 @@ namespace PKGE.Unsafe
 
             if (Input.GetKeyDown(KeyCode.F7))
                 m_debrisDebugTest = !m_debrisDebugTest;
+#endif // !ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER
 
             // read back the cell list with magnet and set intensity to 1
             int magnetCellsCount = m_magnetCells.Count;
