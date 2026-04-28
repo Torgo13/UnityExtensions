@@ -39,6 +39,7 @@ namespace PKGE.Packages
         // If your pipeline utilizes the DRH then the min and max scale factors should be defined by a separate config asset.
         // If not, then these values provide you that configuration.
 #if !PIPELINE_IMPLEMENTS_DRH
+        [Range(0.25f, MaxScaleFactor)]
         [SerializeField] float MinScaleFactor = 1.0f / 4;
         const float MaxScaleFactor = 1.0f;
 #endif

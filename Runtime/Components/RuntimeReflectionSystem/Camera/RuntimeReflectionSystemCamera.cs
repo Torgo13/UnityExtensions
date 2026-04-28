@@ -11,6 +11,7 @@ namespace PKGE
     {
         public ReflectionSystem Reflection { get; internal set; }
 
+        public bool CaptureCubemap;
         [SerializeField] private Shader skyboxShader;
         [SerializeField] internal Material skyboxMaterial;
         [SerializeField] internal Camera reflectionCamera;
@@ -36,10 +37,16 @@ namespace PKGE
         [SerializeField] private bool removeBlue;
 
         #region MonoBehaviour
-
+        
         private void Awake()
         {
-            Reflection ??= new ReflectionSystem(skyboxShader, skyboxMaterial, reflectionCamera, texture2DArrayLerp);
+            Reflection ??= new ReflectionSystem(CaptureCubemap, skyboxShader, skyboxMaterial, reflectionCamera, texture2DArrayLerp);
+
+            if (!CaptureCubemap)
+            {
+                Reflection.InitialiseNativeArrays();
+                return;
+            }
 
             if (!Reflection.InitialiseMaterial())
             {
@@ -76,6 +83,17 @@ namespace PKGE
 
         #endregion // MonoBehaviour
 
+        internal static bool GetCameraCubemap(GameObject cam, out Material cubemap)
+        {
+            cubemap = null;
+
+            if (cam == null || !cam.TryGetComponent<Skybox>(out var skybox))
+                return false;
+
+            cubemap = skybox.material;
+            return cubemap != null;
+        }
+
         internal void GetReflectionCamera()
         {
             // Check if the field has already been assigned
@@ -109,6 +127,8 @@ namespace PKGE
             "Skybox/CubemapSimple";
 #endif // BLEND_SHADER
 
+        private readonly bool _captureCubemap;
+
         private Shader _skyboxShader;
         internal Material _skyboxMaterial;
         private bool _createdMaterial;
@@ -118,6 +138,8 @@ namespace PKGE
         private bool _createdReflectionCamera;
 
         public Transform TargetOverride { set => _mainCameraTransform = value; }
+        private Camera _mainCamera;
+        private GameObject _mainCameraGameObject;
         private Transform _mainCameraTransform;
         private Vector3 _previousCameraPosition;
         private Vector3 _currentCameraPosition;
@@ -220,12 +242,13 @@ namespace PKGE
         /// <summary>Spread the <see cref="Cubemap"/> capture over six frames by rendering one face per frame.</summary>
         private const int BlendFrames = 6;
 
-        public ReflectionSystem(
+        public ReflectionSystem(bool captureCubemap,
             [System.Diagnostics.CodeAnalysis.MaybeNull] Shader skyboxShader = null,
             [System.Diagnostics.CodeAnalysis.MaybeNull] Material skyboxMaterial = null,
             [System.Diagnostics.CodeAnalysis.MaybeNull] Camera reflectionCamera = null,
             [System.Diagnostics.CodeAnalysis.MaybeNull] ComputeShader texture2DArrayLerp = null)
         {
+            _captureCubemap = captureCubemap;
             _skyboxShader = skyboxShader;
             _skyboxMaterial = skyboxMaterial;
             _reflectionCamera = reflectionCamera;
@@ -280,7 +303,7 @@ namespace PKGE
 
             // Take a full capture before applying it to the skybox
             _ = _reflectionCamera.RenderToCubemap(_blendedTexture);
-            UpdateAmbient();
+            UpdateAmbient(_blendedTexture);
 
             // Usually sampled with SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, uv, mipLevel)
             // or GlossyEnvironmentReflection(half3 reflectVector, half perceptualRoughness, half occlusion)
@@ -291,6 +314,14 @@ namespace PKGE
 
             _skyboxMaterial.SetTexture(Tex, _blendedTexture);
 
+            InitialiseNativeArrays();
+#endif // BLEND_SHADER
+        }
+
+        internal void InitialiseNativeArrays()
+        {
+#if BLEND_SHADER
+#else
             ambientColours = new NativeArray<Color32>(6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             equatorArray = new NativeArray<float>(4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             skyEquatorArray = new NativeArray<float>(4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -317,12 +348,15 @@ namespace PKGE
             _blendedTexture = null;
 
             handle.Complete();
-            ambientColours.Dispose();
-            equatorArray.Dispose();
-            skyEquatorArray.Dispose();
-            adaptiveColourRef.Dispose();
-            skyColourRef.Dispose();
-            invSkyColorRef.Dispose();
+            if (ambientColours.IsCreated)
+            {
+                ambientColours.Dispose();
+                equatorArray.Dispose();
+                skyEquatorArray.Dispose();
+                adaptiveColourRef.Dispose();
+                skyColourRef.Dispose();
+                invSkyColorRef.Dispose();
+            }
 #endif // BLEND_SHADER
 
             if (_createdMaterial)
@@ -361,6 +395,30 @@ namespace PKGE
             else
                 scaleFactor = ScalableBufferManager.widthScaleFactor;
 
+            if (!_captureCubemap)
+            {
+                Texture customReflectionTexture = RenderSettings.customReflectionTexture;
+                if (customReflectionTexture != null)
+                {
+                    if (FindMainCamera()
+                        && RuntimeReflectionSystemCamera.GetCameraCubemap(_mainCameraGameObject, out var cubemapMat))
+                    {
+                        cubemapMat.SetTexture(Tex, customReflectionTexture);
+                    }
+
+#if BLEND_SHADER
+#else
+                    if (RenderSettings.ambientMode == AmbientMode.Trilight
+                        && (_readbackRequest.Equals(default) || _readbackRequest.done))
+                    {
+                        UpdateAmbient(customReflectionTexture);
+                    }
+#endif // BLEND_SHADER
+                }
+
+                return;
+            }
+
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
             if (!EnsureCreated())
@@ -372,7 +430,7 @@ namespace PKGE
             {
                 UpdateReflectionCameraPosition();
                 _ = _reflectionCamera.RenderToCubemap(_blendedTexture);
-                UpdateAmbient();
+                UpdateAmbient(_blendedTexture);
                 return;
             }
 #endif // BLEND_SHADER
@@ -402,7 +460,7 @@ namespace PKGE
                 // Update reflection texture
                 RenderSettings.customReflectionTexture = _renderTextures[_index];
 #else
-                UpdateAmbient();
+                UpdateAmbient(_blendedTexture);
 #endif // BLEND_SHADER
 
                 PrepareNextCubemap();
@@ -439,9 +497,9 @@ namespace PKGE
             return updated;
         }
 
-        static int NeighbouringFace(int faceMask)
+        static int NeighbouringFace(int face)
         {
-            return (CubemapFace)faceMask switch
+            return (CubemapFace)face switch
             {
                 CubemapFace.NegativeX => 1 << 0,
                 CubemapFace.NegativeZ => 1 << 1,
@@ -449,6 +507,20 @@ namespace PKGE
                 CubemapFace.PositiveX => 1 << 3,
                 CubemapFace.PositiveZ => 1 << 4,
                 CubemapFace.PositiveY => 1 << 5,
+                _ => 63,
+            };
+        }
+        
+        static int FaceToFaceMask(int face)
+        {
+            return (CubemapFace)face switch
+            {
+                CubemapFace.PositiveX => 1 << 0,
+                CubemapFace.NegativeX => 1 << 1,
+                CubemapFace.PositiveY => 1 << 2,
+                CubemapFace.NegativeY => 1 << 3,
+                CubemapFace.PositiveZ => 1 << 4,
+                CubemapFace.NegativeZ => 1 << 5,
                 _ => 63,
             };
         }
@@ -462,12 +534,8 @@ namespace PKGE
                 _skyboxShader = Shader.Find(shaderName);
 
             _skyboxMaterial = CoreUtils.CreateEngineMaterial(_skyboxShader);
-
-            if (_skyboxMaterial == null)
-                return false;
-
-            _createdMaterial = true;
-            return true;
+            _createdMaterial = _skyboxMaterial != null;
+            return _createdMaterial;
         }
 
         internal void PrepareNextCubemap()
@@ -487,17 +555,17 @@ namespace PKGE
 
         internal bool FindMainCamera()
         {
-            if (_mainCameraTransform != null)
+            bool mainCameraFound = _mainCamera != null;
+            if (!mainCameraFound)
             {
-                _previousCameraPosition = _currentCameraPosition;
-                _currentCameraPosition = _mainCameraTransform.position;
-                return true;
+                _mainCamera = Camera.main;
+                mainCameraFound = _mainCamera != null;
             }
 
-            var mainCamera = Camera.main;
-            if (mainCamera != null)
+            if (mainCameraFound)
             {
-                _mainCameraTransform = mainCamera.transform;
+                _mainCameraGameObject = _mainCamera.gameObject;
+                _mainCameraTransform = _mainCamera.transform;
                 _previousCameraPosition = _currentCameraPosition;
                 _currentCameraPosition = _mainCameraTransform.position;
                 return true;
@@ -541,7 +609,7 @@ namespace PKGE
         internal void UpdateCameraSkybox()
         {
             if (FindMainCamera()
-                && _mainCameraTransform.TryGetComponent<Skybox>(out var skybox))
+                && _mainCameraGameObject.TryGetComponent<Skybox>(out var skybox))
             {
                 skybox.material = _skyboxMaterial;
             }
@@ -670,10 +738,10 @@ namespace PKGE
         /// <remarks>
         /// Instead of providing a callback function, avoid allocating by checking each frame if it has completed.
         /// </remarks>
-        internal void UpdateAmbient()
+        internal void UpdateAmbient(Texture skyboxTexture)
         {
-            _readbackRequest = AsyncGPUReadback.Request(_blendedTexture,
-                mipIndex: _blendedTexture.mipmapCount - 1,
+            _readbackRequest = AsyncGPUReadback.Request(skyboxTexture,
+                mipIndex: skyboxTexture.mipmapCount - 1,
                 x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
                 TextureFormat.RGBA32);
         }
