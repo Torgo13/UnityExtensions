@@ -171,18 +171,18 @@ namespace PKGE
         /// <summary>
         /// The weighted <see cref="Color"/> in the direction of the main camera.
         /// </summary>
-        public Color adaptiveColour;
+        public Color adaptiveColour = Color.gray;
 
         /// <summary>
         /// The weighted <see cref="Color"/> in the direction of the sun.
         /// </summary>
-        public Color skyColour;
+        public Color skyColour = Color.gray;
 
         /// <summary>
         /// The ratio between the sky colour intensity in the direction of the sun
         /// and the opposite direction.
         /// </summary>
-        public float skyRatio;
+        public float skyRatio = 0.5f;
 
         Unity.Jobs.JobHandle handle;
         NativeArray<float> equatorArray;
@@ -322,9 +322,9 @@ namespace PKGE
         {
 #if BLEND_SHADER
 #else
-            ambientColours = new NativeArray<Color32>(6, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            equatorArray = new NativeArray<float>(4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            skyEquatorArray = new NativeArray<float>(4, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            ambientColours = new NativeArray<Color32>(6, Allocator.Persistent);
+            equatorArray = new NativeArray<float>(4, Allocator.Persistent);
+            skyEquatorArray = new NativeArray<float>(4, Allocator.Persistent);
             adaptiveColourRef = new NativeArray<Color>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             skyColourRef = new NativeArray<Color>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             invSkyColorRef = new NativeArray<Color>(1, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
@@ -754,22 +754,10 @@ namespace PKGE
             handle.Complete();
             handle = default;
 
-            adaptiveColour = adaptiveColourRef[0];
-            skyColour = skyColourRef[0];
-            float denominator = invSkyColorRef[0].grayscale;
-            skyRatio = denominator > float.Epsilon ? skyColour.grayscale / denominator : 1;
+            UpdateExternalColours();
+            UpdateAmbient();
 
-            Color equator = equatorArray.Reinterpret<Color>(sizeof(float))[0];
-
-            RenderSettings.ambientSkyColor = (Color)ambientColours[(int)CubemapFace.PositiveY];
-            RenderSettings.ambientEquatorColor = groundColour
-                ? equator
-                : skyEquatorArray.Reinterpret<Color>(sizeof(float))[0];
-            RenderSettings.ambientGroundColor = groundColour
-                ? (Color)ambientColours[(int)CubemapFace.NegativeY]
-                : equator;
-
-            bool sunFound = LightUtils.GetDirectionalLight(out Light sun, out Transform sunTransform);
+            bool sunFound = LightUtils.GetDirectionalLight(out Light sun, out _, out Transform sunTransform);
 
             for (int i = 0; i < ambientColours.Length; i++)
             {
@@ -778,7 +766,7 @@ namespace PKGE
 
             if (removeBlue)
             {
-                Color sunColour = default;
+                Color sunColour = Color.white;
                 float colorTemperature = 5000f;
                 bool useColorTemperature = true;
 
@@ -844,19 +832,50 @@ namespace PKGE
                 {
                     output = skyColourRef,
                     colours = ambientColours,
-                    forward = sunForward,
+                    forward = -sunForward,
                 }, handle);
 
                 sampleHandles[2] = Unity.Jobs.IJobExtensions.Schedule(new SampleCubemapBilinearJob
                 {
                     output = invSkyColorRef,
                     colours = ambientColours,
-                    forward = -sunForward,
+                    forward = sunForward,
                 }, handle);
             }
 
             handle = Unity.Jobs.JobHandle.CombineDependencies(sampleHandles);
             sampleHandles.Dispose();
+        }
+
+        internal void UpdateExternalColours()
+        {
+            adaptiveColour = Color.LerpUnclamped(adaptiveColour, adaptiveColourRef[0], 0.5f);
+            skyColour = Color.LerpUnclamped(skyColour, skyColourRef[0], 0.5f);
+            Color invSkyColour = invSkyColorRef[0];
+            float skyColourIntensity = skyColour.grayscale;
+            float invSkyColourIntensity = invSkyColour.grayscale;
+
+            var denominator = skyColourIntensity + invSkyColourIntensity + double.Epsilon;
+            var scaleFactor = denominator / (denominator + 1e-6);
+            var rawRatio = ((skyColourIntensity / denominator) - 0.25) * 2;
+            skyRatio = Mathf.Clamp01((float)(rawRatio * scaleFactor + 0.5 * (1.0 - scaleFactor)));
+        }
+
+        internal void UpdateAmbient()
+        {
+            Color equator = equatorArray.Reinterpret<Color>(sizeof(float))[0];
+
+            Color ambientSkyColor = (Color)ambientColours[(int)CubemapFace.PositiveY];
+            Color ambientEquatorColor = groundColour
+                ? equator
+                : skyEquatorArray.Reinterpret<Color>(sizeof(float))[0];
+            Color ambientGroundColor = groundColour
+                ? (Color)ambientColours[(int)CubemapFace.NegativeY]
+                : equator;
+
+            RenderSettings.ambientSkyColor = Color.LerpUnclamped(RenderSettings.ambientSkyColor, ambientSkyColor, 0.5f);
+            RenderSettings.ambientEquatorColor = Color.LerpUnclamped(RenderSettings.ambientEquatorColor, ambientEquatorColor, 0.5f);
+            RenderSettings.ambientGroundColor = Color.LerpUnclamped(RenderSettings.ambientGroundColor, ambientGroundColor, 0.5f);
         }
 
         /// <summary>
@@ -966,16 +985,23 @@ namespace PKGE
 
             public void Execute()
             {
+                float l = Vector3.Distance(forward, Vector3.left);
+                float r = Vector3.Distance(forward, Vector3.right);
+                float d = Vector3.Distance(forward, Vector3.down);
+                float u = Vector3.Distance(forward, Vector3.up);
+                float b = Vector3.Distance(forward, Vector3.back);
+                float f = Vector3.Distance(forward, Vector3.forward);
+
                 Color sum
-                    = (Color)colours[(int)CubemapFace.PositiveX] * Vector3.Distance(Vector3.left, forward)
-                    + (Color)colours[(int)CubemapFace.NegativeX] * Vector3.Distance(Vector3.right, forward)
-                    + (Color)colours[(int)CubemapFace.PositiveY] * Vector3.Distance(Vector3.down, forward)
-                    + (Color)colours[(int)CubemapFace.NegativeY] * Vector3.Distance(Vector3.up, forward)
-                    + (Color)colours[(int)CubemapFace.PositiveZ] * Vector3.Distance(Vector3.back, forward)
-                    + (Color)colours[(int)CubemapFace.NegativeZ] * Vector3.Distance(Vector3.forward, forward);
+                    = l * (Color)colours[(int)CubemapFace.PositiveX]
+                    + r * (Color)colours[(int)CubemapFace.NegativeX]
+                    + d * (Color)colours[(int)CubemapFace.PositiveY]
+                    + u * (Color)colours[(int)CubemapFace.NegativeY]
+                    + b * (Color)colours[(int)CubemapFace.PositiveZ]
+                    + f * (Color)colours[(int)CubemapFace.NegativeZ];
 
                 // Scale the output channels to 0 - 1
-                output[0] = sum * 0.13060193748f; // rcp(2 + 4 * sqrt(2));
+                output[0] = sum / (l + r + d + u + b + f);
             }
         }
 #endif // BLEND_SHADER

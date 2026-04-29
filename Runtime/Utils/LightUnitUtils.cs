@@ -5,44 +5,59 @@ namespace PKGE
 {
     public static class LightUtils
     {
-        public static bool GetDirectionalLight(out Light sun, [System.Diagnostics.CodeAnalysis.MaybeNull] out Transform sunTransform)
+        /// <summary>
+        /// Return the directional <see cref="Light"/> of the current <see cref="UnityEngine.SceneManagement.Scene"/>.
+        /// </summary>
+        /// <param name="sun">The directional <see cref="Light"/>, or <see langword="null"/> if not found.</param>
+        /// <param name="sunGameObject">The sun <see cref="GameObject"/>, or <see langword="null"/> if not found.</param>
+        /// <param name="sunTransform">The sun <see cref="Transform"/>, or <see langword="null"/> if not found.</param>
+        /// <param name="includeInactive">Use <see cref="FindObjectsInactive.Exclude"/> to only return
+        /// a directional light that is active and enabled.</param>
+        /// <returns><see langword="true"/> if a directional light was found with the requested active state.</returns>
+        public static bool GetDirectionalLight(
+            [System.Diagnostics.CodeAnalysis.MaybeNull] out Light sun,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] out GameObject sunGameObject,
+            [System.Diagnostics.CodeAnalysis.MaybeNull] out Transform sunTransform,
+            FindObjectsInactive includeInactive = FindObjectsInactive.Exclude)
         {
             sun = RenderSettings.sun;
-            if (sun != null)
+            if (sun != null
+                && (includeInactive == FindObjectsInactive.Include || sun.isActiveAndEnabled))
             {
+                sunGameObject = sun.gameObject;
                 sunTransform = sun.transform;
                 return true;
             }
 
-            sun = UnityEngine.Object.FindAnyObjectByType<Light>();
+            sun = UnityEngine.Object.FindAnyObjectByType<Light>(includeInactive);
             if (sun != null
                 && sun.type == LightType.Directional)
             {
+                sunGameObject = sun.gameObject;
                 sunTransform = sun.transform;
                 return true;
             }
 
 #if UNITY_2022_3_OR_NEWER
-            Light[] lights = UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
+            Light[] lights = UnityEngine.Object.FindObjectsByType<Light>(includeInactive, FindObjectsSortMode.None);
 #else
             Light[] lights = UnityEngine.Object.FindObjectsOfType<Light>();
 #endif // UNITY_2022_3_OR_NEWER
 
-            if (lights == null)
+            if (lights != null)
             {
-                sunTransform = null;
-                return false;
-            }
-
-            foreach (var light in lights)
-            {
-                if (light.type == LightType.Directional)
+                foreach (var light in lights)
                 {
-                    sunTransform = light.transform;
-                    return true;
+                    if (light.type == LightType.Directional)
+                    {
+                        sunGameObject = light.gameObject;
+                        sunTransform = light.transform;
+                        return true;
+                    }
                 }
             }
 
+            sunGameObject = null;
             sunTransform = null;
             return false;
         }
