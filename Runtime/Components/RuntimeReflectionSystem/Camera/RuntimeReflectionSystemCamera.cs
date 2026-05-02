@@ -335,7 +335,7 @@ namespace PKGE
 
         public void LateUpdate()
         {
-            Render(timeSlice, resolutionScaleOverride, resolutionScale);
+            Render(Time.timeScale, timeSlice, resolutionScaleOverride, resolutionScale);
         }
 
         public void OnDestroy()
@@ -378,7 +378,7 @@ namespace PKGE
 
         #endregion // MonoBehaviour
 
-        public void Render(bool timeSlice, bool resolutionScaleOverride = false, float scaleFactor = 1)
+        public void Render(float timeScale, bool timeSlice = false, bool resolutionScaleOverride = false, float scaleFactor = 1)
         {
 #if BLEND_SHADER
 #else
@@ -386,38 +386,39 @@ namespace PKGE
                 GPUReadbackRequest();
 #endif // BLEND_SHADER
 
-            // Only update when time is progressing
-            if (Time.timeScale <= float.Epsilon)
-                return;
-
             if (resolutionScaleOverride)
                 ScalableBufferManager.ResizeBuffers(scaleFactor, scaleFactor);
-            else
-                scaleFactor = ScalableBufferManager.widthScaleFactor;
+
+            // Only update when time is progressing
+            if (timeScale <= float.Epsilon)
+                return;
 
             if (!_captureCubemap)
             {
                 Texture customReflectionTexture = RenderSettings.customReflectionTexture;
-                if (customReflectionTexture != null)
+                if (customReflectionTexture == null)
+                    return;
+
+                if (FindMainCamera()
+                    && RuntimeReflectionSystemCamera.GetCameraCubemap(_mainCameraGameObject, out var cubemapMat))
                 {
-                    if (FindMainCamera()
-                        && RuntimeReflectionSystemCamera.GetCameraCubemap(_mainCameraGameObject, out var cubemapMat))
-                    {
-                        cubemapMat.SetTexture(Tex, customReflectionTexture);
-                    }
+                    cubemapMat.SetTexture(Tex, customReflectionTexture);
+                }
 
 #if BLEND_SHADER
 #else
-                    if (RenderSettings.ambientMode == AmbientMode.Trilight
-                        && (_readbackRequest.Equals(default) || _readbackRequest.done))
-                    {
-                        UpdateAmbient(customReflectionTexture);
-                    }
-#endif // BLEND_SHADER
+                if (RenderSettings.ambientMode == AmbientMode.Trilight
+                    && (_readbackRequest.Equals(default) || _readbackRequest.done))
+                {
+                    UpdateAmbient(customReflectionTexture);
                 }
+#endif // BLEND_SHADER
 
                 return;
             }
+
+            if (!resolutionScaleOverride)
+                scaleFactor = ScalableBufferManager.widthScaleFactor;
 
             _skyboxMaterial.SetFloat(MipLevel, GetMipLevel(scaleFactor));
 
