@@ -43,10 +43,7 @@ namespace PKGE
             Reflection ??= new ReflectionSystem(CaptureCubemap, skyboxShader, skyboxMaterial, reflectionCamera, texture2DArrayLerp);
 
             if (!CaptureCubemap)
-            {
-                Reflection.InitialiseNativeArrays();
                 return;
-            }
 
             if (!Reflection.InitialiseMaterial())
             {
@@ -253,6 +250,11 @@ namespace PKGE
             _skyboxMaterial = skyboxMaterial;
             _reflectionCamera = reflectionCamera;
             _texture2DArrayLerp = texture2DArrayLerp;
+
+#if BLEND_SHADER
+#else
+            InitialiseNativeArrays();
+#endif // BLEND_SHADER
         }
 
         #region MonoBehaviour
@@ -313,8 +315,6 @@ namespace PKGE
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += UpdateCustomReflectionTexture;
 
             _skyboxMaterial.SetTexture(Tex, _blendedTexture);
-
-            InitialiseNativeArrays();
 #endif // BLEND_SHADER
         }
 

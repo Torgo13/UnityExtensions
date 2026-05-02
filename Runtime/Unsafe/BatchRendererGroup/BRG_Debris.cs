@@ -454,9 +454,8 @@ namespace PKGE.Unsafe
                 // Copy & clear the list of all explosions for this frame
                 var na = new NativeArray<DebrisSpawnDesc>(explosionsCount, Allocator.TempJob,
                     NativeArrayOptions.UninitializedMemory);
-                for (int i = 0; i < m_debrisExplosions.Count; i++)
-                    na[i] = m_debrisExplosions[i];
-                
+
+                m_debrisExplosions.AsReadOnlySpan().CopyTo(na);
                 m_debrisExplosions.Clear();
 
                 // Enqueue the generation job
