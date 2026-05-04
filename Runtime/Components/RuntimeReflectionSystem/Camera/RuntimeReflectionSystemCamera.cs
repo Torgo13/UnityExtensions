@@ -107,7 +107,7 @@ namespace PKGE
     }
 
     //https://docs.unity3d.com/Documentation/ScriptReference/Camera.RenderToCubemap.html
-    public class ReflectionSystem
+    public class ReflectionSystem : System.IDisposable
     {
         private readonly int Tex = Shader.PropertyToID("_Tex");
         private readonly int MipLevel = Shader.PropertyToID("_MipLevel");
@@ -255,6 +255,18 @@ namespace PKGE
 #else
             InitialiseNativeArrays();
 #endif // BLEND_SHADER
+        }
+
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                OnDestroy();
+            }
+
+            _disposed = true;
         }
 
         #region MonoBehaviour
@@ -754,6 +766,9 @@ namespace PKGE
         {
             handle.Complete();
             handle = default;
+
+            if (_disposed)
+                return;
 
             UpdateExternalColours();
             UpdateAmbient();
