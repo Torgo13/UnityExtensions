@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -14,6 +13,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/Utilities/HDTextureUtilities.cs
         #region UnityEngine.Rendering.HighDefinition
+#if USING_IMAGE_CONVERSION_MODULE
         /// <exception cref="ArgumentException">Thrown if <paramref name="target"/> is not a
         /// Texture2D, a RenderTexture or a Cubemap.</exception>
         public static void WriteTextureToDisk(this Texture target, [System.Diagnostics.CodeAnalysis.NotNull] string filePath, string filename = "")
@@ -57,6 +57,7 @@ namespace PKGE
 
             throw new ArgumentException("Texture target is not a Texture2D, a RenderTexture or a Cubemap.", nameof(target));
         }
+#endif // USING_IMAGE_CONVERSION_MODULE
 
         // Write to disk via the Unity Asset Pipeline rather than File.WriteAllBytes.
         [Conditional("UNITY_EDITOR")]
@@ -111,8 +112,10 @@ namespace PKGE
         #endregion // UnityEngine.Rendering.HighDefinition
 
         #region Async
+#if USING_IMAGE_CONVERSION_MODULE
         /// <inheritdoc cref="WriteTextureToDisk(Texture,string,string)"/>
-        public static async ValueTask<string> WriteTextureToDiskAsync(this Texture target, [System.Diagnostics.CodeAnalysis.NotNull] string filePath)
+        public static async System.Threading.Tasks.ValueTask<string> WriteTextureToDiskAsync(this Texture target,
+            [System.Diagnostics.CodeAnalysis.NotNull] string filePath)
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -154,10 +157,12 @@ namespace PKGE
 
             throw new ArgumentException("Texture target is not a Texture2D, a RenderTexture or a Cubemap.", nameof(target));
         }
+#endif // USING_IMAGE_CONVERSION_MODULE
 
         /// <inheritdoc cref="CopyRenderTextureToTexture2D(RenderTexture)"/>
         [JetBrains.Annotations.ItemNotNull]
-        public static async ValueTask<Texture2D> CopyRenderTextureToTexture2DAsync([System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
+        public static async System.Threading.Tasks.ValueTask<Texture2D> CopyRenderTextureToTexture2DAsync(
+            [System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
         {
             Assert.IsTrue(source.dimension is TextureDimension.Tex2D or TextureDimension.Cube);
 
@@ -166,25 +171,25 @@ namespace PKGE
 
         /// <inheritdoc cref="RenderTextureToTexture(RenderTexture)"/>
         [JetBrains.Annotations.ItemNotNull]
-        private static async ValueTask<Texture> RenderTextureToTextureAsync([System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
+        private static async System.Threading.Tasks.ValueTask<Texture> RenderTextureToTextureAsync(
+            [System.Diagnostics.CodeAnalysis.NotNull] this Texture source)
         {
             GraphicsFormat format = source.graphicsFormat;
+            int resolution = source.width;
 
             switch (source.dimension)
             {
                 case TextureDimension.Cube:
                 {
-                    var resolution = source.width;
-
                     var result = RenderTexture.GetTemporary(resolution * 6, resolution,
-                        depthBuffer: 16, source.format);
+                        depthBuffer: 16, format);
 
                     var cmd = new CommandBuffer();
                     for (var i = 0; i < 6; ++i)
                     {
                         cmd.CopyTexture(
-                            source, i, 0, 0, 0, resolution,
-                            resolution, result, 0, 0, i * resolution, 0);
+                            source, i, 0, 0, 0, resolution, resolution, 
+                            result, 0, 0, i * resolution, 0);
                     }
 
                     Graphics.ExecuteCommandBuffer(cmd);
@@ -195,6 +200,7 @@ namespace PKGE
                     var a = RenderTexture.active;
                     RenderTexture.active = result;
                     t2D.ReadPixels(new Rect(0, 0, 6 * resolution, resolution), 0, 0, recalculateMipMaps: false);
+                    t2D.Apply();
                     RenderTexture.active = a;
                     RenderTexture.ReleaseTemporary(result);
                     cmd.Dispose();
@@ -203,28 +209,32 @@ namespace PKGE
                 }
                 case TextureDimension.Tex2D:
                 {
-                    var resolution = source.width;
-                    var result = new Texture2D(resolution, resolution, format,
-                        TextureCreationFlags.DontInitializePixels);
+                    if (source is RenderTexture rt)
+                    {
+                        var result = new Texture2D(resolution, resolution, format,
+                            TextureCreationFlags.DontInitializePixels);
 
-                    Graphics.SetRenderTarget(source, mipLevel: 0);
-                    result.ReadPixels(new Rect(0, 0, resolution, resolution), 0, 0);
-                    result.Apply();
-                    Graphics.SetRenderTarget(rt: null);
+                        Graphics.SetRenderTarget(rt, mipLevel: 0);
+                        result.ReadPixels(new Rect(0, 0, resolution, resolution), 0, 0);
+                        result.Apply();
+                        Graphics.SetRenderTarget(rt: null);
 
-                    return result;
+                        return result;
+                    }
+
+                    return ReadTexture((Texture2D)source);
                 }
                 case TextureDimension.Tex3D:
                 {
-                    var result = new Texture3D(source.width, source.height, source.volumeDepth, format,
-                        TextureCreationFlags.DontInitializePixels);
+                    var height = source.height;
+                    var volumeDepth = ((Texture3D)source).depth;
 
                     // Determine the number of bytes elements that need to be read based on the texture format.
                     int stagingMemorySize = (int)GraphicsFormatUtility.GetBlockSize(format)
-                                            * source.width * source.height * source.volumeDepth;
+                                            * resolution * height * volumeDepth;
 
                     // Async-readbacks do not work if the RT resource is not registered with the graphics API backend.
-                    Assert.IsTrue(source.IsCreated());
+                    Assert.IsTrue(source is not RenderTexture rt || rt.IsCreated());
 
                     // Staging memory for the readback.
                     var stagingReadback = new NativeArray<byte>(stagingMemorySize, Allocator.TempJob,
@@ -232,9 +242,9 @@ namespace PKGE
 
                     // Request and wait for the GPU data to transfer into staging memory.
 #if UNITY_6000_3_OR_NEWER
-                    _ = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref stagingReadback, source, 0, format);
+                    _ = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref stagingReadback, source, mipIndex: 0, format);
 #else
-                    var request = AsyncGPUReadback.RequestIntoNativeArray(ref stagingReadback, source, 0, format);
+                    var request = AsyncGPUReadback.RequestIntoNativeArray(ref stagingReadback, source, mipIndex: 0, format);
                     while (!request.done)
                     {
                         await Task.Yield();
@@ -242,7 +252,11 @@ namespace PKGE
 #endif // UNITY_6000_3_OR_NEWER
 
                     // Finally transfer the staging memory into the texture asset.
+                    var result = new Texture3D(resolution, height, volumeDepth, format,
+                        TextureCreationFlags.DontInitializePixels);
+
                     result.SetPixelData(stagingReadback, mipLevel: 0);
+                    result.Apply();
 
                     // Free the staging memory.
                     stagingReadback.Dispose();

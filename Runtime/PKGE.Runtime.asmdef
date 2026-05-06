@@ -19,6 +19,26 @@
     "defineConstraints": [],
     "versionDefines": [
         {
+            "name": "com.unity.modules.ai",
+            "expression": "1.0.0",
+            "define": "USING_AI_MODULE"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "USING_ANIMATION_MODULE"
+        },
+        {
+            "name": "com.unity.modules.audio",
+            "expression": "1.0.0",
+            "define": "USING_AUDIO_MODULE"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "1.0.0",
+            "define": "USING_IMAGE_CONVERSION_MODULE"
+        },
+        {
             "name": "com.unity.modules.physics",
             "expression": "1.0.0",
             "define": "INCLUDE_PHYSICS_MODULE"

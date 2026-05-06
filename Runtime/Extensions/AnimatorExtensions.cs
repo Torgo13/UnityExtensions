@@ -1,3 +1,4 @@
+#if USING_ANIMATION_MODULE
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -59,3 +60,4 @@ namespace PKGE
         #endregion // Unity.LiveCapture
     }
 }
+#endif // USING_ANIMATION_MODULE

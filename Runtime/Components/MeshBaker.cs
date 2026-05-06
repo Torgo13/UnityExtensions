@@ -1,3 +1,4 @@
+#if USING_IMAGE_CONVERSION_MODULE
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -261,3 +262,4 @@ namespace PKGE
     }
 #endif
 }
+#endif // USING_IMAGE_CONVERSION_MODULE

@@ -1,3 +1,4 @@
+#if USING_IMAGE_CONVERSION_MODULE
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -170,3 +171,4 @@ namespace PKGE.Tests
         #endregion // EXR
     }
 }
+#endif // USING_IMAGE_CONVERSION_MODULE

@@ -17,7 +17,7 @@ namespace PKGE.Tests
         {
             go = new GameObject("RuntimeReflectionSystemCamera");
             sysCamComponent = go.AddComponent<RuntimeReflectionSystemCamera>();
-            sysCamComponent.Reflection = new ReflectionSystem(skyboxMaterial: new Material(Shader.Find("Skybox/Procedural")));
+            sysCamComponent.Reflection = new ReflectionSystem(captureCubemap: true, skyboxMaterial: new Material(Shader.Find("Skybox/Procedural")));
         }
 
         [TearDown]
@@ -96,7 +96,7 @@ namespace PKGE.Tests
         public IEnumerator Render_SetsSkyboxMipLevel_AndSkips_WhenTimeScaleZero()
         {
             Time.timeScale = 0f;
-            sysCam.Render(true);
+            sysCam.Render(timeScale: Time.deltaTime, timeSlice: true);
             // If TimeScale = 0, should skip without errors
             yield return null;
             Time.timeScale = 1f;

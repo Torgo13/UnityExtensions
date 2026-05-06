@@ -6,6 +6,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.animation.cs-jobs-samples/blob/0.6.1-preview/Samples/Scripts/SampleUtility.cs
         #region SampleUtility
+#if USING_ANIMATION_MODULE
         [JetBrains.Annotations.CanBeNull]
         public static AnimationClip LoadAnimationClipFromFbx(string fbxName, string clipName)
         {
@@ -18,6 +19,7 @@ namespace PKGE
             
             return null;
         }
+#endif // USING_ANIMATION_MODULE
 
         [JetBrains.Annotations.NotNull]
         public static GameObject CreateEffector([System.Diagnostics.CodeAnalysis.NotNull] string name, Vector3 position, Quaternion rotation)
