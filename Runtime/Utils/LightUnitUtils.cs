@@ -50,6 +50,7 @@ namespace PKGE
                 {
                     if (light.type == LightType.Directional)
                     {
+                        sun = light;
                         sunGameObject = light.gameObject;
                         sunTransform = light.transform;
                         return true;

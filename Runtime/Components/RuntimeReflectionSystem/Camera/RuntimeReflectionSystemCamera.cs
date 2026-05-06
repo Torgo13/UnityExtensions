@@ -80,11 +80,13 @@ namespace PKGE
 
         #endregion // MonoBehaviour
 
-        internal static bool GetCameraCubemap(GameObject cam, out Material cubemap)
+        internal static bool GetCameraCubemap(
+            [System.Diagnostics.CodeAnalysis.NotNull] GameObject cam,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material cubemap)
         {
             cubemap = null;
 
-            if (cam == null || !cam.TryGetComponent<Skybox>(out var skybox))
+            if (!cam.TryGetComponent<Skybox>(out var skybox))
                 return false;
 
             cubemap = skybox.material;
@@ -751,10 +753,14 @@ namespace PKGE
         /// <remarks>
         /// Instead of providing a callback function, avoid allocating by checking each frame if it has completed.
         /// </remarks>
-        internal void UpdateAmbient(Texture skyboxTexture)
+        internal void UpdateAmbient(Texture skyboxTexture, bool useDynamicScale = false)
         {
+            int mipmapOffset = useDynamicScale
+                ? (int)(1 / ScalableBufferManager.widthScaleFactor)
+                : 0;
+
             _readbackRequest = AsyncGPUReadback.Request(skyboxTexture,
-                mipIndex: skyboxTexture.mipmapCount - 1,
+                mipIndex: skyboxTexture.mipmapCount - 1 - mipmapOffset,
                 x: 0, width: 1, y: 0, height: 1, z: 0, depth: 6,
                 TextureFormat.RGBA32);
         }
@@ -879,12 +885,12 @@ namespace PKGE
 
         internal void UpdateAmbient()
         {
-            Color equator = equatorArray.Reinterpret<Color>(sizeof(float))[0];
+            Color equator = new Color(equatorArray[0], equatorArray[1], equatorArray[2]);
 
             Color ambientSkyColor = (Color)ambientColours[(int)CubemapFace.PositiveY];
             Color ambientEquatorColor = groundColour
                 ? equator
-                : skyEquatorArray.Reinterpret<Color>(sizeof(float))[0];
+                : new Color(skyEquatorArray[0], skyEquatorArray[1], skyEquatorArray[2]);
             Color ambientGroundColor = groundColour
                 ? (Color)ambientColours[(int)CubemapFace.NegativeY]
                 : equator;

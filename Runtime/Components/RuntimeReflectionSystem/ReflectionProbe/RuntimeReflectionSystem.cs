@@ -118,7 +118,8 @@ namespace PKGE
             // Blend between the previous and current reflection probe render textures
             // ReflectionProbeTimeSlicingMode.IndividualFaces takes 14 frames to complete
             float blend = _frameCount / 14f;
-            RenderSettings.skybox.SetFloat(Blend, blend);
+            var skybox = RenderSettings.skybox;
+            skybox.SetFloat(Blend, blend);
 
             _isRendering = _frameCount < 14;
             bool wasUpdated = !_isRendering;
@@ -128,9 +129,9 @@ namespace PKGE
             //ReflectionProbe.UpdateCachedState();
             //return base.TickRealtimeProbes();
 
-            RenderSettings.skybox.SetTexture(TexA, reflectionProbes[PreviousIndex()].realtimeTexture);
-            RenderSettings.skybox.SetTexture(TexB, reflectionProbes[_index].realtimeTexture);
-            RenderSettings.skybox.SetFloat(Blend, 0f);
+            skybox.SetTexture(TexA, reflectionProbes[PreviousIndex()].realtimeTexture);
+            skybox.SetTexture(TexB, reflectionProbes[_index].realtimeTexture);
+            skybox.SetFloat(Blend, 0f);
 
             _index = NextIndex();
 
