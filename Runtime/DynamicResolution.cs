@@ -12,14 +12,12 @@ using UnityEngine.Rendering;
 
 namespace PKGE.Packages
 {
-    //https://github.com/Unity-Technologies/DynamicResolutionSample/blob/9677fbd4d890f809d95aa1c3c266966646bb23c6/DynamicResolution.cs
-    public class DynamicResolution : MonoBehaviour
+    public static class DynamicResolutionImpl
     {
-        [SerializeField] double DesiredFrameRate = 60.0;
-        double DesiredFrameTime = 1000.0 / 60.0;
+        public static double DesiredFrameRate = 60.0;
+        static double DesiredFrameTime = 1000.0 / 60.0;
 
         #region Tweakables
-
         const uint ScaleRaiseCounterLimit = 360;
 
         const uint ScaleRaiseCounterSmallIncrement = 3;
@@ -39,46 +37,42 @@ namespace PKGE.Packages
         // If your pipeline utilizes the DRH then the min and max scale factors should be defined by a separate config asset.
         // If not, then these values provide you that configuration.
 #if !PIPELINE_IMPLEMENTS_DRH
-        [Range(0.25f, MaxScaleFactor)]
-        [SerializeField] float MinScaleFactor = 1.0f / 4;
-        const float MaxScaleFactor = 1.0f;
+        public static float MinScaleFactor = 1.0f / 4;
+        public const float MaxScaleFactor = 1.0f;
 #endif
-
         #endregion // Tweakables
 
         #region Internal Tracking
+        static uint FrameCount = 0;
 
-        uint FrameCount = 0;
+        static readonly FrameTiming[] FrameTimings = new FrameTiming[NumFrameTimings];
 
-        readonly FrameTiming[] FrameTimings = new FrameTiming[NumFrameTimings];
+        static double GPUFrameTime = 0.0;
+        static double CPUFrameTime = 0.0;
 
-        double GPUFrameTime = 0.0;
-        double CPUFrameTime = 0.0;
+        static double GPUTimeDelta = 0.0;
 
-        double GPUTimeDelta = 0.0;
+        static uint ScaleRaiseCounter = 0;
 
-        uint ScaleRaiseCounter = 0;
+        static float CurrentScaleFactor = 1.0f;
 
-        float CurrentScaleFactor = 1.0f;
-
-        bool CanUpdate = false;
-        [SerializeField] bool SystemEnabled = true; // Default to false if you plan to init from external settings.
-        bool PlatformSupported = true;
+        static bool CanUpdate = false;
+        public static bool SystemEnabled = true; // Default to false if you plan to init from external settings.
+        static bool PlatformSupported = true;
 
         // These are for an unfortunate hack to work around a current issue, see start of Update for more info.
         // Do not change these unless you are sure about what you are doing.
 #if PIPELINE_IMPLEMENTS_DRH
-        bool HasDoneOneTimeInit = false;
-        uint FramesUntilInit = 1;
+        static bool HasDoneOneTimeInit = false;
+        static uint FramesUntilInit = 1;
 #endif
-
         #endregion // Internal Tracking
 
 #if ENABLE_DYNAMIC_RESOLUTION_DEBUG
-        GUIStyle DebugStyle;
+        static GUIStyle DebugStyle;
 #endif
 
-        private void Update()
+        public static void Update()
         {
             if (SystemEnabled)
             {
@@ -189,14 +183,14 @@ namespace PKGE.Packages
             return CurrentScaleFactor;
         }
 #else
-        private void SetNewScale()
+        private static void SetNewScale()
         {
             float finalScaleFactor = Mathf.Lerp(MinScaleFactor, MaxScaleFactor, CurrentScaleFactor);
             ScalableBufferManager.ResizeBuffers(finalScaleFactor, finalScaleFactor);
         }
 #endif
 
-        private void ResetScale()
+        private static void ResetScale()
         {
             CurrentScaleFactor = 1.0f;
 
@@ -207,7 +201,7 @@ namespace PKGE.Packages
 #endif
         }
 
-        private void GetFrameStats()
+        private static void GetFrameStats()
         {
             if (FrameCount < NumFrameTimings)
             {
@@ -239,7 +233,7 @@ namespace PKGE.Packages
             CPUFrameTime = FrameTimings[0].cpuFrameTime;
         }
 
-        public void Enable()
+        public static void Enable()
         {
             if (PlatformSupported)
             {
@@ -247,7 +241,7 @@ namespace PKGE.Packages
             }
         }
 
-        public void Disable()
+        public static void Disable()
         {
             if (PlatformSupported)
             {
@@ -257,22 +251,22 @@ namespace PKGE.Packages
             }
         }
 
-        public bool IsSupportedOnPlatform()
+        public static bool IsSupportedOnPlatform()
         {
             return PlatformSupported;
         }
 
-        public bool IsEnabled()
+        public static bool IsEnabled()
         {
             return SystemEnabled;
         }
 
-        public double GetTargetFramerate()
+        public static double GetTargetFramerate()
         {
             return DesiredFrameRate;
         }
 
-        public void SetTargetFramerate(double target)
+        public static void SetTargetFramerate(double target)
         {
             DesiredFrameRate = target;
             DesiredFrameTime = 1000.0 / target;
@@ -282,7 +276,7 @@ namespace PKGE.Packages
             ResetScale();
         }
 
-        private void Start()
+        public static void Start()
         {
             SetTargetFramerate(DesiredFrameRate);
 
@@ -309,7 +303,7 @@ namespace PKGE.Packages
 #endif
         }
 
-        private void OnDestroy()
+        public static void OnDestroy()
         {
             if (SystemEnabled)
             {
@@ -318,7 +312,7 @@ namespace PKGE.Packages
         }
 
 #if ENABLE_DYNAMIC_RESOLUTION_DEBUG
-        private void OnGUI()
+        public static void OnGUI()
         {
             float curScale = ScalableBufferManager.widthScaleFactor;
             int rezWidth = (int)Mathf.Ceil(curScale * Screen.width);
@@ -338,6 +332,47 @@ namespace PKGE.Packages
                     GPUFrameTime,
                     CPUFrameTime),
                 DebugStyle);
+        }
+#endif
+    }
+
+    //https://github.com/Unity-Technologies/DynamicResolutionSample/blob/9677fbd4d890f809d95aa1c3c266966646bb23c6/DynamicResolution.cs
+    public class DynamicResolution : MonoBehaviour
+    {
+        public ref double DesiredFrameRate => ref DynamicResolutionImpl.DesiredFrameRate;
+
+        #region Tweakables
+        // If your pipeline utilizes the DRH then the min and max scale factors should be defined by a separate config asset.
+        // If not, then these values provide you that configuration.
+#if !PIPELINE_IMPLEMENTS_DRH
+        [Range(0.25f, DynamicResolutionImpl.MaxScaleFactor)]
+        public ref float MinScaleFactor => ref DynamicResolutionImpl.MinScaleFactor;
+#endif
+        #endregion // Tweakables
+
+        #region Internal Tracking
+        public ref bool SystemEnabled => ref DynamicResolutionImpl.SystemEnabled; // Default to false if you plan to init from external settings.
+        #endregion // Internal Tracking
+
+        private void Update()
+        {
+            DynamicResolutionImpl.Update();
+        }
+
+        private void Start()
+        {
+            DynamicResolutionImpl.Start();
+        }
+
+        private void OnDestroy()
+        {
+            DynamicResolutionImpl.OnDestroy();
+        }
+
+#if ENABLE_DYNAMIC_RESOLUTION_DEBUG
+        private void OnGUI()
+        {
+            DynamicResolutionImpl.OnGUI();
         }
 #endif
     }
