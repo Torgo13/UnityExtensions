@@ -9,23 +9,17 @@ namespace PKGE
         /// Return the directional <see cref="Light"/> of the current <see cref="UnityEngine.SceneManagement.Scene"/>.
         /// </summary>
         /// <param name="sun">The directional <see cref="Light"/>, or <see langword="null"/> if not found.</param>
-        /// <param name="sunGameObject">The sun <see cref="GameObject"/>, or <see langword="null"/> if not found.</param>
-        /// <param name="sunTransform">The sun <see cref="Transform"/>, or <see langword="null"/> if not found.</param>
         /// <param name="includeInactive">Use <see cref="FindObjectsInactive.Exclude"/> to only return
         /// a directional light that is active and enabled.</param>
         /// <returns><see langword="true"/> if a directional light was found with the requested active state.</returns>
         public static bool GetDirectionalLight(
-            [System.Diagnostics.CodeAnalysis.MaybeNull] out Light sun,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] out GameObject sunGameObject,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] out Transform sunTransform,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Light sun,
             FindObjectsInactive includeInactive = FindObjectsInactive.Exclude)
         {
             sun = RenderSettings.sun;
             if (sun != null
                 && (includeInactive == FindObjectsInactive.Include || sun.isActiveAndEnabled))
             {
-                sunGameObject = sun.gameObject;
-                sunTransform = sun.transform;
                 return true;
             }
 
@@ -33,8 +27,6 @@ namespace PKGE
             if (sun != null
                 && sun.type == LightType.Directional)
             {
-                sunGameObject = sun.gameObject;
-                sunTransform = sun.transform;
                 return true;
             }
 
@@ -51,15 +43,11 @@ namespace PKGE
                     if (light.type == LightType.Directional)
                     {
                         sun = light;
-                        sunGameObject = light.gameObject;
-                        sunTransform = light.transform;
                         return true;
                     }
                 }
             }
 
-            sunGameObject = null;
-            sunTransform = null;
             return false;
         }
     }

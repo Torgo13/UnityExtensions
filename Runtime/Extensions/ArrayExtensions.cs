@@ -83,68 +83,37 @@ namespace PKGE
             if (count1 != count2)
                 return false;
 
-            for (int i = 0; i < count1; i++)
-            {
-                if (bytes1[offset1 + i] != bytes2[offset2 + i])
-                    return false;
-            }
-
-            return true;
+            return bytes1.AsSpan(offset1, count1).SequenceEqual(bytes2.AsSpan(offset2, count2));
         }
 
-        public static bool StartsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.NotNull] byte[] pattern)
+        public static bool StartsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern)
         {
             int patternLength = pattern.Length;
 
             if (count < patternLength)
                 return false;
 
-            for (int i = 0; i < patternLength; i++, offset++)
-            {
-                if (array[offset] != pattern[i])
-                    return false;
-            }
-
-            return true;
+            return array.AsSpan(offset, count).StartsWith(pattern);
         }
 
-        public static bool EndsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.NotNull] byte[] pattern)
+        public static bool EndsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern)
         {
             int patternLength = pattern.Length;
 
             if (count < patternLength)
                 return false;
 
-            offset = offset + count - patternLength;
-
-            for (int i = 0; i < patternLength; i++, offset++)
-            {
-                if (array[offset] != pattern[i])
-                    return false;
-            }
-
-            return true;
+            return array.AsSpan(offset, count).EndsWith(pattern);
         }
 
-        public static int IndexOfBytes(this byte[] array, [System.Diagnostics.CodeAnalysis.NotNull] byte[] pattern, int startIndex, int count)
+        public static int IndexOfBytes(this byte[] array, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern, int startIndex, int count)
         {
             int patternLength = pattern.Length;
 
             if (count < patternLength)
                 return -1;
 
-            int endIndex = startIndex + count;
-
-            int foundIndex = 0;
-            for (; startIndex < endIndex; startIndex++)
-            {
-                if (array[startIndex] != pattern[foundIndex])
-                    foundIndex = 0;
-                else if (++foundIndex == patternLength)
-                    return startIndex - foundIndex + 1;
-            }
-
-            return -1;
+            return array.AsSpan(startIndex, count).IndexOf(pattern);
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
 
@@ -154,6 +123,7 @@ namespace PKGE
         {
             if (array == null)
                 return 0;
+
             return array.Length;
         }
 
@@ -169,6 +139,7 @@ namespace PKGE
         {
             if (array == null)
                 return;
+
             Array.Clear(array, 0, count);
         }
 
@@ -199,7 +170,7 @@ namespace PKGE
             DuplicateWithCapacity(ref array, count, capacity, capacityIncrement);
         }
 
-        public static void DuplicateWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, int count, int capacity, int capacityIncrement = 10)
+        public static void DuplicateWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.AllowNull] ref TValue[] array, int count, int capacity, int capacityIncrement = 10)
         {
             if (array == null)
             {
@@ -251,7 +222,7 @@ namespace PKGE
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "index", Justification = "Keep this for future implementation")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-        public static bool HaveDuplicateReferences<TFirst>(this TFirst[] first, int index, int count)
+        public static bool HaveDuplicateReferences<TFirst>([System.Diagnostics.CodeAnalysis.DisallowNull] this TFirst[] first, int index, int count)
             where TFirst : class
         {
             for (var i = 0; i < count; ++i)
@@ -301,7 +272,16 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, Predicate<TValue> predicate)
+        public static int IndexOf<TValue>(
+            [System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array,
+            [System.Diagnostics.CodeAnalysis.DisallowNull] Predicate<TValue> predicate)
+        {
+            return IndexOf(array.AsSpan(), predicate);
+        }
+
+        public static int IndexOf<TValue>(
+            [System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TValue> array,
+            [System.Diagnostics.CodeAnalysis.DisallowNull] Predicate<TValue> predicate)
         {
             if (array == null)
                 return -1;
@@ -315,6 +295,11 @@ namespace PKGE
         }
 
         public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, Predicate<TValue> predicate, int startIndex, int count = -1)
+        {
+            return IndexOf(array.AsSpan(), predicate, startIndex, count);
+        }
+
+        public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TValue> array, Predicate<TValue> predicate, int startIndex, int count = -1)
         {
             if (array == null)
                 return -1;
@@ -340,12 +325,17 @@ namespace PKGE
             where TSecond : class
             where TFirst : TSecond
         {
+            return IndexOfReference<TFirst, TSecond>(array.AsSpan(startIndex, count), value);
+        }
+
+        public static int IndexOfReference<TFirst, TSecond>([System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TFirst> array, TSecond value)
+            where TSecond : class
+            where TFirst : TSecond
+        {
             if (array == null)
                 return -1;
 
-            if (count < 0)
-                count = array.Length - startIndex;
-            for (var i = startIndex; i < startIndex + count; ++i)
+            for (var i = 0; i < array.Length; ++i)
                 if (ReferenceEquals(array[i], value))
                     return i;
 
@@ -678,6 +668,7 @@ namespace PKGE
                 EraseAt(ref array, index);
                 return true;
             }
+
             return false;
         }
 
@@ -854,6 +845,11 @@ namespace PKGE
         }
 
         public static void SwapElements<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this TValue[] array, int index1, int index2)
+        {
+            Swap(ref array[index1], ref array[index2]);
+        }
+
+        public static void SwapElements<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this Span<TValue> array, int index1, int index2)
         {
             Swap(ref array[index1], ref array[index2]);
         }

@@ -22,7 +22,7 @@ namespace PKGE
         /// <param name="camera">The camera to get the aspect ratio from.</param>
         /// <param name="aspectNeutralFieldOfView"> The "aspect neutral" field of view, which is the diagonal field of view.</param>
         /// <returns>The vertical field of view calculated.</returns>
-        public static float GetVerticalFieldOfView([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, float aspectNeutralFieldOfView)
+        public static float GetVerticalFieldOfView([System.Diagnostics.CodeAnalysis.DisallowNull] this Camera camera, float aspectNeutralFieldOfView)
         {
             var verticalHalfFieldOfViewTangent = Mathf.Tan(aspectNeutralFieldOfView * 0.5f * Mathf.Deg2Rad) *
                 OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
@@ -30,7 +30,7 @@ namespace PKGE
         }
         
         /// <inheritdoc cref="GetVerticalFieldOfView"/>
-        public static double GetVerticalFieldOfViewRad([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, double aspectNeutralFieldOfView)
+        public static double GetVerticalFieldOfViewRad([System.Diagnostics.CodeAnalysis.DisallowNull] this Camera camera, double aspectNeutralFieldOfView)
         {
             var verticalHalfFieldOfViewTangent = System.Math.Tan(aspectNeutralFieldOfView * 0.5) *
                 OneOverSqrt2 / System.Math.Sqrt(camera.aspect);
@@ -42,14 +42,14 @@ namespace PKGE
         /// </summary>
         /// <param name="camera">The camera to get the aspect ratio and vertical field of view from.</param>
         /// <returns>The horizontal field of view of the camera.</returns>
-        public static float GetHorizontalFieldOfView([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera)
+        public static float GetHorizontalFieldOfView([System.Diagnostics.CodeAnalysis.DisallowNull] this Camera camera)
         {
             var halfFieldOfView = camera.fieldOfView * 0.5f;
             return Mathf.Rad2Deg * Mathf.Atan(Mathf.Tan(halfFieldOfView * Mathf.Deg2Rad) * camera.aspect);
         }
         
         /// <inheritdoc cref="GetHorizontalFieldOfView"/>
-        public static double GetHorizontalFieldOfViewRad([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera)
+        public static double GetHorizontalFieldOfViewRad([System.Diagnostics.CodeAnalysis.DisallowNull] this Camera camera)
         {
             var halfFieldOfView = camera.fieldOfView * 0.5 * Mathf.Deg2Rad;
             return System.Math.Atan(System.Math.Tan(halfFieldOfView) * camera.aspect);
@@ -61,7 +61,7 @@ namespace PKGE
         /// <param name="camera">The camera to get the aspect ratio from.</param>
         /// <param name="size">The diagonal orthographic size.</param>
         /// <returns>The vertical orthographic size calculated.</returns>
-        public static float GetVerticalOrthographicSize([System.Diagnostics.CodeAnalysis.NotNull] this Camera camera, float size)
+        public static float GetVerticalOrthographicSize([System.Diagnostics.CodeAnalysis.DisallowNull] this Camera camera, float size)
         {
             return size * OneOverSqrt2 / Mathf.Sqrt(camera.aspect);
         }
@@ -101,13 +101,18 @@ namespace PKGE
         }
         #endregion // Unity.LiveCapture
 
-        public static bool GetAllCameras(List<Camera> cameras)
+        /// <summary>
+        /// Find all cameras without allocating memory.
+        /// </summary>
+        /// <param name="cameras">Assumes an empty, non-null List.</param>
+        /// <returns><see langword="true"/> if more than 0 cameras were found.</returns>
+        public static bool GetAllCameras([System.Diagnostics.CodeAnalysis.DisallowNull] List<Camera> cameras)
         {
             int allCamerasCount = Camera.allCamerasCount;
             if (allCamerasCount == 0)
                 return false;
 
-            using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var list);
+            var list = UnityEngine.Pool.ListPool<Camera>.Get();
             list.EnsureCapacity(allCamerasCount);
             Camera[] allCameras = list.AsArray();
 
@@ -119,24 +124,47 @@ namespace PKGE
                 cameras.Add(allCameras[i]);
             }
 
+            UnityEngine.Pool.ListPool<Camera>.Release(list);
             return true;
         }
 
         public static Camera GetFirstCamera()
         {
+            _ = GetFirstCamera(out var camera);
+            return camera;
+        }
+
+        public static bool GetFirstCamera([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Camera camera)
+        {
             using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
             if (GetAllCameras(cameras))
-                return cameras[0];
+            {
+                camera = cameras[0];
+                return true;
+            }
 
-            return default;
+            camera = null;
+            return false;
         }
 
         [JetBrains.Annotations.CanBeNull]
         public static Camera GetCamera(string identifier, bool compareTag = false)
         {
+            _ = GetCamera(out var camera, identifier, compareTag);
+            return camera;
+        }
+
+        public static bool GetCamera(
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Camera camera,
+            [System.Diagnostics.CodeAnalysis.DisallowNull] string identifier,
+            bool compareTag = false)
+        {
             using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
             if (!GetAllCameras(cameras))
-                return default;
+            {
+                camera = null;
+                return false;
+            }
 
             foreach (var cam in cameras)
             {
@@ -145,25 +173,63 @@ namespace PKGE
                     : string.Equals(cam.name, identifier, System.StringComparison.Ordinal);
 
                 if (found)
-                    return cam;
+                {
+                    camera = cam;
+                    return true;
+                }
             }
 
-            return default;
+            camera = null;
+            return false;
         }
 
         public static Camera GetMainOrFirstCamera()
         {
+            _ = GetMainOrFirstCamera(out var camera);
+            return camera;
+        }
+
+        public static bool GetMainOrFirstCamera([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Camera camera)
+        {
             using var _0 = UnityEngine.Pool.ListPool<Camera>.Get(out var cameras);
             if (!GetAllCameras(cameras))
-                return default;
+            {
+                camera = null;
+                return false;
+            }
 
             foreach (var cam in cameras)
             {
                 if (cam.CompareTag("MainCamera"))
-                    return cam;
+                {
+                    camera = cam;
+                    return true;
+                }
             }
 
-            return cameras[0];
+            camera = cameras[0];
+            return true;
+        }
+
+        public static bool GetCameraCubemap(
+            [System.Diagnostics.CodeAnalysis.DisallowNull] this Camera cam,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material cubemap)
+        {
+            return GetCameraCubemap(cam.gameObject, out cubemap);
+        }
+
+        public static bool GetCameraCubemap(
+            [System.Diagnostics.CodeAnalysis.DisallowNull] GameObject cam,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material cubemap)
+        {
+            if (cam.TryGetComponent<Skybox>(out var skybox))
+            {
+                cubemap = skybox.material;
+                return cubemap != null;
+            }
+
+            cubemap = null;
+            return false;
         }
     }
 }
