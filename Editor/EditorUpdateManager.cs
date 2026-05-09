@@ -3,7 +3,9 @@ using UnityEditor;
 
 namespace PKGE.Editor
 {
-    // Call update at regular interval, even when using executeMethod on the command line
+    /// <summary>
+    /// Call update at regular interval, even when using executeMethod on the command line
+    /// </summary>
     public static class EditorUpdateManager
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/Internal/EditorUpdateManager.cs
@@ -16,7 +18,9 @@ namespace PKGE.Editor
             EditorApplication.update += Tick;
         }
 
-        // Call this to tick
+        /// <summary>
+        /// Call this to tick
+        /// </summary>
         public static void Tick() => ToUpdate?.Invoke();
         #endregion // UnityEditor.ShaderAnalysis.Internal
     }

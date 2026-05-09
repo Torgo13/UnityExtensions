@@ -18,9 +18,10 @@ namespace PKGE
             {
                 UnityEngine.Debug.LogException(e);
                 UnityEngine.Debug.LogWarning("Can't load assembly '" + assembly.GetName() + "'. Problematic types follow.");
-                foreach (TypeLoadException tle in (TypeLoadException[])e.LoaderExceptions)
+                foreach (var le in e.LoaderExceptions)
                 {
-                    UnityEngine.Debug.LogWarning("Can't load type '" + tle.TypeName + "': " + tle.Message);
+                    if (le is TypeLoadException tle)
+                        UnityEngine.Debug.LogWarning("Can't load type '" + tle.TypeName + "': " + tle.Message);
                 }
 
                 var types = e.Types;

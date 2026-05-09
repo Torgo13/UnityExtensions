@@ -37,7 +37,7 @@ namespace PKGE.Editor
 
         static void LoadAllSettingsClasses()
         {
-            var instances = new List<ScriptableSettingsBase>();
+            using var _0 = UnityEngine.Pool.ListPool<ScriptableSettingsBase>.Get(out var instances);
             ReflectionUtils.ForEachAssembly(assembly =>
             {
                 foreach (var type in GetSettingsClasses(assembly))
@@ -56,8 +56,8 @@ namespace PKGE.Editor
         {
             return ReflectionUtils.GetCachedTypesDictionary()[assembly].Where(EditorApplication.isPlayingOrWillChangePlaymode ? Filter : EditorFilter);
             
-            bool Filter(Type t) => t.IsSubclassOf(typeof(ScriptableSettings<>));
-            bool EditorFilter(Type t) => t.IsSubclassOf(typeof(ScriptableSettingsBase)) && !t.IsAbstract;
+            static bool Filter(Type t) => t.IsSubclassOf(typeof(ScriptableSettings<>));
+            static bool EditorFilter(Type t) => t.IsSubclassOf(typeof(ScriptableSettingsBase)) && !t.IsAbstract;
         }
         #endregion // Unity.XR.CoreUtils.Editor
     }
