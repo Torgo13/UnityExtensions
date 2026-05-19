@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace PKGE
@@ -62,10 +61,10 @@ namespace PKGE
         {
             if (loop)
             {
-                return (int)Mathf.Repeat(index, ColorPalette.Length);
+                return (int)Mathf.Repeat(index, ColorPalette.Length - 1);
             }
 
-            return Mathf.Clamp(index, 0, ColorPalette.Length);
+            return Mathf.Clamp(index, 0, ColorPalette.Length - 1);
         }
         
         //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/GameSystem/AppSettings.cs#L295
@@ -74,13 +73,14 @@ namespace PKGE
         {
             get
             {
-                DateTime dt = DateTime.UtcNow;
-                return unchecked((uint)(dt.Ticks % (uint.MaxValue - 1)));
+                var dt = System.DateTime.UtcNow;
+                return (uint)dt.Ticks;
             }
         }
         
-        public static Color[] ColorPalette;
+        public static Color[] ColorPalette = System.Array.Empty<Color>();
         private static Texture2D _colorPaletteRaw;
+        private static Texture2D ColorPaletteRaw { get { if (_colorPaletteRaw == null) { _colorPaletteRaw = Resources.Load<Texture2D>("textures/colorSwatch"); } return _colorPaletteRaw; } }
 
         public static Color GetPaletteColor(int index)
         {
@@ -93,11 +93,7 @@ namespace PKGE
             get
             {
                 GenerateColors();
-#if INCLUDE_MATHEMATICS
-                var rand = new Unity.Mathematics.Random(1 + SeedNow);
-#else
-                var rand = new System.Random(unchecked((int)SeedNow));
-#endif // INCLUDE_MATHEMATICS
+                var rand = RandomExtensions.CreateSafe(SeedNow);
                 var colour = ColorPalette[rand.Range(0, ColorPalette.Length)];
                 return colour;
             }
@@ -105,33 +101,31 @@ namespace PKGE
 
         private static void GenerateColors()
         {
-            if (ColorPalette != null && ColorPalette.Length != 0)
+            if (ColorPalette.Length != 0)
                 return;
 
-            if (_colorPaletteRaw == null)
-                _colorPaletteRaw = Resources.Load<Texture2D>("textures/colorSwatch");
-
-            if (_colorPaletteRaw == null)
+            if (ColorPaletteRaw == null)
             {
                 const int colourDepth = 4;
                 const int colourDepthSq = colourDepth * colourDepth;
                 const float scale = 1f / colourDepth;
-                int length = (int)System.Math.Pow(colourDepth, 3);
-                
+                const int length = colourDepth * colourDepth * colourDepth; //(int)System.Math.Pow(colourDepth, 3);
+
                 ColorPalette = new Color[length];
                 for (int i = 0; i < ColorPalette.Length; i++)
                 {
-                    int index = i;
-                    int b = index / colourDepthSq;
-                    index -= b * colourDepthSq;
-                    int g = index / colourDepth;
-                    int r = index % colourDepth;
+                    int b = i / colourDepthSq;
+                    int a = i % colourDepthSq;
+                    int g = a / colourDepth;
+                    int r = a % colourDepth;
 
                     ColorPalette[i] = new Color(r * scale, g * scale, b * scale);
                 }
             }
-
-            ColorPalette = _colorPaletteRaw.GetPixels();
+            else
+            {
+                ColorPalette = _colorPaletteRaw.GetPixels();
+            }
 #if DEBUG
             Debug.Log($"Found {ColorPalette.Length} colors.");
 #endif // DEBUG

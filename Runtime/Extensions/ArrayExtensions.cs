@@ -113,7 +113,10 @@ namespace PKGE
             if (count < patternLength)
                 return -1;
 
-            return array.AsSpan(startIndex, count).IndexOf(pattern);
+            var index = array.AsSpan(startIndex, count).IndexOf(pattern);
+            return index == -1
+                ? -1
+                : index + startIndex;
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils
 
@@ -325,7 +328,10 @@ namespace PKGE
             where TSecond : class
             where TFirst : TSecond
         {
-            return IndexOfReference<TFirst, TSecond>(array.AsSpan(startIndex, count), value);
+            var index = IndexOfReference<TFirst, TSecond>(array.AsSpan(startIndex, count), value);
+            return index == -1
+                ? -1
+                : startIndex + index;
         }
 
         public static int IndexOfReference<TFirst, TSecond>([System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TFirst> array, TSecond value)

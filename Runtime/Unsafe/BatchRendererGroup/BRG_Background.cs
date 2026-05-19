@@ -112,14 +112,19 @@ namespace PKGE.Unsafe
         private static void InjectNewSlice(ref uint m_slicePos, int m_backgroundH, int m_backgroundW,
             ref NativeArray<BackgroundItem> m_backgroundItems)
         {
-#if INCLUDE_MATHEMATICS
-            var Random = new Random(
-                math.max(1, new NativeReference<uint>(AllocatorManager.Temp,
-                    NativeArrayOptions.UninitializedMemory).Value));
-#else
-            var Random = new Random(new NativeArray<int>(1, Allocator.Temp,
-                NativeArrayOptions.UninitializedMemory)[0]);
-#endif // INCLUDE_MATHEMATICS
+            var hash = new System.HashCode();
+            hash.Add(m_slicePos);
+            hash.Add(m_backgroundH);
+            hash.Add(m_backgroundW);
+            foreach (var item in m_backgroundItems)
+            {
+                hash.Add(item.x);
+                hash.Add(item.hInitial);
+                hash.Add(item.phase);
+                hash.Add(item.color);
+            }
+
+            var Random = RandomExtensions.CreateSafe((uint)hash.ToHashCode());
 
             m_slicePos++;
 
@@ -305,7 +310,7 @@ namespace PKGE.Unsafe
                 m_phase -= 1.0f;
             }
 
-#if !ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER
+#if DEBUG && (!ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER)
             if (Input.touchCount == 3)
             {
                 if ((Input.GetTouch(0).phase == TouchPhase.Began) &&
@@ -316,7 +321,7 @@ namespace PKGE.Unsafe
 
             if (Input.GetKeyDown(KeyCode.F7))
                 m_debrisDebugTest = !m_debrisDebugTest;
-#endif // !ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER
+#endif // DEBUG && (!ENABLE_INPUT_SYSTEM || ENABLE_LEGACY_INPUT_MANAGER)
 
             // read back the cell list with magnet and set intensity to 1
             int magnetCellsCount = m_magnetCells.Count;
@@ -340,14 +345,7 @@ namespace PKGE.Unsafe
                 if (m_debrisDebugTest
                     && m_burstTimer <= 0.0f)
                 {
-#if INCLUDE_MATHEMATICS
-                    var Random = new Random(
-                        math.max(1, new NativeReference<uint>(AllocatorManager.Temp,
-                            NativeArrayOptions.UninitializedMemory).Value));
-#else
-                    var Random = new Random(new NativeArray<int>(1, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory)[0]);
-#endif // INCLUDE_MATHEMATICS
+                    var Random = new Random(1 + (uint)m_phase * (uint.MaxValue - 1));
 #if true
                     for (int e = 0; e < 8; e++)
                     {

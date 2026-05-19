@@ -16,28 +16,40 @@ namespace PKGE.Tests
         [Test]
         public void RandomNormalTestTwoDouble()
         {
-            var rn = new RandomNormal(2018);
+            var rand = new Unity.Mathematics.Random(2018);
+            double spareGaussian = double.NaN;
 
-            Assert.AreEqual(k_FirstValue, rn.NextDouble(), k_Epsilon);
-            Assert.AreEqual(k_SecondValue, rn.NextDouble(), k_Epsilon);
+            var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian);
+            Assert.AreEqual(k_FirstValue, rn, k_Epsilon);
+
+            rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian);
+            Assert.AreEqual(k_SecondValue, rn, k_Epsilon);
         }
 
         [Test]
         public void RandomNormalTestWithMean()
         {
-            var rn = new RandomNormal(2018, 5.0f);
+            var rand = new Unity.Mathematics.Random(2018);
+            double spareGaussian = double.NaN;
 
-            Assert.AreEqual(k_FirstValue + 5.0, rn.NextDouble(), k_Epsilon);
-            Assert.AreEqual(k_SecondValue + 5.0, rn.NextDouble(), k_Epsilon);
+            var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 5);
+            Assert.AreEqual(k_FirstValue + 5.0, rn, k_Epsilon);
+
+            rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 5);
+            Assert.AreEqual(k_SecondValue + 5.0, rn, k_Epsilon);
         }
 
         [Test]
         public void RandomNormalTestWithStddev()
         {
-            var rn = new RandomNormal(2018, 0.0f, 4.2f);
+            var rand = new Unity.Mathematics.Random(2018);
+            double spareGaussian = double.NaN;
 
-            Assert.AreEqual(k_FirstValue * 4.2, rn.NextDouble(), k_Epsilon);
-            Assert.AreEqual(k_SecondValue * 4.2, rn.NextDouble(), k_Epsilon);
+            var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 0, stdDev: 4.2);
+            Assert.AreEqual(k_FirstValue * 4.2, rn, k_Epsilon);
+
+            rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 0, stdDev: 4.2);
+            Assert.AreEqual(k_SecondValue * 4.2, rn, k_Epsilon);
         }
 
         [Test]
@@ -45,10 +57,14 @@ namespace PKGE.Tests
         {
             const float mean = -3.2f;
             const float stddev = 2.2f;
-            var rn = new RandomNormal(2018, mean, stddev);
+            var rand = new Unity.Mathematics.Random(2018);
+            double spareGaussian = double.NaN;
 
-            Assert.AreEqual(k_FirstValue * stddev + mean, rn.NextDouble(), k_Epsilon);
-            Assert.AreEqual(k_SecondValue * stddev + mean, rn.NextDouble(), k_Epsilon);
+            var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean, stddev);
+            Assert.AreEqual(k_FirstValue * stddev + mean, rn, k_Epsilon);
+
+            rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean, stddev);
+            Assert.AreEqual(k_SecondValue * stddev + mean, rn, k_Epsilon);
         }
 
         [Test]
@@ -56,7 +72,8 @@ namespace PKGE.Tests
         {
             const float mean = -3.2f;
             const float stddev = 2.2f;
-            var rn = new RandomNormal(2018, mean, stddev);
+            var rand = new Unity.Mathematics.Random(2018);
+            double spareGaussian = double.NaN;
 
             const int numSamples = 100000;
             // Adapted from https://www.johndcook.com/blog/standard_deviation/
@@ -65,7 +82,7 @@ namespace PKGE.Tests
 
             for (var i = 0; i < numSamples; i++)
             {
-                var x = rn.NextDouble();
+                var x = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean, stddev);
                 if (i == 0)
                 {
                     oldM = newM = x;

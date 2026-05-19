@@ -20,13 +20,18 @@ namespace PKGE.Tests
         public void TearDown()
         {
             if (cam != null)
-                UnityEngine.Object.DestroyImmediate(cam.gameObject);
+                Object.DestroyImmediate(cam.gameObject);
 
             // Cleanup any other cameras created during the test
-            foreach (var c in UnityEngine.Object.FindObjectsOfType<Camera>())
+#if UNITY_2022_3_OR_NEWER
+            foreach (var c in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+#else
+            foreach (var c in Object.FindObjectsOfType<Camera>())
+#endif // UNITY_2022_3_OR_NEWER
             {
-                if (c != Camera.main)
-                    UnityEngine.Object.DestroyImmediate(c.gameObject);
+                var go = c.gameObject;
+                if (!go.CompareTag("MainCamera"))
+                    Object.DestroyImmediate(go);
             }
         }
 
@@ -124,7 +129,7 @@ namespace PKGE.Tests
         {
             cam.tag = "MainCamera";
             var result = CameraExtensions.GetCamera("MainCamera", compareTag: true);
-            Assert.IsTrue(result.CompareTag(cam.tag));
+            Assert.IsTrue(result.CompareTag("MainCamera"));
         }
 
         [Test]

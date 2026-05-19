@@ -1586,14 +1586,7 @@ namespace PKGE
             float sqrMag = lengthsq(vector);
             if (sqrMag > maxLength * maxLength)
             {
-                float mag = sqrt(sqrMag);
-                float normalizedX = vector.x / mag;
-                float normalizedY = vector.y / mag;
-                float normalizedZ = vector.z / mag;
-                return new float3(
-                    normalizedX * maxLength,
-                    normalizedY * maxLength,
-                    normalizedZ * maxLength);
+                return vector * maxLength / sqrt(sqrMag);
             }
 
             return vector;
@@ -1602,9 +1595,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3 RandomInSphere(ref Random random, float radius)
         {
-            float3 v = random.NextFloat3Direction();
-            v *= pow(random.NextFloat(), 1.0f / 3.0f);
-            return v * radius;
+            return radius * random.NextInsideUnitSphere();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1624,7 +1615,7 @@ namespace PKGE
             }
             else
             {
-                float t = max(0f, min(1f, dot(sphereCenter - p1, p2 - p1) / segmentLengthSq));
+                float t = clamp(dot(sphereCenter - p1, p2 - p1) / segmentLengthSq, 0, 1);
                 float3 projection = p1 + t * (p2 - p1);
                 distanceSqToSphereCenter = distancesq(sphereCenter, projection);
             }
@@ -1640,7 +1631,7 @@ namespace PKGE
         }
 
         public static JobHandle GenerateEquidistantPointsOnSphereJobHandle(ref NativeList<float3> points, int newPointsCount, float radius,
-            int repelIterations = 50)
+            int repelIterations = 50, JobHandle dependency = default)
         {
             int initialPointsCount = points.Length;
             int totalPointsCount = initialPointsCount + newPointsCount;
@@ -1662,7 +1653,7 @@ namespace PKGE
             };
 
             var jobHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
-                innerloopBatchCount: 32, dependency: default);
+                innerloopBatchCount: 32, dependency);
 
             // Second pass: make points repel each other
             if (totalPointsCount > 1)
@@ -1750,7 +1741,7 @@ namespace PKGE
                 ref float closestPointRemappedDot, ref float3 closestPointRotationAxis)
             {
                 float dot = math.dot(dir, otherDir);
-                float remappedDot = remap(-1f, 1f, 0f, 1f, dot);
+                float remappedDot = dot * 0.5f + 0.5f; //remap(-1f, 1f, 0f, 1f, dot);
 
                 if (remappedDot > closestPointRemappedDot)
                 {

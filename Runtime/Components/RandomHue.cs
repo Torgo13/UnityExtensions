@@ -14,20 +14,20 @@ namespace PKGE
 
         void OnEnable()
         {
-            RandomizeHue();
+            RandomizeHue(RandomExtensions.SecureRandomUInt);
         }
 
-        void RandomizeHue()
+        void RandomizeHue(uint seed)
         {
-#if STATIC_EVERYTHING
-            var hue = 0f;
-#else
-            var hue = Random.Range(0f, 1f);
-#endif
-
             if (renderers == null || renderers.Length <= 0)
                 return;
-            
+
+#if STATIC_EVERYTHING
+            const float hue = 0f;
+#else
+            float hue = RandomExtensions.CreateSafe(seed).NextFloat();
+#endif
+
             foreach (var t in renderers)
             {
                 if (t == null)

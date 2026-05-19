@@ -1142,10 +1142,16 @@ namespace PKGE
         /// <returns>Length of the byte array needed to allocate.</returns>
         public static int FromBase64_ComputeResultLength([System.Diagnostics.CodeAnalysis.NotNull] this string input)
         {
+            return FromBase64_ComputeResultLength(input.AsSpan());
+        }
+
+        /// <inheritdoc cref="FromBase64_ComputeResultLength(string)"/>
+        public static int FromBase64_ComputeResultLength(ReadOnlySpan<char> input)
+        {
             const uint intEq = '=';
             const uint intSpace = ' ';
 
-            Assert.IsNotNull(input);
+            Assert.IsTrue(input != null);
 
             int usefulInputLength = input.Length;
             int padding = 0;

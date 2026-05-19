@@ -19,24 +19,12 @@ namespace PKGE.Packages
             public float3 Center;
             [WriteOnly]
             public NativeArray<float3> Points;
-            public int Count;
             public uint Seed;
 
             public void Execute()
             {
-                var radiusSquared = Radius * Radius;
-                var pointsFound = 0;
                 var random = new Random(Seed);
-
-                while (pointsFound < Count)
-                {
-                    var p = random.NextFloat3() * new float3(Radius + Radius) - new float3(Radius);
-                    if (math.lengthsq(p) < radiusSquared)
-                    {
-                        Points[pointsFound] = Center + p;
-                        pointsFound++;
-                    }
-                }
+                random.PointsInSphere(ref Points, Center, Radius);
             }
         }
 
@@ -45,20 +33,17 @@ namespace PKGE.Packages
         /// </summary>
         /// <param name="inputDeps">A JobHandle to wait for, before the job scheduled by this function</param>
         /// <returns>A JobHandle of the job that was created to generate random points inside a sphere</returns>
-        /// <inheritdoc cref="RandomPointsInSphere(NativeArray{float3}, float3, float)"/>
+        /// <inheritdoc cref="RandomPointsInSphere(NativeArray{float3}, float3, float, uint)"/>
         public static JobHandle RandomPointsInSphere(NativeArray<float3> points, float3 center, float radius,
-            JobHandle inputDeps)
+            uint seed, JobHandle inputDeps)
         {
-            var pointsInSphereJob = new PointsInSphere
+            return new PointsInSphere
             {
                 Radius = radius,
                 Center = center,
                 Points = points,
-                Count = points.Length,
-                Seed = 0x6E624EB7u,
-            };
-            var pointsInSphereJobHandle = pointsInSphereJob.Schedule(inputDeps);
-            return pointsInSphereJobHandle;
+                Seed = seed,
+            }.Schedule(inputDeps);
         }
 
         /// <summary>
@@ -68,39 +53,18 @@ namespace PKGE.Packages
         /// <param name="points">A NativeArray in which to store the randomly generated points</param>
         /// <param name="center">The center of the sphere</param>
         /// <param name="radius">The radius of the sphere</param>
-        public static void RandomPointsInSphere(NativeArray<float3> points, float3 center = default, float radius = 1.0f)
+        public static void RandomPointsInSphere(NativeArray<float3> points, float3 center = default, float radius = 1.0f,
+            uint seed = 0x6E624EB7u)
         {
-            var pointsInSphereJob = new PointsInSphere
+            new PointsInSphere
             {
                 Radius = radius,
                 Center = center,
                 Points = points,
-                Count = points.Length,
-                Seed = 0x6E624EB7u,
-            };
-            pointsInSphereJob.Run();
+                Seed = seed,
+            }.Run();
         }
-
-        /// <summary>
-        /// A function that returns a single random position, fairly distributed inside the unit sphere.
-        /// </summary>
-        /// <param name="seed">A seed to the random number generator</param>
-        /// <returns>A point inside of the unit sphere, fairly distributed</returns>
-        public static float3 RandomPositionInsideUnitSphere(uint seed)
-        {
-            var random = new Random(seed);
-            while (true)
-            {
-                float3 randomPosition = random.NextFloat3();
-                var doubled = randomPosition * new float3(2);
-                var offset = doubled - new float3(1, 1, 1);
-                if (math.lengthsq(offset) > 1)
-                    continue;
-
-                return offset;
-            }
-        }
+        #endregion // Unity.Entities
     }
-    #endregion // Unity.Entities
 }
 #endif // INCLUDE_MATHEMATICS

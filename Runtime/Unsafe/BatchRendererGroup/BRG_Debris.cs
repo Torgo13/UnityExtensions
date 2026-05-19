@@ -85,7 +85,7 @@ namespace PKGE.Unsafe
 
         void Start()
         {
-            m_rndGen = new Random(0x22112003);
+            m_rndGen = RandomExtensions.Create();
 
             m_brgContainer = new BRG_Container();
             m_brgContainer.Init(m_mesh, m_material, kMaxDebris, kDebrisGpuSize, m_castShadows);

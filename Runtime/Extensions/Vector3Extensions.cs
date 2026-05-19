@@ -319,12 +319,32 @@ namespace PKGE
 
         public static readonly Vector3 MaxValue = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 
-        public static Vector3 RandomRange(float min, float max)
+        public static Vector3 RandomRange(float min, float max, uint seed)
         {
+            var Random = RandomExtensions.CreateSafe(seed);
+
             return new Vector3(
                 Random.Range(min, max),
                 Random.Range(min, max),
                 Random.Range(min, max));
+        }
+
+        public static Vector3 RandomRange(float min, float max)
+        {
+            var Random = RandomExtensions.CreateSafe(RandomExtensions.SecureRandomUInt);
+
+            return new Vector3(
+                Random.Range(min, max),
+                Random.Range(min, max),
+                Random.Range(min, max));
+        }
+
+        public static Vector3 RandomRangeSafe(float min, float max, uint seed)
+        {
+            if (min > max)
+                (min, max) = (max, min);
+
+            return RandomRange(min, max, seed);
         }
 
         public static Vector3 RandomRangeSafe(float min, float max)
