@@ -3,92 +3,125 @@ namespace PKGE
     public static class RandomExtensions
     {
         #region int
+        public static int NextInt(ref System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.Next(minInclusive, maxExclusive);
+
+        public static int NextInt(this System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.Next(minInclusive, maxExclusive);
+
+        public static int NextInt(int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => UnityEngine.Random.Range(minInclusive, maxExclusive);
+
 #if INCLUDE_MATHEMATICS
-        public static int Int(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = 1)
+        public static int Int(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
+#endif // INCLUDE_MATHEMATICS
+            
+        public static int Int(ref System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
+
+        public static int Int(this System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
+
+        public static int Int(int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => NextInt(minInclusive, maxExclusive);
+
+#if INCLUDE_MATHEMATICS
+        public static int Next(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
             => random.NextInt(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static int Int([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
-            => random.Next(minInclusive, maxExclusive);
+        public static int Next(ref System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
 
-        public static int Int(int minInclusive = 0, int maxExclusive = 1)
-            => UnityEngine.Random.Range(minInclusive, maxExclusive);
+        public static int Next(this System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
 
-        public static int NextInt([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
-            => random.Int(minInclusive, maxExclusive);
-
-        public static int NextInt(int minInclusive = 0, int maxExclusive = 1)
-            => Int(minInclusive, maxExclusive);
+        public static int Next(int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => NextInt(minInclusive, maxExclusive);
 
 #if INCLUDE_MATHEMATICS
-        public static int Next(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = 1)
-            => random.Int(minInclusive, maxExclusive);
+        public static int Range(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static int Next(int minInclusive = 0, int maxExclusive = 1)
-            => Int(minInclusive, maxExclusive);
+        public static int Range(ref System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
 
-#if INCLUDE_MATHEMATICS
-        public static int Range(ref this Unity.Mathematics.Random random, int minInclusive = 0, int maxExclusive = 1)
-            => random.Int(minInclusive, maxExclusive);
-#endif // INCLUDE_MATHEMATICS
-
-        public static int Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, int minInclusive = 0, int maxExclusive = 1)
-            => random.Int(minInclusive, maxExclusive);
+        public static int Range(this System.Random random, int minInclusive = 0, int maxExclusive = int.MaxValue)
+            => random.NextInt(minInclusive, maxExclusive);
         #endregion // int
 
         #region float
+        public static float NextFloat(ref System.Random random, float minInclusive = 0, float maxExclusive = 1)
+            => (float)(random.NextDouble() * (maxExclusive - minInclusive) + minInclusive);
+
+        public static float NextFloat(this System.Random random, float minInclusive = 0, float maxExclusive = 1)
+            => (float)(random.NextDouble() * (maxExclusive - minInclusive) + minInclusive);
+
+        public static float NextFloat(float minInclusive = 0, float maxExclusive = 1)
+            => UnityEngine.Random.Range(minInclusive, maxInclusive: maxExclusive - float.Epsilon);
+
 #if INCLUDE_MATHEMATICS
         public static float Float(ref this Unity.Mathematics.Random random, float minInclusive = 0, float maxExclusive = 1)
             => random.NextFloat(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
 
-        public static float Float([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
-            => (float)random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
+        public static float Float(ref System.Random random, float minInclusive = 0, float maxExclusive = 1)
+            => random.NextFloat(minInclusive, maxExclusive);
+
+        public static float Float(this System.Random random, float minInclusive = 0, float maxExclusive = 1)
+            => random.NextFloat(minInclusive, maxExclusive);
 
         public static float Float(float minInclusive = 0, float maxExclusive = 1)
-            => UnityEngine.Random.Range(minInclusive, maxInclusive: maxExclusive - float.Epsilon);
-
-        public static float NextFloat([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
-            => random.Float(minInclusive, maxExclusive);
-
-        public static float NextFloat(float minInclusive = 0, float maxExclusive = 1)
-            => Float(minInclusive, maxExclusive);
+            => NextFloat(minInclusive, maxExclusive);
 
 #if INCLUDE_MATHEMATICS
-        public static float Range(ref this Unity.Mathematics.Random random, float minInclusive = 0, float maxExclusive = 1)
-            => random.Float(minInclusive, maxExclusive);
+        public static float Range(ref this Unity.Mathematics.Random random, float minInclusive = 0, float maxInclusive = 1)
+            => random.NextUInt() / (float)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
 #endif // INCLUDE_MATHEMATICS
 
-        public static float Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, float minInclusive = 0, float maxExclusive = 1)
-            => random.Float(minInclusive, maxExclusive);
+        public static float Range(ref System.Random random, float minInclusive = 0, float maxInclusive = 1)
+            => (uint)random.NextInt(int.MinValue, int.MaxValue) / (float)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
+
+        public static float Range(this System.Random random, float minInclusive = 0, float maxInclusive = 1)
+            => (uint)random.NextInt(int.MinValue, int.MaxValue) / (float)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
         #endregion // float
 
         #region double
+        public static double NextDouble(ref System.Random random, double minInclusive = 0, double maxExclusive = 1)
+            => random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
+
+        public static double NextDouble(this System.Random random, double minInclusive = 0, double maxExclusive = 1)
+            => random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
+
+        public static double NextDouble(double minInclusive = 0, double maxExclusive = 1)
+            => UnityEngine.Random.Range((float)minInclusive, maxInclusive: (float)(maxExclusive - float.Epsilon));
+
 #if INCLUDE_MATHEMATICS
         public static double Double(ref this Unity.Mathematics.Random random, double minInclusive = 0, double maxExclusive = 1)
             => random.NextDouble(minInclusive, maxExclusive);
 #endif // INCLUDE_MATHEMATICS
+            
+        public static double Double(ref System.Random random, double minInclusive = 0, double maxExclusive = 1)
+            => random.NextDouble(minInclusive, maxExclusive);
 
-        public static double Double([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
-            => random.NextDouble() * (maxExclusive - minInclusive) + minInclusive;
+        public static double Double(this System.Random random, double minInclusive = 0, double maxExclusive = 1)
+            => random.NextDouble(minInclusive, maxExclusive);
 
         public static double Double(double minInclusive = 0, double maxExclusive = 1)
-            => UnityEngine.Random.Range((float)minInclusive, maxInclusive: (float)(maxExclusive - double.Epsilon));
+            => NextDouble(minInclusive, maxExclusive);
 
 #if INCLUDE_MATHEMATICS
-        public static double Range(ref this Unity.Mathematics.Random random, double minInclusive = 0, double maxExclusive = 1)
-            => random.Double(minInclusive, maxExclusive);
+        public static double Range(ref this Unity.Mathematics.Random random, double minInclusive = 0, double maxInclusive = 1)
+            => random.NextUInt() / (double)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
 #endif // INCLUDE_MATHEMATICS
 
-        public static double Range([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
-            => random.Double(minInclusive, maxExclusive);
+        public static double Range(ref System.Random random, double minInclusive = 0, double maxInclusive = 1)
+            => (uint)random.NextInt(int.MinValue, int.MaxValue) / (double)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
 
-        public static double NextDouble([System.Diagnostics.CodeAnalysis.NotNull] this System.Random random, double minInclusive = 0, double maxExclusive = 1)
-            => random.Double(minInclusive, maxExclusive);
-
-        public static double NextDouble(double minInclusive = 0, double maxExclusive = 1)
-            => Double(minInclusive, maxExclusive);
+        public static double Range(this System.Random random, double minInclusive = 0, double maxInclusive = 1)
+            => (uint)random.NextInt(int.MinValue, int.MaxValue) / (double)(uint.MaxValue - 1U) * (maxInclusive - minInclusive) + minInclusive;
         #endregion // double
 
         #region Secure
@@ -200,49 +233,83 @@ namespace PKGE
 #endif // INCLUDE_MATHEMATICS
         #endregion // Create
 
+        #region UnitSphere
 #if INCLUDE_MATHEMATICS
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static Unity.Mathematics.float3 NextInsideUnitSphere(ref this Unity.Mathematics.Random random) => random.NextOnUnitSphere() * random.NextFloat();
+        public static Unity.Mathematics.float3 NextInsideUnitSphere(ref this Unity.Mathematics.Random random)
+            => random.NextOnUnitSphere() * random.NextFloat();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static Unity.Mathematics.float3 NextOnUnitSphere(ref this Unity.Mathematics.Random random) => random.NextFloat3Direction();
+        public static Unity.Mathematics.float3 NextInsideUnitSphere(ref System.Random random)
+            => random.NextOnUnitSphere() * random.NextFloat();
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static Unity.Mathematics.float2 NextInsideUnitCircle(ref this Unity.Mathematics.Random random) => random.NextOnUnitCircle() * random.NextFloat();
+        public static UnityEngine.Vector3 NextInsideUnitSphere(this System.Random random)
+            => random.NextOnUnitSphere() * random.NextFloat();
+
+#if INCLUDE_MATHEMATICS
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Unity.Mathematics.float3 NextOnUnitSphere(ref this Unity.Mathematics.Random random)
+            => random.NextFloat3Direction();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static Unity.Mathematics.float2 NextOnUnitCircle(ref this Unity.Mathematics.Random random) => random.NextFloat2Direction();
-#else
-        [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector3 NextInsideUnitSphere(this System.Random random) => random.NextOnUnitSphere() * random.NextFloat();
+        public static Unity.Mathematics.float3 NextOnUnitSphere(ref System.Random random)
+            => random.NextFloat3Direction();
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector3 NextOnUnitSphere(this System.Random random) => random.NextFloat3Direction();
+        public static UnityEngine.Vector3 NextOnUnitSphere(this System.Random random)
+            => random.NextFloat3Direction();
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector3 NextFloat3Direction(this System.Random random)
+        private static UnityEngine.Vector3 NextFloat3Direction(this System.Random random)
         {
             var z = random.Double() * 2 - 1;
             var r = (float)System.Math.Sqrt(System.Math.Max(1 - z * z, 0));
             var sc = r * random.NextFloat2Direction();
             return new UnityEngine.Vector3(sc.x, sc.y, (float)z);
         }
+        #endregion // UnitSphere
+
+        #region UnitCircle
+#if INCLUDE_MATHEMATICS
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Unity.Mathematics.float2 NextInsideUnitCircle(ref this Unity.Mathematics.Random random)
+            => random.NextOnUnitCircle() * random.NextFloat();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector2 NextInsideUnitCircle(this System.Random random) => random.NextOnUnitCircle() * random.NextFloat();
+        public static Unity.Mathematics.float2 NextInsideUnitCircle(ref System.Random random)
+            => random.NextOnUnitCircle() * random.NextFloat();
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector2 NextOnUnitCircle(this System.Random random) => random.NextFloat2Direction();
+        public static UnityEngine.Vector2 NextInsideUnitCircle(this System.Random random)
+            => random.NextOnUnitCircle() * random.NextFloat();
+
+#if INCLUDE_MATHEMATICS
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static Unity.Mathematics.float2 NextOnUnitCircle(ref this Unity.Mathematics.Random random)
+            => random.NextFloat2Direction();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
-        public static UnityEngine.Vector2 NextFloat2Direction(this System.Random random)
+        public static Unity.Mathematics.float2 NextOnUnitCircle(ref System.Random random)
+            => random.NextFloat2Direction();
+
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        public static UnityEngine.Vector2 NextOnUnitCircle(this System.Random random)
+            => random.NextFloat2Direction();
+
+        [System.Runtime.CompilerServices.MethodImpl(256)]
+        private static UnityEngine.Vector2 NextFloat2Direction(this System.Random random)
         {
             var angle = random.Double() * (System.Math.PI * 2);
             var s = (float)System.Math.Sin(angle);
             var c = (float)System.Math.Cos(angle);
             return new UnityEngine.Vector2(c, s);
         }
-#endif // INCLUDE_MATHEMATICS
+        #endregion // UnitCircle
 
         //https://github.com/needle-mirror/com.unity.physics/blob/e68e39991dabb1007b1cbe7f710740876f683ddf/Unity.Physics/Numerics/Random/Random.cs
         #region Unity.Numerics.Random
@@ -258,21 +325,28 @@ namespace PKGE
                 return nextGaussian;
             }
 
-            double u, v, s;
+            Unity.Mathematics.double2 uv;
+            double s;
             do
             {
-                u = random.NextDouble() * 2 - 1;
-                v = random.NextDouble() * 2 - 1;
-                s = u * u + v * v;
+                uv = Unity.Mathematics.math.mad(random.NextDouble2(), 2, -1);
+                s = Unity.Mathematics.math.dot(uv, uv);
             }
-            while (s >= 1 || System.Math.Abs(s) < double.Epsilon);
+            while (s >= 1 || System.Math.Abs(s) <= double.Epsilon);
 
             s = System.Math.Sqrt(-2 * System.Math.Log(s) / s);
-            spareGaussian = v * s;
+            spareGaussian = uv.y * s;
 
-            return mean + stdDev * (u * s);
+            return mean + stdDev * (uv.x * s);
         }
 #endif // INCLUDE_MATHEMATICS
+
+        /// <see cref="NextGaussian(System.Random, ref double, double, double)"/>
+        public static double NextGaussian(ref System.Random random, ref double spareGaussian,
+            double mean = 0, double stdDev = 1)
+        {
+            return random.NextGaussian(ref spareGaussian, mean, stdDev);
+        }
 
         /// <summary>
         /// Returns a Gaussian deviate using the Marsaglia polar method.
@@ -300,7 +374,7 @@ namespace PKGE
                 v = random.NextDouble() * 2 - 1;
                 s = u * u + v * v;
             }
-            while (s >= 1 || System.Math.Abs(s) < double.Epsilon);
+            while (s >= 1 || System.Math.Abs(s) <= double.Epsilon);
 
             s = System.Math.Sqrt(-2 * System.Math.Log(s) / s);
             spareGaussian = v * s;
@@ -316,6 +390,7 @@ namespace PKGE
         public static void PointsInSphere(ref this Unity.Mathematics.Random random,
             ref Unity.Collections.NativeArray<Unity.Mathematics.float3> points, Unity.Mathematics.float3 center, float radius)
         {
+#if ZERO
             var radiusSquared = radius * radius;
             var pointsFound = 0;
 
@@ -327,8 +402,21 @@ namespace PKGE
                     points[pointsFound++] = center + p;
                 }
             }
+#else
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i] = Unity.Mathematics.math.mad(random.NextInsideUnitSphere(), radius, center);
+            }
+#endif // ZERO
         }
 #endif // INCLUDE_MATHEMATICS
+
+        /// <inheritdoc cref="PointsInSphere(System.Random, ref Unity.Collections.NativeArray{UnityEngine.Vector3}, UnityEngine.Vector3, float)"/>
+        public static void PointsInSphere(ref System.Random random,
+            ref Unity.Collections.NativeArray<UnityEngine.Vector3> points, UnityEngine.Vector3 center, float radius)
+        {
+            random.PointsInSphere(ref points, center, radius);
+        }
 
         /// <summary>
         /// A function that generates random points inside of a sphere.
@@ -340,6 +428,7 @@ namespace PKGE
         public static void PointsInSphere(this System.Random random,
             ref Unity.Collections.NativeArray<UnityEngine.Vector3> points, UnityEngine.Vector3 center, float radius)
         {
+#if ZERO
             var radiusSquared = radius * radius;
             var pointsFound = 0;
 
@@ -351,6 +440,12 @@ namespace PKGE
                     points[pointsFound++] = center + p;
                 }
             }
+#else
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i] = random.NextInsideUnitSphere() * radius + center;
+            }
+#endif // ZERO
         }
         #endregion // Unity.Entities
     }
