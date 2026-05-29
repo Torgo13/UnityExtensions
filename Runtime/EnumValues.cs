@@ -7,12 +7,12 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Utility/EnumUtility.cs
         #region Unity.Kinematica
-        public static string GetDescription<T>(this T val) where T : Enum
+        public static string GetDescription<T>(this T val) where T : struct, Enum
         {
             return GetDescription<T>(EnumValues<T>.Name(val));
         }
 
-        public static string GetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name) where T : Enum
+        public static string GetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name) where T : struct, Enum
         {
             if (TryGetDescription<T>(name, out var description))
                 return description;
@@ -20,7 +20,7 @@ namespace PKGE
             return string.Empty;
         }
 
-        public static bool TryGetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name, out string description) where T : Enum
+        public static bool TryGetDescription<T>([System.Diagnostics.CodeAnalysis.NotNull] string name, out string description) where T : struct, Enum
         {
             System.Reflection.MemberInfo[] memberInfo = typeof(T).GetMember(name);
             foreach (var member in memberInfo)
@@ -41,7 +41,7 @@ namespace PKGE
         }
 
         [JetBrains.Annotations.NotNull]
-        public static List<string> GetAllDescriptions<T>(List<string> list = null) where T : Enum
+        public static List<string> GetAllDescriptions<T>(List<string> list = null) where T : struct, Enum
         {
             list ??= new List<string>();
             list.Clear();
@@ -61,7 +61,7 @@ namespace PKGE
         }
 
         [JetBrains.Annotations.NotNull]
-        public static string[] GetDescriptions<T>() where T : Enum
+        public static string[] GetDescriptions<T>() where T : struct, Enum
         {
             var list = UnityEngine.Pool.ListPool<string>.Get();
             var descriptions = GetAllDescriptions<T>(list).ToArray();
@@ -88,7 +88,7 @@ namespace PKGE
             return false;
         }
 
-        public static T TypeFromName<T>(string name) where T : Enum
+        public static T TypeFromName<T>(string name) where T : struct, Enum
         {
             var values = EnumValues<T>.Values;
             foreach (var value in values)
@@ -112,7 +112,7 @@ namespace PKGE
         /// <returns>The display name of the enum.</returns>
         /// <remarks><see cref="UnityEngine.InspectorNameAttribute"/> is stripped from the build
         /// unless manually preserved with <see cref="UnityEngine.Scripting.PreserveAttribute"/> or link.xml.</remarks>
-        public static string GetDisplayName<T>(this T value) where T : Enum
+        public static string GetDisplayName<T>(this T value) where T : struct, Enum
         {
             var memberInfo = typeof(T).GetMember(EnumValues<T>.Name(value));
 
@@ -132,7 +132,7 @@ namespace PKGE
 
         /// <inheritdoc cref="GetDisplayName{T}(T)"/>
         [JetBrains.Annotations.NotNull]
-        public static string[] GetDisplayNames<T>() where T : Enum
+        public static string[] GetDisplayNames<T>() where T : struct, Enum
         {
             var displayNames = new string[EnumValues<T>.Values.Length];
             for (int i = 0; i < displayNames.Length; i++)
@@ -161,7 +161,7 @@ namespace PKGE
     /// </summary>
     /// <typeparam name="T">The enum type whose values should be cached.</typeparam>
     public static class EnumValues<T>
-        where T : Enum
+        where T : struct, Enum
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/EnumValues.cs
         #region Unity.XR.CoreUtils
@@ -293,12 +293,12 @@ namespace PKGE
 
     public static class EnumExtensions
     {
-        public static string ToStringFast<T>(this T e) where T : Enum
+        public static string ToStringFast<T>(this T e) where T : struct, Enum
         {
             return EnumValues<T>.Name(e);
         }
 
-        public static string ToDisplayStringFast<T>(this T e) where T : Enum
+        public static string ToDisplayStringFast<T>(this T e) where T : struct, Enum
         {
             return EnumValues<T>.Description(e);
         }

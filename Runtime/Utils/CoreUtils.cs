@@ -1019,13 +1019,13 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">Type of the enum</typeparam>
         /// <returns>Last value of the enum</returns>
-        public static T GetLastEnumValue<T>() where T : Enum
+        public static T GetLastEnumValue<T>() where T : struct, Enum
             => EnumValues<T>.Values[^1];
             
-        public static T GetSmallestEnumValue<T>() where T : Enum
+        public static T GetSmallestEnumValue<T>() where T : struct, Enum
             => EnumValues<T>.SortedValues[0];
 
-        public static T GetLargestEnumValue<T>() where T : Enum
+        public static T GetLargestEnumValue<T>() where T : struct, Enum
             => EnumValues<T>.SortedValues[^1];
 
 #if UNITY_EDITOR
@@ -1110,7 +1110,7 @@ namespace PKGE
 
             Unity.Jobs.IJobExtensions.Run(new CalculateViewSpaceCornersJob
             {
-                proj = proj,
+                invProj = Matrix4x4.Inverse(in proj),
                 z = z,
                 outCorners = outCornersArray,
             });
@@ -1122,15 +1122,13 @@ namespace PKGE
         [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         public struct CalculateViewSpaceCornersJob : Unity.Jobs.IJob
         {
-            [ReadOnly] public Matrix4x4 proj;
+            [ReadOnly] public Matrix4x4 invProj;
             [ReadOnly] public float z;
             [NativeFixedLength(4)]
             [WriteOnly] public NativeArray<Vector3> outCorners;
             
             public void Execute()
             {
-                Matrix4x4 invProj = Matrix4x4.Inverse(proj);
-
                 Span<Vector4> temp = stackalloc Vector4[4];
 
                 // We transform a point further than near plane and closer than far plane, for precision reasons.

@@ -911,7 +911,9 @@ namespace PKGE
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal struct RemoveBlueJob : Unity.Jobs.IJobFor
         {
-            [NativeFixedLength(6)][NativeMatchesParallelForLength] public NativeArray<Color32> ambientColours;
+            [NativeFixedLength(6), NativeMatchesParallelForLength]
+            public NativeArray<Color32> ambientColours;
+
             [ReadOnly] public Color sunColour;
 
             public void Execute(int index)
@@ -930,8 +932,11 @@ namespace PKGE
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal struct AmbientColoursJob : Unity.Jobs.IJobFor
         {
-            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> temp;
-            [ReadOnly][NativeFixedLength(6)] public NativeArray<uint> ambientColours;
+            [NativeFixedLength(4), NativeMatchesParallelForLength]
+            [WriteOnly] public NativeArray<float> temp;
+
+            [NativeFixedLength(6)]
+            [ReadOnly] public NativeArray<uint> ambientColours;
 
             public void Execute(int index)
             {
@@ -955,10 +960,17 @@ namespace PKGE
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal struct AverageColoursJob : Unity.Jobs.IJobFor
         {
-            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> equator;
-            [WriteOnly][NativeFixedLength(4)][NativeMatchesParallelForLength] public NativeArray<float> skyEquator;
-            [ReadOnly][NativeFixedLength(4)][NativeMatchesParallelForLength][DeallocateOnJobCompletion] public NativeArray<float> temp;
-            [ReadOnly][NativeFixedLength(6)] public NativeArray<uint> ambientColours;
+            [NativeMatchesParallelForLength, NativeFixedLength(4)]
+            [WriteOnly] public NativeArray<float> equator;
+
+            [NativeMatchesParallelForLength, NativeFixedLength(4)]
+            [WriteOnly] public NativeArray<float> skyEquator;
+
+            [NativeMatchesParallelForLength, NativeFixedLength(4)]
+            [ReadOnly, DeallocateOnJobCompletion] public NativeArray<float> temp;
+
+            [NativeFixedLength(6)]
+            [ReadOnly] public NativeArray<uint> ambientColours;
 
             public void Execute(int index)
             {
@@ -985,8 +997,12 @@ namespace PKGE
         [Unity.Burst.BurstCompile(Unity.Burst.FloatPrecision.Low, Unity.Burst.FloatMode.Fast)]
         internal struct SampleCubemapBilinearJob : Unity.Jobs.IJob
         {
-            [WriteOnly][NativeFixedLength(1)] public NativeArray<Color> output;
-            [ReadOnly][NativeFixedLength(6)] public NativeArray<Color32> colours;
+            [NativeFixedLength(1)]
+            [WriteOnly] public NativeArray<Color> output;
+
+            [NativeFixedLength(6)]
+            [ReadOnly] public NativeArray<Color32> colours;
+
             [ReadOnly] public Vector3 forward;
 
             public void Execute()

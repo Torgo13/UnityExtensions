@@ -79,10 +79,7 @@ namespace PKGE.Unsafe
                     array.Length);
             }
 #else
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = value;
-            }
+            array.AsSpan().Fill(value);
 #endif // PKGE_USING_UNSAFE
         }
 
@@ -129,7 +126,6 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
         {
-            Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < array.Length);
             
@@ -139,7 +135,6 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
         {
-            Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < array.Length);
             

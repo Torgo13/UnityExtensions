@@ -16,7 +16,7 @@ using Unity.Profiling;
 
 namespace PKGE
 {
-    class TProfilingSampler<TEnum> : ProfilingSampler where TEnum : Enum
+    class TProfilingSampler<TEnum> : ProfilingSampler where TEnum : struct, Enum
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Debugging/ProfilingScope.cs
         #region UnityEngine.Rendering
@@ -72,7 +72,7 @@ namespace PKGE
         /// <returns>The profiling sampler for the given enumeration value.</returns>
 #if DEBUG
         public static ProfilingSampler Get<TEnum>(TEnum marker)
-            where TEnum : Enum
+            where TEnum : struct, Enum
         {
 #if USE_UNSAFE
             UnityEngine.Assertions.Assert.AreEqual(sizeof(int), SizeOfCache<TEnum>.Size);
@@ -84,7 +84,7 @@ namespace PKGE
         }
 #else
         public static ProfilingSampler Get<TEnum>(TEnum marker)
-            where TEnum : Enum
+            where TEnum : struct, Enum
         {
             return null;
         }

@@ -9,7 +9,9 @@ namespace PKGE.Editor
     /// <summary>
     /// Ensures that all scriptable settings have backing data that can be inspected and edited at compile-time.
     /// </summary>
+#if SCRIPTABLE_SETTINGS
     [InitializeOnLoad]
+#endif // SCRIPTABLE_SETTINGS
     internal static class ScriptableSettingsInitializer
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ScriptableSettingsInitializer.cs

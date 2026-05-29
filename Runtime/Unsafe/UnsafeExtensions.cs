@@ -7,10 +7,13 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Reflection;
 using Unity.Collections;
+#if PKGE_USING_UNSAFE
 using Unity.Collections.LowLevel.Unsafe;
+#endif // PKGE_USING_UNSAFE
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 using PKGE.Packages;
+using UnsafeUtility = Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
 
 namespace PKGE.Unsafe
 {

@@ -70,10 +70,16 @@ namespace PKGE.Unsafe
 
     //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/develop/com.unity.netcode.gameobjects/Runtime/Serialization/ByteUtility.cs
     #region Unity.Netcode
-    public static class ByteExtensions
+    public static class BoolExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte ToByte(this bool b) => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<bool, byte>(ref b);
+    }
+
+    public static class ByteExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool ToBool(this byte b) => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<byte, bool>(ref b);
     }
     #endregion // Unity.Netcode
 }

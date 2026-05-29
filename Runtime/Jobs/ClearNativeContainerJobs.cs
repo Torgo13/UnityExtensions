@@ -3,21 +3,21 @@ using Unity.Jobs;
 
 namespace PKGE.Packages
 {
-    //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Gameplay/Traffic/UtilityJobs.cs
-    #region Unity.Megacity.Traffic
-#if INCLUDE_COLLECTIONS
+    //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
+    #region Unity.Entities
     [Unity.Burst.BurstCompile]
-    public struct ClearHashJob<T> : IJob where T : unmanaged
+    public struct SetArrayJob<T> : IJobFor where T : struct
     {
-        [WriteOnly] public NativeParallelMultiHashMap<int, T> Hash;
+        [ReadOnly] public T src;
+        [NativeMatchesParallelForLength]
+        [WriteOnly] public NativeArray<T> dst;
 
-        public void Execute()
+        public void Execute(int index)
         {
-            Hash.Clear();
+            dst[index] = src;
         }
     }
-#endif // INCLUDE_COLLECTIONS
-    #endregion // Unity.Megacity.Traffic
+    #endregion // Unity.Entities
 
     [Unity.Burst.BurstCompile]
     public struct CopyArrayJob<T> : IJobFor where T : struct
@@ -31,22 +31,6 @@ namespace PKGE.Packages
         {
             dst[index] = src[index];
         }
-    }
-
-    [Unity.Burst.BurstCompile]
-    public struct SetArrayJob<T> : IJobFor where T : struct
-    {
-        //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
-        #region Unity.Entities
-        [ReadOnly] public T src;
-        [NativeMatchesParallelForLength]
-        [WriteOnly] public NativeArray<T> dst;
-
-        public void Execute(int index)
-        {
-            dst[index] = src;
-        }
-        #endregion // Unity.Entities
     }
 
     [Unity.Burst.BurstCompile]
@@ -80,6 +64,31 @@ namespace PKGE.Packages
     }
 
 #if INCLUDE_COLLECTIONS
+    //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Gameplay/Traffic/UtilityJobs.cs
+    #region Unity.Megacity.Traffic
+    [Unity.Burst.BurstCompile]
+    public struct ClearHashJob<T> : IJob where T : unmanaged
+    {
+        [WriteOnly] public NativeParallelMultiHashMap<int, T> Hash;
+
+        public void Execute()
+        {
+            Hash.Clear();
+        }
+    }
+    #endregion // Unity.Megacity.Traffic
+
+    [Unity.Burst.BurstCompile]
+    public struct ClearQueueJob<T> : IJob where T : unmanaged
+    {
+        [WriteOnly] public NativeQueue<T> input;
+
+        public void Execute()
+        {
+            input.Clear();
+        }
+    }
+
     /// <remarks>
     /// Does not clear <see cref="input"/> after the job is complete.
     /// </remarks>
@@ -105,17 +114,6 @@ namespace PKGE.Packages
         public void Execute(int index)
         {
             output.Enqueue(input[index]);
-        }
-    }
-
-    [Unity.Burst.BurstCompile]
-    public struct ClearQueueJob<T> : IJob where T : unmanaged
-    {
-        [WriteOnly] public NativeQueue<T> input;
-
-        public void Execute()
-        {
-            input.Clear();
         }
     }
 #endif // INCLUDE_COLLECTIONS

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Assertions;
+using AtomicSafetyHandle = Unity.Collections.LowLevel.Unsafe.AtomicSafetyHandle;
+using NativeArrayUnsafeUtility = Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility;
+using UnsafeUtility = Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
 
 namespace PKGE.Unsafe
 {

@@ -181,7 +181,7 @@ namespace PKGE.Unsafe
 
             [NativeFixedLength(kMaxJustLandedPerFrame)]
             [ReadOnly] [NativeDisableParallelForRestriction]
-            public NativeArray<int> _deadList;
+            public NativeArray<int>.ReadOnly _deadList;
 
             [NativeFixedLength(kTotalCounters)]
             [NativeDisableParallelForRestriction]
@@ -259,7 +259,7 @@ namespace PKGE.Unsafe
             public NativeArray<float4> _sysmemBuffer;
 
             [NativeDisableParallelForRestriction] [ReadOnly]
-            public NativeArray<BRG_Background.BackgroundItem> _backgroundItems;
+            public NativeArray<BRG_Background.BackgroundItem>.ReadOnly _backgroundItems;
 
             [NativeFixedLength(kMaxJustLandedPerFrame)]
             [NativeDisableParallelForRestriction] [WriteOnly] public NativeArray<int> _justLandedList;
@@ -409,7 +409,7 @@ namespace PKGE.Unsafe
             PhysicsUpdateJob myJob = new PhysicsUpdateJob()
             {
                 _gfxItems = m_gfxItems,
-                _backgroundItems = backgroundItems,
+                _backgroundItems = backgroundItems.AsReadOnly(),
                 _sliceId = sliceId,
                 _w = w,
                 _h = h,
@@ -433,7 +433,7 @@ namespace PKGE.Unsafe
             BackgroundDiggerJob diggerJob = new BackgroundDiggerJob
             {
                 _backgroundItems = backgroundItems,
-                _deadList = m_justLandedList,
+                _deadList = m_justLandedList.AsReadOnly(),
                 _inOutCounters = m_inOutCounters
             };
             jobFence = diggerJob.Schedule(jobFence);

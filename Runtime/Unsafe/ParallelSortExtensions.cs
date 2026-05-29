@@ -2,9 +2,9 @@
 using System.Threading;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine.Assertions;
+using NativeDisableContainerSafetyRestriction = Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestrictionAttribute;
 
 namespace PKGE.Unsafe
 {

@@ -71,7 +71,7 @@ namespace PKGE.Unsafe
         public static NativeArray<T> GetSubNativeArray<T>(this UnsafeList<T> unsafeList, int start, int length)
             where T : unmanaged =>
             unsafeList.AsNativeArray().GetSubArray(start, length);
-#endregion // CullingExtensions
+        #endregion // CullingExtensions
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,8 +134,6 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
         {
-            Assert.IsTrue(nativeArray.IsCreated);
-            
             return new UnsafeList<T>((T*)nativeArray.GetUnsafePtr(), nativeArray.Length);
         }
     }
