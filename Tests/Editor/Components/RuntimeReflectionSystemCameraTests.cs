@@ -95,7 +95,7 @@ namespace PKGE.Tests
         public IEnumerator Render_SetsSkyboxMipLevel_AndSkips_WhenTimeScaleZero()
         {
             Time.timeScale = 0f;
-            ReflectionSystem.Render(timeScale: Time.deltaTime, timeSlice: true);
+            ReflectionSystem.Render(timeScale: Time.timeScale, timeSlice: true);
             // If TimeScale = 0, should skip without errors
             yield return null;
             Time.timeScale = 1f;

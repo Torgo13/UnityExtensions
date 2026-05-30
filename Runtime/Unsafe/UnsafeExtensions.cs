@@ -14,6 +14,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Pool;
 using PKGE.Packages;
 using UnsafeUtility = Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
+using UnsafeAtomicCounter32 = Unity.Collections.LowLevel.Unsafe.UnsafeAtomicCounter32;
 
 namespace PKGE.Unsafe
 {
@@ -22,7 +23,7 @@ namespace PKGE.Unsafe
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         #region Blittable
-        public static bool IsBlittableValueType([System.Diagnostics.CodeAnalysis.NotNull] Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
+        public static bool IsBlittableValueType(this Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
 
 #if USING_REFLECTION
         public static string GetReasonForTypeNonBlittableImpl(Type t, string name)
@@ -88,6 +89,21 @@ namespace PKGE.Unsafe
 #endif // USING_REFLECTION
         #endregion // Blittable
         #endregion // Unity.Collections.LowLevel.Unsafe
+
+        public static unsafe UnsafeAtomicCounter32 AtomicCounter32(this NativeArray<int> value)
+        {
+            return new UnsafeAtomicCounter32(Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafePtr(value));
+        }
+
+        public static unsafe UnsafeAtomicCounter32 AtomicCounter32(this NativeList<int> value)
+        {
+            return new UnsafeAtomicCounter32(Unity.Collections.LowLevel.Unsafe.NativeListUnsafeUtility.GetUnsafePtr(value));
+        }
+
+        public static unsafe UnsafeAtomicCounter32 AtomicCounter32(this NativeReference<int> value)
+        {
+            return new UnsafeAtomicCounter32(Unity.Collections.LowLevel.Unsafe.NativeReferenceUnsafeUtility.GetUnsafePtr(value));
+        }
 
 #if PKGE_USING_UNSAFE
         #region Unmanaged

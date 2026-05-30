@@ -88,29 +88,24 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(ref this UnsafeList<T> unsafeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array) where T : unmanaged
         {
-            Assert.IsNotNull(array);
-
             unsafeList.AddRange(array.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(ref this UnsafeList<T> unsafeList, [System.Diagnostics.CodeAnalysis.NotNull] List<T> list) where T : unmanaged
         {
-            Assert.IsNotNull(list);
-
             unsafeList.AddRange(list.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe void AddRange<T>(ref this UnsafeList<T> unsafeList, Span<T> span) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, Span<T> span) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsFalse(span == null);
             
-            if (span.Length == 0)
+            if (span == null || span.Length == 0)
                 return;
 
-            unsafeList.AddRange(UnsafeUtility.AddressOf(ref span[0]), span.Length);
+            unsafeList.AddRange(span.AsUnsafeList());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,6 +130,12 @@ namespace PKGE.Unsafe
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
         {
             return new UnsafeList<T>((T*)nativeArray.GetUnsafePtr(), nativeArray.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe UnsafeList<T> AsUnsafeList<T>(this Span<T> span) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref span[0]), span.Length);
         }
     }
 }

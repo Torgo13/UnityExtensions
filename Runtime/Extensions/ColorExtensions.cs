@@ -1,10 +1,202 @@
-using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 
+namespace TCGE
+{
+    public static class ColorExtensions
+    {
+        #region System.Drawing
+        /// <summary>
+        /// Convert <see cref="UnityEngine.Color32"/> to <see cref="System.Drawing.Color"/>.
+        /// </summary>
+        public static System.Drawing.Color FromColor32(this Color32 colour) => System.Drawing.Color.FromArgb(colour.a, colour.r, colour.g, colour.b);
+
+        /// <summary>
+        /// Convert <see cref="System.Drawing.Color"/> to <see cref="UnityEngine.Color32"/>.
+        /// </summary>
+        public static Color32 ToColor32(this System.Drawing.Color colour) => new Color32(colour.R, colour.G, colour.B, colour.A);
+
+        /// <summary>
+        /// Convert <see cref="System.Drawing.KnownColor"/> to <see cref="UnityEngine.Color32"/>.
+        /// </summary>
+        public static Color32 FromKnownColor(System.Drawing.KnownColor knownColor) => System.Drawing.Color.FromKnownColor(knownColor).ToColor32();
+
+        /// <summary>
+        /// Convert <see cref="UnityEngine.Color32"/> to <see cref="System.Drawing.KnownColor"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.color.toknowncolor?view=netstandard-2.1"/>
+        /// A predefined color is also called a known color and is represented by an element of the KnownColor enumeration.
+        /// When the ToKnownColor method is applied to a Color structure that is created by using the FromArgb method,
+        /// ToKnownColor returns 0, even if the ARGB value matches the ARGB value of a predefined color.
+        /// ToKnownColor also returns 0 when it is applied to a Color structure that is created by using the FromName method with a string name that is not valid.
+        /// </remarks>
+        /// <returns>The equivalent <see cref="System.Drawing.KnownColor"/>, or 0 if no exact match was found.
+        /// -1 is not used so that <see cref="System.Drawing.KnownColor"/> can be safely cast to a <see langword="byte"/>.</returns>
+        public static System.Drawing.KnownColor ToKnownColor(this Color32 colour)
+        {
+#if ZERO
+            // Range of named colours
+            var knownColours = new NativeArray<System.Drawing.Color>(1 + System.Drawing.KnownColor.YellowGreen - System.Drawing.KnownColor.AliceBlue,
+                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+
+            for (int i = 0; i < knownColours.Length; i++)
+            {
+                knownColours[i] = System.Drawing.Color.FromKnownColor(i + System.Drawing.KnownColor.AliceBlue);
+            }
+
+            int index = System.MemoryExtensions.IndexOf(knownColours.AsReadOnlySpan(), colour.FromColor32());
+            knownColours.Dispose();
+            return index != -1 ? index + System.Drawing.KnownColor.AliceBlue : 0;
+#else
+            System.Drawing.KnownColor found = 0;
+            System.Drawing.Color color = colour.FromColor32();
+            const int namedColours = 1 + (int)System.Drawing.KnownColor.YellowGreen;
+
+            for (int i = (int)System.Drawing.KnownColor.AliceBlue; i < namedColours; i++)
+            {
+                System.Drawing.KnownColor knownColor = (System.Drawing.KnownColor)i;
+                if (color == System.Drawing.Color.FromKnownColor(knownColor))
+                {
+                    found = knownColor;
+                    break;
+                }
+            }
+
+            return found;
+#endif // ZERO
+        }
+        #endregion // System.Drawing
+
+        /// <summary>
+        /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte Color32ToByte(Color32 c)
+        {
+            int r = c.r & 0b1110_0000;
+            int g = c.g & 0b1110_0000;
+            int b = c.b & 0b1100_0000;
+
+            return (byte)(r | g >> 3 | b >> 6);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color32.RGB values.
+        /// </summary>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color32 containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Color32 ByteToColor32(byte b)
+        {
+            return new Color32(
+                (byte)(b & 0b1110_0000 | b >> 3 & 0b0001_1100 | b >> 6 & 0b0000_0011),
+                (byte)(b << 3 & 0b1110_0000 | b & 0b1110_0000 | b >> 3 & 0b0000_0011),
+                (byte)(b << 6 & 0b1100_0000 | b << 4 & 0b0011_0000 | b << 2 & 0b0000_1100 | b & 0b0000_0011),
+                byte.MaxValue);
+        }
+
+        /// <summary>
+        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte ColorToByte(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 0b1110_0000);
+            int g = Mathf.RoundToInt(c.g * 0b0001_1100);
+            int b = Mathf.RoundToInt(c.b * 0b0000_0011);
+
+            return (byte)(r & 0b1110_0000 | g & 0b0001_1100 | b & 0b0000_0011);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color.RGB values.
+        /// </summary>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Color ByteToColor(byte b)
+        {
+            return new Color(
+                (b & 0b1110_0000) / (float)0b1110_0000,
+                (b & 0b0001_1100) / (float)0b0001_1100,
+                (b & 0b0000_0011) / (float)0b0000_0011);
+        }
+
+        /// <summary>
+        /// Encodes Color32.RGB values to a ushort, using 5:6:5 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Short containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ushort Color32ToUShort(Color32 c)
+        {
+            int r = c.r & 0b1111_1000;
+            int g = c.g & 0b1111_1100;
+            int b = c.b & 0b1111_1000;
+
+            return (ushort)(r << 8 | g << 3 | b >> 3);
+        }
+
+        /// <summary>
+        /// Decodes a ushort to Color32.RGB values.
+        /// </summary>
+        /// <param name="b">Short with RGB colours encoded in 5:6:5 bits.</param>
+        /// <returns>Color32 containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Color32 UShortToColor32(ushort b)
+        {
+            return new Color32(
+                (byte)(b >> 8 & 0b1111_1000),
+                (byte)(b >> 3 & 0b1111_1100),
+                (byte)(b << 3 & 0b1111_1000),
+                byte.MaxValue);
+        }
+
+        /// <summary>
+        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// </summary>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns>Byte containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ushort ColorToUShort(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 0b1111_1000_0000_0000);
+            int g = Mathf.RoundToInt(c.g * 0b0000_0111_1110_0000);
+            int b = Mathf.RoundToInt(c.b * 0b0000_0000_0001_1111);
+
+            return (ushort)(r & 0b1111_1000_0000_0000 | g & 0b0000_0111_1110_0000 | b & 0b0000_0000_0001_1111);
+        }
+
+        /// <summary>
+        /// Decodes a byte to Color.RGB values.
+        /// </summary>
+        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns>Color containing the decoded values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Color UShortToColor(ushort b)
+        {
+            return new Color(
+                (b & 0b1111_1000_0000_0000) / (float)0b1111_1000_0000_0000,
+                (b & 0b0000_0111_1110_0000) / (float)0b0000_0111_1110_0000,
+                (b & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
+        }
+
+        public static int Color32ToInt(this Color32 color) => new PKGE.Union4 { Color32 = color }.Int;
+        public static Color32 IntToColor32(this int color) => new PKGE.Union4 { Int = color }.Color32;
+
+        public static uint Color32ToUInt(this Color32 color) => new PKGE.Union4 { Color32 = color }.UInt;
+        public static Color32 UIntToColor32(this uint color) => new PKGE.Union4 { UInt = color }.Color32;
+    }
+}
+
 namespace PKGE
 {
-    [StructLayout(LayoutKind.Sequential)]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct Color24
     {
         public byte r;
@@ -409,11 +601,5 @@ namespace PKGE
                 _ => '0',
             };
         }
-
-        public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;
-        public static Color32 IntToColor32(this int color) => new Union4 { Int = color }.Color32;
-
-        public static uint Color32ToUInt(this Color32 color) => new Union4 { Color32 = color }.UInt;
-        public static Color32 UIntToColor32(this uint color) => new Union4 { UInt = color }.Color32;
     }
 }

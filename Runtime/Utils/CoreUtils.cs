@@ -466,12 +466,14 @@ namespace PKGE
                     var flagUshort = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ushort>(ref flag);
                     return (maskUshort & flagUshort) != 0;
                 }
-                default:
+                case 1:
                 {
                     var maskByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref mask);
                     var flagByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref flag);
                     return (maskByte & flagByte) != 0;
                 }
+                default:
+                    return false;
             }
         }
 

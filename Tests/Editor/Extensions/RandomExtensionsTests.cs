@@ -5,8 +5,8 @@ namespace PKGE.Tests
     public class RandomNormalTest
     {
 #if INCLUDE_MATHEMATICS
-        const float k_FirstValue = 0.27865908699308078f;
-        const float k_SecondValue = -0.36536631752896848f;
+        const double k_FirstValue = -0.36536631752896848;
+        const double k_SecondValue = 0.27865908699308078;
 #else
         const float k_FirstValue = -1.19580f;
         const float k_SecondValue = -0.97345f;

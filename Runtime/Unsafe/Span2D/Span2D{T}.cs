@@ -891,6 +891,8 @@ namespace PKGE.Unsafe
                 return ref r0;
             }
 #else
+            UnityEngine.Assertions.Assert.IsTrue(span != null);
+            UnityEngine.Assertions.Assert.IsTrue(span.Length > 0);
             return ref span[0];
 #endif // PKGE_USING_UNSAFE
         }

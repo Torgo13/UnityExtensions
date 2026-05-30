@@ -5,6 +5,12 @@ using System.IO;
 using UnityEditor;
 using UnityObject = UnityEngine.Object;
 
+#if UNITY_6000_3_OR_NEWER
+using EntityId = UnityEngine.EntityId;
+#else
+using EntityId = PKGE.EntityId;
+#endif // UNITY_6000_3_OR_NEWER
+
 namespace PKGE.Editor
 {
     public static class AssetDatabaseUtility
@@ -110,13 +116,9 @@ namespace PKGE.Editor
         /// </summary>
         /// <param name="instanceID">The instanceID of the asset to retrieve the GUID from.</param>
         /// <returns>The string representation of the GUID of the asset.</returns>
-        public static string GetAssetGUID(int instanceID)
+        public static string GetAssetGUID(EntityId instanceID)
         {
-#if UNITY_6000_3_OR_NEWER
-            var path = AssetDatabase.GetAssetPath((UnityEngine.EntityId)instanceID);
-#else
             var path = AssetDatabase.GetAssetPath(instanceID);
-#endif // UNITY_6000_3_OR_NEWER
 
             return AssetDatabase.AssetPathToGUID(path);
         }

@@ -72,11 +72,11 @@ namespace PKGE
         /// <returns>The profiling sampler for the given enumeration value.</returns>
 #if DEBUG
         public static ProfilingSampler Get<TEnum>(TEnum marker)
-            where TEnum : struct, Enum
+            where TEnum : struct, Enum, IConvertible
         {
 #if USE_UNSAFE
             UnityEngine.Assertions.Assert.AreEqual(sizeof(int), SizeOfCache<TEnum>.Size);
-            return TProfilingSampler<TEnum>.Samples[Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum, int>(ref marker)];
+            return TProfilingSampler<TEnum>.Samples[marker.ToInt32(default)];
 #else
             TProfilingSampler<TEnum>.Samples.TryGetValue(marker, out var sampler);
             return sampler;

@@ -397,6 +397,9 @@ namespace PKGE
                 if (customReflectionTexture == null)
                     return;
 
+                if (customReflectionTexture is RenderTexture rt)
+                    rt.GenerateMips();
+
                 if (FindMainCamera()
                     && CameraExtensions.GetCameraCubemap(_mainCameraGameObject, out var cubemapMat))
                 {
@@ -678,7 +681,12 @@ namespace PKGE
         /// <returns><see langword="false"/> if any of the RenderTextures could not be recreated.</returns>
         internal static bool EnsureCreated()
         {
-            bool created = true;
+            bool created = _renderTextures != null;
+            if (!created)
+            {
+                return false;
+            }
+
             foreach (var rt in _renderTextures)
             {
                 created &= CreateRenderTexture(rt);

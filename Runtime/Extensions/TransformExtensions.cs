@@ -189,68 +189,21 @@ namespace PKGE
             return childT;
         }
 
-        public static int FindAllDescendants([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, List<Transform> descendants)
+        public static int FindAllDescendants(
+            [System.Diagnostics.CodeAnalysis.NotNull] this Transform t,
+            [System.Diagnostics.CodeAnalysis.NotNull] List<Transform> descendants,
+            bool includeInactive = false)
         {
-            int childCount = 0;
-            var childEnumerator = ListPool<Transform>.Get();
-            
-            int numChildren = t.childCount;
-            for (int i = 0; i < numChildren; ++i)
-            {
-                Transform child = t.GetChild(i);
-                descendants.Add(child);
-
-                childEnumerator.Clear();
-                childCount += 1 + FindAllDescendants(child, childEnumerator);
-                descendants.AddRange(childEnumerator);
-            }
-
-            ListPool<Transform>.Release(childEnumerator);
-            return childCount;
-        }
-
-        public static int FindAllActiveDescendants([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, List<Transform> activeDescendants)
-        {
-            int activeChildCount = 0;
-            var childEnumerator = ListPool<Transform>.Get();
-            
-            int numChildren = t.childCount;
-            for (int i = 0; i < numChildren; ++i)
-            {
-                Transform child = t.GetChild(i);
-                if (child.gameObject.activeInHierarchy)
-                {
-                    activeDescendants.Add(child);
-                    ++activeChildCount;
-                }
-
-                childEnumerator.Clear();
-                activeChildCount += FindAllActiveDescendants(child, childEnumerator);
-                foreach (var descendant in childEnumerator)
-                {
-                    if (descendant.gameObject.activeInHierarchy)
-                    {
-                        activeDescendants.Add(descendant);
-                    }
-                }
-            }
-
-            ListPool<Transform>.Release(childEnumerator);
-            return activeChildCount;
+            t.GetComponentsInChildren(includeInactive, descendants);
+            descendants.RemoveAtSwapBack(0);
+            return descendants.Count;
         }
         #endregion // Unity.FilmInternalUtilities
         
         public static int GetChildCount([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, bool onlyActive = false)
         {
             var children = ListPool<Transform>.Get();
-
-            int childrenCount;
-
-            if (onlyActive)
-                childrenCount = t.FindAllActiveDescendants(children);
-            else
-                childrenCount = t.FindAllDescendants(children);
-
+            int childrenCount = t.FindAllDescendants(children, includeInactive: !onlyActive);
             ListPool<Transform>.Release(children);
 
             return childrenCount;
@@ -285,7 +238,10 @@ namespace PKGE
         /// <param name="type">The type of component to search for.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
         /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.</param>
-        public static void GetComponentsInChildren([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, System.Type type, List<Component> results,
+        public static void GetComponentsInChildren(
+            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
+            [System.Diagnostics.CodeAnalysis.NotNull] System.Type type,
+            [System.Diagnostics.CodeAnalysis.NotNull] List<Component> results,
             bool includeInactive = false)
         {
             var children = ListPool<Transform>.Get();
@@ -330,7 +286,9 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
         /// <param name="childTransforms">The direct children of a Transform.</param>
-        public static void GetChildTransforms([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, [System.Diagnostics.CodeAnalysis.NotNull] List<Transform> childTransforms)
+        public static void GetChildTransforms(
+            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
+            [System.Diagnostics.CodeAnalysis.NotNull] List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
             childTransforms.EnsureCapacity(childCount);
@@ -340,7 +298,9 @@ namespace PKGE
             }
         }
 
-        public static void GetChildInstanceIDs([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, [System.Diagnostics.CodeAnalysis.NotNull] List<int> childInstanceIDs)
+        public static void GetChildInstanceIDs(
+            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
+            [System.Diagnostics.CodeAnalysis.NotNull] List<EntityId> childInstanceIDs)
         {
             var children = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(children);
@@ -350,7 +310,7 @@ namespace PKGE
             
             for (var i = 1; i < childCount; i++)
             {
-                childInstanceIDs.Add(children[i].GetInstanceID());
+                childInstanceIDs.Add(children[i].GetEntityId());
             }
             
             ListPool<Transform>.Release(children);
@@ -358,24 +318,24 @@ namespace PKGE
 
         public static void SetActiveRecursively([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, bool active)
         {
-            var childInstanceIDs = ListPool<int>.Get();
+            var childInstanceIDs = ListPool<EntityId>.Get();
             transform.GetChildInstanceIDs(childInstanceIDs);
 
             if (childInstanceIDs.Count > 0)
             {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(System.Runtime.InteropServices.MemoryMarshal.Cast<int, EntityId>(childInstanceIDs.AsSpan()), active);
-#else
                 GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+#else
+                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
 #endif // UNITY_6000_3_OR_NEWER
             }
 
-            ListPool<int>.Release(childInstanceIDs);
+            ListPool<EntityId>.Release(childInstanceIDs);
         }
 
         public static void SetGrandchildrenActiveRecursively([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, bool active)
         {
-            var childInstanceIDs = ListPool<int>.Get();
+            var childInstanceIDs = ListPool<EntityId>.Get();
             for (int i = 0, childCount = transform.childCount; i < childCount; i++)
             {
                 transform.GetChild(i).GetChildInstanceIDs(childInstanceIDs);
@@ -384,13 +344,13 @@ namespace PKGE
             if (childInstanceIDs.Count > 0)
             {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<int, EntityId>(), active);
-#else
                 GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+#else
+                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
 #endif // UNITY_6000_3_OR_NEWER
             }
 
-            ListPool<int>.Release(childInstanceIDs);
+            ListPool<EntityId>.Release(childInstanceIDs);
         }
 
         /// <summary>

@@ -5,6 +5,11 @@ namespace PKGE
 {
     public static class UnityObjectExtensions
     {
+#if UNITY_6000_3_OR_NEWER
+#else
+        public static EntityId GetEntityId(this UnityObject objectIn) => objectIn.GetInstanceID();
+#endif // UNITY_6000_3_OR_NEWER
+
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/UnityObjectUtils.cs
         #region Unity.XR.CoreUtils
         /// <summary>

@@ -5,6 +5,26 @@ using Unity.Collections;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+#if UNITY_6000_3_OR_NEWER
+#else
+namespace PKGE
+{
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct EntityId : IEquatable<EntityId>
+    {
+        private int _instanceID;
+
+        public static implicit operator int(EntityId entityId) => entityId._instanceID;
+        public static implicit operator EntityId(int entityId) => new EntityId { _instanceID = entityId, };
+
+        #region IEquatable
+        public readonly bool Equals(EntityId other) => _instanceID == other._instanceID;
+        #endregion // IEquatable
+    }
+}
+#endif // UNITY_6000_3_OR_NEWER
+
 namespace PKGE.Packages
 {
 #if INCLUDE_COLLECTIONS
@@ -12,23 +32,15 @@ namespace PKGE.Packages
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Serialization/UnityObjectRef.cs
         #region Unity.Entities
-        public NativeHashMap<int, int> InstanceIDMap;
-#if UNITY_6000_3_OR_NEWER
+        public NativeHashMap<EntityId, EntityId> InstanceIDMap;
         public NativeList<EntityId> InstanceIDs;
-#else
-        public NativeList<int> InstanceIDs;
-#endif // UNITY_6000_3_OR_NEWER
 
         public readonly bool IsCreated => InstanceIDs.IsCreated && InstanceIDMap.IsCreated;
 
         public UnityObjectRefMap(AllocatorManager.AllocatorHandle allocator)
         {
-            InstanceIDMap = new NativeHashMap<int, int>(0, allocator);
-#if UNITY_6000_3_OR_NEWER
+            InstanceIDMap = new NativeHashMap<EntityId, EntityId>(0, allocator);
             InstanceIDs = new NativeList<EntityId>(0, allocator);
-#else
-            InstanceIDs = new NativeList<int>(0, allocator);
-#endif // UNITY_6000_3_OR_NEWER
         }
 
         public void Dispose()
@@ -44,9 +56,9 @@ namespace PKGE.Packages
             return Get(objects).ToArray();
         }
 
-        public int Add(int instanceId)
+        public EntityId Add(EntityId instanceId)
         {
-            var index = -1;
+            EntityId index = -1;
             if (instanceId != 0 && IsCreated)
             {
                 if (!InstanceIDMap.TryGetValue(instanceId, out index))
@@ -67,7 +79,7 @@ namespace PKGE.Packages
 #if UNITY_6000_3_OR_NEWER
                 Resources.EntityIdsToObjectList(InstanceIDs.AsArray(), objects);
 #else
-                Resources.InstanceIDToObjectList(InstanceIDs.AsArray(), objects);
+                Resources.InstanceIDToObjectList(InstanceIDs.AsArray().Reinterpret<int>(sizeof(int)), objects);
 #endif // UNITY_6000_3_OR_NEWER
 
             return objects;
@@ -82,11 +94,7 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Serialization/UnityObjectRef.cs
         #region Unity.Entities
         [SerializeField]
-#if UNITY_6000_3_OR_NEWER
         internal EntityId instanceId;
-#else
-        internal int instanceId;
-#endif // UNITY_6000_3_OR_NEWER
 
         public readonly bool Equals(UntypedUnityObjectRef other)
         {
@@ -137,12 +145,12 @@ namespace PKGE.Packages
         /// <returns>A UnityObjectRef referencing instance</returns>
         public static implicit operator UnityObjectRef<T>(T instance)
         {
-            int instanceId;
+            EntityId instanceId;
 
 #if DEBUG // Log a warning each time a UnityObjectRef<T> is created from a background thread
             try
             {
-                instanceId = instance == null ? 0 : instance.GetInstanceID();
+                instanceId = instance == null ? 0 : instance.GetEntityId();
             }
             catch (InvalidOperationException ex)
             {
@@ -156,7 +164,7 @@ namespace PKGE.Packages
             return FromInstanceID(instanceId);
         }
 
-        internal static UnityObjectRef<T> FromInstanceID(int instanceId)
+        internal static UnityObjectRef<T> FromInstanceID(EntityId instanceId)
         {
             var result = new UnityObjectRef<T>{Id = new UntypedUnityObjectRef{ instanceId = instanceId }};
             return result;

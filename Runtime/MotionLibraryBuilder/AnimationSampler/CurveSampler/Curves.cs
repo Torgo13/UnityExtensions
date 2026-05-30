@@ -20,6 +20,7 @@ namespace PKGE.Packages
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Editor/MotionLibraryBuilder/AnimationSampler/CurveSampler/Editor/Curves.cs
         #region Unity.Curves
         public readonly NativeArray<Keyframe> Keys;
+
         [MarshalAs(UnmanagedType.U1)]
         private readonly bool owner;
 
@@ -39,6 +40,13 @@ namespace PKGE.Packages
         {
             Keys = new NativeArray<Keyframe>(keyframes, alloc);
             owner = true;
+        }
+
+        public Curve(ReadOnlySpan<Keyframe> keyframes, Allocator alloc)
+        {
+            Keys = new NativeArray<Keyframe>(keyframes.Length, alloc);
+            owner = true;
+            keyframes.CopyTo(Keys);
         }
 
         public Curve(NativeArray<Keyframe> keyframes, Allocator alloc)
@@ -65,6 +73,7 @@ namespace PKGE.Packages
             owner = true;
         }
 
+        #region IDisposable
         public void Dispose()
         {
             if (owner)
@@ -72,6 +81,7 @@ namespace PKGE.Packages
                 Keys.Dispose();
             }
         }
+        #endregion // IDisposable
 
         public float Evaluate(float time)
         {

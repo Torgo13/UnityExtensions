@@ -242,7 +242,12 @@ namespace PKGE
 
                     // Request and wait for the GPU data to transfer into staging memory.
 #if UNITY_6000_3_OR_NEWER
-                    _ = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref stagingReadback, source, mipIndex: 0, format);
+                    var request = await AsyncGPUReadback.RequestIntoNativeArrayAsync(ref stagingReadback, source, mipIndex: 0, format);
+                    if (request.hasError)
+                    {
+                        stagingReadback.Dispose();
+                        return null;
+                    }
 #else
                     var request = AsyncGPUReadback.RequestIntoNativeArray(ref stagingReadback, source, mipIndex: 0, format);
                     while (!request.done)

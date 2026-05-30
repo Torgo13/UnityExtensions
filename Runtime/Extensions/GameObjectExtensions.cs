@@ -216,7 +216,7 @@ namespace PKGE
             }
         }
 
-        public static void GetChildInstanceIDs([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, List<int> childInstanceIDs)
+        public static void GetChildInstanceIDs([System.Diagnostics.CodeAnalysis.NotNull] this GameObject go, List<EntityId> childInstanceIDs)
         {
             go.transform.GetChildInstanceIDs(childInstanceIDs);
         }
@@ -238,8 +238,10 @@ namespace PKGE
         {
             found = false;
             var transforms = ListPool<Transform>.Get();
-            go.GetComponentsInChildren(transforms);
+            go.GetComponentsInChildren(includeInactive: true, transforms);
             GameObject foundObject = null;
+
+            // Start index at 1 as 0 is the current transform
             for (var i = 1; i < transforms.Count; i++)
             {
                 if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
@@ -273,11 +275,10 @@ namespace PKGE
             const Allocator allocator = Allocator.Temp;
             const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
 
-#if UNITY_6000_3_OR_NEWER
             var id = go.GetEntityId();
+#if UNITY_6000_3_OR_NEWER
             var ids = new NativeArray<EntityId>(2 * count, allocator, options);
 #else
-            var id = go.GetInstanceID();
             var ids = new NativeArray<int>(2 * count, allocator, options);
 #endif // UNITY_6000_3_OR_NEWER
 
@@ -405,14 +406,10 @@ namespace PKGE
 #endif // UNITY_EDITOR
         }
 
-        public static string GetAssetPath(int instanceID)
+        public static string GetAssetPath(EntityId instanceID)
         {
 #if UNITY_EDITOR
-#if UNITY_6000_3_OR_NEWER
-            return UnityEditor.AssetDatabase.GetAssetPath((EntityId)instanceID);
-#else
             return UnityEditor.AssetDatabase.GetAssetPath(instanceID);
-#endif // UNITY_6000_3_OR_NEWER
 #else
             return string.Empty;
 #endif // UNITY_EDITOR
@@ -449,10 +446,18 @@ namespace PKGE
         public static void InstanceIDsToGUIDs(NativeArray<int> instanceIDs, NativeArray<Union16> guidsOut)
         {
 #if UNITY_EDITOR
+            InstanceIDsToGUIDs(instanceIDs.Reinterpret<EntityId>(sizeof(int)), guidsOut);
+#endif // UNITY_EDITOR
+        }
+
+        [System.Diagnostics.Conditional("UNITY_EDITOR")]
+        public static void InstanceIDsToGUIDs(NativeArray<EntityId> instanceIDs, NativeArray<Union16> guidsOut)
+        {
+#if UNITY_EDITOR
 #if UNITY_6000_3_OR_NEWER
-            UnityEditor.AssetDatabase.EntityIdsToGUIDs(instanceIDs.Reinterpret<EntityId>(), guidsOut.Reinterpret<UnityEditor.GUID>());
+            UnityEditor.AssetDatabase.EntityIdsToGUIDs(instanceIDs, guidsOut.Reinterpret<UnityEditor.GUID>(4 * sizeof(uint)));
 #else
-            UnityEditor.AssetDatabase.InstanceIDsToGUIDs(instanceIDs, guidsOut.Reinterpret<UnityEditor.GUID>());
+            UnityEditor.AssetDatabase.InstanceIDsToGUIDs(instanceIDs.Reinterpret<int>(sizeof(int)), guidsOut.Reinterpret<UnityEditor.GUID>(4 * sizeof(uint)));
 #endif // UNITY_6000_3_OR_NEWER
 #endif // UNITY_EDITOR
         }
