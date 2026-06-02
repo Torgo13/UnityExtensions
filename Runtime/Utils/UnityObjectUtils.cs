@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -17,7 +18,7 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The specific type of UnityObject in the dictionary.</typeparam>
         /// <param name="list">A list of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedObjects<T>([System.Diagnostics.CodeAnalysis.NotNull] this List<T> list) where T : UnityObject
+        public static void RemoveDestroyedObjects<T>(this List<T> list) where T : UnityObject
         {
             var nonNull = ListPool<T>.Get();
             nonNull.EnsureCapacity(list.Count);
@@ -39,25 +40,26 @@ namespace PKGE
         /// <typeparam name="TKey">The specific type of UnityObject serving as keys in the dictionary.</typeparam>
         /// <typeparam name="TValue">The value type of the dictionary.</typeparam>
         /// <param name="dictionary">A dictionary of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedKeys<TKey, TValue>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<TKey, TValue> dictionary)
+        public static void RemoveDestroyedKeys<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
             where TKey : UnityObject
         {
-            var removeList = ListPool<TKey>.Get();
-            removeList.EnsureCapacity(dictionary.Count);
+            var keepList = ListPool<(TKey, TValue)>.Get();
+            keepList.EnsureCapacity(dictionary.Count);
             
             foreach (var kvp in dictionary)
             {
-                var key = kvp.Key;
-                if (key == null)
-                    removeList.Add(key);
+                TKey? key = kvp.Key;
+                if (key != null)
+                    keepList.Add((key, kvp.Value));
             }
 
-            foreach (var key in removeList)
+            dictionary.Clear();
+            foreach (var key in keepList)
             {
-                _ = dictionary.Remove(key);
+                dictionary.Add(key.Item1, key.Item2);
             }
 
-            ListPool<TKey>.Release(removeList);
+            ListPool<(TKey, TValue)>.Release(keepList);
         }
         #endregion // Unity.XR.CoreUtils
     }

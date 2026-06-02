@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 
@@ -7,8 +8,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.UI.Editor/Utility/Internal/ArrayUtility.cs
         #region Unity.Entities.UI
-        [JetBrains.Annotations.NotNull]
-        public static T[] RemoveAt<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] source, int index)
+        public static T[] RemoveAt<T>(T[] source, int index)
         {
             if (index < 0)
                 throw new ArgumentException(nameof(ArrayUtility) + ": index must be in [0, Length -1] range.");
@@ -23,8 +23,7 @@ namespace PKGE
             return dest;
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static T[] InsertAt<T>([System.Diagnostics.CodeAnalysis.NotNull] T[] source, int index, T value)
+        public static T[] InsertAt<T>(T[] source, int index, T value)
         {
             if (index < 0 || index > source.Length)
                 throw new ArgumentException(nameof(ArrayUtility) + ": index must be in [0, Length] range.");

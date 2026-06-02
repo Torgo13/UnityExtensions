@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace PKGE
         /// a directional light that is active and enabled.</param>
         /// <returns><see langword="true"/> if a directional light was found with the requested active state.</returns>
         public static bool GetDirectionalLight(
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Light sun,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Light? sun,
             FindObjectsInactive includeInactive = FindObjectsInactive.Exclude)
         {
             sun = RenderSettings.sun;

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 
 namespace PKGE
@@ -15,7 +16,7 @@ namespace PKGE
         /// <param name="source">Source delegate.</param>
         /// <param name="type">Type of the delegate.</param>
         /// <returns>Cast delegate.</returns>
-        public static Delegate Cast([System.Diagnostics.CodeAnalysis.MaybeNull] Delegate source, Type type)
+        public static Delegate? Cast(Delegate? source, Type type)
         {
             if (source == null)
                 return null;

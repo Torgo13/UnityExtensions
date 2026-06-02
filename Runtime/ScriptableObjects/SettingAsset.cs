@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.IO;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/SettingAsset.cs
         #region Unity.LiveCapture
-        static T _instance;
+        static T? _instance;
 
         /// <summary>
         /// The asset instance.
@@ -41,7 +42,6 @@ namespace PKGE
             }
         }
 
-        [JetBrains.Annotations.NotNull]
         static T CreateOrLoad()
         {
 #if UNITY_EDITOR
@@ -98,9 +98,6 @@ namespace PKGE
             }
 
             UnityEngine.Object obj = _instance;
-            if (obj == null)
-                return;
-
             UnityEditorInternal.InternalEditorUtility.SaveToSerializedFileAndForget(new[] { obj },
                 filePath, true);
         }
@@ -134,7 +131,7 @@ namespace PKGE
         #region Unity.LiveCapture
         internal string FilePath { get; }
 
-        public SettingFilePathAttribute([System.Diagnostics.CodeAnalysis.NotNull] string relativePath, Location location)
+        public SettingFilePathAttribute(string? relativePath, Location location)
         {
             if (string.IsNullOrEmpty(relativePath))
                 throw new ArgumentException("Path is empty.", nameof(relativePath));
@@ -142,7 +139,6 @@ namespace PKGE
             FilePath = CombineFilePath(relativePath, location);
         }
 
-        [JetBrains.Annotations.NotNull]
         static string CombineFilePath(string relativePath, Location location)
         {
             if (relativePath[0] == '/')

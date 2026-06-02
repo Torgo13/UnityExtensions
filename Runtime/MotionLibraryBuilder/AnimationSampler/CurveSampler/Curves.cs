@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -24,7 +25,7 @@ namespace PKGE
         [MarshalAs(UnmanagedType.U1)]
         private readonly bool owner;
 
-        public Curve([System.Diagnostics.CodeAnalysis.NotNull] AnimationCurve c, Allocator alloc)
+        public Curve(AnimationCurve c, Allocator alloc)
         {
             Keys = new NativeArray<Keyframe>(c.keys, alloc);
             owner = true;

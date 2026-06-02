@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -31,7 +32,6 @@ namespace PKGE
             }
         }
 
-        [JetBrains.Annotations.NotNull]
         static T CreateAndLoad()
         {
             Assert.IsNull(BaseInstance);

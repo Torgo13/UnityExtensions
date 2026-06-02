@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -16,7 +17,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The transform from which to get the pose.</param>
         /// <returns>The local pose.</returns>
-        public static Pose GetLocalPose([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform)
+        public static Pose GetLocalPose(this Transform transform)
         {
 #if HAS_GET_POSITION_AND_ROTATION
             transform.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
@@ -31,7 +32,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The transform from which to get the pose.</param>
         /// <returns>The world pose.</returns>
-        public static Pose GetWorldPose([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform)
+        public static Pose GetWorldPose(this Transform transform)
         {
 #if HAS_GET_POSITION_AND_ROTATION
             transform.GetPositionAndRotation(out var position, out var rotation);
@@ -46,7 +47,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The transform on which to set the pose.</param>
         /// <param name="pose">Pose specifying the new position and rotation.</param>
-        public static void SetLocalPose([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, Pose pose)
+        public static void SetLocalPose(this Transform transform, Pose pose)
         {
 #if HAS_SET_LOCAL_POSITION_AND_ROTATION
             transform.SetLocalPositionAndRotation(pose.position, pose.rotation);
@@ -61,7 +62,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The transform on which to set the pose.</param>
         /// <param name="pose">Pose specifying the new position and rotation.</param>
-        public static void SetWorldPose([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, Pose pose)
+        public static void SetWorldPose(this Transform transform, Pose pose)
         {
             transform.SetPositionAndRotation(pose.position, pose.rotation);
         }
@@ -84,7 +85,7 @@ namespace PKGE
         /// <param name="pose">The <c>Pose</c> to inversely transform.</param>
         /// <returns>A new <c>Pose</c> representing the inversely transformed <paramref name="pose"/>.</returns>
         /// <exception cref="System.ArgumentNullException">transform</exception>
-        public static Pose InverseTransformPose([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, Pose pose)
+        public static Pose InverseTransformPose(this Transform transform, Pose pose)
         {
             if (transform == null)
                 throw new System.ArgumentNullException(nameof(transform));
@@ -103,7 +104,7 @@ namespace PKGE
         /// <param name="ray">The <c>Ray</c> to inversely transform.</param>
         /// <returns>A new <c>Ray</c> representing the inversely transformed <paramref name="ray"/>.</returns>
         /// <exception cref="System.ArgumentNullException">transform</exception>
-        public static Ray InverseTransformRay([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, Ray ray)
+        public static Ray InverseTransformRay(this Transform transform, Ray ray)
         {
             if (transform == null)
                 throw new System.ArgumentNullException(nameof(transform));
@@ -120,7 +121,7 @@ namespace PKGE
         /// <param name="transform">The <c>Transform</c> component.</param>
         /// <param name="ray">The <c>Ray</c> to transform.</param>
         /// <returns>A new <c>Ray</c> representing the transformed <paramref name="ray"/>.</returns>
-        public static Ray TransformRay([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, Ray ray)
+        public static Ray TransformRay(this Transform transform, Ray ray)
         {
             return new Ray(
                 transform.TransformPoint(ray.origin),
@@ -129,7 +130,7 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.cinemachine/blob/85e81c94d0839e65c46a6fe0cd638bd1c6cd48af/Runtime/Core/UnityVectorExtensions.cs
         #region Unity.Cinemachine
-        public static void ConservativeSetPositionAndRotation([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, Vector3 pos, Quaternion rot)
+        public static void ConservativeSetPositionAndRotation(this Transform t, Vector3 pos, Quaternion rot)
         {
             // Avoid precision creep
             t.GetPositionAndRotation(out var position, out var rotation);
@@ -176,8 +177,7 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/TransformExtensions.cs
         #region Unity.FilmInternalUtilities
-        [JetBrains.Annotations.NotNull]
-        public static Transform FindOrCreateChild([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, string childName, bool worldPositionStays = true)
+        public static Transform FindOrCreateChild(this Transform t, string childName, bool worldPositionStays = true)
         {
             Transform childT = t.Find(childName);
             if (null != childT)
@@ -190,8 +190,8 @@ namespace PKGE
         }
 
         public static int FindAllDescendants(
-            [System.Diagnostics.CodeAnalysis.NotNull] this Transform t,
-            [System.Diagnostics.CodeAnalysis.NotNull] List<Transform> descendants,
+            this Transform t,
+            List<Transform> descendants,
             bool includeInactive = false)
         {
             t.GetComponentsInChildren(includeInactive, descendants);
@@ -200,7 +200,7 @@ namespace PKGE
         }
         #endregion // Unity.FilmInternalUtilities
         
-        public static int GetChildCount([System.Diagnostics.CodeAnalysis.NotNull] this Transform t, bool onlyActive = false)
+        public static int GetChildCount(this Transform t, bool onlyActive = false)
         {
             var children = ListPool<Transform>.Get();
             int childrenCount = t.FindAllDescendants(children, includeInactive: !onlyActive);
@@ -211,7 +211,7 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/3d486c22f22d65278f910f0835128afdb8f2a36e/com.unity.formats.alembic/Runtime/Scripts/Exporter/Utils.cs
         #region UnityEngine.Formats.Alembic.Util
-        public static Matrix4x4 WorldNoScale([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform)
+        public static Matrix4x4 WorldNoScale(this Transform transform)
         {
             transform.GetPositionAndRotation(out var pos, out var rotation);
             var rot = Matrix4x4.Rotate(rotation);
@@ -223,7 +223,7 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/game-programming-patterns-demo/blob/b2b309abf65c59fd53f09a4a391396c592c99c7d/Assets/UnityTechnologies/Scripts/Utilities/ExtensionMethods.cs
         #region DesignPatterns.Utilities
-        public static void ResetTransformation([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform)
+        public static void ResetTransformation(this Transform transform)
         {
             transform.position = Vector3.zero;
             transform.localRotation = Quaternion.identity;
@@ -239,9 +239,9 @@ namespace PKGE
         /// <param name="results">A list of all found components matching the specified type.</param>
         /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.</param>
         public static void GetComponentsInChildren(
-            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
-            [System.Diagnostics.CodeAnalysis.NotNull] System.Type type,
-            [System.Diagnostics.CodeAnalysis.NotNull] List<Component> results,
+            this Transform transform,
+            System.Type type,
+            List<Component> results,
             bool includeInactive = false)
         {
             var children = ListPool<Transform>.Get();
@@ -287,8 +287,8 @@ namespace PKGE
         /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
         /// <param name="childTransforms">The direct children of a Transform.</param>
         public static void GetChildTransforms(
-            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
-            [System.Diagnostics.CodeAnalysis.NotNull] List<Transform> childTransforms)
+            this Transform transform,
+            List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
             childTransforms.EnsureCapacity(childCount);
@@ -299,8 +299,8 @@ namespace PKGE
         }
 
         public static void GetChildInstanceIDs(
-            [System.Diagnostics.CodeAnalysis.NotNull] this Transform transform,
-            [System.Diagnostics.CodeAnalysis.NotNull] List<EntityId> childInstanceIDs)
+            this Transform transform,
+            List<EntityId> childInstanceIDs)
         {
             var children = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(children);
@@ -316,7 +316,7 @@ namespace PKGE
             ListPool<Transform>.Release(children);
         }
 
-        public static void SetActiveRecursively([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, bool active)
+        public static void SetActiveRecursively(this Transform transform, bool active)
         {
             var childInstanceIDs = ListPool<EntityId>.Get();
             transform.GetChildInstanceIDs(childInstanceIDs);
@@ -333,7 +333,7 @@ namespace PKGE
             ListPool<EntityId>.Release(childInstanceIDs);
         }
 
-        public static void SetGrandchildrenActiveRecursively([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, bool active)
+        public static void SetGrandchildrenActiveRecursively(this Transform transform, bool active)
         {
             var childInstanceIDs = ListPool<EntityId>.Get();
             for (int i = 0, childCount = transform.childCount; i < childCount; i++)
@@ -360,13 +360,13 @@ namespace PKGE
         /// <param name="name">Name of child to be found.</param>
         /// <param name="found">True if a descendant Transform with the specified name was found.</param>
         /// <returns>The returned child Transform or null if no child is found.</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static Transform GetNamedChild([System.Diagnostics.CodeAnalysis.NotNull] this Transform transform, string name, out bool found)
+        public static bool GetNamedChild(this Transform transform, string name,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? foundObject)
         {
-            found = false;
+            foundObject = null;
+            bool found = false;
             var transforms = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(transforms);
-            Transform foundObject = null;
             for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
             {
                 if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
@@ -378,7 +378,7 @@ namespace PKGE
             }
 
             ListPool<Transform>.Release(transforms);
-            return foundObject;
+            return found;
         }
     }
 }

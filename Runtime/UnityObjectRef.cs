@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -49,7 +50,6 @@ namespace PKGE
             InstanceIDs.Dispose();
         }
 
-        [JetBrains.Annotations.NotNull]
         public UnityEngine.Object[] ToObjectArray()
         {
             using var _0 = UnityEngine.Pool.ListPool<UnityEngine.Object>.Get(out var objects);
@@ -143,7 +143,7 @@ namespace PKGE
         /// </summary>
         /// <param name="instance">Instance of the Object to store as a reference.</param>
         /// <returns>A UnityObjectRef referencing instance</returns>
-        public static implicit operator UnityObjectRef<T>(T instance)
+        public static implicit operator UnityObjectRef<T>(T? instance)
         {
             EntityId instanceId;
 
@@ -175,7 +175,7 @@ namespace PKGE
         /// </summary>
         /// <param name="unityObjectRef">Reference used to access the Object.</param>
         /// <returns>The instance of type T referenced by unityObjectRef.</returns>
-        public static implicit operator T(UnityObjectRef<T> unityObjectRef)
+        public static implicit operator T?(UnityObjectRef<T> unityObjectRef)
         {
             if (unityObjectRef.Id.instanceId == default)
                 return null;
@@ -204,8 +204,7 @@ namespace PKGE
         /// <summary>
         /// Object being referenced by this <see cref="UnityObjectRef{T}"/>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.NotNull]
-        public T Value
+        public T? Value
         {
             [ExcludeFromBurstCompatTesting("Returns managed object")]
             readonly get => this;

@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -22,11 +23,11 @@ namespace PKGE
         const int ElementShift = 5;
         const int ElementMask = (1 << ElementShift) - 1;
 
-        private float[] _data;
+        private float[]? _data;
 
         public readonly int elemLength => _data == null ? 0 : _data.Length;
         public readonly int bitCapacity => elemLength * BitsPerElement;
-        public readonly float[] data => _data;
+        public readonly float[]? data => _data;
 
         public void Resize(int bitCount)
         {
@@ -49,6 +50,9 @@ namespace PKGE
 
         public readonly void Clear()
         {
+            if (_data == null)
+                return;
+
             for (int i = 0; i < _data.Length; i++)
                 _data[i] = 0;
         }
@@ -66,12 +70,18 @@ namespace PKGE
             {
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
 
+                if (_data == null || elemIndex >= _data.Length)
+                    return false;
+
                 var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
                 return (uintElem & (1u << bitOffset)) != 0u;
             }
             set
             {
                 GetElementIndexAndBitOffset(index, out var elemIndex, out var bitOffset);
+                
+                if (_data == null || elemIndex >= _data.Length)
+                    return;
 
                 var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
                 if (value)

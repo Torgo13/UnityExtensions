@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine.LowLevel;
 
@@ -24,7 +25,7 @@ namespace PKGE
         /// <typeparam name="TSystem">The system to add the subsystem to.</typeparam>
         /// <typeparam name="TSubSystem">The system to add the <paramref name="update"/> callback to.</typeparam>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="update"/> is null.</exception>
-        public static bool RegisterUpdate<TSystem, TSubSystem>([System.Diagnostics.CodeAnalysis.NotNull] PlayerLoopSystem.UpdateFunction update, int index = -1)
+        public static bool RegisterUpdate<TSystem, TSubSystem>(PlayerLoopSystem.UpdateFunction update, int index = -1)
         {
             if (update == null)
                 throw new ArgumentNullException(nameof(update));
@@ -70,7 +71,7 @@ namespace PKGE
         /// <param name="update">The update callback to deregister.</param>
         /// <typeparam name="TSubSystem">The system to remove the <paramref name="update"/> callback from.</typeparam>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="update"/> is null.</exception>
-        public static void DeregisterUpdate<TSubSystem>([System.Diagnostics.CodeAnalysis.NotNull] PlayerLoopSystem.UpdateFunction update)
+        public static void DeregisterUpdate<TSubSystem>(PlayerLoopSystem.UpdateFunction update)
         {
             if (update == null)
                 throw new ArgumentNullException(nameof(update));
@@ -111,7 +112,7 @@ namespace PKGE
         /// <param name="subsystemType">The type of subsystem to find.</param>
         /// <param name="result">The returned subsystem.</param>
         /// <returns>True if a subsystem with a matching type was found; otherwise, false.</returns>
-        public static bool TryFindSubSystem(this PlayerLoopSystem system, Type subsystemType, out PlayerLoopSystem result)
+        public static bool TryFindSubSystem(this PlayerLoopSystem system, Type? subsystemType, out PlayerLoopSystem result)
         {
             if (system.type == subsystemType)
             {
@@ -182,15 +183,22 @@ namespace PKGE
 
             var newSubSystems = new PlayerLoopSystem[oldLength + 1];
 
-            for (var i = 0; i < oldLength; i++)
+            if (subSystems == null)
             {
-                if (i < index)
+                newSubSystems[0] = default;
+            }
+            else
+            {
+                for (var i = 0; i < oldLength; i++)
                 {
-                    newSubSystems[i] = subSystems[i];
-                }
-                else if (i >= index)
-                {
-                    newSubSystems[i + 1] = subSystems[i];
+                    if (i < index)
+                    {
+                        newSubSystems[i] = subSystems[i];
+                    }
+                    else if (i >= index)
+                    {
+                        newSubSystems[i + 1] = subSystems[i];
+                    }
                 }
             }
 
@@ -220,7 +228,7 @@ namespace PKGE
         /// <param name="system">The system to use for the search.</param>
         /// <param name="subsystemType">The type of the subsystem to search for.</param>
         /// <returns>The index of the subsystem if found; otherwise, -1.</returns>
-        public static int IndexOf(this ref PlayerLoopSystem system, [System.Diagnostics.CodeAnalysis.MaybeNull] Type subsystemType)
+        public static int IndexOf(this ref PlayerLoopSystem system, Type? subsystemType)
         {
             if (subsystemType != null && system.subSystemList != null)
             {

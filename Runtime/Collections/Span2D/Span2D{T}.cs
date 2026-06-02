@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
+#nullable enable
 #if NETSTANDARD2_1
 #define NETSTANDARD2_1_OR_GREATER
 #endif // NETSTANDARD2_1
@@ -156,7 +156,7 @@ namespace PKGE
         /// Thrown when either <paramref name="height"/> or <paramref name="width"/> are invalid.
         /// </exception>
         /// <remarks>The total area must match the length of <paramref name="array"/>.</remarks>
-        public Span2D([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int height, int width)
+        public Span2D(T[] array, int height, int width)
             : this(array, 0, height, width, 0)
         {
         }
@@ -178,7 +178,7 @@ namespace PKGE
         /// <exception cref="ArgumentException">
         /// Thrown when the requested area is outside of bounds for <paramref name="array"/>.
         /// </exception>
-        public Span2D([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int offset, int height, int width, int pitch)
+        public Span2D(T[] array, int offset, int height, int width, int pitch)
         {
             if (array.IsCovariant())
             {
@@ -213,7 +213,7 @@ namespace PKGE
                 ThrowHelper.ThrowArgumentException();
             }
 
-            this.span = MemoryMarshal.CreateSpan(ref array.DangerousGetReferenceAt(offset), height);
+            this.span = MemoryMarshal.CreateSpan(ref array[offset], height);
             this.width = width;
             this.Stride = width + pitch;
         }
@@ -873,7 +873,7 @@ namespace PKGE
             ref T r0 = ref MemoryMarshal.GetReference(this.span);
             nint index = ((nint)(uint)i * (nint)(uint)this.Stride) + (nint)(uint)j;
 
-            return ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, index);
+            return ref Unsafe.Add(ref r0, index);
         }
 
         /// <summary>
@@ -1021,7 +1021,6 @@ namespace PKGE
 #endif // ZERO
 
         /// <inheritdoc/>
-        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             return $"CommunityToolkit.HighPerformance.Span2D<{typeof(T)}>[{Height}, {this.width}]";

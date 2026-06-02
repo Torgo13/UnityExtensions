@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
@@ -26,7 +27,7 @@ namespace PKGE
         /// <param name="objectIn">The Unity Object reference to convert.</param>
         /// <typeparam name="T"> The type to convert to.</typeparam>
         /// <returns>A component of type `T`, if found on the object. Otherwise returns `null`.</returns>
-        public static T ConvertUnityObjectToType<T>(this UnityObject objectIn) where T : class
+        public static T? ConvertUnityObjectToType<T>(this UnityObject? objectIn) where T : class
         {
             var interfaceOut = objectIn as T;
             if (interfaceOut == null && objectIn != null)

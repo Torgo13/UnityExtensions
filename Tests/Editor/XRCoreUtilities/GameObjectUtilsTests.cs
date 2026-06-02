@@ -107,8 +107,8 @@ namespace PKGE.Editor.Tests
         [Test]
         public void ExhaustiveComponentSearch_ComponentInChildren_ReturnsComponent()
         {
-            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject);
-            Assert.IsNotNull(component);
+            bool found = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject, out var component);
+            Assert.IsTrue(found);
             Assert.IsInstanceOf<TestComponent>(component);
         }
 
@@ -119,8 +119,8 @@ namespace PKGE.Editor.Tests
         public void ExhaustiveComponentSearch_NoComponent_ReturnsNull()
         {
             Object.DestroyImmediate(childGameObject.GetComponent<TestComponent>());
-            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject);
-            Assert.IsNull(component);
+            bool found = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(testGameObject, out var component);
+            Assert.IsFalse(found);
         }
 
 #if UNITY_EDITOR
@@ -134,8 +134,8 @@ namespace PKGE.Editor.Tests
             disabledGameObject.AddComponent<TestComponent>();
             disabledGameObject.SetActive(false);
 
-            var component = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(null);
-            Assert.IsNotNull(component);
+            bool found = GameObjectUtils.ExhaustiveComponentSearch<TestComponent>(null, out var component);
+            Assert.IsTrue(found);
             Assert.IsInstanceOf<TestComponent>(component);
 
             Object.DestroyImmediate(disabledGameObject);
@@ -148,8 +148,8 @@ namespace PKGE.Editor.Tests
         [Test]
         public void ExhaustiveTaggedComponentSearch_ComponentInChildrenWithTag_ReturnsComponent()
         {
-            var component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, testTag);
-            Assert.IsNotNull(component);
+            bool found = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, testTag, out var component);
+            Assert.IsTrue(found);
             Assert.IsInstanceOf<TestComponent>(component);
         }
 
@@ -162,7 +162,7 @@ namespace PKGE.Editor.Tests
             const string nonExistentTag = "NonExistentTag";
             TestComponent component = null;
             UnityEngine.TestTools.LogAssert.Expect(LogType.Error, $"Tag: {nonExistentTag} is not defined.");
-            Assert.Throws<UnityException>(() => component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, nonExistentTag));
+            Assert.Throws<UnityException>(() => _ = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(testGameObject, nonExistentTag, out component));
             Assert.IsNull(component);
         }
 
@@ -178,8 +178,8 @@ namespace PKGE.Editor.Tests
             disabledGameObject.SetActive(false);
             disabledGameObject.tag = testTag;
 
-            var component = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(null, testTag);
-            Assert.IsNotNull(component);
+            bool found = GameObjectUtils.ExhaustiveTaggedComponentSearch<TestComponent>(null, testTag, out var component);
+            Assert.IsTrue(found);
             Assert.IsInstanceOf<TestComponent>(component);
 
             Object.DestroyImmediate(disabledGameObject);

@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.Pool;
@@ -8,9 +9,8 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Runtime/Core/Utilities/WildcardFormatter.cs
         #region Unity.LiveCapture
-        protected readonly Dictionary<string, string> Replacements = new Dictionary<string, string>(System.StringComparer.Ordinal);
+        protected readonly Dictionary<string, string?> Replacements = new Dictionary<string, string?>(System.StringComparer.Ordinal);
 
-        [JetBrains.Annotations.NotNull]
         protected string Format(string str)
         {
             using var _0 = StringBuilderPool.Get(out var stringBuilder);

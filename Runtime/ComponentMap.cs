@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -24,7 +25,7 @@ namespace PKGE
         readonly Dictionary<TKey, TValue> _keyToValueMap = new Dictionary<TKey, TValue>();
         readonly Dictionary<TValue, TKey> _valueToKeyMap = new Dictionary<TValue, TKey>();
 
-        void Add([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue value)
+        void Add(TKey key, TValue value)
         {
             _keyToValueMap.Add(key, value);
             _valueToKeyMap.Add(value, key);
@@ -38,7 +39,7 @@ namespace PKGE
             }
         }
 
-        void Remove([System.Diagnostics.CodeAnalysis.NotNull] TValue value)
+        void Remove(TValue value)
         {
             if (_valueToKeyMap.TryGetValue(value, out var key))
             {
@@ -47,11 +48,8 @@ namespace PKGE
             }
         }
 
-        void UpdateMap([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
+        void UpdateMap(TKey key, TValue instance)
         {
-            Assert.IsNotNull(key);
-            Assert.IsNotNull(instance);
-
             // In case the key exists already, check if the instance should be updated.
             if (_keyToValueMap.TryGetValue(key, out var existingValue))
             {
@@ -75,9 +73,8 @@ namespace PKGE
             Add(key, instance);
         }
 
-        public void RemoveInstance([System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
+        public void RemoveInstance(TValue instance)
         {
-            Assert.IsNotNull(instance);
             Remove(instance);
         }
 
@@ -86,10 +83,8 @@ namespace PKGE
         /// </summary>
         /// <param name="key">The key component.</param>
         /// <param name="instance">The value component.</param>
-        public void AddUniqueInstance([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.NotNull] TValue instance)
+        public void AddUniqueInstance(TKey key, TValue instance)
         {
-            Assert.IsNotNull(key);
-            Assert.IsNotNull(instance);
             UpdateMap(key, instance);
         }
 
@@ -99,7 +94,7 @@ namespace PKGE
         /// <param name="key">The key component.</param>
         /// <param name="instance">The value component.</param>
         /// <returns>Indicates whether a corresponding value component was found.</returns>
-        public bool TryGetInstance([System.Diagnostics.CodeAnalysis.NotNull] TKey key, [System.Diagnostics.CodeAnalysis.MaybeNull] out TValue instance)
+        public bool TryGetInstance(TKey key, out TValue instance)
         {
             return _keyToValueMap.TryGetValue(key, out instance);
         }

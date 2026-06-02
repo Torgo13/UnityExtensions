@@ -100,9 +100,7 @@ namespace PKGE
         public static void Fill<T>(this List<T> dest, T value, int count)
         {
             if (dest == null)
-            {
                 throw new ArgumentNullException(nameof(dest));
-            }
 
             dest.Capacity = Math.Max(dest.Capacity, dest.Count + count);
             while (count-- > 0)
@@ -153,7 +151,7 @@ namespace PKGE
         /// <typeparam name="T">Collection type</typeparam>
         /// <returns>Serialized collection</returns>
         /// <exception cref="ArgumentNullException">Can produce exception if collection or serialize method is null</exception>
-        public static string SerializedView<T>(this IEnumerable<T> collection, Func<T, string> serializeElement)
+        public static string SerializedView<T>(this IEnumerable<T?> collection, Func<T, string> serializeElement)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");

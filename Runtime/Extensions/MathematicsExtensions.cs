@@ -1,3 +1,4 @@
+#nullable enable
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -769,7 +770,7 @@ namespace PKGE
         }
 #endif // INCLUDE_MATHEMATICS
 
-        public static AffineTransform Convert([System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
+        public static AffineTransform Convert(Transform transform)
         {
             return new AffineTransform(transform.position, transform.rotation);
         }

@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using System.Diagnostics;
 using Unity.Collections;
@@ -54,7 +55,7 @@ namespace PKGE
             ClampedAuto,
         };
 
-        public static float StartTime([System.Diagnostics.CodeAnalysis.NotNull] Keyframe[] frames)
+        public static float StartTime(Keyframe[] frames)
         {
             return frames[0].time;
         }
@@ -64,7 +65,7 @@ namespace PKGE
             return frames[0].time;
         }
 
-        public static float EndTime([System.Diagnostics.CodeAnalysis.NotNull] Keyframe[] frames)
+        public static float EndTime(Keyframe[] frames)
         {
             return frames[frames.Length - 1].time;
         }

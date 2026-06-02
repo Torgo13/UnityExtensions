@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -24,7 +25,7 @@ namespace PKGE
         [SerializeField]
         Gradient gradient;
 
-        Texture2D _texture;
+        Texture2D? _texture;
 
         int _requestedTextureSize = -1;
 
@@ -32,12 +33,10 @@ namespace PKGE
         bool _precise;
 
         /// <summary>All color keys defined in the gradient.</summary>
-        [System.Diagnostics.CodeAnalysis.MaybeNull]
-        public GradientColorKey[] colorKeys => gradient?.colorKeys;
+        public GradientColorKey[]? colorKeys => gradient?.colorKeys;
 
         /// <summary>All alpha keys defined in the gradient.</summary>
-        [System.Diagnostics.CodeAnalysis.MaybeNull]
-        public GradientAlphaKey[] alphaKeys => gradient?.alphaKeys;
+        public GradientAlphaKey[]? alphaKeys => gradient?.alphaKeys;
 
         /// <summary>Controls how the gradient colors are interpolated.</summary>
         [SerializeField, HideInInspector]
@@ -51,7 +50,7 @@ namespace PKGE
         /// Creates a new <see cref="TextureGradient"/> from an existing <c>Gradient</c>.
         /// </summary>
         /// <param name="baseCurve">The source <c>Gradient</c>.</param>
-        public TextureGradient([System.Diagnostics.CodeAnalysis.NotNull] Gradient baseCurve)
+        public TextureGradient(Gradient baseCurve)
             : this(baseCurve.colorKeys, baseCurve.alphaKeys)
         {
             mode = baseCurve.mode;
@@ -73,13 +72,14 @@ namespace PKGE
             GradientMode mode = GradientMode.PerceptualBlend, ColorSpace colorSpace = ColorSpace.Uninitialized,
             int requestedTextureSize = -1, bool precise = false)
         {
+            gradient = new Gradient();
             Rebuild(colorKeys, alphaKeys, mode, colorSpace, requestedTextureSize, precise);
         }
 
         void Rebuild(GradientColorKey[] cKeys, GradientAlphaKey[] aKeys, GradientMode gradientMode,
             ColorSpace cSpace, int requestedTextureSize, bool precise)
         {
-            gradient = new Gradient();
+            gradient ??= new Gradient();
             gradient.mode = gradientMode;
             gradient.colorSpace = cSpace;
             gradient.SetKeys(cKeys, aKeys);
@@ -180,7 +180,6 @@ namespace PKGE
         /// Gets the texture representation of this Gradient.
         /// </summary>
         /// <returns>A texture.</returns>
-        [JetBrains.Annotations.NotNull]
         public Texture2D GetTexture()
         {
             float step = 1.0f / (textureSize - 1);

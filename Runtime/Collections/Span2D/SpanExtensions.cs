@@ -45,7 +45,7 @@ namespace PKGE
         public static ref T DangerousGetReferenceAt<T>(this Span<T> span, int i)
         {
             ref T r0 = ref MemoryMarshal.GetReference(span);
-            ref T ri = ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, (nint)(uint)i);
+            ref T ri = ref Unsafe.Add(ref r0, (nint)(uint)i);
 
             return ref ri;
         }
@@ -62,7 +62,7 @@ namespace PKGE
         public static ref T DangerousGetReferenceAt<T>(this Span<T> span, nint i)
         {
             ref T r0 = ref MemoryMarshal.GetReference(span);
-            ref T ri = ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, i);
+            ref T ri = ref Unsafe.Add(ref r0, i);
 
             return ref ri;
         }

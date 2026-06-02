@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace PKGE
@@ -19,7 +20,7 @@ namespace PKGE
         /// and then <see href="https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnEnable.html">OnEnable</see>.
         /// </remarks>
         /// <param name="behaviour">The behaviour</param>
-        public static void StartRunInEditMode([System.Diagnostics.CodeAnalysis.NotNull] this MonoBehaviour behaviour)
+        public static void StartRunInEditMode(this MonoBehaviour behaviour)
         {
             behaviour.runInEditMode = true;
         }
@@ -36,7 +37,7 @@ namespace PKGE
         /// <see cref="MonoBehaviour.runInEditMode"/> to <see langword="false"/>.
         /// </remarks>
         /// <param name="behaviour">The behaviour</param>
-        public static void StopRunInEditMode([System.Diagnostics.CodeAnalysis.NotNull] this MonoBehaviour behaviour)
+        public static void StopRunInEditMode(this MonoBehaviour behaviour)
         {
             var wasEnabled = behaviour.enabled;
             if (wasEnabled)

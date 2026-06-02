@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace PKGE.Attributes
         /// Initialize a new EnumDisplayAttribute.
         /// </summary>
         /// <param name="enumValues">The enum values which should be displayed.</param>
-        public EnumDisplayAttribute([System.Diagnostics.CodeAnalysis.NotNull] params object[] enumValues)
+        public EnumDisplayAttribute(params object[] enumValues)
         {
             Names = new string[enumValues.Length];
             Values = new int[enumValues.Length];

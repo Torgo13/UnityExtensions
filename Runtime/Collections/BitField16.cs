@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Diagnostics;
 using Unity.Collections;
@@ -228,7 +229,6 @@ namespace PKGE
             BitField = bitfield;
         }
 
-        [System.Diagnostics.CodeAnalysis.NotNull]
         public bool[] Bits
         {
             get

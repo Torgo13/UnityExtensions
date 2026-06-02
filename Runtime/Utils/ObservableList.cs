@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,16 +52,16 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ObservableList.cs
         #region UnityEngine.Rendering
         readonly List<T> _list;
-        private readonly Comparison<T> _comparison;
+        private readonly Comparison<T>? _comparison;
 
         /// <summary>
         /// Added item event.
         /// </summary>
-        public event ListChangedEventHandler<T> ItemAdded;
+        public event ListChangedEventHandler<T>? ItemAdded;
         /// <summary>
         /// Removed item event.
         /// </summary>
-        public event ListChangedEventHandler<T> ItemRemoved;
+        public event ListChangedEventHandler<T>? ItemRemoved;
 
         /// <summary>
         /// Accessor.
@@ -105,7 +106,7 @@ namespace PKGE
         /// </summary>
         /// <param name="capacity">Allocation size.</param>
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
-        public ObservableList(int capacity, [System.Diagnostics.CodeAnalysis.MaybeNull] Comparison<T> comparison = null)
+        public ObservableList(int capacity, Comparison<T>? comparison = null)
         {
             _list = new List<T>(capacity);
             _comparison = comparison;
@@ -116,14 +117,14 @@ namespace PKGE
         /// </summary>
         /// <param name="collection">Input list.</param>
         /// <param name="comparison">The comparision if you want the list to be sorted</param>
-        public ObservableList([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<T> collection, [System.Diagnostics.CodeAnalysis.MaybeNull] Comparison<T> comparison = null)
+        public ObservableList(IEnumerable<T> collection, Comparison<T>? comparison = null)
         {
             _list = new List<T>(collection);
             _comparison = comparison;
             Sort(); // Make sure the given list is sorted
         }
 
-        void OnEvent([System.Diagnostics.CodeAnalysis.MaybeNull] ListChangedEventHandler<T> e, int index, T item)
+        void OnEvent(ListChangedEventHandler<T>? e, int index, T item)
         {
             if (e != null)
                 e(this, new ListChangedEventArgs<T>(index, item));

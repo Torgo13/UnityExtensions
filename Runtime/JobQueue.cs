@@ -1,7 +1,8 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
+using Thread = System.Threading.Thread;
 
 namespace PKGE
 {
@@ -55,7 +56,7 @@ namespace PKGE
             }
         }
 
-        private Action DequeueMainThreadJob()
+        private Action? DequeueMainThreadJob()
         {
             lock (_mainThreadJobs)
             {
@@ -65,7 +66,7 @@ namespace PKGE
                 return _mainThreadJobs.Dequeue();
             }
         }
-        private Action DequeueJob()
+        private Action? DequeueJob()
         {
             lock (_jobs)
             {
@@ -83,7 +84,7 @@ namespace PKGE
             {
                 while (true)
                 {
-                    Action mainThreadJob = DequeueMainThreadJob();
+                    Action? mainThreadJob = DequeueMainThreadJob();
                     if (mainThreadJob == null)
                         break;
 
@@ -124,7 +125,7 @@ namespace PKGE
             bool isFinished = false;
             while (isFinished == false)
             {
-                Action mainThreadJob = DequeueMainThreadJob();
+                Action? mainThreadJob = DequeueMainThreadJob();
                 while (mainThreadJob != null)
                 {
                     mainThreadJob.Invoke();
@@ -174,10 +175,10 @@ namespace PKGE
                 _workers[i].Stop();
             }
 
-            _workers = null;
+            _workers = Array.Empty<Worker>();
         }
 
-        private Worker[] _workers;
+        private Worker[] _workers = Array.Empty<Worker>();
         
         private readonly Queue<Action> _mainThreadJobs = new Queue<Action>();
         private readonly Queue<Action> _jobs = new Queue<Action>();
@@ -226,7 +227,7 @@ namespace PKGE
                     try
                     {
                         _working = true;
-                        Action job = _queue.DequeueJob();
+                        Action? job = _queue.DequeueJob();
                         if (job == null)
                         {
                             _working = false;

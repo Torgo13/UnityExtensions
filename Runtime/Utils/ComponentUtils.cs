@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -18,8 +19,7 @@ namespace PKGE
         /// </summary>
         /// <param name="gameObject">The GameObject from which to get the component.</param>
         /// <returns>The component, if one exists.</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static T GetComponent([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject)
+        public static T? GetComponent(GameObject gameObject)
         {
             var foundComponent = default(T);
             List<T> retrievalList = ListPool<T>.Get();
@@ -36,8 +36,7 @@ namespace PKGE
         /// </summary>
         /// <param name="gameObject">The GameObject from which to get the component.</param>
         /// <returns>The component, if one exists.</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static T GetComponentInChildren([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject)
+        public static T? GetComponentInChildren(GameObject gameObject)
         {
             var foundComponent = default(T);
             List<T> retrievalList = ListPool<T>.Get();
@@ -56,7 +55,7 @@ namespace PKGE
         /// <param name="gameObject">The GameObject from which to get the component.</param>
         /// <param name="foundComponent">Gets a single component of type T using the non-allocating GetComponents API.</param>
         /// <returns><see langword="true"/> if one exists.</returns>
-        public static bool TryGetComponent([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject, out T foundComponent)
+        public static bool TryGetComponent(GameObject gameObject, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? foundComponent)
         {
             foundComponent = null;
             using var _0 = ListPool<T>.Get(out var retrievalList);
@@ -76,7 +75,7 @@ namespace PKGE
         /// <param name="gameObject">The GameObject from which to get the component.</param>
         /// <param name="foundComponent">Gets a single component of type T using the non-allocating GetComponentsInChildren API.</param>
         /// <returns><see langword="true"/> if one exists.</returns>
-        public static bool TryGetComponentInChildren([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject, out T foundComponent)
+        public static bool TryGetComponentInChildren(GameObject gameObject, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? foundComponent)
         {
             foundComponent = null;
             var retrievalList = ListPool<T>.Get();
@@ -108,7 +107,7 @@ namespace PKGE
         /// <param name="add">Whether to add a new component of the given type, if one does not already exist.</param>
         /// <typeparam name="T">The type of component to get or add.</typeparam>
         /// <returns>The new or retrieved component.</returns>
-        public static T GetOrAddIf<T>([System.Diagnostics.CodeAnalysis.NotNull] GameObject gameObject, bool add = true) where T : Component
+        public static T GetOrAddIf<T>(GameObject gameObject, bool add = true) where T : Component
         {
             bool found = gameObject.TryGetComponent<T>(out var component);
             if (add && !found)

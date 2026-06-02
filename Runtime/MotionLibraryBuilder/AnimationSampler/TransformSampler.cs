@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 using Unity.Collections;
@@ -70,7 +71,7 @@ namespace PKGE
             }
         }
 
-        public Curve? MapEditorCurve([System.Diagnostics.CodeAnalysis.NotNull] string curveName, string posCurvePrefix, string rotCurvePrefix, AnimationCurve curve, out int curveIndex)
+        public Curve? MapEditorCurve(string curveName, string posCurvePrefix, string rotCurvePrefix, AnimationCurve curve, out int curveIndex)
         {
             curveIndex = -1;
 

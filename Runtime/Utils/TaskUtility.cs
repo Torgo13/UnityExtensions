@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,9 +24,8 @@ namespace PKGE
         /// <typeparam name="TInput">The type of each item.</typeparam>
         /// <typeparam name="TOutput">The type of the result.</typeparam>
         /// <returns>An enumerable of the execution results.</returns>
-        [JetBrains.Annotations.NotNull]
         public static IEnumerable<TOutput> RunTasks<TInput, TOutput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
         {
@@ -54,9 +54,8 @@ namespace PKGE
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
-        [JetBrains.Annotations.ItemNotNull]
         public static async System.Threading.Tasks.ValueTask<IEnumerable<TOutput>> RunTasksAsync<TInput, TOutput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
         {
@@ -67,7 +66,7 @@ namespace PKGE
 
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
         public static async System.Threading.Tasks.ValueTask RunTasksAsync<TInput, TOutput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             ConcurrentBag<TOutput> cb,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
@@ -96,7 +95,7 @@ namespace PKGE
         
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
         public static async System.Threading.Tasks.ValueTask RunTasksAsync<TInput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             Action<TInput> action,
             CancellationToken ct = default)
         {
@@ -126,7 +125,7 @@ namespace PKGE
 #if UNITY_6000_0_OR_NEWER
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
         public static async UnityEngine.Awaitable RunAsync<TInput, TOutput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             ConcurrentBag<TOutput> cb,
             Action<TInput, ConcurrentBag<TOutput>> action,
             CancellationToken ct = default)
@@ -169,7 +168,7 @@ namespace PKGE
 
         /// <inheritdoc cref="RunTasks{TInput, TOutput}(List{TInput}, Action{TInput, ConcurrentBag{TOutput}}, CancellationToken)"/>
         public static async UnityEngine.Awaitable RunAsync<TInput>(
-            [System.Diagnostics.CodeAnalysis.NotNull] List<TInput> items,
+            List<TInput> items,
             Action<TInput> action,
             CancellationToken ct = default)
         {

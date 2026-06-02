@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace PKGE
@@ -79,7 +80,7 @@ namespace PKGE
         }
         
         public static Color[] ColorPalette = System.Array.Empty<Color>();
-        private static Texture2D _colorPaletteRaw;
+        private static Texture2D? _colorPaletteRaw;
         private static Texture2D ColorPaletteRaw { get { if (_colorPaletteRaw == null) { _colorPaletteRaw = Resources.Load<Texture2D>("textures/colorSwatch"); } return _colorPaletteRaw; } }
 
         public static Color GetPaletteColor(int index)
@@ -104,7 +105,7 @@ namespace PKGE
             if (ColorPalette.Length != 0)
                 return;
 
-            if (ColorPaletteRaw == null)
+            if (_colorPaletteRaw == null)
             {
                 const int colourDepth = 4;
                 const int colourDepthSq = colourDepth * colourDepth;

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace PKGE
         /// <typeparam name="TKey">Dictionary's Key type.</typeparam>
         /// <typeparam name="TValue">Dictionary's Value type.</typeparam>
         /// <returns>The first element in the dictionary.</returns>
-        public static KeyValuePair<TKey, TValue> First<TKey, TValue>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<TKey, TValue> dictionary)
+        public static KeyValuePair<TKey, TValue> First<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
         {
             var kvp = default(KeyValuePair<TKey, TValue>);
             var enumerator = dictionary.GetEnumerator();
@@ -38,8 +39,8 @@ namespace PKGE
         
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Modules/UIElements/Core/Collections/DictionaryExtensions.cs
         #region UnityEngine.UIElements.Collections
-        public static TValue Get<TKey, TValue>([System.Diagnostics.CodeAnalysis.NotNull] this IDictionary<TKey, TValue> dict, [System.Diagnostics.CodeAnalysis.NotNull] TKey key,
-            TValue fallbackValue = default(TValue))
+        public static TValue? Get<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key,
+            TValue? fallbackValue = default(TValue))
         {
             return dict.TryGetValue(key, out var result) ? result : fallbackValue;
         }
@@ -48,7 +49,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Modules/PackageManagerUI/Editor/Services/Common/DictionaryExtensions.cs
         #region UnityEditor.PackageManager.UI.Internal
         /// <exception cref="FieldAccessException"></exception>
-        public static T Get<T>(this IDictionary<string, object> dict, [System.Diagnostics.CodeAnalysis.MaybeNull] string key, T fallbackValue = default)
+        public static T? Get<T>(this IDictionary<string, object> dict, string? key, T? fallbackValue = default)
         {
             if (key == null)
                 return fallbackValue;
@@ -64,24 +65,22 @@ namespace PKGE
             }
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static T Get<T>([System.Diagnostics.CodeAnalysis.NotNull] this IDictionary<long, T> dict, long key)
+        public static T? Get<T>(this IDictionary<long, T> dict, long key)
         {
             return dict.TryGetValue(key, out var result) ? result : default;
         }
 
-        public static T Get<T>(this IDictionary<string, T> dict, [System.Diagnostics.CodeAnalysis.MaybeNull] string key, T fallbackValue = default)
+        public static T? Get<T>(this IDictionary<string, T> dict, string? key, T? fallbackValue = default)
         {
             return key != null && dict.TryGetValue(key, out var result) ? result : fallbackValue;
         }
 
-        public static IDictionary<string, object> GetDictionary(this IDictionary<string, object> dict, string key)
+        public static IDictionary<string, object>? GetDictionary(this IDictionary<string, object> dict, string key)
         {
             return Get<IDictionary<string, object>>(dict, key);
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static IEnumerable<T> GetList<T>(this IDictionary<string, object> dict, string key)
+        public static IEnumerable<T>? GetList<T>(this IDictionary<string, object> dict, string key)
         {
 #if USING_LINQ
             return Get<IList>(dict, key)?.OfType<T>();
@@ -90,7 +89,7 @@ namespace PKGE
 #endif // USING_LINQ
         }
 
-        public static string GetString(this IDictionary<string, object> dict, string key)
+        public static string? GetString(this IDictionary<string, object> dict, string key)
         {
             return Get<string>(dict, key);
         }
@@ -104,7 +103,7 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/DictionaryExtensions.cs
         #region Unity.FilmInternalUtilities
-        public static void Loop<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> collection, System.Action<K, V> eachAction)
+        public static void Loop<K, V>(this Dictionary<K, V> collection, System.Action<K, V> eachAction)
         {
             using var enumerator = collection.GetEnumerator();
             while (enumerator.MoveNext())
@@ -115,8 +114,7 @@ namespace PKGE
         }
         #endregion // Unity.FilmInternalUtilities
 
-        [JetBrains.Annotations.NotNull]
-        public static Dictionary<K, V> RemoveKeys<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, ReadOnlySpan<K> remove) where K : IEquatable<K>
+        public static Dictionary<K, V> RemoveKeys<K, V>(this Dictionary<K, V> dictionary, ReadOnlySpan<K> remove) where K : IEquatable<K>
         {
             using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
 
@@ -136,8 +134,7 @@ namespace PKGE
             return dictionary;
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static Dictionary<K, V> RemoveValues<K, V>([System.Diagnostics.CodeAnalysis.NotNull] this Dictionary<K, V> dictionary, ReadOnlySpan<V> remove) where V : IEquatable<V>
+        public static Dictionary<K, V> RemoveValues<K, V>(this Dictionary<K, V> dictionary, ReadOnlySpan<V> remove) where V : IEquatable<V>
         {
             using var _0 = UnityEngine.Pool.DictionaryPool<K, V>.Get(out var temp);
 

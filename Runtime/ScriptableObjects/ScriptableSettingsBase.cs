@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.IO;
 using System.Reflection;
@@ -50,7 +51,7 @@ namespace PKGE
         /// <param name="settingsType">The type that refers to a singleton class,
         /// which implements an 'Instance' property.</param>
         /// <returns>The actual singleton instance of the specified class.</returns>
-        public static ScriptableSettingsBase GetInstanceByType([System.Diagnostics.CodeAnalysis.NotNull] Type settingsType)
+        public static ScriptableSettingsBase GetInstanceByType(Type settingsType)
         {
             var instanceProperty = settingsType.GetProperty("Instance",
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.FlattenHierarchy);
@@ -88,7 +89,7 @@ namespace PKGE
         {
         }
 
-        internal static bool ValidatePath(string path, [System.Diagnostics.CodeAnalysis.MaybeNull] out string cleanedPath)
+        internal static bool ValidatePath(string? path, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? cleanedPath)
         {
             cleanedPath = path;
 
@@ -169,7 +170,7 @@ namespace PKGE
         /// <summary>
         /// Singleton instance field.
         /// </summary>
-        protected static T BaseInstance;
+        protected static T? BaseInstance;
 
         /// <summary>
         /// Initialize a new ScriptableSettingsBase.
@@ -204,7 +205,7 @@ namespace PKGE
             }
 
             var generatePath = true;
-            string savePath = null;
+            string? savePath = null;
             if (HasCustomPath)
             {
                 var pathAttribute = typeof(T).GetAttribute<ScriptableSettingsPathAttribute>(true);
@@ -271,7 +272,6 @@ namespace PKGE
         /// Get the filename for this ScriptableSettings.
         /// </summary>
         /// <returns>The filename.</returns>
-        [JetBrains.Annotations.NotNull]
         protected static string GetFilePath()
         {
             var type = typeof(T);
@@ -279,7 +279,7 @@ namespace PKGE
         }
 
 #if UNITY_EDITOR
-        static void CreateInstanceAsset([System.Diagnostics.CodeAnalysis.NotNull] string savePath)
+        static void CreateInstanceAsset(string savePath)
         {
             var folderPath = Path.GetDirectoryName(savePath);
             if (folderPath == null)

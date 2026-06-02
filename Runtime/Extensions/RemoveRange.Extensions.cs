@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,7 +23,7 @@ namespace PKGE
         /// <returns>True if it succeeded, false otherwise</returns>
         [JetBrains.Annotations.CollectionAccess(JetBrains.Annotations.CollectionAccessType.ModifyExistingContent)]
         [JetBrains.Annotations.MustUseReturnValue]
-        public static bool TryRemoveElementsInRange<TValue>([DisallowNull] this IList<TValue> list, int index, int count, [NotNullWhen(false)] [System.Diagnostics.CodeAnalysis.MaybeNull] out Exception error)
+        public static bool TryRemoveElementsInRange<TValue>(this IList<TValue> list, int index, int count, [NotNullWhen(false)] out Exception? error)
         {
             try
             {

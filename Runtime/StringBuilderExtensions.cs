@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -8,7 +9,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/274b2c01bdceac862ed35742dcfa90e48e5f3248/Packages/com.unity.shadergraph/Editor/Utilities/StringBuilderExtensions.cs
         #region UnityEditor.ShaderGraph
-        public static void AppendIndentedLines(this StringBuilder sb, [System.Diagnostics.CodeAnalysis.NotNull] string lines, string indentation)
+        public static void AppendIndentedLines(this StringBuilder sb, string lines, string indentation)
         {
 #if INCLUDE_STRINGBUILDER_EXTENSIONS
             System.Text.StringBuilderExtensions.EnsureRoom(sb, lines.Length);
@@ -39,8 +40,7 @@ namespace PKGE
         }
         #endregion // UnityEditor.ShaderGraph
 
-        [JetBrains.Annotations.NotNull]
-        public static StringBuilder Append([System.Diagnostics.CodeAnalysis.NotNull] this StringBuilder stringBuilder, [System.Diagnostics.CodeAnalysis.NotNull] string value, int startIndex)
+        public static StringBuilder Append(this StringBuilder stringBuilder, string value, int startIndex)
         {
             int length = 0;
             (startIndex, length) = value.Length.CalculateLength(startIndex, length);

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 
 namespace PKGE
@@ -11,7 +12,6 @@ namespace PKGE
         /// </summary>
         /// <param name="dateTime">The DateTime object to format.</param>
         /// <returns>A string representation of the input DateTime object in the specified format.</returns>
-        [JetBrains.Annotations.NotNull]
         public static string FormatDateTime(this DateTime dateTime)
         {
             return dateTime.ToString("yyyy/MM/dd HH:mm");
@@ -22,7 +22,6 @@ namespace PKGE
         /// </summary>
         /// <param name="timeSpan">The TimeSpan object to format.</param>
         /// <returns>A string representation of the input value.</returns>
-        [JetBrains.Annotations.NotNull]
         public static string FormatDuration(TimeSpan timeSpan)
         {
             return $"{timeSpan.Hours}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
@@ -33,7 +32,6 @@ namespace PKGE
         /// </summary>
         /// <param name="timeSpan">The TimeSpan object to format.</param>
         /// <returns>A string representation of the input TimeSpan object.</returns>
-        [JetBrains.Annotations.NotNull]
         public static string FormatTime(TimeSpan timeSpan)
         {
             var timeMs = timeSpan.TotalMilliseconds;
@@ -51,7 +49,6 @@ namespace PKGE
         /// </summary>
         /// <param name="timeMs">The time value to format, in milliseconds.</param>
         /// <returns>A string representation of the input float value.</returns>
-        [JetBrains.Annotations.NotNull]
         public static string FormatTime(float timeMs)
         {
             if (float.IsNaN(timeMs))
@@ -65,7 +62,6 @@ namespace PKGE
         /// </summary>
         /// <param name="number">The decimal number to format.</param>
         /// <returns>A string representation of the decimal number as a percentage.</returns>
-        [JetBrains.Annotations.NotNull]
         public static string FormatPercentage(float number)
         {
             return $"{number:P1}";

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -59,7 +60,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/CachedComponentFilter.cs
         #region Unity.XR.CoreUtils
-        readonly List<TFilterType> _masterComponentStorage;
+        readonly List<TFilterType>? _masterComponentStorage = ListPool<TFilterType>.Get();
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
         static readonly List<TFilterType> TempComponentList = new List<TFilterType>();
@@ -75,8 +76,6 @@ namespace PKGE
         /// <param name="includeDisabled">Whether to include components on disabled objects.</param>
         public CachedComponentFilter(TRootType componentRoot, CachedSearchType cachedSearchType = CachedSearchType.Self | CachedSearchType.Children, bool includeDisabled = true)
         {
-            _masterComponentStorage = ListPool<TFilterType>.Get();
-
             TempComponentList.Clear();
             TempHostComponentList.Clear();
 
@@ -94,7 +93,7 @@ namespace PKGE
                 var searchRoot = componentRoot.transform.parent;
                 while (searchRoot != null)
                 {
-                    if (searchRoot.GetComponent<TRootType>() != null)
+                    if (searchRoot.TryGetComponent<TRootType>(out _))
                         break;
 
                     searchRoot.GetComponents(TempComponentList);
@@ -123,12 +122,10 @@ namespace PKGE
         /// </summary>
         /// <param name="componentList">The array of objects to use.</param>
         /// <param name="includeDisabled">Whether to include components on disabled objects.</param>
-        public CachedComponentFilter([System.Diagnostics.CodeAnalysis.MaybeNull] TFilterType[] componentList, bool includeDisabled = true)
+        public CachedComponentFilter(TFilterType[]? componentList, bool includeDisabled = true)
         {
             if (componentList == null)
                 return;
-
-            _masterComponentStorage = ListPool<TFilterType>.Get();
 
             TempComponentList.Clear();
             TempComponentList.AddRange(componentList);
@@ -154,7 +151,6 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="TChildType">The type for which to search. Must inherit from or be TFilterType.</typeparam>
         /// <returns>The array of matching components.</returns>
-        [JetBrains.Annotations.NotNull]
         public TChildType[] GetMatchingComponents<TChildType>() where TChildType : class, TFilterType
         {
             var componentCount = 0;
@@ -221,6 +217,8 @@ namespace PKGE
                 foreach (var currentEntry in TempComponentList)
                 {
                     var currentComponent = currentEntry as Component;
+                    if (currentComponent == null)
+                        continue;
 
                     if (currentComponent.transform == requiredRoot)
                         continue;
@@ -234,6 +232,8 @@ namespace PKGE
                 foreach (var currentEntry in TempHostComponentList)
                 {
                     var currentComponent = currentEntry as Component;
+                    if (currentComponent == null)
+                        continue;
 
                     if (currentComponent.transform == requiredRoot)
                         continue;
@@ -249,6 +249,8 @@ namespace PKGE
                 foreach (var currentEntry in TempComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
+                    if (currentBehaviour == null)
+                        continue;
 
                     if (!currentBehaviour.enabled)
                         continue;
@@ -265,6 +267,8 @@ namespace PKGE
                 foreach (var currentEntry in TempHostComponentList)
                 {
                     var currentBehaviour = currentEntry as Behaviour;
+                    if (currentBehaviour == null)
+                        continue;
 
                     if (!currentBehaviour.enabled)
                         continue;

@@ -66,7 +66,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeInt32Area(int height, int width, int pitch)
         {
-            return checked(((width + pitch) * max(unchecked(height - 1), 0)) + width);
+            return max(checked(((width + pitch) * (height - 1)) + width), 0);
         }
         #endregion // CommunityToolkit.HighPerformance.Memory.Internals
     }

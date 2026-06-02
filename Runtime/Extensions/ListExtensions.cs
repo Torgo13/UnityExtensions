@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -43,7 +44,7 @@ namespace PKGE
         /// <typeparam name="T">The list element type.</typeparam>
         /// <param name="list">The list whose capacity will be ensured.</param>
         /// <param name="capacity">The minimum number of elements the list storage must contain.</param>
-        public static void EnsureCapacity<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, int capacity)
+        public static void EnsureCapacity<T>(this List<T> list, int capacity)
         {
             if (list.Capacity < capacity)
                 list.Capacity = capacity;
@@ -57,7 +58,7 @@ namespace PKGE
         /// <param name="first">The index of the first item to swap.</param>
         /// <param name="second">The index of the second item to swap.</param>
         /// <typeparam name="T">The type of list items to be swapped.</typeparam>
-        public static void SwapAtIndices<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, int first, int second)
+        public static void SwapAtIndices<T>(this List<T> list, int first, int second)
         {
             UnityEngine.Assertions.Assert.IsTrue(first >= 0);
             UnityEngine.Assertions.Assert.IsTrue(second >= 0);
@@ -68,14 +69,14 @@ namespace PKGE
         }
         #endregion // Unity.XR.CoreUtils
         
-        public static void EnsureRoom<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, int room)
+        public static void EnsureRoom<T>(this List<T> list, int room)
         {
             var capacity = list.Count + room;
             if (list.Capacity < capacity)
                 list.Capacity = capacity;
         }
 
-        public static void RemoveNull<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list)
+        public static void RemoveNull<T>(this List<T?> list)
             where T : class
         {
             var temp = UnityEngine.Pool.ListPool<T>.Get();
@@ -95,7 +96,7 @@ namespace PKGE
         /// <summary>
         /// Variant of <see cref="RemoveNull{T}(List{T})"/> for when the order does not matter.
         /// </summary>
-        public static void RemoveNullSwapBack<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list)
+        public static void RemoveNullSwapBack<T>(this List<T?> list)
             where T : class
         {
             for (int i = list.Count - 1; i >= 0; --i)
@@ -117,7 +118,7 @@ namespace PKGE
         /// <param name="list">The list to search.</param>
         /// <param name="value">The value to locate and remove.</param>
         /// <returns>Returns true if an element was removed.</returns>
-        public static bool RemoveSwapBack<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, T value)
+        public static bool RemoveSwapBack<T>(this List<T> list, T value)
         {
             int index = list.IndexOf(value);
             if (index < 0)
@@ -137,7 +138,7 @@ namespace PKGE
         /// <param name="list">The list to search.</param>
         /// <param name="matcher">The predicate for testing the elements of the list.</param>
         /// <returns>Returns true if an element was removed.</returns>
-        public static bool RemoveSwapBack<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, [System.Diagnostics.CodeAnalysis.DisallowNull] Predicate<T> matcher)
+        public static bool RemoveSwapBack<T>(this List<T> list, Predicate<T> matcher)
         {
             int index = list.FindIndex(matcher);
             if (index < 0)
@@ -157,7 +158,7 @@ namespace PKGE
         /// <param name="list">The list to search.</param>
         /// <param name="index">The index at which to remove an element from the list.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"/>
-        public static void RemoveAtSwapBack<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, int index)
+        public static void RemoveAtSwapBack<T>(this List<T> list, int index)
         {
             int lastIndex = list.Count - 1;
             list[index] = list[lastIndex];
@@ -167,13 +168,11 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.CodeGen/ListExtensions.cs
         #region Unity.Entities.CodeGen
-        public static void Add<T>(
-            [System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list,
-            [System.Diagnostics.CodeAnalysis.DisallowNull] IEnumerable<T> elementsToAdd)
+        public static void Add<T>(this List<T> list, IEnumerable<T> elementsToAdd)
             => list.AddRange(elementsToAdd);
         #endregion // Unity.Entities.CodeGen
 
-        public static Span<TTo> Cast<TFrom, TTo>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<TFrom> list)
+        public static Span<TTo> Cast<TFrom, TTo>(this List<TFrom> list)
             where TFrom : struct
             where TTo : struct
         {
@@ -187,7 +186,7 @@ namespace PKGE
             return NoAllocHelpers.ExtractArrayFromList(list);
         }
 
-        public static Span<T> AsSpan<T>([System.Diagnostics.CodeAnalysis.MaybeNull] this List<T> list)
+        public static Span<T> AsSpan<T>(this List<T>? list)
         {
             if (list == null)
                 return new Span<T>();
@@ -195,7 +194,7 @@ namespace PKGE
             return list.AsArray().AsSpan(start: 0, length: list.Count);
         }
 
-        public static Span<T> AsSpan<T>([System.Diagnostics.CodeAnalysis.MaybeNull] this List<T> list, int start, int length)
+        public static Span<T> AsSpan<T>(this List<T>? list, int start, int length)
         {
             if (list == null)
                 return new Span<T>();
@@ -214,7 +213,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="Dictionary{TKey, TValue}.TryAdd(TKey, TValue)"/>
-        public static bool TryAdd<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, T element)
+        public static bool TryAdd<T>(this List<T> list, T element)
         {
             if (!list.Contains(element))
             {
@@ -225,8 +224,7 @@ namespace PKGE
             return false;
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static List<T> Remove<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, List<T> remove)
+        public static List<T> Remove<T>(this List<T> list, List<T> remove)
         {
             using var _0 = UnityEngine.Pool.ListPool<T>.Get(out var temp);
             temp.EnsureCapacity(list.Count);
@@ -242,8 +240,7 @@ namespace PKGE
             return list;
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static List<T> Remove<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, ReadOnlySpan<T> remove)
+        public static List<T> Remove<T>(this List<T> list, ReadOnlySpan<T> remove)
             where T : IEquatable<T>
         {
             using var _0 = UnityEngine.Pool.ListPool<T>.Get(out var temp);
@@ -267,7 +264,7 @@ namespace PKGE
             return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<U>, List<T>>(ref list);
         }
 
-        public static ref T AsRef<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list, int index) where T : struct
+        public static ref T AsRef<T>(this List<T> list, int index) where T : struct
         {
             UnityEngine.Assertions.Assert.IsTrue(index >= 0);
             UnityEngine.Assertions.Assert.IsTrue(index < list.Count);
@@ -285,7 +282,7 @@ namespace PKGE
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>A copy of this list.</returns>
-        public static NativeList<T> ToNativeList<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list,
+        public static NativeList<T> ToNativeList<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             var count = list.Count;
@@ -303,7 +300,7 @@ namespace PKGE
         /// <param name="list">The list to copy.</param>
         /// <param name="allocator">The allocator to use.</param>
         /// <returns>An array that is a copy of this list.</returns>
-        public static NativeArray<T> ToNativeArray<T>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<T> list,
+        public static NativeArray<T> ToNativeArray<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
             var container = CollectionHelper.CreateNativeArray<T>(list.Count, allocator, NativeArrayOptions.UninitializedMemory);

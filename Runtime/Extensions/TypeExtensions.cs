@@ -98,7 +98,7 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, <see langword="null"/>.</returns>
-        public static PropertyInfo? GetPropertyRecursively(this Type type, string name,
+        public static PropertyInfo? GetPropertyRecursively(this Type? type, string name,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
@@ -121,7 +121,7 @@ namespace PKGE
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
         /// <returns>An object representing the field that matches the specified requirements, if found;
         /// otherwise, <see langword="null"/>.</returns>
-        public static FieldInfo? GetFieldRecursively(this Type type, string name,
+        public static FieldInfo? GetFieldRecursively(this Type? type, string name,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
@@ -142,7 +142,7 @@ namespace PKGE
         /// <param name="type">Type we are going to get fields on.</param>
         /// <param name="fields">A list to which all fields of this type will be added.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
-        public static void GetFieldsRecursively(this Type type, List<FieldInfo> fields,
+        public static void GetFieldsRecursively(this Type? type, List<FieldInfo> fields,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
@@ -159,7 +159,7 @@ namespace PKGE
         /// <param name="type">Type we are going to get properties on.</param>
         /// <param name="fields">A list to which all properties of this type will be added.</param>
         /// <param name="bindingAttr">A bitmask specifying how the search is conducted.</param>
-        public static void GetPropertiesRecursively(this Type type, List<PropertyInfo> fields,
+        public static void GetPropertiesRecursively(this Type? type, List<PropertyInfo> fields,
             BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
                                        | BindingFlags.DeclaredOnly)
         {
@@ -231,7 +231,7 @@ namespace PKGE
         /// <typeparam name="TAttribute">Type of attribute we are checking if is defined.</typeparam>
         /// <param name="type">Type that has the attribute or inherits the attribute.</param>
         /// <param name="types">A list to which matching types will be added.</param>
-        public static void IsDefinedGetInheritedTypes<TAttribute>(this Type type, List<Type> types)
+        public static void IsDefinedGetInheritedTypes<TAttribute>(this Type? type, List<Type> types)
             where TAttribute : Attribute
         {
             while (type != null)
@@ -251,7 +251,7 @@ namespace PKGE
         /// <param name="type">The type to search.</param>
         /// <param name="fieldName">The name of the field to search for.</param>
         /// <returns>The field, if found.</returns>
-        public static FieldInfo? GetFieldInTypeOrBaseType(this Type type, string fieldName)
+        public static FieldInfo? GetFieldInTypeOrBaseType(this Type? type, string fieldName)
         {
             while (type != null)
             {
@@ -449,7 +449,7 @@ namespace PKGE
         /// <param name="name">The name of the method for which to search.</param>
         /// <param name="bindingAttr">BindingFlags passed to Type.GetMethod.</param>
         /// <returns>MethodInfo for the first matching method found. <see langword="null"/> if no method is found.</returns>
-        public static MethodInfo? GetMethodRecursively(this Type type, string name, BindingFlags bindingAttr)
+        public static MethodInfo? GetMethodRecursively(this Type? type, string name, BindingFlags bindingAttr)
         {
             MethodInfo? method = null;
 

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -20,14 +21,13 @@ namespace PKGE
         /// Called when a GameObject has been instantiated through the <see cref="GameObjectUtils"/> versions of
         /// <see cref="UnityObject.Instantiate(UnityObject)"/>.
         /// </summary>
-        public static event Action<GameObject> OnGameObjectInstantiated;
+        public static event Action<GameObject>? OnGameObjectInstantiated;
 
         /// <summary>
         /// Creates a new GameObject and returns it.
         /// This method also calls <see cref="OnGameObjectInstantiated"/>.
         /// </summary>
         /// <returns>The new GameObject.</returns>
-        [JetBrains.Annotations.NotNull]
         public static GameObject Create()
         {
             var gameObject = new GameObject();
@@ -41,7 +41,6 @@ namespace PKGE
         /// </summary>
         /// <param name="name">The name to be given to the new GameObject.</param>
         /// <returns>The new GameObject.</returns>
-        [JetBrains.Annotations.NotNull]
         public static GameObject Create(string name)
         {
             var gameObject = new GameObject(name);
@@ -60,7 +59,7 @@ namespace PKGE
         /// which places it in the same position as the cloned GameObject,
         /// or to offset the new object from <paramref name="parent"/>.</param>
         /// <returns>The instantiated clone.</returns>
-        public static GameObject Instantiate([DisallowNull] GameObject original, [AllowNull] Transform parent = null, bool worldPositionStays = true)
+        public static GameObject Instantiate(GameObject original, Transform? parent = null, bool worldPositionStays = true)
         {
             var gameObject = UnityObject.Instantiate(original, parent, worldPositionStays);
             OnGameObjectInstantiated?.Invoke(gameObject);
@@ -76,7 +75,7 @@ namespace PKGE
         /// <param name="position">Position for the new object.</param>
         /// <param name="rotation">Orientation of the new object.</param>
         /// <returns>The instantiated clone.</returns>
-        public static GameObject Instantiate([DisallowNull] GameObject original, Vector3 position, Quaternion rotation)
+        public static GameObject Instantiate(GameObject original, Vector3 position, Quaternion rotation)
         {
             return Instantiate(original, null, position, rotation);
         }
@@ -91,7 +90,7 @@ namespace PKGE
         /// <param name="rotation">Orientation of the new object.</param>
         /// <param name="parent">Parent that will be assigned to the new object</param>
         /// <returns>The instantiated clone</returns>
-        public static GameObject Instantiate([DisallowNull] GameObject original, Transform parent, Vector3 position, Quaternion rotation)
+        public static GameObject Instantiate(GameObject original, Transform? parent, Vector3 position, Quaternion rotation)
         {
             var gameObject = UnityObject.Instantiate(original, position, rotation, parent);
             OnGameObjectInstantiated?.Invoke(gameObject);
@@ -106,8 +105,7 @@ namespace PKGE
         /// <param name="original">The Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>
-        [JetBrains.Annotations.NotNull]
-        public static GameObject CloneWithHideFlags([DisallowNull] GameObject original, [AllowNull] Transform parent = null)
+        public static GameObject CloneWithHideFlags(GameObject original, Transform? parent = null)
         {
             var copy = UnityObject.Instantiate(original, parent);
             CopyHideFlagsRecursively(original, copy);
@@ -123,8 +121,7 @@ namespace PKGE
         /// <param name="prefab">The Prefab Game Object to make a copy of</param>
         /// <param name="parent">Optional parent that will be assigned to the clone of the original Game Object</param>
         /// <returns>The clone of the original Game Object</returns>
-        [JetBrains.Annotations.NotNull]
-        public static GameObject ClonePrefabWithHideFlags([DisallowNull] GameObject prefab, [AllowNull] Transform parent = null)
+        public static GameObject ClonePrefabWithHideFlags(GameObject prefab, Transform? parent = null)
         {
             var copy = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, parent);
             CopyHideFlagsRecursively(prefab, copy);
@@ -132,12 +129,12 @@ namespace PKGE
         }
 #endif
 
-        static void CopyHideFlagsRecursively([DisallowNull] GameObject copyFrom, [DisallowNull] GameObject copyTo)
+        static void CopyHideFlagsRecursively(GameObject copyFrom, GameObject copyTo)
         {
             CopyHideFlagsRecursively(copyFrom.transform, copyTo.transform);
         }
 
-        static void CopyHideFlagsRecursively([DisallowNull] Component copyFrom, [DisallowNull] Component copyTo)
+        static void CopyHideFlagsRecursively(Component copyFrom, Component copyTo)
         {
             var copyFromChildren = ListPool<Transform>.Get();
             var copyToChildren = ListPool<Transform>.Get();
@@ -164,9 +161,10 @@ namespace PKGE
         /// <typeparam name="T">The type of component to find in the scene</typeparam>
         /// <param name="desiredSource">The Game Object we expect to be a parent or owner of the component</param>
         /// <returns>A component of the desired type, or NULL if no component was located</returns>
-        public static T ExhaustiveComponentSearch<T>(GameObject desiredSource) where T : Component
+        public static bool ExhaustiveComponentSearch<T>(GameObject? desiredSource,
+            [NotNullWhen(true)] out T? foundObject) where T : Component
         {
-            var foundObject = default(T);
+            foundObject = default(T);
 
             // We check in the following order
             // - Location we expect the object to be
@@ -185,7 +183,7 @@ namespace PKGE
             }
 
             if (foundObject != null)
-                return foundObject;
+                return true;
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -201,7 +199,7 @@ namespace PKGE
                 }
             }
 #endif
-            return foundObject;
+            return foundObject != null;
         }
 
         /// <summary>
@@ -213,9 +211,10 @@ namespace PKGE
         /// <param name="desiredSource">The GameObject we expect to be a parent or owner of the component</param>
         /// <param name="tag">The tag this component must have to match</param>
         /// <returns>A component of the desired type, or NULL if no component was located</returns>
-        public static T ExhaustiveTaggedComponentSearch<T>(GameObject desiredSource, string tag) where T : Component
+        public static bool ExhaustiveTaggedComponentSearch<T>(GameObject? desiredSource, string tag,
+            [NotNullWhen(true)] out T? foundObject) where T : Component
         {
-            var foundObject = default(T);
+            foundObject = default(T);
 
             // We check in the following order
             // - Location we expect the object to be
@@ -272,7 +271,7 @@ namespace PKGE
                 }
             }
 #endif
-            return foundObject;
+            return foundObject != null;
         }
 
         /// <summary>
@@ -281,19 +280,21 @@ namespace PKGE
         /// <typeparam name="T">The type of component to retrieve</typeparam>
         /// <param name="scene">The scene to search</param>
         /// <returns>The first component found in the active scene, or null if none exists</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static T GetComponentInScene<T>(Scene scene) where T : Component
+        public static bool GetComponentInScene<T>(Scene scene,
+            [NotNullWhen(true)] out T? component) where T : Component
         {
+            component = null;
+
             using var _0 = ListPool<GameObject>.Get(out var gameObjects);
             scene.GetRootGameObjects(gameObjects);
             foreach (var gameObject in gameObjects)
             {
-                var component = gameObject.GetComponentInChildren<T>();
+                component = gameObject.GetComponentInChildren<T>();
                 if (component)
-                    return component;
+                    return true;
             }
 
-            return null;
+            return false;
         }
 
         /// <summary>
@@ -303,11 +304,9 @@ namespace PKGE
         /// <param name="scene">The scene to search</param>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInScene<T>(Scene scene, [DisallowNull] List<T> components, bool includeInactive = false)
+        public static void GetComponentsInScene<T>(Scene scene, List<T> components, bool includeInactive = false)
             where T : Component
         {
-            UnityEngine.Assertions.Assert.IsNotNull(components);
-
             var gameObjects = ListPool<GameObject>.Get();
             var children = ListPool<T>.Get();
             scene.GetRootGameObjects(gameObjects);
@@ -330,10 +329,9 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The type of component to retrieve</typeparam>
         /// <returns>The first component found in the active scene, or null if none exists</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static T GetComponentInActiveScene<T>() where T : Component
+        public static bool GetComponentInActiveScene<T>([NotNullWhen(true)] out T? component) where T : Component
         {
-            return GetComponentInScene<T>(SceneManager.GetActiveScene());
+            return GetComponentInScene(SceneManager.GetActiveScene(), out component);
         }
 
         /// <summary>
@@ -342,7 +340,7 @@ namespace PKGE
         /// <typeparam name="T">The type of components to retrieve</typeparam>
         /// <param name="components">List that will be filled out with components retrieved</param>
         /// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-        public static void GetComponentsInActiveScene<T>([DisallowNull] List<T> components, bool includeInactive = false)
+        public static void GetComponentsInActiveScene<T>(List<T> components, bool includeInactive = false)
             where T : Component
         {
             GetComponentsInScene(SceneManager.GetActiveScene(), components, includeInactive);
@@ -372,29 +370,24 @@ namespace PKGE
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
         /// <returns>The returned child GameObject or null if no child is found.</returns>
-        [JetBrains.Annotations.CanBeNull]
-        public static GameObject GetNamedChild([DisallowNull] this GameObject go, string name)
+        public static bool GetNamedChild(this GameObject go, string name,
+            [NotNullWhen(true)] out GameObject? namedChild)
         {
-            List<Transform> transforms = ListPool<Transform>.Get();
-            go.GetComponentsInChildren(transforms);
-            Transform foundObject = null;
-            
+            namedChild = null;
+
+            using var _0 = ListPool<Transform>.Get(out var transforms);
+            go.GetComponentsInChildren(transforms);            
             for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
             {
-                var currentTransform = transforms[i];
+                Transform currentTransform = transforms[i];
                 if (string.Equals(currentTransform.name, name, StringComparison.Ordinal))
                 {
-                    foundObject = currentTransform;
-                    break;
+                    namedChild = currentTransform.gameObject;
+                    return true;
                 }
             }
-            
-            ListPool<Transform>.Release(transforms);
 
-            if (foundObject != null)
-                return foundObject.gameObject;
-
-            return null;
+            return false;
         }
         #endregion // Unity.XR.CoreUtils
     }

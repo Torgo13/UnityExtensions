@@ -276,21 +276,6 @@ namespace PKGE.Tests
             UnityEngine.Object.DestroyImmediate(rt);
             UnityEngine.Object.DestroyImmediate(tex2D);
         }
-
-        [Test]
-        public void RenderTextureToTexture2D_Asserts_OnNullArguments()
-        {
-            var rt = new RenderTexture(4, 4, 0);
-            var tex2D = new Texture2D(4, 4);
-
-            Assert.Throws<AssertionException>(() =>
-                TextureUtils.RenderTextureToTexture2D(null, tex2D));
-            Assert.Throws<AssertionException>(() =>
-                rt.RenderTextureToTexture2D(null));
-
-            UnityEngine.Object.DestroyImmediate(rt);
-            UnityEngine.Object.DestroyImmediate(tex2D);
-        }
         #endregion // RenderTextureToTexture2D
 
         #region GetMipData
@@ -510,17 +495,6 @@ namespace PKGE.Tests
         }
 
         [Test]
-        public void Constructor_Asserts_WhenTextureNull()
-        {
-            var arr = new NativeArray<byte>(4, Allocator.Persistent);
-            Assert.Throws<AssertionException>(() =>
-            {
-                var _ = new ReadbackAsyncDispose(ref arr, null);
-            });
-            arr.Dispose();
-        }
-
-        [Test]
         public void ReadbackAsyncDispose_CompletesAndReturnsSucceeded()
         {
             var arr = new NativeArray<byte>(4 * 4 * 4, Allocator.Persistent); // 4x4 RGBA
@@ -540,15 +514,6 @@ namespace PKGE.Tests
 
     public class ReadbackMipsAsyncDisposeTests
     {
-        [Test]
-        public void Constructor_Asserts_WhenTextureNull()
-        {
-            Assert.Throws<AssertionException>(() =>
-            {
-                var _ = new ReadbackMipsAsyncDispose(null, Allocator.TempJob, 1);
-            });
-        }
-
         [Test]
         public void Constructor_Asserts_WhenMipCountTooLarge()
         {
@@ -854,15 +819,6 @@ namespace PKGE.Tests
 
     public class Texture2DPropertiesTests
     {
-        [Test]
-        public void Constructor_Asserts_OnNullTexture()
-        {
-            Assert.Throws<AssertionException>(() =>
-            {
-                var _ = new Texture2DProperties(null);
-            });
-        }
-
         [Test]
         public void Constructor_Asserts_OnNon2DTexture()
         {

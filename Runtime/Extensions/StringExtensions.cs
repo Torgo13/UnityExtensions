@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -16,7 +17,6 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Modules/UIBuilder/Editor/Utilities/StringExtensions/StringExtensions.cs
         #region Unity.UI.Builder
-        [JetBrains.Annotations.NotNull]
         public static string RemoveExtraWhitespace(this string str)
         {
             using var _0 = StringBuilderPool.Get(out var builder);
@@ -53,8 +53,7 @@ namespace PKGE
         /// </summary>
         /// <param name="str">String to be capitalized.</param>
         /// <returns>The new string.</returns>
-        [JetBrains.Annotations.NotNull]
-        public static string FirstToUpper([System.Diagnostics.CodeAnalysis.MaybeNull] this string str)
+        public static string FirstToUpper(this string? str)
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
@@ -78,8 +77,7 @@ namespace PKGE
         /// </remarks>
         /// <param name="str">Input string.</param>
         /// <returns>Input string with spaces added.</returns>
-        [JetBrains.Annotations.NotNull]
-        public static string InsertSpacesBetweenWords([System.Diagnostics.CodeAnalysis.MaybeNull] this string str)
+        public static string InsertSpacesBetweenWords(this string? str)
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
@@ -120,7 +118,7 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/StringExtensions.cs
         #region UnityEngine.XR.ARCore
         /// <exception cref="System.ArgumentNullException">@string</exception>
-        public static NativeArray<byte> ToBytes([System.Diagnostics.CodeAnalysis.NotNull] this string @string, Encoding encoding = null, Allocator allocator = Allocator.Temp)
+        public static NativeArray<byte> ToBytes(this string @string, Encoding? encoding = null, Allocator allocator = Allocator.Temp)
         {
             if (@string == null)
                 throw new ArgumentNullException(nameof(@string));
@@ -148,11 +146,10 @@ namespace PKGE
         static readonly char[] WordDelimiters = { ' ', '-', '_' };
 
         /// <exception cref="ArgumentNullException"></exception>
-        [JetBrains.Annotations.NotNull]
-        public static string ConvertCase([System.Diagnostics.CodeAnalysis.NotNull] string text,
+        public static string ConvertCase(string text,
             char outputWordDelimiter,
-            [System.Diagnostics.CodeAnalysis.NotNull] Func<char, char> startOfStringCaseHandler,
-            [System.Diagnostics.CodeAnalysis.NotNull] Func<char, char> middleStringCaseHandler)
+            Func<char, char> startOfStringCaseHandler,
+            Func<char, char> middleStringCaseHandler)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
@@ -219,10 +216,8 @@ namespace PKGE
             return builder.ToString();
         }
 
-        [JetBrains.Annotations.NotNull]
         public static string WithUssElement(this string blockName, string elementName) => blockName + "__" + elementName;
 
-        [JetBrains.Annotations.NotNull]
         public static string WithUssModifier(this string blockName, string modifier) => blockName + "--" + modifier;
         #endregion // UnityEditor.GraphToolsFoundation.Overdrive
 
@@ -230,8 +225,7 @@ namespace PKGE
         #region UnityEngine.GraphToolsFoundation.Overdrive
         static readonly Regex CodifyRegex = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled);
 
-        [JetBrains.Annotations.NotNull]
-        public static string CodifyString([System.Diagnostics.CodeAnalysis.NotNull] this string str)
+        public static string CodifyString(this string str)
         {
             return CodifyRegex.Replace(str, "_");
         }
@@ -239,8 +233,7 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.CodeGen/ListExtensions.cs
         #region Unity.Entities.CodeGen
-        [JetBrains.Annotations.NotNull]
-        public static string SeparateBy([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<string> elements, string delimiter)
+        public static string SeparateBy(this IEnumerable<string> elements, string delimiter)
         {
             bool first = true;
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -256,8 +249,7 @@ namespace PKGE
             return sb.ToString();
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string SeparateBy([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<string> elements, char delimiter)
+        public static string SeparateBy(this IEnumerable<string> elements, char delimiter)
         {
             bool first = true;
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -273,10 +265,8 @@ namespace PKGE
             return sb.ToString();
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string SeparateBySpace([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<string> elements) => elements.SeparateBy(' ');
-        [JetBrains.Annotations.NotNull]
-        public static string SeparateByComma([System.Diagnostics.CodeAnalysis.NotNull] this IEnumerable<string> elements) => elements.SeparateBy(',');
+        public static string SeparateBySpace(this IEnumerable<string> elements) => elements.SeparateBy(' ');
+        public static string SeparateByComma(this IEnumerable<string> elements) => elements.SeparateBy(',');
         #endregion // Unity.Entities.CodeGen
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/StringExtensions.cs
@@ -284,8 +274,7 @@ namespace PKGE
         static readonly Regex ToWordRegex = new Regex(@"[^\w]", RegexOptions.Compiled);
         static readonly Regex SplitCaseRegex = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
 
-        [JetBrains.Annotations.NotNull]
-        public static string SingleQuoted([System.Diagnostics.CodeAnalysis.NotNull] this string value, bool onlyIfSpaces = false)
+        public static string SingleQuoted(this string value, bool onlyIfSpaces = false)
         {
             if (onlyIfSpaces && !value.Contains(' '))
                 return value;
@@ -293,8 +282,7 @@ namespace PKGE
             return $"'{value.Trim('\'')}'";
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string DoubleQuoted([System.Diagnostics.CodeAnalysis.NotNull] this string value, bool onlyIfSpaces = false)
+        public static string DoubleQuoted(this string value, bool onlyIfSpaces = false)
         {
             if (onlyIfSpaces && !value.Contains(' '))
                 return value;
@@ -302,23 +290,19 @@ namespace PKGE
             return $"\"{value.Trim('\"')}\"";
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string ToHyperLink(this string value, [System.Diagnostics.CodeAnalysis.MaybeNull] string key = null)
+        public static string ToHyperLink(this string value, string? key = null)
         {
             return string.IsNullOrEmpty(key) ? $"<a>{value}</a>" : $"<a {key}={value.DoubleQuoted()}>{value}</a>";
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string ToIdentifier([System.Diagnostics.CodeAnalysis.NotNull] this string value)
+        public static string ToIdentifier(this string value)
         {
             return ToWordRegex.Replace(value, "_");
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string ToForwardSlash([System.Diagnostics.CodeAnalysis.NotNull] this string value) => value.Replace('\\', '/');
+        public static string ToForwardSlash(this string value) => value.Replace('\\', '/');
 
-        [JetBrains.Annotations.NotNull]
-        public static string ReplaceLastOccurrence([System.Diagnostics.CodeAnalysis.NotNull] this string value, [System.Diagnostics.CodeAnalysis.NotNull] string oldValue, string newValue)
+        public static string ReplaceLastOccurrence(this string value, string oldValue, string newValue)
         {
             var index = value.LastIndexOf(oldValue, StringComparison.CurrentCulture);
             return index >= 0 ? value.Remove(index, oldValue.Length).Insert(index, newValue) : value;
@@ -332,7 +316,6 @@ namespace PKGE
         /// "layoutWidth"  -> "Layout Width"
         /// "TargetCount"  -> "Target Count"
         /// </summary>
-        [JetBrains.Annotations.NotNull]
         public static string SplitPascalCase(this string str)
         {
             str = SplitCaseRegex.Replace(str, " $1");
@@ -343,8 +326,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.high-definition/Runtime/Core/Debugging/FrameSettingsFieldAttribute.cs
         #region UnityEngine.Rendering.HighDefinition
         /// <summary>Runtime alternative to UnityEditor.ObjectNames.NicifyVariableName. Only prefix 'm_' is not skipped.</summary>
-        [JetBrains.Annotations.NotNull]
-        public static string CamelToPascalCaseWithSpace([System.Diagnostics.CodeAnalysis.MaybeNull] this string text, bool preserveAcronyms = true)
+        public static string CamelToPascalCaseWithSpace(this string? text, bool preserveAcronyms = true)
         {
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
@@ -373,8 +355,7 @@ namespace PKGE
         #endregion // UnityEngine.Rendering.HighDefinition
         
         /// <summary>Runtime alternative to UnityEditor.ObjectNames.NicifyVariableName. Only prefix 'm_' is not skipped.</summary>
-        [JetBrains.Annotations.NotNull]
-        public static string CamelToSentenceCaseWithSpace([System.Diagnostics.CodeAnalysis.MaybeNull] this string text, bool preserveAcronyms = true)
+        public static string CamelToSentenceCaseWithSpace(this string? text, bool preserveAcronyms = true)
         {
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
@@ -411,8 +392,7 @@ namespace PKGE
         /// <param name="input">The input filename or directory</param>
         /// <param name="replacement">The replacement</param>
         /// <returns>The string with the invalid characters replaced</returns>
-        [JetBrains.Annotations.NotNull]
-        public static string ReplaceInvalidFileNameCharacters([System.Diagnostics.CodeAnalysis.NotNull] this string input, [System.Diagnostics.CodeAnalysis.NotNull] string replacement = "_") => InvalidRegEx.Replace(input, replacement);
+        public static string ReplaceInvalidFileNameCharacters(this string input, string replacement = "_") => InvalidRegEx.Replace(input, replacement);
 
         /// <summary>
         /// Checks if the given string ends with the given extension
@@ -420,7 +400,7 @@ namespace PKGE
         /// <param name="input">The input string</param>
         /// <param name="extension">The extension</param>
         /// <returns>True if the extension is found on the string path</returns>
-        public static bool HasExtension([System.Diagnostics.CodeAnalysis.NotNull] this string input, [System.Diagnostics.CodeAnalysis.NotNull] string extension) =>
+        public static bool HasExtension(this string input, string extension) =>
             input.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
 
 
@@ -436,7 +416,7 @@ namespace PKGE
         }
         
         /// <inheritdoc cref="ContainsAny(string, string[])"/>
-        public static bool ContainsAny([System.Diagnostics.CodeAnalysis.MaybeNull] this string input, ReadOnlySpan<string> stringsToCheck)
+        public static bool ContainsAny(this string? input, ReadOnlySpan<string> stringsToCheck)
         {
             if (string.IsNullOrEmpty(input))
                 return false;
@@ -456,35 +436,31 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/StringExtensionMethods.cs
         #region FPSSample
-        [JetBrains.Annotations.NotNull]
-        public static string AfterLast([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string sub)
+        public static string AfterLast(this string str, string sub)
         {
             var idx = str.LastIndexOf(sub);
             return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string BeforeLast([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string sub)
+        public static string BeforeLast(this string str, string sub)
         {
             var idx = str.LastIndexOf(sub);
             return idx < 0 ? string.Empty : str.Substring(0, idx);
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string AfterFirst([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string sub)
+        public static string AfterFirst(this string str, string sub)
         {
             var idx = str.IndexOf(sub);
             return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string BeforeFirst([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string sub)
+        public static string BeforeFirst(this string str, string sub)
         {
             var idx = str.IndexOf(sub);
             return idx < 0 ? string.Empty : str.Substring(0, idx);
         }
 
-        public static int PrefixMatch([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string prefix)
+        public static int PrefixMatch(this string str, string prefix)
         {
             int l = 0, slen = str.Length, plen = prefix.Length;
             while (l < slen && l < plen)
@@ -502,7 +478,7 @@ namespace PKGE
         //https://docs.unity3d.com/2022.3/Documentation/Manual/UnderstandingPerformanceStringsAndText.html
         #region Unity Documentation
         #region StartsWithOrdinal
-        public static bool StartsWithOrdinal(this string a, [System.Diagnostics.CodeAnalysis.NotNull] string b)
+        public static bool StartsWithOrdinal(this string a, string b)
         {
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
@@ -526,12 +502,12 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool StartsWithOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string a, char b)
+        public static bool StartsWithOrdinal(this string a, char b)
         {
             return a[0] == b;
         }
 
-        public static bool StartsWithOrdinal(this string a, [System.Diagnostics.CodeAnalysis.NotNull] string b, bool ignoreCase)
+        public static bool StartsWithOrdinal(this string a, string b, bool ignoreCase)
         {
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
@@ -566,7 +542,7 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool StartsWithOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string a, char b, bool ignoreCase)
+        public static bool StartsWithOrdinal(this string a, char b, bool ignoreCase)
         {
             if (ignoreCase)
                 return char.ToLower(a[0]) == char.ToLower(b);
@@ -575,7 +551,7 @@ namespace PKGE
         }
         #endregion // StartsWithOrdinal
         #region EndsWithOrdinal
-        public static bool EndsWithOrdinal(this string a, [System.Diagnostics.CodeAnalysis.NotNull] string b)
+        public static bool EndsWithOrdinal(this string a, string b)
         {
             if (b == null)
                 throw new ArgumentNullException(nameof(b));
@@ -596,12 +572,12 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool EndsWithOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string a, char b)
+        public static bool EndsWithOrdinal(this string a, char b)
         {
             return a[^1] == b;
         }
 
-        public static bool EndsWithOrdinal(this string a, [System.Diagnostics.CodeAnalysis.NotNull] string b, bool ignoreCase)
+        public static bool EndsWithOrdinal(this string a, string b, bool ignoreCase)
         {
             if (b.Length == 1)
                 return a.EndsWithOrdinal(b[0], ignoreCase);
@@ -630,7 +606,7 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool EndsWithOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string a, char b, bool ignoreCase)
+        public static bool EndsWithOrdinal(this string a, char b, bool ignoreCase)
         {
             if (ignoreCase)
                 return char.ToLower(a[^1]) == char.ToLower(b);
@@ -641,7 +617,7 @@ namespace PKGE
         #endregion // Unity Documentation
         
         #region ContainsOrdinal
-        public static bool ContainsOrdinal(this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value)
+        public static bool ContainsOrdinal(this string str, string value)
         {
             if (value.Length == 1)
                 return str.ContainsOrdinal(value[0]);
@@ -649,7 +625,7 @@ namespace PKGE
             return str.IndexOfOrdinal(value) >= 0;
         }
 
-        public static bool ContainsOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value)
+        public static bool ContainsOrdinal(this string str, char value)
         {
             foreach (char c in str)
             {
@@ -660,7 +636,7 @@ namespace PKGE
             return false;
         }
 
-        public static bool ContainsOrdinal(this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value, bool ignoreCase)
+        public static bool ContainsOrdinal(this string str, string value, bool ignoreCase)
         {
             if (value.Length == 1)
                 return str.ContainsOrdinal(value[0], ignoreCase);
@@ -668,7 +644,7 @@ namespace PKGE
             return str.IndexOfOrdinal(value, ignoreCase) >= 0;
         }
 
-        public static bool ContainsOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, bool ignoreCase)
+        public static bool ContainsOrdinal(this string str, char value, bool ignoreCase)
         {
             if (ignoreCase == false)
             {
@@ -693,7 +669,7 @@ namespace PKGE
         }
         #endregion // ContainsOrdinal
         #region IndexOfOrdinal
-        public static int IndexOfOrdinal(this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value)
+        public static int IndexOfOrdinal(this string str, string value)
         {
             if (value == string.Empty)
                 return 0;
@@ -728,12 +704,12 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, string value, int startIndex)
+        public static int IndexOfOrdinal(this string str, string value, int startIndex)
         {
             return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex);
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value, int startIndex, int count)
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, int count)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -774,7 +750,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal(this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value, bool ignoreCase)
+        public static int IndexOfOrdinal(this string str, string value, bool ignoreCase)
         {
             if (value.Length == 1)
                 return str.IndexOfOrdinal(value[0], ignoreCase);
@@ -825,12 +801,12 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, string value, int startIndex, bool ignoreCase)
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, bool ignoreCase)
         {
             return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex, ignoreCase);
         }
 
-        public static int IndexOfOrdinal(this string str, [System.Diagnostics.CodeAnalysis.NotNull] string value, int startIndex, int count, bool ignoreCase)
+        public static int IndexOfOrdinal(this string str, string value, int startIndex, int count, bool ignoreCase)
         {
             if (value == string.Empty)
                 return startIndex;
@@ -884,7 +860,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value)
+        public static int IndexOfOrdinal(this string str, char value)
         {
             for (int i = 0; i < str.Length; i++)
             {
@@ -895,12 +871,12 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, int startIndex)
+        public static int IndexOfOrdinal(this string str, char value, int startIndex)
         {
             return str.IndexOfOrdinal(value, startIndex, str.Length - startIndex);
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, int startIndex, int count)
+        public static int IndexOfOrdinal(this string str, char value, int startIndex, int count)
         {
             if (str.Length != 0 && (startIndex < 0 || startIndex >= str.Length))
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
@@ -917,7 +893,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, bool ignoreCase)
+        public static int IndexOfOrdinal(this string str, char value, bool ignoreCase)
         {
             if (ignoreCase == false)
             {
@@ -954,7 +930,7 @@ namespace PKGE
         /// The zero-based index position of <paramref name="value"/> if that character is found, or -1
         /// if it is not.
         /// </returns>
-        public static int LastIndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, bool ignoreCase = false)
+        public static int LastIndexOfOrdinal(this string str, char value, bool ignoreCase = false)
         {
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
@@ -983,7 +959,7 @@ namespace PKGE
         /// The current instance <see cref="string.Length"/> does not equal 0, 
         /// and <paramref name="startIndex"/> is less than zero or greater than or equal to the length of this instance.
         /// </exception>
-        public static int LastIndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, int startIndex, bool ignoreCase = false)
+        public static int LastIndexOfOrdinal(this string str, char value, int startIndex, bool ignoreCase = false)
         {
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
@@ -1015,7 +991,7 @@ namespace PKGE
         /// -or-The current instance <see cref="string.Length"/> 
         /// does not equal 0, and <paramref name="startIndex"/> - <paramref name="count"/> + 1 is less than zero.
         /// </exception>
-        public static int LastIndexOfOrdinal([System.Diagnostics.CodeAnalysis.NotNull] this string str, char value, int startIndex, int count, bool ignoreCase = false)
+        public static int LastIndexOfOrdinal(this string str, char value, int startIndex, int count, bool ignoreCase = false)
         {
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
@@ -1061,8 +1037,7 @@ namespace PKGE
         /// <summary>
         /// Remove all occurrences of char c.
         /// </summary>
-        [JetBrains.Annotations.CanBeNull]
-        public static string RemoveChar([System.Diagnostics.CodeAnalysis.MaybeNull] this string str, char c)
+        public static string? RemoveChar(this string? str, char c)
         {
             // If c wasn't found, return the original string
             if (string.IsNullOrEmpty(str) || str.IndexOfOrdinal(c) == -1)
@@ -1096,8 +1071,7 @@ namespace PKGE
             }
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static string RemoveWhiteSpace([System.Diagnostics.CodeAnalysis.MaybeNull] this string str)
+        public static string? RemoveWhiteSpace(this string? str)
         {
             // If c wasn't found, return the original string
             if (string.IsNullOrEmpty(str))
@@ -1140,7 +1114,7 @@ namespace PKGE
         /// </summary>
         /// <param name="input">String to be converted from Base64.</param>
         /// <returns>Length of the byte array needed to allocate.</returns>
-        public static int FromBase64_ComputeResultLength([System.Diagnostics.CodeAnalysis.NotNull] this string input)
+        public static int FromBase64_ComputeResultLength(this string input)
         {
             return FromBase64_ComputeResultLength(input.AsSpan());
         }
@@ -1236,8 +1210,7 @@ namespace PKGE
         }
         #endregion // dotnet
 
-        [JetBrains.Annotations.NotNull]
-        public static string Remove([System.Diagnostics.CodeAnalysis.NotNull] this string str, List<char> removeChars)
+        public static string Remove(this string str, List<char> removeChars)
         {
             using (StringBuilderPool.Get(out var sb))
             {
@@ -1253,8 +1226,7 @@ namespace PKGE
             }
         }
 
-        [JetBrains.Annotations.NotNull]
-        public static string RemoveEmptyLines([System.Diagnostics.CodeAnalysis.NotNull] this string text, bool trimEnd = false)
+        public static string RemoveEmptyLines(this string text, bool trimEnd = false)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
             bool isPreviousLineEmpty = true;

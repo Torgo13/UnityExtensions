@@ -1,4 +1,5 @@
 #if INCLUDE_COLLECTIONS
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -54,10 +55,9 @@ namespace PKGE.Unsafe
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsNotNull(array);
             Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
 
@@ -65,13 +65,13 @@ namespace PKGE.Unsafe
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
         {
             unsafeList.AddRange(array.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, [System.Diagnostics.CodeAnalysis.NotNull] List<T> list) where T : unmanaged
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
         {
             unsafeList.AddRange(list.AsSpan());
         }

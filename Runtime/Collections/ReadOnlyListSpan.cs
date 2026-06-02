@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace PKGE
     /// This collection is not thread-safe.
     /// </remarks>
     /// <typeparam name="T">The element type.</typeparam>
-    public readonly struct ReadOnlyListSpan<T> : IReadOnlyList<T>, IEquatable<ReadOnlyListSpan<T>>
+    public readonly struct ReadOnlyListSpan<T> : IReadOnlyList<T?>, IEquatable<ReadOnlyListSpan<T>>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/ReadOnlyListSpan.cs
         #region Unity.XR.CoreUtils.Collections
@@ -34,7 +35,7 @@ namespace PKGE
         /// <param name="index">The index.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="index"/> is <see langword="null"/>.
         /// </exception>
-        public T this[int index]
+        public T? this[int index]
         {
             get
             {
@@ -52,7 +53,7 @@ namespace PKGE
         /// <param name="list">The list to wrap.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.
         /// </exception>
-        public ReadOnlyListSpan([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list)
+        public ReadOnlyListSpan(IReadOnlyList<T> list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
@@ -70,7 +71,7 @@ namespace PKGE
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException"> Thrown if
         /// start or length are outside the bounds of the list.</exception>
-        public ReadOnlyListSpan([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list, int start, int length)
+        public ReadOnlyListSpan(IReadOnlyList<T> list, int start, int length)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
@@ -92,7 +93,7 @@ namespace PKGE
         /// <returns>A new <see cref="ReadOnlyListSpan{T}"/> that is a read only view of a slice of a list.</returns>
         /// <exception cref="ArgumentOutOfRangeException"> Thrown if
         /// start or length are outside the bounds of the current ReadOnlyListSpan.</exception>
-        public ReadOnlyListSpan<T> Slice(int start, int length)
+        public ReadOnlyListSpan<T?> Slice(int start, int length)
         {
             var newStart = _enumerator.start + start;
             if (newStart < _enumerator.start)
@@ -101,7 +102,7 @@ namespace PKGE
             if (newStart + length > _enumerator.end)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            return new ReadOnlyListSpan<T>(_enumerator.List, _enumerator.start + start, length);
+            return new ReadOnlyListSpan<T?>(_enumerator.List, _enumerator.start + start, length);
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace PKGE
         /// > Use the public <see cref="GetEnumerator"/> overload instead.
         /// </remarks>
         /// <returns>The boxed enumerator.</returns>
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator<T?> IEnumerable<T?>.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
@@ -190,7 +191,6 @@ namespace PKGE
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>The string.</returns>
-        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);
@@ -215,7 +215,7 @@ namespace PKGE
         /// <summary>
         /// Provides an enumerator for the elements of `ReadOnlyListSpan`.
         /// </summary>
-        public struct Enumerator : IEnumerator<T>
+        public struct Enumerator : IEnumerator<T?>
         {
             /// <summary>
             /// The inclusive start index of a slice of the list.
@@ -232,7 +232,7 @@ namespace PKGE
             /// </summary>
             /// <exception cref="ArgumentOutOfRangeException">Thrown if the current position is outside the bounds of
             /// the ReadOnlyListSpan.</exception>
-            public T Current
+            public readonly T? Current
             {
                 get
                 {
@@ -243,11 +243,11 @@ namespace PKGE
                 }
             }
 
-            object IEnumerator.Current => Current;
-            internal readonly IReadOnlyList<T> List;
+            object? IEnumerator.Current => Current;
+            internal readonly IReadOnlyList<T?> List;
             int _currentIndex;
 
-            internal Enumerator([System.Diagnostics.CodeAnalysis.NotNull] IReadOnlyList<T> list) : this(list, 0, list.Count) { }
+            internal Enumerator(IReadOnlyList<T> list) : this(list, 0, list.Count) { }
 
             /// <summary>
             /// Provides an enumerator for a slice of the elements of a list beginning with the

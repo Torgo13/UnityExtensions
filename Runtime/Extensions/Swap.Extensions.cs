@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -23,13 +24,14 @@ namespace PKGE
         /// <returns>True if it succeeded, false otherwise</returns>
         [JetBrains.Annotations.CollectionAccess(JetBrains.Annotations.CollectionAccessType.ModifyExistingContent)]
         [JetBrains.Annotations.MustUseReturnValue]
-        public static bool TrySwap<TValue>([DisallowNull] this IList<TValue> list, int from, int to,
-            [NotNullWhen(false)] [System.Diagnostics.CodeAnalysis.MaybeNull] out Exception error)
+        public static bool TrySwap<TValue>(this IList<TValue> list, int from, int to,
+            [NotNullWhen(false)] out Exception? error)
         {
             error = null;
             if (list == null)
             {
                 error = new ArgumentNullException(nameof(list));
+                return false;
             }
             else
             {

@@ -1,7 +1,7 @@
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using PKGE;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -35,7 +35,7 @@ namespace PKGE
             return new AffineTransform(t, q);
         }
 
-        public static AffineTransform CreateGlobal([System.Diagnostics.CodeAnalysis.NotNull] Transform transform)
+        public static AffineTransform CreateGlobal(Transform transform)
         {
             return Create(transform.position, transform.rotation);
         }

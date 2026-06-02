@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Runtime/Core/Utilities/CircularBuffer.cs
         #region Unity.LiveCapture
         T[] _data;
-        int _startIndex ;
+        int _startIndex;
         int _endIndex;
 
         /// <summary>
@@ -36,7 +37,7 @@ namespace PKGE
         /// <summary>
         /// A callback invoked for each element that is discarded from the buffer.
         /// </summary>
-        public event Action<T> ElementDiscarded;
+        public event Action<T>? ElementDiscarded;
 
         /// <summary>
         /// Constructs a new <see cref="CircularBuffer{T}"/> instance with an initial capacity.
@@ -44,7 +45,9 @@ namespace PKGE
         /// <param name="capacity">The maximum number of elements which can be stored in the collection.</param>
         public CircularBuffer(int capacity)
         {
-            Capacity = capacity;
+            _data = new T[capacity + 1];
+            _startIndex = 0;
+            _endIndex = 0;
         }
 
         /// <inheritdoc cref="PushBack"/>

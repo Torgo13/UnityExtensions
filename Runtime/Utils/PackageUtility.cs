@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Text.RegularExpressions;
 
@@ -7,8 +8,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/PackageUtility.cs
         #region Unity.LiveCapture
-        [JetBrains.Annotations.CanBeNull]
-        public static Version GetVersion([System.Diagnostics.CodeAnalysis.NotNull] string version)
+        public static Version? GetVersion(string version)
         {
             var versionNumbers = Regex.Split(version, @"\D+",
                 RegexOptions.None, TimeSpan.FromSeconds(0.1));

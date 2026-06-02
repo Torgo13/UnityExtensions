@@ -1,7 +1,7 @@
 ﻿#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
 #define WINDOWS
 #endif // UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +27,7 @@ namespace PKGE
         private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr FindWindowEx(IntPtr parentWindow, IntPtr previousChildWindow, string windowClass, string windowTitle);
+        private static extern IntPtr FindWindowEx(IntPtr parentWindow, IntPtr previousChildWindow, string? windowClass, string? windowTitle);
 
         /// <see href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowrect"/>
         [DllImport("user32.dll")]
@@ -80,7 +80,7 @@ namespace PKGE
             height: lpRect.Bottom - lpRect.Top
         );
 
-        private static void GetProcessRect([System.Diagnostics.CodeAnalysis.NotNull] Process process, ref LpRect rect, ref bool gotProcessRect)
+        private static void GetProcessRect(Process process, ref LpRect rect, ref bool gotProcessRect)
         {
             gotProcessRect = false;
 
@@ -100,7 +100,7 @@ namespace PKGE
 #endif // WINDOWS
 
         [Conditional("WINDOWS")]
-        public static void GetProcessRect([System.Diagnostics.CodeAnalysis.NotNull] Process process, ref RectInt rectInt, ref bool gotProcessRect)
+        public static void GetProcessRect(Process process, ref RectInt rectInt, ref bool gotProcessRect)
         {
 #if WINDOWS
             var rect = RectIntToLpRect(rectInt);

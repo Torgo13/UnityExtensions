@@ -1,4 +1,5 @@
 #if INCLUDE_COLLECTIONS
+#nullable enable
 using System;
 using System.Reflection;
 using Unity.Burst;
@@ -9,14 +10,14 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Utility/FunctionPointerUtility.cs
         #region Unity.Kinematica
-        public static FunctionPointer<TDelegate> CompileStaticMemberFunction<TDelegate>([System.Diagnostics.CodeAnalysis.NotNull] Type type, [System.Diagnostics.CodeAnalysis.NotNull] string methodName) where TDelegate : class
+        public static FunctionPointer<TDelegate> CompileStaticMemberFunction<TDelegate>(Type type, string methodName) where TDelegate : class
         {
             if (type.GetCustomAttribute<BurstCompileAttribute>() == null)
             {
                 throw new ArgumentException($"Compilation of function {methodName} from {type.Name} failed : class is missing [BurstCompile] attribute.");
             }
 
-            MethodInfo method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
+            MethodInfo? method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
             if (method == null)
             {
                 throw new ArgumentException($"Compilation of function {methodName} from {type.Name} failed : method not found.");

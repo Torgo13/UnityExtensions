@@ -6,8 +6,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#pragma warning disable CS0660, CS0661
-
 namespace PKGE
 {
     partial struct Span2D<T>
@@ -30,7 +28,7 @@ namespace PKGE
 
             nint startIndex = (nint)(uint)this.Stride * (nint)(uint)row;
             ref T r0 = ref DangerousGetReference();
-            ref T r1 = ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, startIndex);
+            ref T r1 = ref Unsafe.Add(ref r0, startIndex);
 
             return new(ref r1, Width, 1);
         }
@@ -50,7 +48,7 @@ namespace PKGE
             }
 
             ref T r0 = ref DangerousGetReference();
-            ref T r1 = ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, (nint)(uint)column);
+            ref T r1 = ref Unsafe.Add(ref r0, (nint)(uint)column);
 
             return new(ref r1, Height, this.Stride);
         }
@@ -143,7 +141,7 @@ namespace PKGE
                     ref T r0 = ref MemoryMarshal.GetReference(this.span);
                     nint index = ((nint)(uint)this.y * (nint)(uint)this.stride) + (nint)(uint)this.x;
 
-                    return ref System.Runtime.CompilerServices.Unsafe.Add(ref r0, index);
+                    return ref Unsafe.Add(ref r0, index);
                 }
             }
         }

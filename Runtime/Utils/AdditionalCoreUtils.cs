@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -23,7 +24,6 @@ namespace PKGE
         /// depending on the Editor configuration.
         /// See https://fogbugz.unity3d.com/f/cases/1196137/.
         /// </remarks>
-        [JetBrains.Annotations.NotNull]
         public static GameObject CreateEmptyGameObject()
         {
             var result = GameObject.CreatePrimitive(PrimitiveType.Cube);

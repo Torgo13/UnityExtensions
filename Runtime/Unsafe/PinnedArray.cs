@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -16,7 +17,7 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/e1261529950630672ed38500dd626d4f4298b7bc/Packages/com.unity.render-pipelines.universal/Runtime/Memory/PinnedArray.cs
         #region UnityEngine.Rendering.Universal
-        public readonly T[] managedArray;
+        public readonly T[]? managedArray;
         public readonly NativeArray<T> nativeArray;
         private readonly ulong handle;
 
@@ -36,9 +37,8 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int start, int length)
+        public PinnedArray(T[] array, int start, int length)
         {
-            Assert.IsNotNull(array);
             Assert.IsTrue(start >= 0);
             Assert.IsTrue(length >= 0);
             Assert.IsTrue(start + length <= array.Length);
@@ -56,9 +56,8 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array, int length)
+        public PinnedArray(T[] array, int length)
         {
-            Assert.IsNotNull(array);
             Assert.IsTrue(length >= 0);
             managedArray = array;
             unsafe
@@ -71,9 +70,8 @@ namespace PKGE.Unsafe
 #endif
         }
 
-        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] T[] array)
+        public PinnedArray(T[] array)
         {
-            Assert.IsNotNull(array);
             managedArray = array;
             unsafe
             {
@@ -85,10 +83,10 @@ namespace PKGE.Unsafe
 #endif
         }
         
-        public PinnedArray([System.Diagnostics.CodeAnalysis.NotNull] List<T> list)
+        public PinnedArray(List<T> list)
         {
             Assert.IsNotNull(list);
-            managedArray = list.ExtractArrayFromList();
+            managedArray = list.ExtractArrayFromList()!;
             unsafe
             {
                 nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
@@ -114,7 +112,7 @@ namespace PKGE.Unsafe
 
     public static partial class ArrayExtensions
     {
-        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int start, int length, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>(this T[] array, int start, int length, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array, start, length);
@@ -122,7 +120,7 @@ namespace PKGE.Unsafe
             return pinnedArray;
         }
 
-        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int length, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>(this T[] array, int length, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array, length);
@@ -130,7 +128,7 @@ namespace PKGE.Unsafe
             return pinnedArray;
         }
 
-        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>(this T[] array, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(array);
@@ -141,7 +139,7 @@ namespace PKGE.Unsafe
 
     public static partial class ListExtensions
     {
-        public static PinnedArray<T> AsNativeArray<T>([System.Diagnostics.CodeAnalysis.NotNull] this List<T> list, out NativeArray<T> nativeArray)
+        public static PinnedArray<T> AsNativeArray<T>(this List<T> list, out NativeArray<T> nativeArray)
             where T : struct
         {
             var pinnedArray = new PinnedArray<T>(list);

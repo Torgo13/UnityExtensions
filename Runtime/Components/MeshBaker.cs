@@ -1,4 +1,5 @@
 #if USING_IMAGE_CONVERSION_MODULE
+#nullable enable
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -24,7 +25,7 @@ namespace PKGE
         public float sliceThreshold = 0.0044f;
 
         // Baked data
-        [HideInInspector] public List<float> slicesY;
+        [HideInInspector] public List<float>? slicesY;
         [HideInInspector] public Bounds bounds;
 
         public void Bake()
@@ -139,7 +140,7 @@ namespace PKGE
             public Vector2 uv;
         }
 
-        void GetSlice([System.Diagnostics.CodeAnalysis.NotNull] List<PointWithUV> slice, int idx, out float sliceLength)
+        void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
         {
             var vertices = ListPool<Vector3>.Get();
             var colors = ListPool<Color>.Get();

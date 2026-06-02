@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 
@@ -15,21 +16,20 @@ namespace PKGE
         [SerializeField] private string enumTypeAsString;
 
         /// <summary> Value as enum </summary>
-        [JetBrains.Annotations.CanBeNull]
-        public Enum value
+        public Enum? value
         {
             get => !string.IsNullOrEmpty(enumTypeAsString)
                    && Enum.TryParse(Type.GetType(enumTypeAsString), enumValueAsString, out object result)
                 ? (Enum)result
                 : null;
-            set => enumValueAsString = value?.ToString();
+            set => enumValueAsString = value?.ToString() ?? string.Empty;
         }
 
         /// <summary>
         /// Construct an enum to be serialized with a type
         /// </summary>
         /// <param name="enumType">The underlying type of the enum</param>
-        public SerializableEnum([System.Diagnostics.CodeAnalysis.NotNull] Type enumType)
+        public SerializableEnum(Type enumType)
         {
             enumTypeAsString = enumType.AssemblyQualifiedName;
             enumValueAsString = Enum.GetNames(enumType)[0];

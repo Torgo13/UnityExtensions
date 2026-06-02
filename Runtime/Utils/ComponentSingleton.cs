@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace PKGE
@@ -15,7 +16,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ComponentSingleton.cs
         #region UnityEngine.Rendering
-        static TType _instance;
+        static TType? _instance;
         /// <summary>
         /// Instance of the required component type.
         /// </summary>

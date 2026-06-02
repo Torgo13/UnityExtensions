@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -16,7 +17,7 @@ namespace PKGE
 #if USING_IMAGE_CONVERSION_MODULE
         /// <exception cref="ArgumentException">Thrown if <paramref name="target"/> is not a
         /// Texture2D, a RenderTexture or a Cubemap.</exception>
-        public static void WriteTextureToDisk(this Texture target, [System.Diagnostics.CodeAnalysis.NotNull] string filePath, string filename = "")
+        public static void WriteTextureToDisk(this Texture? target, string filePath, string? filename = "")
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -25,7 +26,7 @@ namespace PKGE
             }
 
             if (string.IsNullOrEmpty(filename))
-                filename = target.name;
+                filename = target != null ? target.name : DateTime.UtcNow.ToString();
 
             var t2D = target as Texture2D;
             if (t2D != null)
@@ -84,16 +85,16 @@ namespace PKGE
         /// </summary>
         /// <param name="source">RenderTexture with a TextureDimension of either Tex2D or Cube.</param>
         /// <returns>The copied texture.</returns>
-        public static Texture2D CopyRenderTextureToTexture2D([System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
+        public static Texture2D? CopyRenderTextureToTexture2D(this RenderTexture source)
         {
             Assert.IsTrue(source.dimension is TextureDimension.Tex2D or TextureDimension.Cube);
 
-            return (Texture2D)RenderTextureToTexture(source);
+            return RenderTextureToTexture(source) as Texture2D;
         }
 
         /// <exception cref="ArgumentException">Thrown if <paramref name="source"/> is not a
         /// Texture2D, Texture3D or Cubemap.</exception>
-        private static Texture RenderTextureToTexture([System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
+        private static Texture? RenderTextureToTexture(this RenderTexture source)
         {
             return RenderTextureToTextureAsync(source).AsTask().Result;
         }
@@ -101,7 +102,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Runtime/Utilities/HDBakingUtilities.cs
         #region UnityEngine.Rendering.HighDefinition
-        public static void CreateParentDirectoryIfMissing([System.Diagnostics.CodeAnalysis.NotNull] string path)
+        public static void CreateParentDirectoryIfMissing(string path)
         {
             var fileInfo = new FileInfo(path);
             Assert.IsNotNull(fileInfo.Directory);
@@ -114,8 +115,8 @@ namespace PKGE
         #region Async
 #if USING_IMAGE_CONVERSION_MODULE
         /// <inheritdoc cref="WriteTextureToDisk(Texture,string,string)"/>
-        public static async System.Threading.Tasks.ValueTask<string> WriteTextureToDiskAsync(this Texture target,
-            [System.Diagnostics.CodeAnalysis.NotNull] string filePath)
+        public static async System.Threading.Tasks.ValueTask<string> WriteTextureToDiskAsync(this Texture? target,
+            string filePath)
         {
             var rt = target as RenderTexture;
             if (rt != null)
@@ -127,7 +128,7 @@ namespace PKGE
             var t2D = target as Texture2D;
             if (t2D != null)
             {
-                return await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
+                return await t2D.SaveAsEXRAsync(t2D.name, filePath, Texture2D.EXRFlags.CompressZIP)
                     .ConfigureAwait(continueOnCapturedContext: true);
             }
 
@@ -148,7 +149,7 @@ namespace PKGE
 
                 Graphics.ExecuteCommandBuffer(cmd);
 
-                var assetPath = await t2D.SaveAsEXRAsync(target.name, filePath, Texture2D.EXRFlags.CompressZIP)
+                var assetPath = await t2D.SaveAsEXRAsync(cube.name, filePath, Texture2D.EXRFlags.CompressZIP)
                     .ConfigureAwait(continueOnCapturedContext: true);
 
                 cmd.Dispose();
@@ -160,19 +161,17 @@ namespace PKGE
 #endif // USING_IMAGE_CONVERSION_MODULE
 
         /// <inheritdoc cref="CopyRenderTextureToTexture2D(RenderTexture)"/>
-        [JetBrains.Annotations.ItemNotNull]
-        public static async System.Threading.Tasks.ValueTask<Texture2D> CopyRenderTextureToTexture2DAsync(
-            [System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture source)
+        public static async System.Threading.Tasks.ValueTask<Texture2D?> CopyRenderTextureToTexture2DAsync(
+            this RenderTexture source)
         {
             Assert.IsTrue(source.dimension is TextureDimension.Tex2D or TextureDimension.Cube);
 
-            return (Texture2D)await source.RenderTextureToTextureAsync().ConfigureAwait(continueOnCapturedContext: true);
+            return await source.RenderTextureToTextureAsync().ConfigureAwait(continueOnCapturedContext: true) as Texture2D;
         }
 
         /// <inheritdoc cref="RenderTextureToTexture(RenderTexture)"/>
-        [JetBrains.Annotations.ItemNotNull]
-        private static async System.Threading.Tasks.ValueTask<Texture> RenderTextureToTextureAsync(
-            [System.Diagnostics.CodeAnalysis.NotNull] this Texture source)
+        private static async System.Threading.Tasks.ValueTask<Texture?> RenderTextureToTextureAsync(
+            this Texture source)
         {
             GraphicsFormat format = source.graphicsFormat;
             int resolution = source.width;
@@ -285,8 +284,7 @@ namespace PKGE
         /// <param name="mipChain">Whether to create mipmaps on the created <see cref="Texture2D"/>.</param>
         /// <returns>The original <paramref name="tex"/> if it is already readable,
         /// otherwise returns a readable copy.</returns>
-        [JetBrains.Annotations.NotNull]
-        public static Texture2D ReadTexture([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D tex, bool mipChain = false)
+        public static Texture2D ReadTexture(this Texture2D tex, bool mipChain = false)
         {
             if (tex.isReadable)
                 return tex;
@@ -324,9 +322,9 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="ReadTexture"/>
-        public static AsyncGPUReadbackRequest ReadTextureAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D tex,
-            [System.Diagnostics.CodeAnalysis.NotNull] out Texture2D readable, out NativeArray<Color32> readableData, bool mipChain = false,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] Action<AsyncGPUReadbackRequest> callback = null)
+        public static AsyncGPUReadbackRequest ReadTextureAsync(this Texture2D tex,
+            out Texture2D readable, out NativeArray<Color32> readableData, bool mipChain = false,
+            Action<AsyncGPUReadbackRequest>? callback = null)
         {
             if (tex.isReadable)
             {

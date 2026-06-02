@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -47,9 +48,7 @@ namespace PKGE
         AnimationCurve curve;
 
         readonly AnimationCurve _loopingCurve = new AnimationCurve();
-#nullable enable
         Texture2D? _texture;
-#nullable disable
 
         bool _isCurveDirty;
         bool _isTextureDirty;
@@ -68,7 +67,7 @@ namespace PKGE
         /// <param name="zeroValue">The default value to use when the curve doesn't have any key.</param>
         /// <param name="loop">Should the curve automatically loop in the given <paramref name="bounds"/>?</param>
         /// <param name="bounds">The boundaries of the curve.</param>
-        public TextureCurve([System.Diagnostics.CodeAnalysis.NotNull] AnimationCurve baseCurve, float zeroValue, bool loop, in Vector2 bounds)
+        public TextureCurve(AnimationCurve baseCurve, float zeroValue, bool loop, in Vector2 bounds)
             : this(baseCurve.keys, zeroValue, loop, bounds) { }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace PKGE
         /// <param name="zeroValue">The default value to use when the curve doesn't have any key.</param>
         /// <param name="loop">Should the curve automatically loop in the given <paramref name="bounds"/>?</param>
         /// <param name="bounds">The boundaries of the curve.</param>
-        public TextureCurve([System.Diagnostics.CodeAnalysis.NotNull] Keyframe[] keys, float zeroValue, bool loop, in Vector2 bounds)
+        public TextureCurve(Keyframe[] keys, float zeroValue, bool loop, in Vector2 bounds)
         {
             curve = new AnimationCurve(keys);
             this.zeroValue = zeroValue;
@@ -139,7 +138,6 @@ namespace PKGE
         /// Gets the texture representation of this curve.
         /// </summary>
         /// <returns>A 128x1 texture.</returns>
-        [JetBrains.Annotations.NotNull]
         public Texture2D GetTexture()
         {
             if (_texture == null)

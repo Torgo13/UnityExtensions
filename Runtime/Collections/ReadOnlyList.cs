@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,13 +15,13 @@ namespace PKGE
     /// This collection is not thread-safe.
     /// </remarks>
     /// <typeparam name="T">The element type.</typeparam>
-    public sealed class ReadOnlyList<T> : IReadOnlyList<T>, IEquatable<ReadOnlyList<T>>
+    public sealed class ReadOnlyList<T> : IReadOnlyList<T?>, IEquatable<ReadOnlyList<T>>
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Collections/ReadOnlyList.cs
         #region Unity.XR.CoreUtils.Collections
-        static ReadOnlyList<T> _emptyList;
+        static ReadOnlyList<T>? _emptyList;
 
-        readonly List<T> _list;
+        readonly List<T?> _list;
 
         /// <summary>
         /// The number of elements in the read-only list.
@@ -32,14 +33,14 @@ namespace PKGE
         /// Returns the element at <paramref name="index"/>.
         /// </summary>
         /// <param name="index">The index.</param>
-        public T this[int index] => _list[index];
+        public T? this[int index] => _list[index];
 
         /// <summary>
         /// Constructs a new instance of this class that is a read-only wrapper around the specified list.
         /// </summary>
         /// <param name="list">The list to wrap.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="list"/> is <see langword="null"/>.</exception>
-        public ReadOnlyList([System.Diagnostics.CodeAnalysis.NotNull] List<T> list)
+        public ReadOnlyList(List<T?> list)
         {
             _list = list ?? throw new ArgumentNullException(nameof(list));
         }
@@ -51,11 +52,10 @@ namespace PKGE
         /// <remarks>
         /// This method caches an empty read-only list that you can re-use throughout the life cycle of your app.
         /// </remarks>
-        [JetBrains.Annotations.NotNull]
         public static ReadOnlyList<T> Empty()
         {
             if (_emptyList == null)
-                _emptyList = new ReadOnlyList<T>(new List<T>(0));
+                _emptyList = new ReadOnlyList<T>(new List<T?>(0));
 
             return _emptyList;
         }
@@ -64,7 +64,7 @@ namespace PKGE
         /// Returns an enumerator that iterates through the read-only list.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public List<T>.Enumerator GetEnumerator() => _list.GetEnumerator();
+        public List<T?>.Enumerator GetEnumerator() => _list.GetEnumerator();
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
@@ -75,7 +75,7 @@ namespace PKGE
         /// > Use the public <see cref="GetEnumerator"/> overload instead.
         /// </remarks>
         /// <returns>The boxed enumerator.</returns>
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        IEnumerator<T?> IEnumerable<T?>.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Returns an enumerator that iterates through the read-only list.
@@ -96,7 +96,7 @@ namespace PKGE
         /// <remarks>
         /// Two `ReadOnlyList` instances compare equal if they are read-only views of the same list instance.
         /// </remarks>
-        public bool Equals(ReadOnlyList<T> other)
+        public bool Equals(ReadOnlyList<T>? other)
         {
             if (other is null)
                 return false;
@@ -111,7 +111,7 @@ namespace PKGE
         /// <remarks>
         /// Two `ReadOnlyList` instances compare equal if they are read-only views of the same list instance.
         /// </remarks>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null)
                 return false;
@@ -127,7 +127,7 @@ namespace PKGE
         /// <param name="lhs">The left-hand side of the comparison.</param>
         /// <param name="rhs">The right-hand side of the comparison.</param>
         /// <returns>`true` if objects are equal. Otherwise, `false`.</returns>
-        public static bool operator ==([System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> lhs, [System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> rhs)
+        public static bool operator ==(ReadOnlyList<T>? lhs, ReadOnlyList<T>? rhs)
         {
             if (lhs is null && rhs is null)
                 return true;
@@ -141,7 +141,7 @@ namespace PKGE
         /// <param name="lhs">The left-hand side of the comparison.</param>
         /// <param name="rhs">The right-hand side of the comparison.</param>
         /// <returns>`false` if objects are equal. Otherwise, `true`.</returns>
-        public static bool operator !=([System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> lhs, [System.Diagnostics.CodeAnalysis.MaybeNull] ReadOnlyList<T> rhs) => !(lhs == rhs);
+        public static bool operator !=(ReadOnlyList<T>? lhs, ReadOnlyList<T>? rhs) => !(lhs == rhs);
 
         /// <summary>
         /// Get a hash code for this object.
@@ -153,7 +153,6 @@ namespace PKGE
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>The string.</returns>
-        [JetBrains.Annotations.NotNull]
         public override string ToString()
         {
             using var _0 = StringBuilderPool.Get(out var sb);

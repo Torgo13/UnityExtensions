@@ -1,6 +1,6 @@
+#nullable enable
 using System;
 using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PKGE
 {
@@ -46,7 +46,6 @@ namespace PKGE
             return new ResizableArrayPool<T>(minimumLength);
         }
 
-        [JetBrains.Annotations.NotNull]
         public T[] Resize(int minimumLength)
         {
             UnityEngine.Assertions.Assert.IsTrue(minimumLength > 0);
@@ -68,7 +67,6 @@ namespace PKGE
     {
         //https://github.com/CommunityToolkit/dotnet/blob/657c6971a8d42655c648336b781639ed96c2c49f/src/CommunityToolkit.HighPerformance/Extensions/ArrayPoolExtensions.cs
         #region CommunityToolkit.HighPerformance
-#nullable enable
         /// <summary>
         /// Changes the number of elements of a rented one-dimensional array to the specified new size.
         /// </summary>
@@ -172,6 +170,5 @@ namespace PKGE
         {
             ArrayPool<T>.Shared.Resize(ref array, newSize, clearArray);
         }
-#nullable restore
     }
 }

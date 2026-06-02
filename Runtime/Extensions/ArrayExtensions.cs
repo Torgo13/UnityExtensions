@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -86,7 +87,7 @@ namespace PKGE
             return bytes1.AsSpan(offset1, count1).SequenceEqual(bytes2.AsSpan(offset2, count2));
         }
 
-        public static bool StartsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern)
+        public static bool StartsWith(this byte[] array, int offset, int count, ReadOnlySpan<byte> pattern)
         {
             int patternLength = pattern.Length;
 
@@ -96,7 +97,7 @@ namespace PKGE
             return array.AsSpan(offset, count).StartsWith(pattern);
         }
 
-        public static bool EndsWith(this byte[] array, int offset, int count, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern)
+        public static bool EndsWith(this byte[] array, int offset, int count, ReadOnlySpan<byte> pattern)
         {
             int patternLength = pattern.Length;
 
@@ -106,7 +107,7 @@ namespace PKGE
             return array.AsSpan(offset, count).EndsWith(pattern);
         }
 
-        public static int IndexOfBytes(this byte[] array, [System.Diagnostics.CodeAnalysis.DisallowNull] ReadOnlySpan<byte> pattern, int startIndex, int count)
+        public static int IndexOfBytes(this byte[] array, ReadOnlySpan<byte> pattern, int startIndex, int count)
         {
             int patternLength = pattern.Length;
 
@@ -122,7 +123,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
-        public static int LengthSafe<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array)
+        public static int LengthSafe<TValue>(this TValue[]? array)
         {
             if (array == null)
                 return 0;
@@ -130,7 +131,7 @@ namespace PKGE
             return array.Length;
         }
 
-        public static void Clear<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array)
+        public static void Clear<TValue>(this TValue[]? array)
         {
             if (array == null)
                 return;
@@ -138,7 +139,7 @@ namespace PKGE
             Array.Clear(array, 0, array.Length);
         }
 
-        public static void Clear<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, int count)
+        public static void Clear<TValue>(this TValue[]? array, int count)
         {
             if (array == null)
                 return;
@@ -146,7 +147,7 @@ namespace PKGE
             Array.Clear(array, 0, count);
         }
 
-        public static void Clear<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, ref int count)
+        public static void Clear<TValue>(this TValue[]? array, ref int count)
         {
             if (array == null)
                 return;
@@ -155,16 +156,16 @@ namespace PKGE
             count = 0;
         }
 
-        public static void EnsureCapacity<TValue>(ref TValue[] array, int count, int capacity, int capacityIncrement = 10)
+        public static void EnsureCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, int count, int capacity, int capacityIncrement = 10)
         {
-            if (capacity == 0)
-                return;
-
             if (array == null)
             {
                 array = new TValue[Math.Max(capacity, capacityIncrement)];
                 return;
             }
+
+            if (capacity == 0)
+                return;
 
             var currentCapacity = array.Length - count;
             if (currentCapacity >= capacity)
@@ -173,7 +174,7 @@ namespace PKGE
             DuplicateWithCapacity(ref array, count, capacity, capacityIncrement);
         }
 
-        public static void DuplicateWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.AllowNull] ref TValue[] array, int count, int capacity, int capacityIncrement = 10)
+        public static void DuplicateWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, int count, int capacity, int capacityIncrement = 10)
         {
             if (array == null)
             {
@@ -187,7 +188,7 @@ namespace PKGE
             array = newArray;
         }
 
-        public static bool Contains<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, TValue value)
+        public static bool Contains<TValue>(this TValue[]? array, TValue value)
         {
             if (array == null)
                 return false;
@@ -200,7 +201,7 @@ namespace PKGE
             return false;
         }
 
-        public static bool ContainsReference<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, TValue value)
+        public static bool ContainsReference<TValue>(this TValue[]? array, TValue value)
             where TValue : class
         {
             if (array == null)
@@ -225,7 +226,7 @@ namespace PKGE
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "index", Justification = "Keep this for future implementation")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter")]
-        public static bool HaveDuplicateReferences<TFirst>([System.Diagnostics.CodeAnalysis.DisallowNull] this TFirst[] first, int index, int count)
+        public static bool HaveDuplicateReferences<TFirst>(this TFirst[] first, int index, int count)
             where TFirst : class
         {
             for (var i = 0; i < count; ++i)
@@ -240,7 +241,7 @@ namespace PKGE
             return false;
         }
 
-        public static bool HaveEqualElements<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] first, [System.Diagnostics.CodeAnalysis.MaybeNull] TValue[] second, int count = int.MaxValue)
+        public static bool HaveEqualElements<TValue>(this TValue[]? first, TValue[]? second, int count = int.MaxValue)
         {
             if (first == null || second == null)
                 return second == first;
@@ -260,7 +261,7 @@ namespace PKGE
         }
 
         ////REVIEW: remove this to get rid of default equality comparer?
-        public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, TValue value, int startIndex = 0, int count = -1)
+        public static int IndexOf<TValue>(this TValue[]? array, TValue value, int startIndex = 0, int count = -1)
         {
             if (array == null)
                 return -1;
@@ -275,16 +276,12 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOf<TValue>(
-            [System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array,
-            [System.Diagnostics.CodeAnalysis.DisallowNull] Predicate<TValue> predicate)
+        public static int IndexOf<TValue>(this TValue[] array, Predicate<TValue> predicate)
         {
             return IndexOf(array.AsSpan(), predicate);
         }
 
-        public static int IndexOf<TValue>(
-            [System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TValue> array,
-            [System.Diagnostics.CodeAnalysis.DisallowNull] Predicate<TValue> predicate)
+        public static int IndexOf<TValue>(this ReadOnlySpan<TValue> array, Predicate<TValue> predicate)
         {
             if (array == null)
                 return -1;
@@ -297,12 +294,12 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, Predicate<TValue> predicate, int startIndex, int count = -1)
+        public static int IndexOf<TValue>(this TValue[] array, Predicate<TValue> predicate, int startIndex, int count = -1)
         {
             return IndexOf(array.AsSpan(), predicate, startIndex, count);
         }
 
-        public static int IndexOf<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TValue> array, Predicate<TValue> predicate, int startIndex, int count = -1)
+        public static int IndexOf<TValue>(this ReadOnlySpan<TValue> array, Predicate<TValue> predicate, int startIndex, int count = -1)
         {
             if (array == null)
                 return -1;
@@ -324,7 +321,7 @@ namespace PKGE
             return IndexOfReference(array, value, 0, count);
         }
 
-        public static int IndexOfReference<TFirst, TSecond>([System.Diagnostics.CodeAnalysis.MaybeNull] this TFirst[] array, TSecond value, int startIndex, int count)
+        public static int IndexOfReference<TFirst, TSecond>(this TFirst[] array, TSecond value, int startIndex, int count)
             where TSecond : class
             where TFirst : TSecond
         {
@@ -334,7 +331,7 @@ namespace PKGE
                 : startIndex + index;
         }
 
-        public static int IndexOfReference<TFirst, TSecond>([System.Diagnostics.CodeAnalysis.MaybeNull] this ReadOnlySpan<TFirst> array, TSecond value)
+        public static int IndexOfReference<TFirst, TSecond>(this ReadOnlySpan<TFirst> array, TSecond value)
             where TSecond : class
             where TFirst : TSecond
         {
@@ -348,7 +345,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int IndexOfValue<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array, TValue value, int startIndex = 0, int count = -1)
+        public static int IndexOfValue<TValue>(this TValue[]? array, TValue value, int startIndex = 0, int count = -1)
             where TValue : struct, IEquatable<TValue>
         {
             if (array == null)
@@ -363,7 +360,7 @@ namespace PKGE
             return -1;
         }
 
-        public static int Append<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, TValue value)
+        public static int Append<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, TValue value)
         {
             if (array == null)
             {
@@ -378,7 +375,7 @@ namespace PKGE
             return length;
         }
 
-        public static int Append<TValue>(ref TValue[] array, [System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<TValue> values)
+        public static int Append<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, IEnumerable<TValue> values)
         {
             using var _0 = UnityEngine.Pool.ListPool<TValue>.Get(out var list);
             list.AddRange(values);
@@ -401,10 +398,12 @@ namespace PKGE
             return oldLength;
         }
 
-        // Append to an array that is considered immutable. This allows using 'values' as is
-        // if 'array' is null.
-        // Returns the index of the first newly added element in the resulting array.
-        public static int AppendToImmutable<TValue>(ref TValue[] array, TValue[] values)
+        /// <summary>
+        /// Append to an array that is considered immutable. This allows using <paramref name="values"/> as is
+        /// if <paramref name="array"/> is <see langword="null"/>.
+        /// </summary>
+        /// <returns>The index of the first newly added element in the resulting array.</returns>
+        public static int AppendToImmutable<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, TValue[]? values)
         {
             if (array == null)
             {
@@ -424,7 +423,7 @@ namespace PKGE
             return array.Length;
         }
 
-        public static int AppendWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, ref int count, TValue value, int capacityIncrement = 10)
+        public static int AppendWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, ref int count, TValue value, int capacityIncrement = 10)
         {
             if (array == null)
             {
@@ -448,7 +447,7 @@ namespace PKGE
             return index;
         }
 
-        public static int AppendListWithCapacity<TValue, TValues>(ref TValue[] array, ref int length, [System.Diagnostics.CodeAnalysis.NotNull] TValues values, int capacityIncrement = 10)
+        public static int AppendListWithCapacity<TValue, TValues>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, ref int length, TValues values, int capacityIncrement = 10)
             where TValues : IReadOnlyList<TValue>
         {
             var numToAdd = values.Count;
@@ -477,7 +476,7 @@ namespace PKGE
             return index;
         }
 
-        public static void InsertAt<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, int index, TValue value)
+        public static void InsertAt<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, int index, TValue value)
         {
             if (array == null)
             {
@@ -501,28 +500,30 @@ namespace PKGE
             array[index] = value;
         }
 
-        public static void InsertAtWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, ref int count, int index, TValue value, int capacityIncrement = 10)
+        public static void InsertAtWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, ref int count, int index, TValue value, int capacityIncrement = 10)
         {
             EnsureCapacity(ref array, count, count + 1, capacityIncrement);
 
             if (index != count)
                 Array.Copy(array, index, array, index + 1, count - index);
 
-            array[index] = value;
+            array![index] = value;
             ++count;
         }
 
-        public static void PutAtIfNotSet<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[] array, int index, Func<TValue> valueFn)
+        public static void PutAtIfNotSet<TValue>(ref TValue[] array, int index, Func<TValue> valueFn)
         {
             if (array.LengthSafe() < index + 1)
                 Array.Resize(ref array, index + 1);
 
-            if (EqualityComparer<TValue>.Default.Equals(array[index], default(TValue)))
+            if (Equals(array[index], default(TValue)))
                 array[index] = valueFn();
         }
 
-        // Adds 'count' entries to the array. Returns first index of newly added entries.
-        public static int GrowBy<TValue>(ref TValue[] array, int count)
+        /// <summary>
+        /// Adds 'count' entries to the array. Returns first index of newly added entries.
+        /// </summary>
+        public static int GrowBy<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, int count)
         {
             if (array == null)
             {
@@ -535,14 +536,14 @@ namespace PKGE
             return oldLength;
         }
 
-        public static int GrowWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] ref TValue[] array, ref int count, int growBy, int capacityIncrement = 10)
+        public static int GrowWithCapacity<TValue>(ref TValue[]? array, ref int count, int growBy, int capacityIncrement = 10)
         {
             var length = array != null ? array.Length : 0;
             if (length < count + growBy)
             {
                 if (capacityIncrement < growBy)
                     capacityIncrement = growBy;
-                GrowBy(ref array, capacityIncrement);
+                _ = GrowBy(ref array, capacityIncrement);
             }
 
             var offset = count;
@@ -550,13 +551,12 @@ namespace PKGE
             return offset;
         }
 
-        public static TValue[] Join<TValue>(this TValue value, params TValue[] values)
+        public static TValue[] Join<TValue>(this TValue? value, params TValue[] values)
         {
             return value.Join(values.AsSpan());
         }
         
-        [JetBrains.Annotations.CanBeNull]
-        public static TValue[] Join<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue value, ReadOnlySpan<TValue> values)
+        public static TValue[] Join<TValue>(this TValue? value, ReadOnlySpan<TValue> values)
         {
             // Determine length.
             var length = 0;
@@ -567,7 +567,7 @@ namespace PKGE
                 length += values.Length;
 
             if (length == 0)
-                return null;
+                return Array.Empty<TValue>();
 
             var array = new TValue[length];
 
@@ -582,7 +582,7 @@ namespace PKGE
             return array;
         }
 
-        public static TValue[] Merge<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] first, TValue[] second)
+        public static TValue[]? Merge<TValue>(this TValue[]? first, TValue[]? second)
             where TValue : IEquatable<TValue>
         {
             if (first == null)
@@ -607,12 +607,12 @@ namespace PKGE
             return array;
         }
 
-        public static TValue[] Merge<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] first, TValue[] second, IEqualityComparer<TValue> comparer)
+        public static TValue[]? Merge<TValue>(this TValue[]? first, TValue[]? second, IEqualityComparer<TValue> comparer)
         {
             if (first == null)
                 return second;
             if (second == null)
-                return null;
+                return Array.Empty<TValue>();
 
             var merged = UnityEngine.Pool.ListPool<TValue>.Get();
             merged.AddRange(first);
@@ -631,15 +631,15 @@ namespace PKGE
             return array;
         }
 
-        public static void EraseAt<TValue>(ref TValue[] array, int index)
+        public static void EraseAt<TValue>(ref TValue[]? array, int index)
         {
-            Assert.IsNotNull(array);
-            Assert.IsTrue(index >= 0 && index < array.Length);
+            if (array == null || (index >= 0 && index < array.Length))
+                return;
 
             var length = array.Length;
             if (index == 0 && length == 1)
             {
-                array = null;
+                array = Array.Empty<TValue>();
                 return;
             }
 
@@ -649,7 +649,7 @@ namespace PKGE
             Array.Resize(ref array, length - 1);
         }
 
-        public static void EraseAtWithCapacity<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this TValue[] array, ref int count, int index)
+        public static void EraseAtWithCapacity<TValue>(this TValue?[] array, ref int count, int index)
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(count <= array.Length);
@@ -666,7 +666,7 @@ namespace PKGE
             --count;
         }
 
-        public static bool Erase<TValue>(ref TValue[] array, TValue value)
+        public static bool Erase<TValue>(ref TValue[]? array, TValue value)
         {
             var index = IndexOf(array, value);
             if (index != -1)
@@ -689,7 +689,7 @@ namespace PKGE
         /// This method does not re-allocate the array. Instead <paramref name="count"/> is used
         /// to keep track of how many elements there actually are in the array.
         /// </remarks>
-        public static void EraseAtByMovingTail<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this TValue[] array, ref int count, int index)
+        public static void EraseAtByMovingTail<TValue>(this TValue?[] array, ref int count, int index)
         {
             Assert.IsNotNull(array);
             Assert.IsTrue(index >= 0 && index < array.Length);
@@ -706,11 +706,10 @@ namespace PKGE
             --count;
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static TValue[] Copy<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array)
+        public static TValue[] Copy<TValue>(this TValue[]? array)
         {
             if (array == null)
-                return null;
+                return Array.Empty<TValue>();
 
             var length = array.Length;
             var result = new TValue[length];
@@ -718,12 +717,11 @@ namespace PKGE
             return result;
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static TValue[] Clone<TValue>([System.Diagnostics.CodeAnalysis.MaybeNull] this TValue[] array)
+        public static TValue[] Clone<TValue>(this TValue[]? array)
             where TValue : ICloneable
         {
             if (array == null)
-                return null;
+                return Array.Empty<TValue>();
 
             var count = array.Length;
             var result = new TValue[count];
@@ -734,11 +732,10 @@ namespace PKGE
             return result;
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public static TNew[] Select<TOld, TNew>([System.Diagnostics.CodeAnalysis.MaybeNull] this TOld[] array, Func<TOld, TNew> converter)
+        public static TNew[] Select<TOld, TNew>(this TOld[]? array, Func<TOld, TNew> converter)
         {
             if (array == null)
-                return null;
+                return Array.Empty<TNew>();
 
             var length = array.Length;
             var result = new TNew[length];
@@ -837,7 +834,7 @@ namespace PKGE
             }
         }
 
-        public static void EraseSliceWithCapacity<TValue>(ref TValue[] array, ref int length, int index, int count)
+        public static void EraseSliceWithCapacity<TValue>(ref TValue?[] array, ref int length, int index, int count)
         {
             // Move elements down.
             if (count < length)
@@ -850,12 +847,12 @@ namespace PKGE
             length -= count;
         }
 
-        public static void SwapElements<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this TValue[] array, int index1, int index2)
+        public static void SwapElements<TValue>(this TValue[] array, int index1, int index2)
         {
             Swap(ref array[index1], ref array[index2]);
         }
 
-        public static void SwapElements<TValue>([System.Diagnostics.CodeAnalysis.NotNull] this Span<TValue> array, int index1, int index2)
+        public static void SwapElements<TValue>(this Span<TValue> array, int index1, int index2)
         {
             Swap(ref array[index1], ref array[index2]);
         }
@@ -1076,7 +1073,7 @@ namespace PKGE
             }
         }
 
-        public static Span<TTo> Cast<TFrom, TTo>([System.Diagnostics.CodeAnalysis.NotNull] this TFrom[] array)
+        public static Span<TTo> Cast<TFrom, TTo>(this TFrom[] array)
             where TFrom : struct
             where TTo : struct
         {
@@ -1087,15 +1084,13 @@ namespace PKGE
 
         /// <exception cref="IndexOutOfRangeException"/>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ref T AsRef<T>([System.Diagnostics.CodeAnalysis.NotNull] this T[] array, int index) where T : struct
+        public static ref T AsRef<T>(this T[] array, int index) where T : struct
         {
-            Assert.IsNotNull(array);
-
             return ref array[index];
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.MaybeNull] this Array array)
+        public static bool IsNullOrEmpty(this Array? array)
         {
             return array == null || array.Length == 0;
         }

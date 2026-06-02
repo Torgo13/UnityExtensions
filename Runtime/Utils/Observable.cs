@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace PKGE
         /// <summary>
         /// Event that is triggered when the value changes.
         /// </summary>
-        public event Action<T> OnValueChanged;
+        public event Action<T>? OnValueChanged;
 
         private T _value;
 
@@ -23,6 +24,7 @@ namespace PKGE
         /// </summary>
         public T value
         {
+            readonly
             get => _value;
             set
             {

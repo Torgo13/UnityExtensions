@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -160,7 +161,7 @@ namespace PKGE
 #if UNITY_6000_0_OR_NEWER
         //https://docs.unity3d.com/Documentation/Manual/async-awaitable-examples.html
         #region Unity
-        public static async Task AsTask([System.Diagnostics.CodeAnalysis.NotNull] this Awaitable a)
+        public static async Task AsTask(this Awaitable a)
         {
 #if SAFETY
             try
@@ -177,7 +178,7 @@ namespace PKGE
 #endif // SAFETY
         }
 
-        public static async Task<T> AsTask<T>([System.Diagnostics.CodeAnalysis.NotNull] this Awaitable<T> a)
+        public static async Task<T> AsTask<T>(this Awaitable<T> a)
         {
 #if SAFETY
             try

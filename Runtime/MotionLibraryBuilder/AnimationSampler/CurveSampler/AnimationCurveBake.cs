@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
@@ -35,7 +36,7 @@ namespace PKGE
             }
         }
 
-        public static int Bake([System.Diagnostics.CodeAnalysis.NotNull] AnimationCurve curve, float frameRate, InterpolationMode mode = InterpolationMode.Auto)
+        public static int Bake(AnimationCurve curve, float frameRate, InterpolationMode mode = InterpolationMode.Auto)
         {
             var keys = new NativeArray<Keyframe>(curve.keys, Allocator.Temp);
             return Bake(ref keys, frameRate, mode);

@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace PKGE
@@ -7,22 +8,26 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.animation.cs-jobs-samples/blob/0.6.1-preview/Samples/Scripts/SampleUtility.cs
         #region SampleUtility
 #if USING_ANIMATION_MODULE
-        [JetBrains.Annotations.CanBeNull]
-        public static AnimationClip LoadAnimationClipFromFbx(string fbxName, string clipName)
+        public static bool LoadAnimationClipFromFbx(string fbxName, string clipName,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out AnimationClip? animationClip)
         {
+            animationClip = null;
+
             var clips = Resources.LoadAll<AnimationClip>(fbxName);
             foreach (var clip in clips)
             {
                 if (clip.name == clipName)
-                    return clip;
+                {
+                    animationClip = clip;
+                    return true;
+                }
             }
             
-            return null;
+            return false;
         }
 #endif // USING_ANIMATION_MODULE
 
-        [JetBrains.Annotations.NotNull]
-        public static GameObject CreateEffector([System.Diagnostics.CodeAnalysis.NotNull] string name, Vector3 position, Quaternion rotation)
+        public static GameObject CreateEffector(string name, Vector3 position, Quaternion rotation)
         {
             var effector = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             effector.name = name;
