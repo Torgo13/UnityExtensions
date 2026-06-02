@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using Unity.Collections;
 
-namespace PKGE.Tests
+namespace PKGE.Unsafe.Tests
 {
     [TestFixture]
     public class ArrayExtensionsTests
@@ -12,7 +12,7 @@ namespace PKGE.Tests
         {
             int[] array = { 1, 2, 3, 4, 5 };
 
-            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = array.AsSpan().AsBytes();
 
             Assert.AreEqual(array.Length * sizeof(int), byteSpan.Length);
 
@@ -33,7 +33,7 @@ namespace PKGE.Tests
         {
             int[] array = null;
 
-            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = array.AsSpan().AsBytes();
 
             Assert.AreEqual(0, byteSpan.Length);
         }
@@ -43,18 +43,11 @@ namespace PKGE.Tests
         {
             int[] array = new int[0];
 
-            Span<byte> byteSpan = ArrayExtensions.AsBytes(array);
+            Span<byte> byteSpan = array.AsSpan().AsBytes();
 
             Assert.AreEqual(0, byteSpan.Length);
         }
-    }
-}
 
-namespace PKGE.Unsafe.Tests
-{
-    [TestFixture]
-    public class ArrayExtensionsTests
-    {
 #if PKGE_USING_UNSAFE
         [Test]
         public void CalculateOffset_ShouldReturnCorrectOffset()
@@ -111,7 +104,7 @@ namespace PKGE.Unsafe.Tests
             const int fillValue = 42;
 
             // Act
-            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            Unity.Jobs.IJobForExtensions.Run(new SetArrayJob<int>
             {
                 src = fillValue,
                 dst = array,
@@ -137,7 +130,7 @@ namespace PKGE.Unsafe.Tests
             const int fillValue = 99;
 
             // Act
-            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            Unity.Jobs.IJobForExtensions.Run(new SetArrayJob<int>
             {
                 src = fillValue,
                 dst = array.GetSubArray(start: 2, length: 2),
@@ -252,7 +245,7 @@ namespace PKGE.Unsafe.Tests
             const int fillValue = 123;
 
             // Act
-            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<int>
+            Unity.Jobs.IJobForExtensions.Run(new SetArrayJob<int>
             {
                 src = fillValue,
                 dst = largeArray,

@@ -6,7 +6,7 @@ using System;
 using System.Runtime.CompilerServices;
 using static Unity.Mathematics.math;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// A helper to validate arithmetic operations for <see cref="Memory2D{T}"/> and <see cref="Span2D{T}"/>.

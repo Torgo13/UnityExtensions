@@ -1,6 +1,6 @@
 using System;
 using Unity.Collections;
-using AffineTransform = PKGE.Packages.AffineTransform;
+using AffineTransform = PKGE.AffineTransform;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -15,7 +15,7 @@ using Unity.SnapshotDebugger;
 using Buffer = Unity.SnapshotDebugger.Buffer;
 #endif // USING_SNAPSHOT_DEBUGGER
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct SplinePoint
     {

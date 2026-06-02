@@ -1,10 +1,11 @@
+#nullable enable
 #if INCLUDE_COLLECTIONS
 using System;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityEngine.Assertions;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class NativeListExtensions
     {
@@ -43,7 +44,7 @@ namespace PKGE.Packages
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
             Assert.IsTrue(count >= 0);
@@ -55,16 +56,37 @@ namespace PKGE.Packages
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] T[] array) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
         {
             nativeList.AddRange(array, array.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, [System.Diagnostics.CodeAnalysis.NotNull] System.Collections.Generic.List<T> list) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, System.Collections.Generic.List<T> list) where T : unmanaged
         {
             nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
         }
+
+        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
+        #region UnityEngine.Rendering.Universal
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        {
+            return ref nativeList.UnsafeElementAtMutable(index);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(index < nativeList.Capacity);
+
+            if (index >= nativeList.Length)
+                nativeList.ResizeUninitialized(1 + index);
+
+            return ref nativeList.ElementAt(index);
+        }
+        #endregion // UnityEngine.Rendering.Universal
     }
 }
 #endif // INCLUDE_COLLECTIONS

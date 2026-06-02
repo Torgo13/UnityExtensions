@@ -1,7 +1,7 @@
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/CopyUtility.cs
     #region Unity.Entities

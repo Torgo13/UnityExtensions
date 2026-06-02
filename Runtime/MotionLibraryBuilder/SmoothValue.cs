@@ -5,7 +5,7 @@ using float2 = UnityEngine.Vector2;
 using float3 = UnityEngine.Vector3;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct SmoothValue
     {

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace PKGE.Collections
+namespace PKGE
 {
     /// <summary>
     /// Wrapper data structure for hashset, that leans on a list for deterministic sort order

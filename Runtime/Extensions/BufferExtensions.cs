@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Networking/Utilities/Extensions/BufferExtensions.cs
     #region Unity.LiveCapture.Networking
@@ -33,9 +33,11 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int WriteStruct<T>(this Span<byte> buffer, ref T data, int offset = 0) where T : struct
         {
-            var size = SizeOfCache<T>.Size;
+            UnityEngine.Assertions.Assert.IsTrue(buffer != null);
+            UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
+
             MemoryMarshal.Cast<byte, T>(buffer[offset..])[0] = data;
-            return offset + size;
+            return offset + SizeOfCache<T>.Size;
         }
 
         /// <summary>
@@ -59,6 +61,9 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this Span<byte> buffer, int offset = 0) where T : struct
         {
+            UnityEngine.Assertions.Assert.IsTrue(buffer != null);
+            UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
+
             return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
         }
 
@@ -84,6 +89,9 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this Span<byte> buffer, int offset, out int nextOffset) where T : struct
         {
+            UnityEngine.Assertions.Assert.IsTrue(buffer != null);
+            UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
+
             nextOffset = offset + SizeOfCache<T>.Size;
             return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
         }

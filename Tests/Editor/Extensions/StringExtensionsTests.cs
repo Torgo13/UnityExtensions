@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 
-namespace PKGE.Packages.Tests
+namespace PKGE.Tests
 {
     class StringExtensionsTests
     {

@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// Helpers for working with the <see cref="Array"/> type.

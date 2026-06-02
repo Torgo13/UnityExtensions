@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace PKGE.Collections
+namespace PKGE
 {
     /// <summary>
     /// A bidirectional one-to-one mapping between two sets of values.

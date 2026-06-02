@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using float3 = UnityEngine.Vector3;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct PositionSampler
     {

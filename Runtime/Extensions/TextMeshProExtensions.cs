@@ -10,7 +10,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class TextMeshProExtensions
     {

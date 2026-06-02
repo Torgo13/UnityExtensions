@@ -10,7 +10,7 @@ using UnityEngine;
 using System.Linq;
 #endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     public ref struct HashFNV1A32
     {

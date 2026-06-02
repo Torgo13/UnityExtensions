@@ -5,8 +5,7 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.Assertions;
-using PKGE.Packages;
-using AffineTransform = PKGE.Packages.AffineTransform;
+using AffineTransform = PKGE.AffineTransform;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -385,6 +384,7 @@ namespace PKGE
                 buffer[i] = c;
             }
         }
+
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Math/AffineTransform.cs
         #region Unity.Mathematics
         // smallest such that 1.0+epsilon != 1.0
@@ -1282,11 +1282,40 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int AlignToMultipleOf(this int number, int alignment)
+        {
+            var remainder = number % alignment;
+            if (remainder == 0)
+                return number;
+
+            return number + alignment - remainder;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long AlignToMultipleOf(this long number, long alignment)
+        {
+            var remainder = number % alignment;
+            if (remainder == 0)
+                return number;
+
+            return number + alignment - remainder;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint AlignToMultipleOf(this uint number, uint alignment)
+        {
+            var remainder = number % alignment;
+            if (remainder == 0)
+                return number;
+
+            return number + alignment - remainder;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float IntToNormalizedFloat(this int value, int minValue, int maxValue)
         {
             if (value <= minValue)
                 return 0.0f;
-
             if (value >= maxValue)
                 return 1.0f;
 
@@ -1300,11 +1329,45 @@ namespace PKGE
         {
             if (value <= 0.0f)
                 return intMinValue;
-
             if (value >= 1.0f)
                 return intMaxValue;
 
             return (int)(value * ((double)intMaxValue - intMinValue) + intMinValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float UIntToNormalizedFloat(this uint value, uint minValue, uint maxValue)
+        {
+            if (value <= minValue)
+                return 0.0f;
+
+            if (value >= maxValue)
+                return 1.0f;
+
+            // using double here because uint.MaxValue is not representable in floats
+            return (float)(((double)value - minValue) / ((double)maxValue - minValue));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint NormalizedFloatToUInt(this float value, uint uintMinValue, uint uintMaxValue)
+        {
+            if (value <= 0.0f)
+                return uintMinValue;
+
+            if (value >= 1.0f)
+                return uintMaxValue;
+
+            return (uint)(value * ((double)uintMaxValue - uintMinValue) + uintMinValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint RemapUIntBitsToNormalizeFloatToUIntBits(this uint value, uint inBitSize, uint outBitSize)
+        {
+            var inMaxValue = (uint)((1UL << (int)inBitSize) - 1);
+            var outMaxValue = (uint)((1UL << (int)outBitSize) - 1);
+
+            var normFloat = UIntToNormalizedFloat(value, 0, inMaxValue);
+            return NormalizedFloatToUInt(normFloat, 0, outMaxValue);
         }
         #endregion // UnityEngine.InputSystem.Utilities
 
@@ -1543,7 +1606,6 @@ namespace PKGE
         }
         #endregion // Unity.DemoTeam.Hair
 
-
         //https://github.com/Unity-Technologies/sentis-samples/blob/526fbb4e2e6767afe347cd3393becd0e3e64ae2b/BlazeDetectionSample/Face/Assets/Scripts/BlazeUtils.cs
         #region BlazeUtils
         public static void RotationMatrix(this float theta, out float2x3 rotationMatrix)
@@ -1571,6 +1633,197 @@ namespace PKGE
             );
         }
         #endregion // BlazeUtils
+
+        //https://github.com/needle-mirror/com.unity.entities/blob/1ae23bf2e5b5388958f4410f4e8daa75a1cad620/Unity.Transforms/TransformHelpers.cs
+        #region Unity.Transforms
+        #region Transformation Matrix Decomposition Helpers
+        /// <summary>Computes the "forward" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "forward" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is positive Z axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Forward(in this float4x4 m) => new float3(m.c2.x, m.c2.y, m.c2.z);
+
+        /// <summary>Computes the "back" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "back" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is negative Z axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Back(in this float4x4 m) => -Forward(m);
+
+        /// <summary>Computes the "up" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "up" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is positive Y axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Up(in this float4x4 m) => new float3(m.c1.x, m.c1.y, m.c1.z);
+
+        /// <summary>Computes the "down" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "down" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is negative Y axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Down(in this float4x4 m) => -Up(m);
+
+        /// <summary>Computes the "right" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "right" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is positive X axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Right(in this float4x4 m) => new float3(m.c0.x, m.c0.y, m.c0.z);
+
+        /// <summary>Computes the "left" direction in a transformation matrix's reference frame.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector pointing in the "left" direction of <paramref name="m"/>'s reference frame. By Unity's convention,
+        /// this is negative X axis. This vector does not necessarily have unit length.
+        /// </returns>
+        public static float3 Left(in this float4x4 m) => -Right(m);
+
+        /// <summary>Extracts the translation from a transformation matrix</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector containing the translation applied by the provided transformation matrix.
+        /// </returns>
+        public static float3 Translation(in this float4x4 m) => new float3(m.c3.x, m.c3.y, m.c3.z);
+
+        /// <summary>Extracts the rotation from a transformation matrix</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A normalized quaternion containing the rotation applied by the provided transformation matrix.
+        /// </returns>
+        public static quaternion Rotation(in this float4x4 m) => new quaternion(math.orthonormalize(new float3x3(m)));
+
+        /// <summary>Extracts the scale from a transformation matrix</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <returns>
+        /// A vector containing the scale applied by the provided transformation matrix.
+        /// </returns>
+        public static float3 Scale(in this float4x4 m) =>
+            new float3(math.length(m.c0.xyz), math.length(m.c1.xyz), math.length(m.c2.xyz));
+        #endregion // Transformation Matrix Decomposition Helpers
+
+        #region Coordinate system conversion
+        /// <summary>Transforms a 3D point by a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="p">A 3D position</param>
+        /// <returns>
+        /// A vector containing the transformed point.
+        /// </returns>
+        public static float3 TransformPoint(in this float4x4 m, in float3 p) => math.mul(m, new float4(p, 1)).xyz;
+
+        /// <summary>Transforms a 3D direction by a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="d">A vector representing a direction in 3D space. This vector does not need to be normalized.</param>
+        /// <returns>
+        /// A vector containing the transformed direction. This vector will not necessarily be unit-length.
+        /// </returns>
+        public static float3 TransformDirection(in this float4x4 m, in float3 d) => math.rotate(m, d);
+
+        /// <summary>Transforms a 3D rotation by a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="q">A quaternion representing a 3D rotation. This quaternion does not need to be normalized.</param>
+        /// <returns>
+        /// A quaternion containing the transformed rotation. This quaternion will normalized if the input quaternion is normalized.
+        /// </returns>
+        public static quaternion TransformRotation(in this float4x4 m, in quaternion q) =>
+            math.mul(new quaternion(math.orthonormalize(new float3x3(m))), q);
+
+        /// <summary>Transforms a 3D point by the inverse of a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="p">A 3D position</param>
+        /// <returns>
+        /// A vector containing the transformed point.
+        /// </returns>
+        public static float3 InverseTransformPoint(in this float4x4 m, in float3 p) => math.mul(math.inverse(m), new float4(p, 1)).xyz;
+
+        /// <summary>Transforms a 3D direction by the inverse of a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="d">A vector representing a direction in 3D space. This vector does not need to be normalized.</param>
+        /// <returns>
+        /// A vector containing the transformed direction. This vector will not necessarily be unit-length.
+        /// </returns>
+        public static float3 InverseTransformDirection(in this float4x4 m, in float3 d) => math.rotate(math.inverse(m), d);
+
+        /// <summary>Transforms a 3D rotation by the inverse of a 4x4 transformation matrix.</summary>
+        /// <remarks>
+        /// This method assumes that <paramref name="m"/> is an affine transformation matrix without shear.
+        /// </remarks>
+        /// <param name="m">A transformation matrix</param>
+        /// <param name="q">A quaternion representing a 3D rotation. This quaternion does not need to be normalized.</param>
+        /// <returns>
+        /// A quaternion containing the transformed rotation. This quaternion will be normalized if the input quaternion is normalized.
+        /// </returns>
+        public static quaternion InverseTransformRotation(in this float4x4 m, in quaternion q) =>
+            math.mul(new quaternion(math.orthonormalize(math.inverse(new float3x3(m)))), q);
+
+        /// <summary>Computes a rotation so that "forward" points to the target.</summary>
+        /// <param name="eyeWorldPosition">The 3D position of the viewer (the "eye"), in world-space.</param>
+        /// <param name="targetWorldPosition">The 3D position the viewer wants to rotate to face, in world-space</param>
+        /// <param name="worldUp">The direction in world-space to represent the up direction. If you don't want to set a
+        /// custom value, use `Unity.Mathematics.math.up`.</param>
+        /// <remarks>
+        /// Note that the viewer's existing orientation is ignored; the quaternion returned by this function should replace
+        /// the viewer's rotation, not be added to it.
+        /// </remarks>
+        /// <returns>
+        /// A quaternion containing the rotation which would cause a viewer at <paramref name="eyeWorldPosition"/> to face
+        /// <paramref name="targetWorldPosition"/>, with the "up" direction in the resulting reference frame corresponding
+        /// as closely as possible to <typeparam name="worldUp"></typeparam>.
+        /// </returns>
+        public static quaternion LookAtRotation(in float3 eyeWorldPosition, float3 targetWorldPosition, float3 worldUp)
+        {
+            return Unity.Mathematics.quaternion.LookRotationSafe(targetWorldPosition - eyeWorldPosition, worldUp);
+        }
+        #endregion // Coordinate system conversion
+        #endregion // Unity.Transforms
 
         //https://github.com/Unity-Technologies/ECSGalaxySample/blob/84f9bec931de73f76731f230d126e0d348b6065c/Assets/Scripts/Utilities/MathUtilities.cs
         #region MathUtilities
@@ -1637,7 +1890,7 @@ namespace PKGE
             int totalPointsCount = initialPointsCount + newPointsCount;
 
             // Set the Length instead of the Capacity because it will be passed as a NativeArray
-            points.Length = totalPointsCount;
+            points.ResizeUninitialized(totalPointsCount);
 
             // First pass: generate points around the sphere in a semiregular distribution
             float goldenRatio = 1 + (sqrt(5f) / 4f);
@@ -1649,10 +1902,10 @@ namespace PKGE
                 totalPointsCount = totalPointsCount,
                 angleIncrement = angleIncrement,
                 radius = radius,
-                points = points.AsArray().GetSubArray(initialPointsCount, totalPointsCount - initialPointsCount),
+                points = points.AsArray().GetSubArray(initialPointsCount, newPointsCount),
             };
 
-            var jobHandle = addPoints.ScheduleParallel(totalPointsCount - initialPointsCount,
+            var jobHandle = addPoints.ScheduleParallel(newPointsCount,
                 innerloopBatchCount: 32, dependency);
 
             // Second pass: make points repel each other
@@ -1755,7 +2008,7 @@ namespace PKGE
 }
 
 #if INCLUDE_MATHEMATICS
-namespace PKGE.Packages
+namespace PKGE.Mathematics
 {
     #region Union
     /// <remarks>Use __0 to access the Union without extensions.</remarks>

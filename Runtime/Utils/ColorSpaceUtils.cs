@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 // The contents of this file should be kept is sync with the ShaderLibrary\HDROutput.hlsl "Color Space transforms" section.
-namespace PKGE.Packages
+namespace PKGE
 {
     /// <summary>
     /// This class holds a collection of color space transformation matrices.

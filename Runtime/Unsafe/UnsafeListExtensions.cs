@@ -25,27 +25,6 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Formats.Alembic.Importer
 #endif // PKGE_USING_UNSAFE
 
-        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
-        #region UnityEngine.Rendering.Universal
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
-        {
-            return ref unsafeList.UnsafeElementAtMutable(index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAtMutable<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
-        {
-            Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsTrue(index < unsafeList.Capacity);
-
-            if (index >= unsafeList.Length)
-                unsafeList.Length = 1 + index;
-
-            return ref unsafeList.ElementAt(index);
-        }
-        #endregion // UnityEngine.Rendering.Universal
-
         //https://github.com/needle-mirror/com.unity.entities.graphics/blob/a50f9d68777370c4f402c07f175d74bdbbcb24f9/Unity.Entities.Graphics/EntitiesGraphicsCulling.cs#L258
         #region CullingExtensions
         /// <remarks>Cannot use <see cref="NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray{T}(Span{T}, Allocator)"/>

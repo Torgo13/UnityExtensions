@@ -14,7 +14,7 @@ using float3 = UnityEngine.Vector3;
 using float4 = UnityEngine.Vector4;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class ImageConversionJobs
     {

@@ -2,17 +2,16 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using Unity.Collections;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     public static class StreamExtensions
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/InternalPackages/com.unity.video-streaming.client/Runtime/Utils/StreamExtensions.cs
         #region Unity.LiveCapture.VideoStreaming.Client.Utils
         /// <exception cref="EndOfStreamException"></exception>
-        public static async ValueTask ReadExactAsync(this Stream stream, byte[] buffer, int offset, int count)
+        public static async System.Threading.Tasks.ValueTask ReadExactAsync(this Stream stream, byte[] buffer, int offset, int count)
         {
             if (count == 0)
                 return;

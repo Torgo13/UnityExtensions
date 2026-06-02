@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
 
 #if INCLUDE_MATHEMATICS
@@ -12,7 +11,7 @@ using float3 = UnityEngine.Vector3;
 using float4 = UnityEngine.Vector4;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// Represents frustum planes.
@@ -85,12 +84,16 @@ namespace PKGE.Unsafe
             if (sourcePlanes.Length != 6)
                 throw new System.ArgumentOutOfRangeException(nameof(sourcePlanes), "The argument sourcePlanes does not have the expected length 6.");
 
-            GeometryUtility.CalculateFrustumPlanes(camera, sourcePlanes);
+            Matrix4x4 worldToProjectionMatrix = camera.projectionMatrix * camera.worldToCameraMatrix;
+#if UNITY_6000_3_OR_NEWER
+            GeometryUtility.CalculateFrustumPlanes(in worldToProjectionMatrix, sourcePlanes);
+#else
+            GeometryUtility.CalculateFrustumPlanes(worldToProjectionMatrix, sourcePlanes);
+#endif // UNITY_6000_3_OR_NEWER
 
             var cameraToWorld = camera.cameraToWorldMatrix;
             var eyePos = cameraToWorld.MultiplyPoint(Vector3.zero);
-            var viewDir = new float3(cameraToWorld.m02, cameraToWorld.m12, cameraToWorld.m22);
-            viewDir = -math.normalizesafe(viewDir);
+            Vector3 viewDir = -math.normalizesafe(new float3(cameraToWorld.m02, cameraToWorld.m12, cameraToWorld.m22));
 
             // Near Plane
             sourcePlanes[4].SetNormalAndPosition(viewDir, eyePos);
@@ -107,6 +110,46 @@ namespace PKGE.Unsafe
             }
         }
 
+#if UNITY_6000_3_OR_NEWER
+        struct FromCameraJob : Unity.Jobs.IJob
+        {
+            [WriteOnly] public NativeArray<float4> planes;
+            public NativeArray<Plane> sourcePlanes;
+            public Matrix4x4 cameraProjection;
+            public Matrix4x4 worldToCamera;
+            public Matrix4x4 cameraToWorld;
+            public float nearClipPlane;
+            public float farClipPlane;
+            
+            public void Execute()
+            {
+                var worldToProjectionMatrix = cameraProjection * worldToCamera;
+                GeometryUtility.CalculateFrustumPlanes(in worldToProjectionMatrix, sourcePlanes);
+
+                var eyePos = cameraToWorld.MultiplyPoint(Vector3.zero);
+                Vector3 viewDir = -math.normalizesafe(new float3(cameraToWorld.m02, cameraToWorld.m12, cameraToWorld.m22));
+
+                // Near Plane
+                var sourcePlane = sourcePlanes[4];
+                sourcePlane.SetNormalAndPosition(viewDir, eyePos);
+                sourcePlane.distance -= nearClipPlane;
+                sourcePlanes[4] = sourcePlane;
+
+                // Far plane
+                sourcePlane = sourcePlanes[5];
+                sourcePlane.SetNormalAndPosition(-viewDir, eyePos);
+                sourcePlane.distance += farClipPlane;
+                sourcePlanes[5] = sourcePlane;
+
+                for (int i = 0; i < 6; ++i)
+                {
+                    planes[i] = new float4(sourcePlanes[i].normal.x, sourcePlanes[i].normal.y, sourcePlanes[i].normal.z,
+                        sourcePlanes[i].distance);
+                }
+            }
+        }
+#endif // UNITY_6000_3_OR_NEWER
+
 #if INCLUDE_COLLECTIONS
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
@@ -117,25 +160,31 @@ namespace PKGE.Unsafe
         /// <returns>Intersection result</returns>
         public static IntersectResult Intersect(NativeArray<float4>.ReadOnly cullingPlanes, float3 m, float3 extent)
         {
-            Intersect(cullingPlanes, m, extent, out var inCount, out var intersectResult);
-
-            if (intersectResult)
+            if (Intersect(cullingPlanes, m, extent, out var inCount))
                 return IntersectResult.Out;
 
             return (inCount == cullingPlanes.Length) ? IntersectResult.In : IntersectResult.Partial;
         }
 
         [BurstCompile(FloatMode = FloatMode.Fast)]
-        static void Intersect(in NativeArray<float4>.ReadOnly cullingPlanes, in float3 m, in float3 extent,
-            out int inCount, out bool intersectResult)
+        static bool Intersect(in NativeArray<float4>.ReadOnly cullingPlanes, in float3 m, in float3 extent,
+            out int inCount)
         {
             inCount = default;
-            intersectResult = default;
+            int intersectResult = default;
 
             for (int i = 0; i < cullingPlanes.Length; i++)
             {
-                Intersect(cullingPlanes[i], m, extent, ref inCount, ref intersectResult);
+                //Intersect(cullingPlanes[i], m, extent, ref inCount, ref intersectResult);
+                float3 normal = cullingPlanes[i].xyz;
+                float dist = math.dot(normal, m) + cullingPlanes[i].w;
+                float radius = math.dot(extent, math.abs(normal));
+                intersectResult += (int)math.saturate(dist + radius);
+                inCount += (int)(math.ceil(math.saturate(dist - radius))
+                    * math.ceil(math.saturate(dist + radius)));
             }
+
+            return intersectResult > 0;
         }
 
         static void Intersect(in float4 cullingPlane, in float3 m, in float3 extent,
@@ -210,7 +259,7 @@ namespace PKGE.Unsafe
         }
 
 #if INCLUDE_COLLECTIONS
-        internal static NativeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
+        public static NativeList<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, AllocatorManager.AllocatorHandle allocator)
         {
             int cullingPlaneCount = cullingPlanes.Length;
             int packetCount = (cullingPlaneCount + 3) >> 2;
@@ -222,7 +271,7 @@ namespace PKGE.Unsafe
             return planes;
         }
 
-        internal static NativeArray<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, Allocator allocator)
+        public static NativeArray<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, Allocator allocator)
         {
             int cullingPlaneCount = cullingPlanes.Length;
             int packetCount = (cullingPlaneCount + 3) >> 2;

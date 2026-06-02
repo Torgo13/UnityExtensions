@@ -4,7 +4,7 @@
 
 using System;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// A helper class to throw exceptions for memory types.

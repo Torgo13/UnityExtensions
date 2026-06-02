@@ -552,7 +552,7 @@ namespace PKGE
         public static bool ConvexHull2D([System.Diagnostics.CodeAnalysis.NotNull] ReadOnlySpan<Vector3> points, [System.Diagnostics.CodeAnalysis.NotNull] List<Vector3> hull)
         {
             var nativeHull = new NativeList<Vector3>(hull.Count, AllocatorManager.TempJob);
-            Packages.NativeListExtensions.AddRange(nativeHull, hull);
+            NativeListExtensions.AddRange(nativeHull, hull);
             bool convexHull2D = ConvexHull2D(points, nativeHull);
             nativeHull.Dispose();
             return convexHull2D;

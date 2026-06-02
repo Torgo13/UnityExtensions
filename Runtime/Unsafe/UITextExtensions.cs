@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿#if PKGE_USING_UNSAFE
+using System.Buffers;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,7 +9,6 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/UIExtensionMethods.cs
         #region FPSSample
-#if PKGE_USING_UNSAFE
         public static void Format<T0>(this Text me, string format, T0 arg0)
         {
             using var pooledArray = DisposeArrayPool<char>.Rent(1024);
@@ -68,51 +68,7 @@ namespace PKGE.Unsafe
             me.Set(buf, l);
         }
 #endif // INCLUDE_TEXTMESH_PRO
-#endif // PKGE_USING_UNSAFE
-
-#if INCLUDE_UGUI
-        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this UnityEngine.UI.Text me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
-        {
-            if (Set(me.text, text, length))
-                me.text = new string(text, 0, length);
-        }
-#endif // INCLUDE_UGUI
-
-#if INCLUDE_TEXTMESH_PRO
-        public static void Set([System.Diagnostics.CodeAnalysis.NotNull] this TMPro.TextMeshProUGUI me, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
-        {
-            if (Set(me.text, text, length))
-                me.SetText(text, 0, length);
-        }
-#endif // INCLUDE_TEXTMESH_PRO
-
-        private static bool Set([System.Diagnostics.CodeAnalysis.MaybeNull] string old, [System.Diagnostics.CodeAnalysis.NotNull] char[] text, int length)
-        {
-            Assert.IsNotNull(text);
-            Assert.IsTrue(length >= 0);
-            Assert.IsTrue(text.Length >= length);
-
-            if (old == null || old.Length != length)
-                return true;
-
-            for (var i = 0; i < length; i++)
-            {
-                if (text[i] != old[i])
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-#if INCLUDE_UGUI
-        public static void SetRGB([System.Diagnostics.CodeAnalysis.NotNull] this UnityEngine.UI.Graphic graphic, Color color)
-        {
-            var c = graphic.color;
-            graphic.color = new Color(color.r, color.g, color.b, c.a);
-        }
-#endif // INCLUDE_UGUI
         #endregion // FPSSample
     }
 }
+#endif // PKGE_USING_UNSAFE

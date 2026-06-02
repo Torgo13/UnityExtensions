@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// A dynamic array of bits backed by a managed array of floats,
@@ -83,22 +83,18 @@ namespace PKGE.Unsafe
             }
         }
 
-        [JetBrains.Annotations.NotNull]
-        public override string ToString()
+        public override readonly string ToString()
         {
-            unsafe
+            const int maxCapacity = 4096;
+            Assert.IsTrue(bitCapacity < maxCapacity, $"Bit string is too long. It was truncated to {maxCapacity} elements.");
+            int len = System.Math.Min(bitCapacity, maxCapacity);
+            System.Span<char> buf = stackalloc char[len];
+            for (int i = 0; i < len; i++)
             {
-                const int maxCapacity = 4096;
-                Assert.IsTrue(bitCapacity < maxCapacity, $"Bit string is too long. It was truncated to {maxCapacity} elements.");
-                int len = System.Math.Min(bitCapacity, maxCapacity);
-                byte* buf = stackalloc byte[len];
-                for (int i = 0; i < len; i++)
-                {
-                    buf[i] = (byte)(this[i] ? '1' : '0');
-                }
-
-                return new string((sbyte*)buf, 0, len, System.Text.Encoding.UTF8);
+                buf[i] = this[i] ? '1' : '0';
             }
+
+            return new string(buf);
         }
         #endregion // UnityEngine.Rendering.Universal
     }

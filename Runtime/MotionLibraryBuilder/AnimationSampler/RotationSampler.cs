@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using quaternion = UnityEngine.Quaternion;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct RotationSampler
     {

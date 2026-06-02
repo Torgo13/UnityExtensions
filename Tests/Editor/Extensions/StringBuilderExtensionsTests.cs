@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using System.Text;
 
-namespace PKGE.Packages.Tests
+namespace PKGE.Tests
 {
     class StringBuilderExtensionsTests
     {

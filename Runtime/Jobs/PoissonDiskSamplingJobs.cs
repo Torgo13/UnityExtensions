@@ -11,7 +11,7 @@ using PKGE.Mathematics;
 using float2 = UnityEngine.Vector2;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     /// <summary>
     /// Utility for generating lists of poisson disk sampled points

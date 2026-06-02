@@ -78,7 +78,11 @@ namespace PKGE
                 });
             }
 
-            playerLoop.subSystemList = playerLoopSystems.ToArray();
+            if (playerLoop.subSystemList.Length == playerLoopSystems.Count)
+                playerLoopSystems.CopyTo(playerLoop.subSystemList);
+            else
+                playerLoop.subSystemList = playerLoopSystems.ToArray();
+
             PlayerLoop.SetPlayerLoop(playerLoop);
         }
 
@@ -101,7 +105,12 @@ namespace PKGE
                 }
             }
 #endif // USING_LINQ
-            playerLoop.subSystemList = playerLoopSystems.ToArray();
+
+            if (playerLoop.subSystemList.Length == playerLoopSystems.Count)
+                playerLoopSystems.CopyTo(playerLoop.subSystemList);
+            else
+                playerLoop.subSystemList = playerLoopSystems.ToArray();
+
             PlayerLoop.SetPlayerLoop(playerLoop);
         }
         #endregion // Unity.Entities

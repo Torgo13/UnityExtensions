@@ -1,62 +1,49 @@
-using System.Threading;
-using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine.Assertions;
+using Interlocked = System.Threading.Interlocked;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
-    public struct ParallelBitArray
+    public struct ParallelBitArray : INativeDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/GPUDriven/Utilities/ParallelBitArray.cs
         #region UnityEngine.Rendering
-        private readonly Allocator _allocator;
-        private NativeArray<long> _bits;
-        private int _length;
+        private readonly AllocatorManager.AllocatorHandle _allocator;
+        private NativeList<long> _bits;
 
-        public readonly int Length => _length;
-
-        public bool IsCreated
+        public readonly bool IsCreated
         {
             get { return _bits.IsCreated; }
         }
 
-        public ParallelBitArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)
+        public ParallelBitArray(int length, AllocatorManager.AllocatorHandle allocator)
         {
             _allocator = allocator;
-            _bits = new NativeArray<long>((length + 63) / 64, allocator, options);
-            _length = length;
+            _bits = new NativeList<long>((length + 63) / 64, allocator);
         }
 
         public void Dispose()
         {
             _bits.Dispose();
-            _length = 0;
         }
 
-        public void Dispose(JobHandle inputDeps)
+        public JobHandle Dispose(JobHandle inputDeps)
         {
-            _ = _bits.Dispose(inputDeps);
-            _length = 0;
+            return _bits.Dispose(inputDeps);
         }
 
         public void Resize(int newLength)
         {
-            int oldLength = _length;
+            int oldLength = _bits.Length;
             if (newLength == oldLength)
                 return;
 
-            int oldBitsLength = _bits.Length;
+            int oldBitsLength = _bits.Capacity;
             int newBitsLength = (newLength + 63) / 64;
             if (newBitsLength != oldBitsLength)
             {
-                var newBits = new NativeArray<long>(newBitsLength, _allocator, NativeArrayOptions.UninitializedMemory);
-                if (_bits.IsCreated)
-                {
-                    NativeArray<long>.Copy(_bits, newBits, _bits.Length);
-                    _bits.Dispose();
-                }
-
-                _bits = newBits;
+                _bits.ResizeUninitialized(newBitsLength);
             }
 
             // mask off bits past the length
@@ -71,16 +58,14 @@ namespace PKGE.Unsafe
                     _bits[chunkIndex] &= (long)validMask;
                 }
             }
-
-            _length = newLength;
         }
 
         public readonly void Set(int index, bool value)
         {
-            Assert.IsTrue(0 <= index && index < _length);
+            Assert.IsTrue(0 <= index && index < _bits.Length);
 
             int entryIndex = index >> 6;
-            ref long entry = ref _bits.UnsafeElementAtMutable(entryIndex);
+            ref long entry = ref _bits.ElementAt(entryIndex);
 
             ulong bit = 1ul << (index & 0x3f);
             long andMask = (long)(~bit);
@@ -96,7 +81,7 @@ namespace PKGE.Unsafe
 
         public readonly bool Get(int index)
         {
-            Assert.IsTrue(0 <= index && index < _length);
+            Assert.IsTrue(0 <= index && index < _bits.Length);
 
             int entryIndex = index >> 6;
 
@@ -117,12 +102,12 @@ namespace PKGE.Unsafe
 
         public readonly ulong InterlockedReadChunk(int chunkIndex)
         {
-            return (ulong)Interlocked.Read(ref _bits.UnsafeElementAtMutable(chunkIndex));
+            return (ulong)Interlocked.Read(ref _bits.ElementAt(chunkIndex));
         }
 
         public readonly void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
         {
-            ref long entry = ref _bits.UnsafeElementAtMutable(chunkIndex);
+            ref long entry = ref _bits.ElementAt(chunkIndex);
 
             long oldEntry, newEntry;
             do
@@ -132,31 +117,23 @@ namespace PKGE.Unsafe
             } while (Interlocked.CompareExchange(ref entry, newEntry, oldEntry) != oldEntry);
         }
 
-        public int ChunkCount()
+        public readonly int ChunkCount()
         {
             return _bits.Length;
         }
 
-        public ParallelBitArray GetSubArray(int length)
-        {
-            ParallelBitArray array = new ParallelBitArray();
-            array._bits = _bits.GetSubArray(0, (length + 63) / 64);
-            array._length = length;
-            return array;
-        }
-
         public readonly NativeArray<long> GetBitsArray()
         {
-            return _bits;
+            return _bits.AsArray();
         }
 
         public void FillZeroes(int length)
         {
-            length = System.Math.Min(length, _length);
+            length = System.Math.Min(length, _bits.Length);
             int chunkIndex = length / 64;
             int remainder = length & 63;
 
-            _bits.AsSpan().Slice(0, chunkIndex).Fill(0);
+            _bits.AsArray().AsSpan().Slice(0, chunkIndex).Fill(0);
 
             if (remainder > 0)
             {
@@ -174,7 +151,7 @@ namespace PKGE.Unsafe
                 return handle;
             }
 
-            length = System.Math.Min(length, _length);
+            length = System.Math.Min(length, _bits.Length);
             int chunkIndex = length / 64;
             int remainder = length & 63;
 
@@ -184,10 +161,10 @@ namespace PKGE.Unsafe
                 _bits[chunkIndex] &= ~lastChunkMask;
             }
 
-            return new Packages.SetArrayJob<long>
+            return new SetArrayJob<long>
             {
                 src = 0,
-                dst = _bits,
+                dst = _bits.AsArray(),
             }.Schedule(chunkIndex, handle);
         }
     }

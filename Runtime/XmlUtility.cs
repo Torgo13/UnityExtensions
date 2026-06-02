@@ -7,7 +7,7 @@ using float3 = UnityEngine.Vector3;
 using quaternion = UnityEngine.Quaternion;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class XmlUtility
     {

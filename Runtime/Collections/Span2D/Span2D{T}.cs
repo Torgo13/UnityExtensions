@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable CS0809, CA1065
 #pragma warning disable CS0660, CS0661
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// <see cref="Span2D{T}"/> represents a 2D region of arbitrary memory. Like the <see cref="Span{T}"/> type,
@@ -92,6 +92,7 @@ namespace PKGE.Unsafe
             this.Stride = width + pitch;
         }
 
+#if ZERO
         /// <summary>
         /// Initializes a new instance of the <see cref="Span2D{T}"/> struct with the specified parameters.
         /// </summary>
@@ -100,7 +101,6 @@ namespace PKGE.Unsafe
         /// <param name="width">The width of the 2D memory area to map.</param>
         /// <param name="pitch">The pitch of the 2D memory area to map (the distance between each row).</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when one of the parameters are negative.</exception>
-#if PKGE_USING_UNSAFE
         public unsafe Span2D(void* pointer, int height, int width, int pitch)
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
@@ -130,64 +130,18 @@ namespace PKGE.Unsafe
             this.Stride = width + pitch;
         }
 #else
-        public Span2D(Span<T> pointer, int height, int width, int pitch)
+        /// <inheritdoc cref="Span2D(ref T, int, int, int)"/>
+        public Span2D(Span<T> span, int height, int width, int pitch)
+            : this(span, 0, height, width, pitch)
         {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentExceptionForManagedType();
-            }
-
-            if (width < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForWidth();
-            }
-
-            if (height < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForHeight();
-            }
-
-            if (pitch < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForPitch();
-            }
-
-            OverflowHelper.EnsureIsInNativeIntRange(height, width, pitch);
-
-            this.span = pointer[..height];
-            this.width = width;
-            this.Stride = width + pitch;
         }
 
-        public Span2D(Memory<T> pointer, int height, int width, int pitch)
+        /// <inheritdoc cref="Span2D(ref T, int, int, int)"/>
+        public Span2D(Memory<T> memory, int height, int width, int pitch)
+            : this(memory.Span, 0, height, width, pitch)
         {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                ThrowHelper.ThrowArgumentExceptionForManagedType();
-            }
-
-            if (width < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForWidth();
-            }
-
-            if (height < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForHeight();
-            }
-
-            if (pitch < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForPitch();
-            }
-
-            OverflowHelper.EnsureIsInNativeIntRange(height, width, pitch);
-
-            this.span = pointer.Span[..height];
-            this.width = width;
-            this.Stride = width + pitch;
         }
-#endif // PKGE_USING_UNSAFE
+#endif // ZERO
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Span2D{T}"/> struct.
@@ -878,7 +832,7 @@ namespace PKGE.Unsafe
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ref T GetPinnableReference()
         {
-#if PKGE_USING_UNSAFE
+#if ZERO
             unsafe
             {
                 ref T r0 = ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(null);
@@ -894,7 +848,7 @@ namespace PKGE.Unsafe
             UnityEngine.Assertions.Assert.IsTrue(span != null);
             UnityEngine.Assertions.Assert.IsTrue(span.Length > 0);
             return ref span[0];
-#endif // PKGE_USING_UNSAFE
+#endif // ZERO
         }
 
         /// <summary>

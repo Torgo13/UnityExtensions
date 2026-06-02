@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 
-namespace PKGE.Unsafe.Tests
+namespace PKGE.Tests
 {
     [TestFixture]
     public class StreamExtensionsTests

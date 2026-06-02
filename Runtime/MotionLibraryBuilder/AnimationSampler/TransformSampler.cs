@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Collections;
-using AffineTransform = PKGE.Packages.AffineTransform;
+using AffineTransform = PKGE.AffineTransform;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -9,7 +9,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct TransformSampler
     {

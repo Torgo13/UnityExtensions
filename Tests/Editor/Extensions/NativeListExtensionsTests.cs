@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using System.Collections.Generic;
 
-namespace PKGE.Packages.Tests
+namespace PKGE.Tests
 {
     public class NativeListExtensionsTests
     {

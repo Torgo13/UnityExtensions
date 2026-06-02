@@ -10,7 +10,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class DynamicResolutionImpl
     {

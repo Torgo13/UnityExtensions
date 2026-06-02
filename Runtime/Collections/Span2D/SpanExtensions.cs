@@ -6,13 +6,18 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// Helpers for working with the <see cref="Span{T}"/> type.
     /// </summary>
     public static class SpanExtensions
     {
+        public static bool Contains<T>(this Span<T> span, T item) where T : IEquatable<T>
+        {
+            return -1 != span.IndexOf(item);
+        }
+
         //https://github.com/CommunityToolkit/dotnet/blob/657c6971a8d42655c648336b781639ed96c2c49f/src/CommunityToolkit.HighPerformance/Extensions/SpanExtensions.cs
         #region CommunityToolkit.HighPerformance
         /// <summary>
@@ -145,8 +150,13 @@ namespace PKGE.Unsafe
     /// <summary>
     /// Helpers for working with the <see cref="ReadOnlySpan{T}"/> type.
     /// </summary>
-    public static class ReadOnlySpanExtensions
+    public static partial class ReadOnlySpanExtensions
     {
+        public static bool Contains<T>(this ReadOnlySpan<T> span, T item) where T : IEquatable<T>
+        {
+            return -1 != span.IndexOf(item);
+        }
+
         //https://github.com/CommunityToolkit/dotnet/blob/657c6971a8d42655c648336b781639ed96c2c49f/src/CommunityToolkit.HighPerformance/Extensions/ReadOnlySpanExtensions.cs
         #region CommunityToolkit.HighPerformance
         /// <summary>

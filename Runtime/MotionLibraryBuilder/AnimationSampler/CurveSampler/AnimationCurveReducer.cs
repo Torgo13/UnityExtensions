@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public static class AnimationCurveReducer
     {
@@ -55,7 +55,11 @@ namespace PKGE.Packages
 
             newKeyFrames.Add(keyframes[numKeys - 1]);
 
-            keyframes = newKeyFrames.ToArray();
+            if (keyframes.Length == newKeyFrames.Count)
+                newKeyFrames.CopyTo(keyframes);
+            else
+                keyframes = newKeyFrames.ToArray();
+
             return conversionError;
         }
 
@@ -95,7 +99,11 @@ namespace PKGE.Packages
 
             newKeyFrames.Add(keyframes[numKeys - 1]);
 
-            keyframes = newKeyFrames.ToArray();
+            if (keyframes.Length == newKeyFrames.Count)
+                newKeyFrames.CopyTo(keyframes);
+            else
+                keyframes = newKeyFrames.ToArray();
+
             return conversionError;
         }
 
@@ -136,7 +144,11 @@ namespace PKGE.Packages
 
             newKeyFrames.Add(keyframes[numKeys - 1]);
 
-            keyframes = newKeyFrames.ToArray();
+            if (keyframes.Length == newKeyFrames.Count)
+                newKeyFrames.CopyTo(keyframes);
+            else
+                keyframes = newKeyFrames.ToArray();
+
             return conversionError;
         }
         #endregion // CurveSampler

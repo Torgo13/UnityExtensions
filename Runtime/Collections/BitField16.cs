@@ -8,7 +8,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     [GenerateTestsForBurstCompatibility]
     public struct Bitwise
@@ -30,8 +30,7 @@ namespace PKGE.Unsafe
             return value ? 1 : 0;
         }
 
-        // 16-bit ushort
-
+        #region 16-bit ushort
         internal static ushort ExtractBits(ushort input, int pos, ushort mask)
         {
             var tmp0 = input >> pos;
@@ -49,6 +48,7 @@ namespace PKGE.Unsafe
         {
             return ReplaceBits(input, pos, mask, (ushort)-FromBool(value));
         }
+        #endregion // 16-bit ushort
         #endregion // Unity.Collections
     }
 

@@ -1,6 +1,6 @@
+#if USING_IMAGE_CONVERSION_MODULE
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace PKGE
@@ -66,7 +66,7 @@ namespace PKGE
         }
         #endregion // Unity.LiveCapture
 
-        public static async ValueTask<string> SaveAsPNGAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory)
+        public static async System.Threading.Tasks.ValueTask<string> SaveAsPNGAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -111,7 +111,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async ValueTask<string> SaveAsEXRAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
+        public static async System.Threading.Tasks.ValueTask<string> SaveAsEXRAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -150,7 +150,7 @@ namespace PKGE
             return assetPath;
         }
 
-        public static async ValueTask<string> SaveAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
+        public static async System.Threading.Tasks.ValueTask<string> SaveAsync([System.Diagnostics.CodeAnalysis.NotNull] this Texture2D texture, string filename, [System.Diagnostics.CodeAnalysis.NotNull] string directory,
             TextureFileType fileType = TextureFileType.Auto, Texture2D.EXRFlags flags = Texture2D.EXRFlags.None)
         {
             if (texture == null)
@@ -272,3 +272,4 @@ namespace PKGE
         #endregion // TextureFileType
     }
 }
+#endif // USING_IMAGE_CONVERSION_MODULE

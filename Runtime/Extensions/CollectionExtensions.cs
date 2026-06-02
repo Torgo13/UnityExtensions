@@ -1,3 +1,4 @@
+#nullable enable
 // Unity C# reference source
 // Copyright (c) Unity Technologies. For terms of use, see
 // https://unity3d.com/legal/licenses/Unity_Reference_Only_License
@@ -24,8 +25,7 @@ namespace PKGE
         /// <param name="collection">The collection to create a string from.</param>
         /// <typeparam name="T">The type of objects in the collection.</typeparam>
         /// <returns>A string with all elements in the collection converted to strings and separated by commas.</returns>
-        [JetBrains.Annotations.NotNull]
-        public static string Stringify<T>([JetBrains.Annotations.NotNull] this ICollection<T> collection)
+        public static string Stringify<T>(this ICollection<T> collection)
         {
             using var _0 = StringBuilderPool.Get(out var sb);
             var endIndex = collection.Count - 1;
@@ -34,11 +34,11 @@ namespace PKGE
             {
                 if (counter++ == endIndex)
                 {
-                    sb.Append(t);
+                    _ = sb.Append(t);
                 }
                 else
                 {
-                    sb.Append(t).Append(',').Append(' ');
+                    _ = sb.Append(t).Append(',').Append(' ');
                 }
             }
 
@@ -57,7 +57,7 @@ namespace PKGE
         /// <param name="comparer">Comparator if Comparer&lt;T&gt;. Default is not suite</param>
         /// <typeparam name="T"></typeparam>
         /// <exception cref="ArgumentNullException">Can throw exception if list is null</exception>
-        public static void AddSorted<T>([DisallowNull] this List<T> list, T item, IComparer<T> comparer = null)
+        public static void AddSorted<T>(this List<T> list, T item, IComparer<T>? comparer = null)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list), $"{nameof(list)} must not be null.");
@@ -97,7 +97,7 @@ namespace PKGE
         /// <param name="count">The number of values to add.</param>
         /// <typeparam name="T">The type of value.</typeparam>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="dest"/> is null.</exception>
-        public static void Fill<T>([DisallowNull] this List<T> dest, T value, int count)
+        public static void Fill<T>(this List<T> dest, T value, int count)
         {
             if (dest == null)
             {
@@ -120,8 +120,7 @@ namespace PKGE
         /// <typeparam name="T"></typeparam>
         /// <returns>The first element if the list was sorted or default</returns>
         /// <exception cref="ArgumentNullException">Can throw exception if list is null</exception>
-        [JetBrains.Annotations.CanBeNull]
-        public static T FirstOrDefaultSorted<T>([JetBrains.Annotations.NotNull] this IEnumerable<T> collection, IComparer<T> comparer = null)
+        public static T? FirstOrDefaultSorted<T>(this IEnumerable<T> collection, IComparer<T>? comparer = null)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");
@@ -129,7 +128,7 @@ namespace PKGE
             comparer ??= Comparer<T>.Default;
 
             var firstAssignment = false;
-            T element = default;
+            T? element = default;
             foreach (var e in collection)
             {
                 if (!firstAssignment)
@@ -138,7 +137,7 @@ namespace PKGE
                     firstAssignment = true;
                 }
 
-                if (comparer.Compare(e, element) < 0)
+                if (element != null && comparer.Compare(e, element) < 0)
                     element = e;
             }
 
@@ -154,8 +153,7 @@ namespace PKGE
         /// <typeparam name="T">Collection type</typeparam>
         /// <returns>Serialized collection</returns>
         /// <exception cref="ArgumentNullException">Can produce exception if collection or serialize method is null</exception>
-        [JetBrains.Annotations.NotNull]
-        public static string SerializedView<T>([DisallowNull] this IEnumerable<T> collection, [DisallowNull] Func<T, string> serializeElement)
+        public static string SerializedView<T>(this IEnumerable<T> collection, Func<T, string> serializeElement)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");
@@ -164,17 +162,16 @@ namespace PKGE
                 throw new ArgumentNullException(nameof(serializeElement), $"Argument {nameof(serializeElement)} must not be null.");
 
             using var _0 = StringBuilderPool.Get(out var sb);
-            sb.Append('[');
+            _ = sb.Append('[');
             foreach (var t in collection)
             {
-                sb.Append(t == null ? "null" : serializeElement(t));
-                sb.Append(',');
+                _ = sb.Append(t == null ? "null" : serializeElement(t)).Append(',');
             }
 
             // Remove last comma
-            sb.Remove(sb.Length - 1, 1);
+            _ = sb.Remove(sb.Length - 1, 1);
             
-            sb.Append(']');
+            _ = sb.Append(']');
             return sb.ToString();
         }
 
@@ -187,35 +184,19 @@ namespace PKGE
         /// <typeparam name="T">Collection type</typeparam>
         /// <returns>True if element found and False if not</returns>
         /// <exception cref="ArgumentNullException">Can produce exception if collection is null</exception>
-        public static bool ContainsByEquals<T>([DisallowNull] this IEnumerable<T> collection, T element)
+        public static bool ContainsByEquals<T>(this IEnumerable<T> collection, T element)
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection), $"{nameof(collection)} must not be null.");
 
             foreach (var e in collection)
             {
-                if (e.Equals(element))
+                if (Equals(e, element))
                     return true;
             }
 
             return false;
         }
         #endregion // Unity.Collections
-    }
-
-    public static class SpanExtensions
-    {
-        public static bool Contains<T>(this Span<T> span, T item) where T : IEquatable<T>
-        {
-            return -1 != span.IndexOf(item);
-        }
-    }
-
-    public static class ReadOnlySpanExtensions
-    {
-        public static bool Contains<T>(this ReadOnlySpan<T> span, T item) where T : IEquatable<T>
-        {
-            return -1 != span.IndexOf(item);
-        }
     }
 }

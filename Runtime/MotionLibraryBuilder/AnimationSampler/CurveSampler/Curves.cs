@@ -12,7 +12,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Curve : IDisposable

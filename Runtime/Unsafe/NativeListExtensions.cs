@@ -25,27 +25,6 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Formats.Alembic.Importer
 #endif // PKGE_USING_UNSAFE
 
-        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
-        #region UnityEngine.Rendering.Universal
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
-        {
-            return ref nativeList.UnsafeElementAtMutable(index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
-        {
-            Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsTrue(index < nativeList.Capacity);
-
-            if (index >= nativeList.Length)
-                nativeList.ResizeUninitialized(1 + index);
-
-            return ref nativeList.ElementAt(index);
-        }
-        #endregion // UnityEngine.Rendering.Universal
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void AddRange<T>(this NativeList<T> nativeList, NativeArray<T>.ReadOnly nativeArrayRO) where T : unmanaged
         {

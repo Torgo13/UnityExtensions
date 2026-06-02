@@ -25,7 +25,7 @@ namespace PKGE
 }
 #endif // UNITY_6000_3_OR_NEWER
 
-namespace PKGE.Packages
+namespace PKGE
 {
 #if INCLUDE_COLLECTIONS
     internal struct UnityObjectRefMap : IDisposable
@@ -155,7 +155,7 @@ namespace PKGE.Packages
             catch (InvalidOperationException ex)
             {
                 Debug.LogWarning(ex.Message, instance);
-                instanceId = instance.GetHashCode();
+                instanceId = instance == null ? 0 : instance.GetHashCode();
             }
 #else
             instanceId = instance == null ? 0 : instance.GetHashCode();

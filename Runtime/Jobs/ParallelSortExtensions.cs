@@ -1,12 +1,11 @@
 #if INCLUDE_COLLECTIONS
-using System.Threading;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.Assertions;
 using NativeDisableContainerSafetyRestriction = Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestrictionAttribute;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     public static class ParallelSortExtensions
     {
@@ -31,7 +30,7 @@ namespace PKGE.Unsafe
                 Assert.IsTrue(jobsCount * batchSize >= array.Length);
 
                 var supportArray = new NativeArray<int>(array.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var counter = new NativeArray<int>(1, Allocator.TempJob);
+                var counter = new NativeList<int>(1, AllocatorManager.TempJob);
                 var buckets = new NativeArray<int>(jobsCount * 256, Allocator.TempJob);
                 var indices = new NativeArray<int>(jobsCount * 256, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var indicesSum = new NativeArray<int>(16, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
@@ -87,11 +86,11 @@ namespace PKGE.Unsafe
                     (arraySource, arrayDest) = (arrayDest, arraySource);
                 }
 
-                _ = supportArray.Dispose(jobHandle);
-                _ = counter.Dispose(jobHandle);
-                _ = buckets.Dispose(jobHandle);
-                _ = indices.Dispose(jobHandle);
-                _ = indicesSum.Dispose(jobHandle);
+                jobHandle = supportArray.Dispose(jobHandle);
+                jobHandle = counter.Dispose(jobHandle);
+                jobHandle = buckets.Dispose(jobHandle);
+                jobHandle = indices.Dispose(jobHandle);
+                jobHandle = indicesSum.Dispose(jobHandle);
             }
             else
             {
@@ -134,14 +133,14 @@ namespace PKGE.Unsafe
             [ReadOnly] public int JobsCount;
             [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Counter;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeList<int> Counter;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
             [WriteOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
-            private static int AtomicIncrement(NativeArray<int> counter)
+            private static int AtomicIncrement(NativeList<int> counter)
             {
-                return Interlocked.Increment(ref counter.UnsafeElementAtMutable(0));
+                return System.Threading.Interlocked.Increment(ref counter.ElementAt(0));
             }
 
             private int JobIndexPrefixSum(int sum, int i)

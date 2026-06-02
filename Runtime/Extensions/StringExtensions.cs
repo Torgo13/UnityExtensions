@@ -1235,13 +1235,7 @@ namespace PKGE
             return (quotient, left - (quotient * right));
         }
         #endregion // dotnet
-    }
-}
 
-namespace PKGE.Packages
-{
-    public static class StringExtensions
-    {
         [JetBrains.Annotations.NotNull]
         public static string Remove([System.Diagnostics.CodeAnalysis.NotNull] this string str, List<char> removeChars)
         {

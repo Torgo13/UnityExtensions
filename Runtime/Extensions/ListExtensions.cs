@@ -173,14 +173,6 @@ namespace PKGE
             => list.AddRange(elementsToAdd);
         #endregion // Unity.Entities.CodeGen
 
-        //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Runtime/Export/Unsafe/UnsafeUtility.cs
-        #region Unity.Collections.LowLevel.Unsafe
-        public static Span<byte> AsBytes<T>(this List<T> list) where T : struct
-        {
-            return MemoryMarshal.AsBytes(list.AsSpan());
-        }
-        #endregion // Unity.Collections.LowLevel.Unsafe
-
         public static Span<TTo> Cast<TFrom, TTo>([System.Diagnostics.CodeAnalysis.DisallowNull] this List<TFrom> list)
             where TFrom : struct
             where TTo : struct

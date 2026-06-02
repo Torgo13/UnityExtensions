@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Pool;
 
-namespace PKGE.Collections
+namespace PKGE
 {
     /// <summary>
     /// Wraps a list or array to provide a read-only view of some or all elements. Elements are not copied, so if the

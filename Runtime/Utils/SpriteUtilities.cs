@@ -6,7 +6,7 @@ using static Unity.Mathematics.math;
 using static PKGE.Mathematics.math;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     public static class SpriteUtilities
     {
@@ -31,7 +31,7 @@ namespace PKGE.Unsafe
 
             var colours = texture.GetRawTextureData<Color32>();
 
-            Unity.Jobs.IJobForExtensions.Run(new Packages.SetArrayJob<Color32>
+            Unity.Jobs.IJobForExtensions.Run(new SetArrayJob<Color32>
             {
                 src = default,
                 dst = colours,

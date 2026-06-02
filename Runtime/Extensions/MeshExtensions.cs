@@ -7,6 +7,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 using IndexFormat = UnityEngine.Rendering.IndexFormat;
+using PKGE;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;
@@ -19,10 +20,137 @@ using int3 = UnityEngine.Vector3Int;
 using uint3 = UnityEngine.Vector3Int;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace TCGE
 {
     public static class MeshExtensions
     {
+        #region List
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> vertices)
+        {
+            mesh.GetVertices(vertices.As<float3, Vector3>());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inVertices)
+        {
+            mesh.SetVertices(inVertices.As<float3, Vector3>());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inNormals)
+        {
+            mesh.SetNormals(inNormals.As<float3, Vector3>());
+        }
+        #endregion // List
+
+        #region NativeArray
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<T> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+            where T : unmanaged
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<int> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<ushort> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+        #endregion // NativeArray
+
+#if INCLUDE_COLLECTIONS
+        #region NativeList
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inVertices)
+        {
+            mesh.SetVertices(inVertices.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inVertices)
+        {
+            mesh.SetVertices(inVertices.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetIndices<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> inIndices, MeshTopology topology = MeshTopology.Triangles, int submesh = 0)
+            where T : unmanaged
+        {
+            mesh.SetIndices(inIndices.AsArray(), topology, submesh);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, int channel, NativeList<T> uvs)
+            where T : unmanaged
+        {
+            mesh.SetUVs(channel, uvs.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> uvs, int channel = 0)
+            where T : unmanaged
+        {
+            mesh.SetUVs(channel, uvs.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inNormals)
+        {
+            mesh.SetNormals(inNormals.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inNormals)
+        {
+            mesh.SetNormals(inNormals.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color> inColors)
+        {
+            mesh.SetColors(inColors.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color32> inColors)
+        {
+            mesh.SetColors(inColors.AsArray());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+            where T : unmanaged
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<int> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<ushort> triangles,
+            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
+        {
+            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
+        }
+        #endregion // NativeList
+#endif // INCLUDE_COLLECTIONS
+
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/master/Runtime/Core/MeshUtility.cs
         #region UnityEngine.ProBuilder
         /// <summary>
@@ -627,128 +755,5 @@ namespace PKGE.Packages
             }
         }
         #endregion // Unity.Physics
-
-#if INCLUDE_COLLECTIONS
-        #region NativeList
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inVertices)
-        {
-            mesh.SetVertices(inVertices.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inVertices)
-        {
-            mesh.SetVertices(inVertices.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetIndices<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> inIndices, MeshTopology topology = MeshTopology.Triangles, int submesh = 0)
-            where T : unmanaged
-        {
-            mesh.SetIndices(inIndices.AsArray(), topology, submesh);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, int channel, NativeList<T> uvs)
-            where T : unmanaged
-        {
-            mesh.SetUVs(channel, uvs.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetUVs<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> uvs, int channel = 0)
-            where T : unmanaged
-        {
-            mesh.SetUVs(channel, uvs.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Vector3> inNormals)
-        {
-            mesh.SetNormals(inNormals.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<float3> inNormals)
-        {
-            mesh.SetNormals(inNormals.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color> inColors)
-        {
-            mesh.SetColors(inColors.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetColors([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<Color32> inColors)
-        {
-            mesh.SetColors(inColors.AsArray());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<T> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-            where T : unmanaged
-        {
-            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<int> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-        {
-            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeList<ushort> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-        {
-            mesh.SetIndices(triangles.AsArray(), MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
-        #endregion // NativeList
-#endif // INCLUDE_COLLECTIONS
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> vertices)
-        {
-            mesh.GetVertices(vertices.As<float3, Vector3>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetVertices([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inVertices)
-        {
-            mesh.SetVertices(inVertices.As<float3, Vector3>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetNormals([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, List<float3> inNormals)
-        {
-            mesh.SetNormals(inNormals.As<float3, Vector3>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles<T>([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<T> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-            where T : unmanaged
-        {
-            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<int> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-        {
-            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SetTriangles([System.Diagnostics.CodeAnalysis.NotNull] this Mesh mesh, NativeArray<ushort> triangles,
-            int submesh = 0, bool calculateBounds = true, int baseVertex = 0)
-        {
-            mesh.SetIndices(triangles, MeshTopology.Triangles, submesh, calculateBounds, baseVertex);
-        }
     }
 }

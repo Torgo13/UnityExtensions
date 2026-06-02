@@ -92,25 +92,25 @@ namespace PKGE
             else
             {
                 float smallestDelta = 1.0f;
-                using var _0 = UnityEngine.Pool.ListPool<float>.Get(out var times);
-                times.EnsureCapacity(cKeys.Length + aKeys.Length);
+                var times = new Unity.Collections.NativeArray<float>(cKeys.Length + aKeys.Length,
+                    Unity.Collections.Allocator.Temp, Unity.Collections.NativeArrayOptions.UninitializedMemory);
                 for (int i = 0; i < cKeys.Length; ++i)
                 {
-                    times.Add(cKeys[i].time);
+                    times[i] = cKeys[i].time;
                 }
 
                 for (int i = 0; i < aKeys.Length; ++i)
                 {
-                    times.Add(aKeys[i].time);
+                    times[i + cKeys.Length] = aKeys[i].time;
                 }
 
-                times.Sort();
+                Unity.Collections.NativeSortExtension.Sort(times);
 
                 // Found the smallest increment between 2 keys
-                for (int i = 1, timesCount = times.Count; i < timesCount; ++i)
+                for (int i = 1; i < times.Length; ++i)
                 {
                     int k0 = Math.Max(i - 1, 0);
-                    int k1 = Math.Min(i, timesCount - 1);
+                    int k1 = Math.Min(i, times.Length - 1);
                     float delta = Math.Abs(times[k0] - times[k1]);
 
                     // Do not compare if time is duplicated
@@ -135,7 +135,7 @@ namespace PKGE
                 else
                     scale = 2.0f;
 
-                float size = scale * (float)Math.Ceiling(1.0 / smallestDelta + 1.0);
+                double size = scale * Math.Ceiling(1.0 / smallestDelta + 1.0);
                 textureSize = (int)Math.Round(size);
                 // Arbitrary max (1024)
                 textureSize = Math.Min(textureSize, 1024);

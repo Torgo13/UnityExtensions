@@ -12,7 +12,7 @@ using float3 = UnityEngine.Vector3;
 using float4 = UnityEngine.Vector4;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     /// <summary>
     /// Provides methods that help you to work with LOD groups.

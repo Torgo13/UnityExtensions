@@ -7,7 +7,7 @@ using UnityEngine.Jobs;
 
 namespace PKGE
 {
-    public static class ArrayExtensions
+    public static partial class ArrayExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/95e018183e0f74dc34855606bf3287b41ee6e6ab/Packages/com.unity.render-pipelines.core/Runtime/Utilities/ArrayExtensions.cs
         #region UnityEngine.Rendering
@@ -869,14 +869,6 @@ namespace PKGE
         }
         #endregion // UnityEngine.InputSystem.Utilities
 
-        //https://github.com/Unity-Technologies/UnityCsReference/blob/b1cf2a8251cce56190f455419eaa5513d5c8f609/Runtime/Export/Unsafe/UnsafeUtility.cs
-        #region Unity.Collections.LowLevel.Unsafe
-        public static Span<byte> AsBytes<T>(this T[] array) where T : struct
-        {
-            return MemoryMarshal.AsBytes(array.AsSpan());
-        }
-        #endregion // Unity.Collections.LowLevel.Unsafe
-
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         public static void Resize<TValue>(ref this NativeArray<TValue> array, int newSize, Allocator allocator,
@@ -934,6 +926,7 @@ namespace PKGE
             where TValue : struct
         {
             Debug.Assert(array.IsCreated);
+            Debug.Assert(count >= 1);
             Debug.Assert(count <= array.Length);
             Debug.Assert(index >= 0 && index < count);
 
@@ -981,6 +974,107 @@ namespace PKGE
             return offset;
         }
         #endregion // UnityEngine.InputSystem.Utilities
+
+        //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/NativeArrayUtils.cs
+        #region Unity.XR.CoreUtils
+        /// <summary>
+        /// Ensure that this array is large enough to contain the given capacity.
+        /// </summary>
+        /// <remarks>
+        /// If the array does not have sufficient capacity, it is disposed and a new, empty array is created.
+        /// </remarks>
+        /// <typeparam name="T">The type of array element.</typeparam>
+        /// <param name="array">The array reference. Overwritten if the original array has insufficient capacity.</param>
+        /// <param name="capacity">The minimum number of elements that the array must be able to contain.</param>
+        /// <param name="allocator">The allocator to use when creating a new array, if needed.</param>
+        /// <param name="options">The options to use when creating the new array, if needed.</param>
+        public static void EnsureCapacity<T>(ref this NativeArray<T> array, int capacity, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory) where T : struct
+        {
+            if (array.Length < capacity)
+            {
+                if (array.IsCreated)
+                {
+                    array.Dispose();
+                }
+
+                array = new NativeArray<T>(capacity, allocator, options);
+            }
+        }
+        #endregion // Unity.XR.CoreUtils
+
+        //https://github.com/needle-mirror/com.unity.xr.arfoundation/blob/8ced5e7002ad2e622a7968f0007ab0bf7298c137/Runtime/ARSubsystems/NativeCopyUtility.cs
+        #region UnityEngine.XR.ARSubsystems
+        /// <summary>
+        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// The lengths of both collections must match.
+        /// </summary>
+        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
+        /// <param name="source">The <c>IReadOnlyList</c> that provides the data</param>
+        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
+        /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
+        public static void CopyFromReadOnlyList<T>(this NativeArray<T> destination, IReadOnlyList<T> source)
+            where T : struct
+        {
+            if (source.Count != destination.Length)
+            {
+                ThrowHelper.CopyFromReadOnlyList(destination, source);
+                return;
+            }
+
+            for (var i = 0; i < source.Count; i++)
+            {
+                destination[i] = source[i];
+            }
+        }
+
+        /// <summary>
+        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// The lengths of both collections must match.
+        /// </summary>
+        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
+        /// <param name="source">The <c>IReadOnlyCollection</c> that provides the data</param>
+        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
+        /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
+        /// <remarks> Prefer IReadOnlyList over IReadOnlyCollection for copy performance where possible.</remarks>
+        /// <seealso cref="CopyFromReadOnlyList{T}"/>
+        public static void CopyFromReadOnlyCollection<T>(this NativeArray<T> destination, IReadOnlyCollection<T> source)
+            where T : struct
+        {
+            if (source.Count != destination.Length)
+            {
+                ThrowHelper.CopyFromReadOnlyCollection(destination, source);
+                return;
+            }
+
+            var index = 0;
+            foreach (var item in source)
+            {
+                destination[index] = item;
+                index++;
+            }
+        }
+        #endregion // UnityEngine.XR.ARSubsystems
+
+        private static class ThrowHelper
+        {
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public static void CopyFromReadOnlyList<T>(NativeArray<T> destination, IReadOnlyList<T> source)
+                where T : struct
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            }
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+            public static void CopyFromReadOnlyCollection<T>(NativeArray<T> destination, IReadOnlyCollection<T> source)
+                where T : struct
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(destination),
+                    $"{nameof(source)} count {source.Count} doesn't match {nameof(destination)} length {destination.Length}!");
+            }
+        }
 
         public static Span<TTo> Cast<TFrom, TTo>([System.Diagnostics.CodeAnalysis.NotNull] this TFrom[] array)
             where TFrom : struct

@@ -132,10 +132,10 @@ namespace PKGE.Tests
         [Test]
         public void Packages_Union_SizeOf()
         {
-            Assert.AreEqual(2, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Packages.Union2>());
-            Assert.AreEqual(4, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Packages.Union4>());
-            Assert.AreEqual(8, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Packages.Union8>());
-            Assert.AreEqual(16, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Packages.Union16>());
+            Assert.AreEqual(2, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Mathematics.Union2>());
+            Assert.AreEqual(4, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Mathematics.Union4>());
+            Assert.AreEqual(8, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Mathematics.Union8>());
+            Assert.AreEqual(16, Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf<PKGE.Mathematics.Union16>());
         }
 
         static Vector3EqualityComparer s_Vector3Comparer;

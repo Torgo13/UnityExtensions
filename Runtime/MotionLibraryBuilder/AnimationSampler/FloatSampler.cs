@@ -1,6 +1,6 @@
 using Unity.Collections;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     public struct FloatSampler
     {
@@ -23,7 +23,7 @@ namespace PKGE.Packages
 
         public float this[int index]
         {
-            get => HasCurve ? curve.Keys[index].value : defaultValue;
+            get => HasCurve && curve.Keys.Length > index ? curve.Keys[index].value : defaultValue;
         }
 
         public float Evaluate(float time)

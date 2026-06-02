@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using Unity.Burst;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     public struct FunctionPointerUtility
     {

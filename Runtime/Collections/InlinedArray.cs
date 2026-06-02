@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace PKGE.Collections
+namespace PKGE
 {
     /// <summary>
     /// Helper to avoid array allocations if there's only a single value in the array.

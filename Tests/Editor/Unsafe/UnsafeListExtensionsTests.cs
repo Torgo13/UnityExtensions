@@ -250,7 +250,7 @@ namespace PKGE.Unsafe.Tests
             // UnityEngine.Assertions.Assert throws UnityEngine.Assertions.AssertionException
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                Packages.UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
+                PKGE.UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
             });
         }
 
@@ -263,7 +263,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    Packages.UnsafeListExtensions.EnsureCapacity(ref list, requested);
+                    PKGE.UnsafeListExtensions.EnsureCapacity(ref list, requested);
                 });
             }
             finally
@@ -287,7 +287,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.AreEqual(4, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity);
-                Packages.UnsafeListExtensions.EnsureCapacity(ref list, 32);
+                PKGE.UnsafeListExtensions.EnsureCapacity(ref list, 32);
                 NUnitAssert.AreEqual(32, list.Capacity);
             }
             finally
@@ -303,7 +303,7 @@ namespace PKGE.Unsafe.Tests
             var list = new UnsafeList<int>(16, Allocator.Persistent);
             try
             {
-                Packages.UnsafeListExtensions.EnsureCapacity(ref list, 10);
+                PKGE.UnsafeListExtensions.EnsureCapacity(ref list, 10);
                 NUnitAssert.AreEqual(16, list.Capacity);
             }
             finally
@@ -320,7 +320,7 @@ namespace PKGE.Unsafe.Tests
         {
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                Packages.UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
+                PKGE.UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
             });
         }
 
@@ -333,7 +333,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    Packages.UnsafeListExtensions.EnsureRoom(ref list, room);
+                    PKGE.UnsafeListExtensions.EnsureRoom(ref list, room);
                 });
             }
             finally
@@ -354,7 +354,7 @@ namespace PKGE.Unsafe.Tests
                 NUnitAssert.AreEqual(3, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
 
-                Packages.UnsafeListExtensions.EnsureRoom(ref list, 5);
+                PKGE.UnsafeListExtensions.EnsureRoom(ref list, 5);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -371,7 +371,7 @@ namespace PKGE.Unsafe.Tests
             try
             {
                 Populate(ref list, new[] { 10, 20, 30 }); // length = 3
-                Packages.UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
+                PKGE.UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -466,7 +466,7 @@ namespace PKGE.Unsafe.Tests
             if (!list.IsCreated)
                 list = new UnsafeList<T>(values.Length, Allocator.Persistent);
 
-            Packages.UnsafeListExtensions.EnsureCapacity(ref list, values.Length);
+            PKGE.UnsafeListExtensions.EnsureCapacity(ref list, values.Length);
             list.Length = values.Length;
 
             for (int i = 0; i < values.Length; i++)

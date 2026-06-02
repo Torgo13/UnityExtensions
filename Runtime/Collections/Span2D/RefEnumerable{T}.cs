@@ -6,7 +6,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace PKGE.Unsafe
+namespace PKGE
 {
     /// <summary>
     /// A <see langword="ref"/> <see langword="struct"/> that iterates items from arbitrary memory locations.

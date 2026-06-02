@@ -9,66 +9,6 @@ namespace PKGE.Unsafe.Tests
     {
 #if PKGE_USING_UNSAFE
         [Test]
-        public void PtrToNativeArrayWithDefault_ShouldCreateNativeArrayAndCopySourceData()
-        {
-            int length = 5;
-            int defaultValue = 0;
-            int[] sourceArray = { 1, 2, 3, 4, 5 };
-            int elementSize = UnsafeUtility.SizeOf<int>();
-
-            unsafe
-            {
-                fixed (void* sourcePtr = sourceArray)
-                {
-                    var nativeArray = NativeCopyUtility.PtrToNativeArrayWithDefault(defaultValue, sourcePtr, elementSize, length, Allocator.Temp);
-
-                    Assert.AreEqual(length, nativeArray.Length);
-                    for (int i = 0; i < length; i++)
-                    {
-                        Assert.AreEqual(sourceArray[i], nativeArray[i]);
-                    }
-
-                    nativeArray.Dispose();
-                }
-            }
-        }
-#endif // PKGE_USING_UNSAFE
-
-        [Test]
-        public void FillArrayWithValue_ShouldFillNativeArrayWithSpecifiedValue()
-        {
-            int length = 5;
-            int value = 10;
-            var nativeArray = new NativeArray<int>(length, Allocator.Temp);
-
-            NativeCopyUtility.FillArrayWithValue(nativeArray, value);
-
-            for (int i = 0; i < length; i++)
-            {
-                Assert.AreEqual(value, nativeArray[i]);
-            }
-
-            nativeArray.Dispose();
-        }
-
-        [Test]
-        public void CreateArrayFilledWithValue_ShouldCreateNativeArrayAndFillWithSpecifiedValue()
-        {
-            int length = 5;
-            int value = 10;
-            var nativeArray = NativeCopyUtility.CreateArrayFilledWithValue(value, length, Allocator.Temp);
-
-            Assert.AreEqual(length, nativeArray.Length);
-            for (int i = 0; i < length; i++)
-            {
-                Assert.AreEqual(value, nativeArray[i]);
-            }
-
-            nativeArray.Dispose();
-        }
-
-#if PKGE_USING_UNSAFE
-        [Test]
         public unsafe void GetPointer_ShouldReturnNullForDefaultArray()
         {
             NativeArray<int> emptyArray = default;

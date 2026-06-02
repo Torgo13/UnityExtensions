@@ -92,14 +92,14 @@ namespace PKGE.Editor.Unsafe.Tests
         public void InsertionSort(uint[] values)
         {
             var array = new NativeArray<uint>(values, Allocator.Temp);
-            CoreUnsafeUtils.InsertionSort(array, array.Length);
+            CoreUtils.InsertionSort(array, array.Length);
             for (int i = 0; i < array.Length - 1; ++i)
                 Assert.LessOrEqual(array[i], array[i + 1]);
 
             array.Dispose();
 
 
-            CoreUnsafeUtils.InsertionSort(values, values.Length);
+            CoreUtils.InsertionSort(values, values.Length);
             for (int i = 0; i < values.Length - 1; ++i)
                 Assert.LessOrEqual(values[i], values[i + 1]);
         }
@@ -110,7 +110,7 @@ namespace PKGE.Editor.Unsafe.Tests
         {
             NativeArray<uint> supportArray = new NativeArray<uint>();
             var array = new NativeArray<uint>(values, Allocator.Temp);
-            CoreUnsafeUtils.MergeSort(array, array.Length, ref supportArray);
+            CoreUtils.MergeSort(array, array.Length, ref supportArray);
             for (int i = 0; i < array.Length - 1; ++i)
                 Assert.LessOrEqual(array[i], array[i + 1]);
 
@@ -119,7 +119,7 @@ namespace PKGE.Editor.Unsafe.Tests
 
 
             var managedSupportArray = new uint[values.Length].AsSpan();
-            CoreUnsafeUtils.MergeSort(values, values.Length, ref managedSupportArray);
+            CoreUtils.MergeSort(values, values.Length, ref managedSupportArray);
             for (int i = 0; i < values.Length - 1; ++i)
                 Assert.LessOrEqual(values[i], values[i + 1]);
         }
@@ -130,7 +130,7 @@ namespace PKGE.Editor.Unsafe.Tests
         {
             NativeArray<uint> supportArray = new NativeArray<uint>();
             var array = new NativeArray<uint>(values, Allocator.Temp);
-            CoreUnsafeUtils.RadixSort(array, array.Length, ref supportArray);
+            CoreUtils.RadixSort(array, array.Length, ref supportArray);
             for (int i = 0; i < array.Length - 1; ++i)
                 Assert.LessOrEqual(array[i], array[i + 1]);
 
@@ -139,7 +139,7 @@ namespace PKGE.Editor.Unsafe.Tests
 
 
             var managedSupportArray = new uint[values.Length].AsSpan();
-            CoreUnsafeUtils.RadixSort(values, values.Length, ref managedSupportArray);
+            CoreUtils.RadixSort(values, values.Length, ref managedSupportArray);
             for (int i = 0; i < values.Length - 1; ++i)
                 Assert.LessOrEqual(values[i], values[i + 1]);
         }
@@ -167,11 +167,11 @@ namespace PKGE.Editor.Unsafe.Tests
                 var algorithmValue = (SortAlgorithm)algorithmId;
                 var array = new NativeArray<uint>(values, Allocator.Temp);
                 if (algorithmValue == SortAlgorithm.Insertion)
-                    CoreUnsafeUtils.InsertionSort(array, sortCount);
+                    CoreUtils.InsertionSort(array, sortCount);
                 else if (algorithmValue == SortAlgorithm.Merge)
-                    CoreUnsafeUtils.MergeSort(array, sortCount, ref supportArray);
+                    CoreUtils.MergeSort(array, sortCount, ref supportArray);
                 else if (algorithmValue == SortAlgorithm.Radix)
-                    CoreUnsafeUtils.RadixSort(array, sortCount, ref supportArray);
+                    CoreUtils.RadixSort(array, sortCount, ref supportArray);
 
                 for (int i = 0; i < sortCount - 1; ++i)
                     Assert.LessOrEqual(array[i], array[i + 1]);

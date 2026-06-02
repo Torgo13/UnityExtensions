@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     /// <summary>
     /// Tools for generating random points inside of a shape of interest

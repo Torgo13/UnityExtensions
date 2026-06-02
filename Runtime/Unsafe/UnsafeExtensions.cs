@@ -12,7 +12,7 @@ using Unity.Collections.LowLevel.Unsafe;
 #endif // PKGE_USING_UNSAFE
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
-using PKGE.Packages;
+using PKGE;
 using UnsafeUtility = Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
 using UnsafeAtomicCounter32 = Unity.Collections.LowLevel.Unsafe.UnsafeAtomicCounter32;
 
@@ -23,8 +23,6 @@ namespace PKGE.Unsafe
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe
         #region Blittable
-        public static bool IsBlittableValueType(this Type t) { return t.IsValueType && UnsafeUtility.IsBlittable(t); }
-
 #if USING_REFLECTION
         public static string GetReasonForTypeNonBlittableImpl(Type t, string name)
         {
@@ -43,27 +41,7 @@ namespace PKGE.Unsafe
 
             return ret.ToString();
         }
-#endif // USING_REFLECTION
 
-        // while it would make sense to have functions like ThrowIfArgumentIsNonBlittable
-        // currently we insist on including part of call stack into exception message in these cases
-        // e.g. "T used in NativeArray<T> must be blittable"
-        // due to that we will need to pass message string to this function
-        //   but most of the time we will be creating it using string.Format and it will happen on every check
-        //   instead of "only if we fail check for is-blittable"
-        // that's why we provide the means to implement this pattern on your code (but not function itself)
-
-        public static bool IsArrayBlittable([System.Diagnostics.CodeAnalysis.NotNull] Array arr)
-        {
-            return IsBlittableValueType(arr.GetType().GetElementType());
-        }
-
-        public static bool IsGenericListBlittable<T>() where T : struct
-        {
-            return UnsafeUtility.IsBlittable(typeof(T));
-        }
-
-#if USING_REFLECTION
         public static string GetReasonForArrayNonBlittable(Array arr)
         {
             Type t = arr.GetType().GetElementType();

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace PKGE.Packages
+namespace PKGE
 {
     using CoreUtils = UnityEngine.Rendering.CoreUtils;
     using ProfilingSampler = UnityEngine.Rendering.ProfilingSampler;

@@ -10,7 +10,7 @@ using Unity.Mathematics;
 using PKGE.Mathematics;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE.Packages
+namespace PKGE
 {
     /// <summary>
     /// ContextContainer is a Dictionary-like storage where the key is a generic parameter and the value is of the same type.
