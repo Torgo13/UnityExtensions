@@ -9,7 +9,7 @@ namespace PKGE
         #region Unity.LiveCapture.VideoStreaming.Client.Utils
         public static ArraySegment<T> SubSegment<T>(this ArraySegment<T> arraySegment, int offset)
         {
-            Assert.IsTrue(arraySegment.Array != null, $"{nameof(arraySegment.Array)} is null.");
+            Assert.IsNotNull(arraySegment.Array, $"{nameof(arraySegment.Array)} is null.");
             return new ArraySegment<T>(arraySegment.Array, arraySegment.Offset + offset, arraySegment.Count - offset);
         }
         #endregion // Unity.LiveCapture.VideoStreaming.Client.Utils

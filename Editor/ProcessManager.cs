@@ -12,20 +12,20 @@ namespace PKGE.Editor
         public interface IProcess
         {
             ProcessStartInfo startInfo { get; }
-            Process process { get; }
+            Process? process { get; }
             bool hasStarted { get; }
         }
 
         class ProcessImpl : IProcess
         {
-            readonly Action<IProcess> _preStart;
-            readonly Action<IProcess> _postStart;
+            readonly Action<IProcess>? _preStart;
+            readonly Action<IProcess>? _postStart;
 
             public ProcessStartInfo startInfo { get; private set; }
-            public Process process { get; private set; }
+            public Process? process { get; private set; }
             public bool hasStarted { get { return process != null; } }
 
-            public ProcessImpl(ProcessStartInfo startInfo, Action<IProcess> preStart, Action<IProcess> postStart)
+            public ProcessImpl(ProcessStartInfo startInfo, Action<IProcess>? preStart, Action<IProcess>? postStart)
             {
                 this.startInfo = startInfo;
                 _preStart = preStart;
@@ -114,7 +114,7 @@ namespace PKGE.Editor
             for (var i = _runningProcesses.Count - 1; i >= 0; --i)
             {
                 var proc = _runningProcesses[i];
-                if (proc.process.HasExited)
+                if (proc.process?.HasExited ?? false)
                 {
                     _runningProcesses.RemoveAt(i);
 
@@ -141,7 +141,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/Internal/ProcessManager.cs
         #region UnityEditor.ShaderAnalysis.Internal
-        public static bool IsComplete(this ProcessManager.IProcess process)
+        public static bool IsComplete(this ProcessManager.IProcess? process)
         {
             return process != null && process.process != null && process.hasStarted && process.process.HasExited;
         }

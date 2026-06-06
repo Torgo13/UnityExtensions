@@ -1,3 +1,5 @@
+#nullable enable
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -45,7 +47,7 @@ namespace PKGE
 #if INCLUDE_MATHEMATICS
 #if UNITY_6000_3_OR_NEWER
         /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, System.Span{Plane})"/>
-        public static void FromCamera(Camera camera, NativeArray<Vector4> planes, System.Span<Plane> sourcePlanes)
+        public static void FromCamera(Camera camera, NativeArray<Vector4> planes, Span<Plane> sourcePlanes)
 #else
         /// <inheritdoc cref="FromCamera(Camera, NativeArray{float4}, Plane[])"/>
         public static void FromCamera(Camera camera, NativeArray<Vector4> planes, Plane[] sourcePlanes)
@@ -61,28 +63,25 @@ namespace PKGE
         /// <param name="camera">The camera to use for calculation.</param>
         /// <param name="planes">The result of the operation.</param>
         /// <param name="sourcePlanes">An array of 6 planes.</param>
-        /// <exception cref="System.ArgumentNullException">Is thrown if the planes are empty.</exception>
-        /// <exception cref="System.ArgumentException">Is thrown if the planes size is not equal to 6.</exception>
+        /// <exception cref="ArgumentNullException">Is thrown if the planes are empty.</exception>
+        /// <exception cref="ArgumentException">Is thrown if the planes size is not equal to 6.</exception>
 #if UNITY_6000_3_OR_NEWER
-        public static void FromCamera(Camera camera, NativeArray<float4> planes, System.Span<Plane> sourcePlanes)
+        public static void FromCamera(Camera camera, NativeArray<float4> planes, Span<Plane> sourcePlanes)
 #else
         public static void FromCamera(Camera camera, NativeArray<float4> planes, Plane[] sourcePlanes)
 #endif // UNITY_6000_3_OR_NEWER
         {
-            if (ReferenceEquals(null, camera))
-                throw new System.ArgumentNullException(nameof(camera), "The argument camera cannot be null.");
-
             if (!planes.IsCreated)
-                throw new System.ArgumentNullException(nameof(planes), "The argument planes cannot be null.");
+                throw new ArgumentNullException(nameof(planes), "The argument planes cannot be null.");
 
             if (planes.Length != 6)
-                throw new System.ArgumentOutOfRangeException(nameof(planes), "The argument planes does not have the expected length 6.");
+                throw new ArgumentOutOfRangeException(nameof(planes), "The argument planes does not have the expected length 6.");
 
             if (sourcePlanes == null)
-                throw new System.ArgumentNullException(nameof(sourcePlanes), "The argument sourcePlanes cannot be null.");
+                throw new ArgumentNullException(nameof(sourcePlanes), "The argument sourcePlanes cannot be null.");
 
             if (sourcePlanes.Length != 6)
-                throw new System.ArgumentOutOfRangeException(nameof(sourcePlanes), "The argument sourcePlanes does not have the expected length 6.");
+                throw new ArgumentOutOfRangeException(nameof(sourcePlanes), "The argument sourcePlanes does not have the expected length 6.");
 
             Matrix4x4 worldToProjectionMatrix = camera.projectionMatrix * camera.worldToCameraMatrix;
 #if UNITY_6000_3_OR_NEWER
@@ -110,46 +109,6 @@ namespace PKGE
             }
         }
 
-#if UNITY_6000_3_OR_NEWER
-        struct FromCameraJob : Unity.Jobs.IJob
-        {
-            [WriteOnly] public NativeArray<float4> planes;
-            public NativeArray<Plane> sourcePlanes;
-            public Matrix4x4 cameraProjection;
-            public Matrix4x4 worldToCamera;
-            public Matrix4x4 cameraToWorld;
-            public float nearClipPlane;
-            public float farClipPlane;
-            
-            public void Execute()
-            {
-                var worldToProjectionMatrix = cameraProjection * worldToCamera;
-                GeometryUtility.CalculateFrustumPlanes(in worldToProjectionMatrix, sourcePlanes);
-
-                var eyePos = cameraToWorld.MultiplyPoint(Vector3.zero);
-                Vector3 viewDir = -math.normalizesafe(new float3(cameraToWorld.m02, cameraToWorld.m12, cameraToWorld.m22));
-
-                // Near Plane
-                var sourcePlane = sourcePlanes[4];
-                sourcePlane.SetNormalAndPosition(viewDir, eyePos);
-                sourcePlane.distance -= nearClipPlane;
-                sourcePlanes[4] = sourcePlane;
-
-                // Far plane
-                sourcePlane = sourcePlanes[5];
-                sourcePlane.SetNormalAndPosition(-viewDir, eyePos);
-                sourcePlane.distance += farClipPlane;
-                sourcePlanes[5] = sourcePlane;
-
-                for (int i = 0; i < 6; ++i)
-                {
-                    planes[i] = new float4(sourcePlanes[i].normal.x, sourcePlanes[i].normal.y, sourcePlanes[i].normal.z,
-                        sourcePlanes[i].distance);
-                }
-            }
-        }
-#endif // UNITY_6000_3_OR_NEWER
-
 #if INCLUDE_COLLECTIONS
         /// <summary>
         /// Performs an intersection test between an AABB and 6 culling planes.
@@ -170,8 +129,7 @@ namespace PKGE
         static bool Intersect(in NativeArray<float4>.ReadOnly cullingPlanes, in float3 m, in float3 extent,
             out int inCount)
         {
-            inCount = default;
-            int intersectResult = default;
+            inCount = 0;
 
             for (int i = 0; i < cullingPlanes.Length; i++)
             {
@@ -179,21 +137,23 @@ namespace PKGE
                 float3 normal = cullingPlanes[i].xyz;
                 float dist = math.dot(normal, m) + cullingPlanes[i].w;
                 float radius = math.dot(extent, math.abs(normal));
-                intersectResult += (int)math.saturate(dist + radius);
-                inCount += (int)(math.ceil(math.saturate(dist - radius))
-                    * math.ceil(math.saturate(dist + radius)));
+                if (dist + radius <= 0)
+                    return true;
+
+                if (dist > radius)
+                    inCount++;
             }
 
-            return intersectResult > 0;
+            return false;
         }
 
         static void Intersect(in float4 cullingPlane, in float3 m, in float3 extent,
-            ref int inCount, ref bool intersectResult)
+            ref int inCount, ref int intersectResult)
         {
             float3 normal = cullingPlane.xyz;
             float dist = math.dot(normal, m) + cullingPlane.w;
             float radius = math.dot(extent, math.abs(normal));
-            intersectResult |= dist + radius <= 0;
+            intersectResult += (int)math.floor(dist + radius);
             inCount += (int)(math.ceil(math.saturate(dist - radius))
                 * math.ceil(math.saturate(dist + radius)));
         }
@@ -301,8 +261,8 @@ namespace PKGE
             float4 ey = extents.yyyy;
             float4 ez = extents.zzzz;
 
-            int4 outCounts = 0;
-            int4 inCounts = 0;
+            int4 outCounts = default;
+            int4 inCounts = default;
 
             for (int i = 0; i < cullingPlanePackets.Length; i++)
             {
@@ -343,7 +303,7 @@ namespace PKGE
             float4 ey = extents.yyyy;
             float4 ez = extents.zzzz;
 
-            int4 masks = 0;
+            int4 masks = default;
 
             for (int i = 0; i < cullingPlanePackets.Length; i++)
             {

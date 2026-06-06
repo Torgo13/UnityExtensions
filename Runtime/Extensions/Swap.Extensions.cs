@@ -24,7 +24,7 @@ namespace PKGE
         /// <returns>True if it succeeded, false otherwise</returns>
         [JetBrains.Annotations.CollectionAccess(JetBrains.Annotations.CollectionAccessType.ModifyExistingContent)]
         [JetBrains.Annotations.MustUseReturnValue]
-        public static bool TrySwap<TValue>(this IList<TValue> list, int from, int to,
+        public static bool TrySwap<TValue>(this IList<TValue>? list, int from, int to,
             [NotNullWhen(false)] out Exception? error)
         {
             error = null;

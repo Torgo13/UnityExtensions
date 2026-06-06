@@ -10,7 +10,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.shaderanalysis/Editor/Internal/EditorUpdateManager.cs
         #region UnityEditor.ShaderAnalysis.Internal
-        public static Action ToUpdate;
+        public static Action? ToUpdate;
 
         [InitializeOnLoadMethod]
         static void Register()

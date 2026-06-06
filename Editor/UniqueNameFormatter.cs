@@ -11,7 +11,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Editor/Core/Utilities/UniqueNameFormatter.cs
         #region Unity.LiveCapture.Editor
-        HashSet<string> _names;
+        HashSet<string>? _names;
         HashSet<string> Names => _names ??= new HashSet<string>(System.StringComparer.Ordinal);
 
         public string Format(string text)

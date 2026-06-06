@@ -197,7 +197,7 @@ namespace PKGE.Editor
         [MenuItem("Assets/AssetDatabase/Replace scene selection by this prefab", false)]
         private static void ReplaceSelPrefab(MenuCommand menuCommand)
         {
-            GameObject ReplaceSource = null;
+            GameObject? ReplaceSource = null;
 
             //Sorting selected scene assets from selected project assets.
             foreach (var go in Selection.gameObjects)

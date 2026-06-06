@@ -121,7 +121,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyList{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.ReadOnlyList{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -135,7 +135,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyList{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.ReadOnlyList{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -147,7 +147,7 @@ namespace PKGE
         /// Get a hash code for this object.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode() => _list != null ? _list.GetHashCode() : 0;
+        public override int GetHashCode() => _list.GetHashCode();
 
         /// <summary>
         /// Returns a string that represents the current object.
@@ -172,6 +172,6 @@ namespace PKGE
             sb.Append('}');
             return sb.ToString();
         }
-#endregion // Unity.XR.CoreUtils.Collections
+        #endregion // Unity.XR.CoreUtils.Collections
     }
 }

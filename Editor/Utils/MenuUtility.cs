@@ -61,7 +61,7 @@ namespace PKGE.Editor
         public static GenericMenu CreateMenu<TMember, TAttribute>(
             IEnumerable<(TMember, TAttribute[])> attributes,
             Func<TMember, bool> isEnabled,
-            Action<TMember, TAttribute> menuFunction
+            Action<TMember, TAttribute>? menuFunction
         )
             where TAttribute : MenuPathAttribute
         {

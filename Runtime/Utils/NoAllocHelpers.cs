@@ -203,8 +203,9 @@ namespace PKGE
         /// </remarks>
         /// <typeparam name="T"></typeparam>
         /// <param name="list">Input <see cref="System.Collections.Generic.List{T}"/>.</param>
-        /// <returns>Internal <see cref="{T}[]"/> of <paramref name="list"/>.</returns>
+        /// <returns>Internal <see cref="T"/>[] of <paramref name="list"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("list")]
         public static T[]? ExtractArrayFromList<T>(this List<T>? list)
         {
             if (list == null)

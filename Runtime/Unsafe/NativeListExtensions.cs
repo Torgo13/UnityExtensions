@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace PKGE.Unsafe
 {
-    public static partial class NativeListExtensions
+    public static class NativeListExtensions
     {
 #if PKGE_USING_UNSAFE
         //https://github.com/Unity-Technologies/com.unity.formats.alembic/blob/main/com.unity.formats.alembic/Runtime/Scripts/Misc/RuntimeUtils.cs

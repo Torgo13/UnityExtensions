@@ -13,7 +13,7 @@ namespace PKGE
         private const float AverageStatDuration = 1.0f; // stats refresh each second
         private int _frameCount;
 		private float _accDeltaTime;
-        private string _statsLabel;
+        private string _statsLabel = string.Empty;
         private GUIStyle _style;
 
         private const int _frameTimeCount = 4096;
@@ -22,12 +22,12 @@ namespace PKGE
         private float _minFrameTime = 1000f;
         private float _maxFrameTime;
 
-        class RecorderEntry
+        sealed class RecorderEntry
         {
             public string Name;
             public int CallCount;
             public float AccTime;
-            public Recorder Recorder;
+            public Recorder? Recorder;
         };
 
 		enum Markers
@@ -115,12 +115,12 @@ namespace PKGE
                 }
 
                 // get timing & update average accumulators
-                for (int i = 0; i < _recordersList.Length; i++)
+                foreach (RecorderEntry entry in _recordersList)
                 {
-                    if (_recordersList[i].Recorder != null)
+                    if (entry.Recorder != null)
                     {
-                        _recordersList[i].AccTime += _recordersList[i].Recorder.elapsedNanoseconds / 1000000.0f; // acc time in ms
-                        _recordersList[i].CallCount += _recordersList[i].Recorder.sampleBlockCount;
+                        entry.AccTime += entry.Recorder.elapsedNanoseconds / 1000000.0f; // acc time in ms
+                        entry.CallCount += entry.Recorder.sampleBlockCount;
                     }
                 }
 

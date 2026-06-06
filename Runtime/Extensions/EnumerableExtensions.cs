@@ -77,14 +77,13 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.purchasing/blob/5.0.0-pre.3/Runtime/Utilities/EnumerableExtensions.cs
         #region UnityEngine.Purchasing
-        public static IEnumerable<T> NonNull<T>(this IEnumerable<T> enumerable) where T : class
+        public static IEnumerable<T> NonNull<T>(this IEnumerable<T?> enumerable) where T : class
         {
 #if USING_LINQ
             return enumerable.Where(static obj => obj != null);
 #else
-            var list = new List<T>(enumerable);
-            list.RemoveNull();
-            return list;
+            var list = new List<T?>(enumerable);
+            return list.RemoveNull();
 #endif // USING_LINQ
         }
 

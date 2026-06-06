@@ -74,7 +74,7 @@ namespace PKGE.Editor
             while (_process.StandardOutput.Peek() > -1)
             {
                 var line = _process.StandardOutput.ReadLine();
-                _lines.Add(line);
+                _lines.Add(line!);
                 _outputBuilder.AppendLine(line);
             }
         }

@@ -1,14 +1,15 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Sources;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+using ValueTask = System.Threading.Tasks.ValueTask;
+using ValueTaskSourceStatus = System.Threading.Tasks.Sources.ValueTaskSourceStatus;
 
 namespace PKGE
 {
@@ -36,7 +37,7 @@ namespace PKGE
         private NativeArray<byte> data;
         private NativeArray<MipLevelParameters> mipParams;
         private readonly ReadbackAsyncDispose readback;
-        private readonly Texture2D tempTex;
+        private readonly Texture2D? tempTex;
 
         /// <summary>Ensure that only either <see cref="Dispose"/> or <see cref="DisposeAsync"/>
         /// is called once total on disposal.</summary>
@@ -47,10 +48,9 @@ namespace PKGE
         /// <param name="allocator">Only change to <see cref="Allocator.TempJob"/> if the
         /// <see cref="AsyncGPUReadbackRequest"/> and job will complete within four frames.</param>
         /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
-        public Texture2DProperties([System.Diagnostics.CodeAnalysis.NotNull] Texture tex, Allocator allocator = Allocator.TempJob, bool mipChain = true)
+        public Texture2DProperties(Texture tex, Allocator allocator = Allocator.TempJob, bool mipChain = true)
         {
             Assert.IsTrue((int)allocator > (int)Allocator.Temp);
-            Assert.IsNotNull(tex);
             Assert.AreEqual(TextureDimension.Tex2D, tex.dimension);
 
             this.tex = tex;
@@ -99,7 +99,7 @@ namespace PKGE
                 : default;
         }
 
-        private static NativeArray<byte> Blit(Texture tex, [System.Diagnostics.CodeAnalysis.NotNull] Texture2D tempTex,
+        private static NativeArray<byte> Blit(Texture tex, Texture2D tempTex,
             Texture2DParameters inputParams, bool isLinear)
         {
             RenderTexture tempRT = RenderTexture.GetTemporary(inputParams.width, inputParams.height,
@@ -211,8 +211,7 @@ namespace PKGE
         }
         #endregion // GetData
 
-        [JetBrains.Annotations.CanBeNull]
-        public readonly Texture2D Apply32(bool updateMipmaps = true, bool makeNoLongerReadable = false)
+        public readonly Texture2D? Apply32(bool updateMipmaps = true, bool makeNoLongerReadable = false)
         {
             if (texParams.format != TextureFormat.RGBA32)
                 return default;
@@ -248,8 +247,7 @@ namespace PKGE
             return output;
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public readonly Texture2D Apply24(bool updateMipmaps = true, bool makeNoLongerReadable = false)
+        public readonly Texture2D? Apply24(bool updateMipmaps = true, bool makeNoLongerReadable = false)
         {
             if (texParams.format != TextureFormat.RGB24)
                 return default;
@@ -320,7 +318,7 @@ namespace PKGE
         #endregion // Properties
 
         #region IEnumerator
-        public readonly object Current => null;
+        public readonly object? Current => null;
         public readonly bool MoveNext() => texReadable.PerformedReadback && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending;
         public readonly void Reset() {}
         #endregion // IEnumerator
@@ -413,7 +411,7 @@ namespace PKGE
             CheckSupportsAsyncGPUReadback();
         }
         
-        public Texture2DReadable([System.Diagnostics.CodeAnalysis.NotNull] Texture tex)
+        public Texture2DReadable(Texture tex)
         {
             this.isReadable =  tex.isReadable;
             this.isCompressed = Texture2DParameters.PixelSize(tex.graphicsFormat) == -1;
@@ -499,7 +497,7 @@ namespace PKGE
             this.mipCount = mipCount;
         }
 
-        public Texture2DParameters([System.Diagnostics.CodeAnalysis.NotNull] Texture tex)
+        public Texture2DParameters(Texture tex)
         {
             width = tex.width;
             height = tex.height;
@@ -509,7 +507,7 @@ namespace PKGE
             mipCount = tex.mipmapCount;
         }
 
-        public Texture2DParameters([System.Diagnostics.CodeAnalysis.NotNull] Texture2D tex)
+        public Texture2DParameters(Texture2D tex)
         {
             width = tex.width;
             height = tex.height;
@@ -773,10 +771,10 @@ namespace PKGE
     }
 
     /// <summary>
-    /// An <see cref="AsyncGPUReadbackRequest"/> wrapper implementing <see cref="IValueTaskSource"/>
+    /// An <see cref="AsyncGPUReadbackRequest"/> wrapper implementing <see cref="System.Threading.Tasks.Sources.IValueTaskSource"/>
     /// so it can be used in the constructor for <see cref="ValueTask"/>.
     /// </summary>
-    public readonly struct ReadbackAsyncDispose : IValueTaskSource
+    public readonly struct ReadbackAsyncDispose : System.Threading.Tasks.Sources.IValueTaskSource
     {
         private readonly AsyncGPUReadbackRequest _readbackRequest;
 
@@ -785,17 +783,16 @@ namespace PKGE
         /// as a reference, but it calls <see cref="AsyncRequestNativeArrayData.CreateAndCheckAccess"/>
         /// which then takes it by value.
         /// </remarks>
-        public ReadbackAsyncDispose(ref NativeArray<byte> output, [System.Diagnostics.CodeAnalysis.NotNull] Texture src)
+        public ReadbackAsyncDispose(ref NativeArray<byte> output, Texture src)
         {
             Assert.IsTrue(output.IsCreated);
-            Assert.IsNotNull(src);
             
             _readbackRequest = AsyncGPUReadback.RequestIntoNativeArray(ref output, src, mipIndex: 0);
         }
 
         /// <summary>Request a region of a a <see cref="Texture2D"/>, a <see cref="Texture3D"/>
         /// or a <see cref="RenderTexture"/>.</summary>
-        public ReadbackAsyncDispose(ref NativeArray<byte> output, [System.Diagnostics.CodeAnalysis.NotNull] Texture src,
+        public ReadbackAsyncDispose(ref NativeArray<byte> output, Texture src,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
             _readbackRequest = AsyncGPUReadback.RequestIntoNativeArray(ref output, src, mipIndex: 0,
@@ -826,8 +823,8 @@ namespace PKGE
             return ValueTaskSourceStatus.Pending;
         }
 
-        public void OnCompleted([System.Diagnostics.CodeAnalysis.NotNull] Action<object> continuation,
-            object state, short token, ValueTaskSourceOnCompletedFlags flags)
+        public void OnCompleted(Action<object> continuation,
+            object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags)
         {
             continuation.Invoke(state);
         }
@@ -835,33 +832,29 @@ namespace PKGE
     }
     
     /// <inheritdoc cref="ReadbackAsyncDispose"/>
-    public readonly struct ReadbackMipsAsyncDispose : IValueTaskSource, IDisposable, IAsyncDisposable
+    public readonly struct ReadbackMipsAsyncDispose : System.Threading.Tasks.Sources.IValueTaskSource, IDisposable, IAsyncDisposable
     {
         private readonly NativeArray<AsyncGPUReadbackRequest> _readbackRequests;
 
         #region Constructors
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
-        public ReadbackMipsAsyncDispose([System.Diagnostics.CodeAnalysis.NotNull] Texture src, Allocator allocator, int mipCount)
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator, int mipCount)
         {
-            Assert.IsNotNull(src);
             Assert.IsTrue(mipCount <= src.mipmapCount);
 
             _readbackRequests = InitialiseReadbackRequests(src, allocator, mipCount);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture)"/>
-        public ReadbackMipsAsyncDispose([System.Diagnostics.CodeAnalysis.NotNull] Texture src, Allocator allocator)
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator)
         {
-            Assert.IsNotNull(src);
-
             _readbackRequests = InitialiseReadbackRequests(src, allocator, src.mipmapCount);
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
-        public ReadbackMipsAsyncDispose([System.Diagnostics.CodeAnalysis.NotNull] Texture src, Allocator allocator, int mipCount,
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator, int mipCount,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
-            Assert.IsNotNull(src);
             Assert.IsTrue(mipCount <= src.mipmapCount);
 
             _readbackRequests = InitialiseReadbackRequests(src, allocator, mipCount,
@@ -869,11 +862,9 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="ReadbackAsyncDispose(ref NativeArray{byte}, Texture, int, int, int, int, int, int)"/>
-        public ReadbackMipsAsyncDispose([System.Diagnostics.CodeAnalysis.NotNull] Texture src, Allocator allocator,
+        public ReadbackMipsAsyncDispose(Texture src, Allocator allocator,
             int x, int width, int y, int height, int z = 0, int depth = 1)
         {
-            Assert.IsNotNull(src);
-
             _readbackRequests = InitialiseReadbackRequests(src, allocator, src.mipmapCount,
                 x, width, y, height, z, depth);
         }
@@ -1069,8 +1060,8 @@ namespace PKGE
             return ValueTaskSourceStatus.Pending;
         }
 
-        public void OnCompleted([System.Diagnostics.CodeAnalysis.NotNull] Action<object> continuation,
-            object state, short token, ValueTaskSourceOnCompletedFlags flags)
+        public void OnCompleted(Action<object> continuation,
+            object state, short token, System.Threading.Tasks.Sources.ValueTaskSourceOnCompletedFlags flags)
         {
             continuation.Invoke(state);
         }
@@ -1090,10 +1081,8 @@ namespace PKGE
         /// </summary>
         /// <param name="renderTexture">The source <see cref="RenderTexture" />.</param>
         /// <param name="texture">The destination <see cref="Texture2D" />.</param>
-        public static void RenderTextureToTexture2D([System.Diagnostics.CodeAnalysis.NotNull] this RenderTexture renderTexture, [System.Diagnostics.CodeAnalysis.NotNull] Texture2D texture)
+        public static void RenderTextureToTexture2D(this RenderTexture renderTexture, Texture2D texture)
         {
-            Assert.IsNotNull(renderTexture);
-            Assert.IsNotNull(texture);
             Assert.AreEqual(renderTexture.width, texture.width);
             Assert.AreEqual(renderTexture.height, texture.height);
 
@@ -1183,7 +1172,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="MipChainLength(int, int, int)"/>
-        public static int MipChainLength([System.Diagnostics.CodeAnalysis.NotNull] Texture2D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height);
+        public static int MipChainLength(Texture2D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height);
 
         /// <summary>Calculate the required number of mipmaps for the given
         /// <see cref="width"/> and <see cref="height"/>.</summary>
@@ -1191,6 +1180,7 @@ namespace PKGE
         /// "Unity only supports textures up to a size of 16384, even if maxTextureSize returns a larger size."</remarks>
         /// <param name="width">Width of the texture.</param>
         /// <param name="height">Height of the texture.</param>
+        /// <param name="depth">Depth of the texture if it is a <see cref="Texture3D"/>, otherwise 1.</param>
         [return: AssumeRange(minMipCount, maxMipCount)]
         public static int MipmapCount(
             [AssumeRange(minTextureSize, maxTextureSize)] int width,
@@ -1209,7 +1199,7 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="MipmapCount(int, int, int)"/>
-        public static int MipmapCount([System.Diagnostics.CodeAnalysis.NotNull] Texture2D tex) => MipmapCount(tex.width, tex.height);
+        public static int MipmapCount(Texture2D tex) => MipmapCount(tex.width, tex.height);
         #endregion // Texture2D
         
         #region Texture3D
@@ -1252,10 +1242,10 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="MipChainLength(int, int, int, int)"/>
-        public static int MipChainLength([System.Diagnostics.CodeAnalysis.NotNull] Texture3D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height, tex.depth);
+        public static int MipChainLength(Texture3D tex) => MipChainLength(tex.mipmapCount, tex.width, tex.height, tex.depth);
 
         /// <inheritdoc cref="MipmapCount(int, int, int)"/>
-        public static int MipmapCount([System.Diagnostics.CodeAnalysis.NotNull] Texture3D tex) => MipmapCount(tex.width, tex.height, tex.depth);
+        public static int MipmapCount(Texture3D tex) => MipmapCount(tex.width, tex.height, tex.depth);
         #endregion // Texture3D
     }
 }

@@ -15,18 +15,18 @@ namespace PKGE
             this.defaultValue = defaultValue;
         }
 
-        public bool HasCurve => curve.Keys.IsCreated;
+        public readonly bool HasCurve => curve.Keys.IsCreated;
 
         public readonly int Length => curve.Length;
 
         public readonly float DefaultValue => defaultValue;
 
-        public float this[int index]
+        public readonly float this[int index]
         {
             get => HasCurve && curve.Keys.Length > index ? curve.Keys[index].value : defaultValue;
         }
 
-        public float Evaluate(float time)
+        public readonly float Evaluate(float time)
         {
             return HasCurve ? curve.Evaluate(time) : defaultValue;
         }

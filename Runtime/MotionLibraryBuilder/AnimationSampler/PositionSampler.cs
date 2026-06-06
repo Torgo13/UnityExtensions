@@ -26,11 +26,11 @@ namespace PKGE
             };
         }
 
-        public float3 DefaultPosition => new float3(x.DefaultValue, y.DefaultValue, z.DefaultValue);
+        public readonly float3 DefaultPosition => new float3(x.DefaultValue, y.DefaultValue, z.DefaultValue);
 
-        public float3 this[int index] => new float3(x[index], y[index], z[index]);
+        public readonly float3 this[int index] => new float3(x[index], y[index], z[index]);
 
-        public float3 Evaluate(float sampleTimeInSeconds)
+        public readonly float3 Evaluate(float sampleTimeInSeconds)
         {
             return new float3(
                 x.Evaluate(sampleTimeInSeconds),

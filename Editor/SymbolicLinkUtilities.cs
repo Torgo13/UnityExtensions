@@ -117,7 +117,7 @@ namespace PKGE.Editor
         {
             //bool value to hold our return value
             bool isAdmin;
-            WindowsIdentity user = null;
+            WindowsIdentity? user = null;
             try
             {
                 //get the currently logged-in user

@@ -9,7 +9,7 @@ namespace PKGE
     /// </summary>
     public class RandomHue : MonoBehaviour
     {
-        public MeshRenderer[] renderers;
+        public MeshRenderer[] renderers = System.Array.Empty<MeshRenderer>();
         static readonly int Hue = Shader.PropertyToID("_Hue");
 
         void OnEnable()
@@ -19,7 +19,7 @@ namespace PKGE
 
         void RandomizeHue(uint seed)
         {
-            if (renderers == null || renderers.Length <= 0)
+            if (renderers.Length <= 0)
                 return;
 
 #if STATIC_EVERYTHING

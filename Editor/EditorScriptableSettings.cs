@@ -26,13 +26,13 @@ namespace PKGE.Editor
             get
             {
                 if (BaseInstance == null)
-                    CreateAndLoad();
+                    BaseInstance = CreateAndLoad();
 
                 return BaseInstance;
             }
         }
 
-        static void CreateAndLoad()
+        static T CreateAndLoad()
         {
             Assert.IsNull(BaseInstance);
 
@@ -78,6 +78,7 @@ namespace PKGE.Editor
             }
 
             Assert.IsNotNull(BaseInstance);
+            return BaseInstance;
         }
 
         static void FindAssetInPackages(string filename)

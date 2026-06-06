@@ -56,6 +56,7 @@ namespace PKGE
             else
             {
                 _undoGroup = -1;
+                _undoLabel = string.Empty;
             }
 #else
             _undoGroup = -1;

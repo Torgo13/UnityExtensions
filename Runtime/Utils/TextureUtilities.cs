@@ -26,7 +26,7 @@ namespace PKGE
             }
 
             if (string.IsNullOrEmpty(filename))
-                filename = target != null ? target.name : DateTime.UtcNow.ToString();
+                filename = target != null ? target.name : DateTime.UtcNow.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             var t2D = target as Texture2D;
             if (t2D != null)

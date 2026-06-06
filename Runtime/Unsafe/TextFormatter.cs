@@ -276,7 +276,7 @@ namespace PKGE.Unsafe
                                 }
                             }
 
-                            // Skip to }
+                            // Skip to '}'
                             while (*src != '\0' && *src != '}')
                                 src++;
 

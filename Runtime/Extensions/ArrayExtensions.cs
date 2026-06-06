@@ -25,7 +25,8 @@ namespace PKGE
 
             if (array.IsCreated)
             {
-                var newArray = new NativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
+                var newArray = new NativeArray<T>(capacity, allocator,
+                    capacity < array.Length ? NativeArrayOptions.UninitializedMemory : NativeArrayOptions.ClearMemory);
                 NativeArray<T>.Copy(array, newArray, Math.Min(array.Length, capacity));
                 array.Dispose();
                 array = newArray;
@@ -42,7 +43,8 @@ namespace PKGE
 
             if (array.IsCreated)
             {
-                var newArray = CollectionHelper.CreateNativeArray<T>(capacity, allocator, NativeArrayOptions.UninitializedMemory);
+                var newArray = CollectionHelper.CreateNativeArray<T>(capacity, allocator, 
+                    capacity < array.Length ? NativeArrayOptions.UninitializedMemory : NativeArrayOptions.ClearMemory);
                 NativeArray<T>.Copy(array, newArray, Math.Min(array.Length, capacity));
                 array.Dispose();
                 array = newArray;
@@ -403,7 +405,7 @@ namespace PKGE
         /// if <paramref name="array"/> is <see langword="null"/>.
         /// </summary>
         /// <returns>The index of the first newly added element in the resulting array.</returns>
-        public static int AppendToImmutable<TValue>([System.Diagnostics.CodeAnalysis.NotNull] ref TValue[]? array, TValue[]? values)
+        public static int AppendToImmutable<TValue>([System.Diagnostics.CodeAnalysis.NotNullIfNotNull("values")] ref TValue[]? array, TValue[]? values)
         {
             if (array == null)
             {
@@ -507,7 +509,7 @@ namespace PKGE
             if (index != count)
                 Array.Copy(array, index, array, index + 1, count - index);
 
-            array![index] = value;
+            array[index] = value;
             ++count;
         }
 

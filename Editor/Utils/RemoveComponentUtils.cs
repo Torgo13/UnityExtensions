@@ -10,7 +10,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/RemoveComponentUtils.cs
         #region UnityEditor.Rendering
-        public static IEnumerable<Component> ComponentDependencies([DisallowNull] Component component)
+        public static IEnumerable<Component> ComponentDependencies(Component component)
         {
             if (component == null)
                 yield break;
@@ -29,7 +29,7 @@ namespace PKGE.Editor
             }
         }
 
-        public static bool CanRemoveComponent([DisallowNull] Component component, IEnumerable<Component> dependencies)
+        public static bool CanRemoveComponent(Component component, IEnumerable<Component> dependencies)
         {
             if (!dependencies.Any())
                 return true;
@@ -40,7 +40,7 @@ namespace PKGE.Editor
             return false;
         }
 
-        public static bool RemoveComponent([DisallowNull] Component component, IEnumerable<Component> dependencies)
+        public static bool RemoveComponent(Component component, IEnumerable<Component> dependencies)
         {
             using var _0 = UnityEngine.Pool.ListPool<Component>.Get(out var additionalData);
             foreach (var c in dependencies)
@@ -94,7 +94,7 @@ namespace PKGE.Editor
             return removed;
         }
 
-        public static void RemoveComponent([DisallowNull] Component comp)
+        public static void RemoveComponent(Component comp)
         {
             var dependencies = ComponentDependencies(comp);
             if (!RemoveComponent(comp, dependencies))

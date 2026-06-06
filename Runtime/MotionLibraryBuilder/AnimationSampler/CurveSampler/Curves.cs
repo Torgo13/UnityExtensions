@@ -235,13 +235,11 @@ namespace PKGE
             {
                 // upper bound (first value larger than curveT)
                 int __len = end - start;
-                int __half;
-                int __middle;
                 int __first = start;
                 while (__len > 0)
                 {
-                    __half = __len >> 1;
-                    __middle = __first + __half;
+                    int __half = __len >> 1;
+                    int __middle = __first + __half;
 
                     var mid = keys[__middle];
                     if (curveT < mid.time)

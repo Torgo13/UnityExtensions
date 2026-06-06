@@ -15,7 +15,7 @@ namespace PKGE
 
         public delegate void UpdateValue(int index);
 
-        public UpdateValue updateVal;
+        public UpdateValue? updateVal;
 
         private void ValueUpdate(int i)
         {

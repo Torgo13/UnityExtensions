@@ -60,7 +60,7 @@ namespace PKGE.Editor
         /// <param name="packages">A list of packages (com.unity.) </param>
         /// <param name="parentFolderName">The name of the folder that is created locally</param>
         /// <param name="foldersToRemove">A list of folders to delete after import to avoid conflicts</param>
-        public static void CopyCommonSampleFolders(string[] packages, string parentFolderName, string[] foldersToRemove = null)
+        public static void CopyCommonSampleFolders(string[] packages, string parentFolderName, string[]? foldersToRemove = null)
         {
             // Foreach packages listed there, we need to import the common dependency folder. 
             foreach (string package in packages)

@@ -200,7 +200,7 @@ namespace PKGE.Editor
         /// <param name="extension">Asset type extension i.e ".mat" for materials. Specifying extension make this faster.</param>
         /// <typeparam name="T">The type of asset you are looking for</typeparam>
         /// <returns>An IEnumerable off all assets found.</returns>
-        public static IEnumerable<T> FindAssets<T>(string extension = null)
+        public static IEnumerable<T> FindAssets<T>(string extension = "")
             where T : UnityObject
         {
             string query = BuildQueryToFindAssets<T>(extension);
@@ -218,7 +218,7 @@ namespace PKGE.Editor
         /// <param name="extension">Asset type extension i.e ".mat" for materials. Specifying extension make this faster.</param>
         /// <typeparam name="T">The type of asset you are looking for</typeparam>
         /// <returns>An IEnumerable off all assets paths found.</returns>
-        public static IEnumerable<string> FindAssetPaths<T>(string extension = null)
+        public static IEnumerable<string> FindAssetPaths<T>(string extension = "")
             where T : UnityObject
         {
             string query = BuildQueryToFindAssets<T>(extension);
@@ -226,7 +226,7 @@ namespace PKGE.Editor
                 yield return AssetDatabase.GUIDToAssetPath(guid);
         }
 
-        static string BuildQueryToFindAssets<T>(string extension = null)
+        static string BuildQueryToFindAssets<T>(string extension = "")
             where T : UnityObject
         {
             string typeName = typeof(T).ToString();

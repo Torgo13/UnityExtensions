@@ -160,11 +160,12 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The type of component to find in the scene</typeparam>
         /// <param name="desiredSource">The Game Object we expect to be a parent or owner of the component</param>
-        /// <returns>A component of the desired type, or NULL if no component was located</returns>
+        /// <param name="foundObject">A component of the desired type, or <see langword="null"/> if no component was located</param>
+        /// <returns><see langword="true"/> if a component of the desired type was located</returns>
         public static bool ExhaustiveComponentSearch<T>(GameObject? desiredSource,
             [NotNullWhen(true)] out T? foundObject) where T : Component
         {
-            foundObject = default(T);
+            foundObject = null;
 
             // We check in the following order
             // - Location we expect the object to be
@@ -210,11 +211,12 @@ namespace PKGE
         /// <typeparam name="T">The type of component to find in the scene</typeparam>
         /// <param name="desiredSource">The GameObject we expect to be a parent or owner of the component</param>
         /// <param name="tag">The tag this component must have to match</param>
-        /// <returns>A component of the desired type, or NULL if no component was located</returns>
+        /// <param name="foundObject">A component of the desired type, or <see langword="null"/> if no component was located</param>
+        /// <returns><see langword="true"/> if a component of the desired type was located</returns>
         public static bool ExhaustiveTaggedComponentSearch<T>(GameObject? desiredSource, string tag,
             [NotNullWhen(true)] out T? foundObject) where T : Component
         {
-            foundObject = default(T);
+            foundObject = null;
 
             // We check in the following order
             // - Location we expect the object to be
@@ -279,7 +281,8 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The type of component to retrieve</typeparam>
         /// <param name="scene">The scene to search</param>
-        /// <returns>The first component found in the active scene, or null if none exists</returns>
+        /// <param name="component">The first component found in the active scene, or <see langword="null"/> if none exists</param>
+        /// <returns><see langword="true"/> if the first component was found in the active scene</returns>
         public static bool GetComponentInScene<T>(Scene scene,
             [NotNullWhen(true)] out T? component) where T : Component
         {
@@ -369,7 +372,8 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
-        /// <returns>The returned child GameObject or null if no child is found.</returns>
+        /// <param name="namedChild">The returned child GameObject or <see langword="null"/> if no child is found.</param>
+        /// <returns><see langword="true"/> if the child is found.</returns>
         public static bool GetNamedChild(this GameObject go, string name,
             [NotNullWhen(true)] out GameObject? namedChild)
         {

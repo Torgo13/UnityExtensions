@@ -70,7 +70,14 @@ namespace PKGE
 
         public static bool GetDescription(this Type type, int val, out string description)
         {
-            var memInfo = type.GetMember(type.GetEnumName(val));
+            var enumName = type.GetEnumName(val);
+            if (string.IsNullOrEmpty(enumName))
+            {
+                description = string.Empty;
+                return false;
+            }
+            
+            var memInfo = type.GetMember(enumName);
             var customAttributes = memInfo[0]
                 .GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), inherit: false);
             var descriptionAttribute = customAttributes.Length > 0

@@ -13,7 +13,7 @@ namespace PKGE.Editor
             GetWindow(typeof(InvertMeshNormals));
         }
         
-        private Mesh mesh;
+        private Mesh? mesh;
 
         private void OnGUI()
         {

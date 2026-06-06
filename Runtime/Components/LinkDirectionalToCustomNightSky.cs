@@ -7,10 +7,9 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Samples~/FullscreenSamples/Scripts/LinkDirectionalToCustomNightSky.cs
         #region UnityEngine.Rendering
-        [SerializeField] Material skyMat;
+        [SerializeField] Material? skyMat;
         public bool update = true;
-        [SerializeField] Light mainLight;
-        Transform _mainLightTransform;
+        [SerializeField] Light? mainLight;
         float _previousIntensity;
         Color _previousColor;
         static readonly int MoonlightForwardDirection = Shader.PropertyToID("_Moonlight_Forward_Direction");
@@ -29,26 +28,7 @@ namespace PKGE
 
         void OnEnable()
         {
-            if (mainLight == null)
-            {
-                //Find a directional light
-#if UNITY_6000_3_OR_NEWER
-                var lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-#else
-                var lights = FindObjectsOfType<Light>();
-#endif // UNITY_6000_3_OR_NEWER
-                foreach (var l in lights)
-                {
-                    if (l.type == LightType.Directional)
-                    {
-                        mainLight = l;
-                        _mainLightTransform = mainLight.transform;
-                        break;
-                    }
-                }
-            }
-
-            if (mainLight != null)
+            if (mainLight != null || LightUtils.GetDirectionalLight(out mainLight))
             {
                 //Force the mainLight to specific intensity and color to approximate the Sun
                 _previousIntensity = mainLight.intensity;
@@ -71,10 +51,10 @@ namespace PKGE
         void Update()
         {
             if (update
-                && _mainLightTransform != null)
+                && mainLight != null)
             {
                 //Sending the forward vector to the material           
-                var dir = _mainLightTransform.forward;
+                Vector4 dir = (Vector4)mainLight.transform.forward;
                 SkyMat.SetVector(MoonlightForwardDirection, dir);
             }
         }

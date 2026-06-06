@@ -60,7 +60,7 @@ namespace PKGE
             }
         }
 
-        public readonly void Set(int index, bool value)
+        public void Set(int index, bool value)
         {
             Assert.IsTrue(0 <= index && index < _bits.Length);
 
@@ -100,12 +100,12 @@ namespace PKGE
             _bits[chunkIndex] = (long)chunkBits;
         }
 
-        public readonly ulong InterlockedReadChunk(int chunkIndex)
+        public ulong InterlockedReadChunk(int chunkIndex)
         {
             return (ulong)Interlocked.Read(ref _bits.ElementAt(chunkIndex));
         }
 
-        public readonly void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
+        public void InterlockedOrChunk(int chunkIndex, ulong chunkBits)
         {
             ref long entry = ref _bits.ElementAt(chunkIndex);
 
@@ -122,7 +122,7 @@ namespace PKGE
             return _bits.Length;
         }
 
-        public readonly NativeArray<long> GetBitsArray()
+        public NativeArray<long> GetBitsArray()
         {
             return _bits.AsArray();
         }

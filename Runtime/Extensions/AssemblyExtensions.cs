@@ -17,7 +17,7 @@ namespace PKGE
             catch (ReflectionTypeLoadException e)
             {
                 UnityEngine.Debug.LogException(e);
-                UnityEngine.Debug.LogWarning("Can't load assembly '" + assembly.GetName() + "'. Problematic types follow.");
+                UnityEngine.Debug.LogWarning($"Can't load assembly '{assembly.GetName()}'. Problematic types follow.");
                 foreach (var le in e.LoaderExceptions)
                 {
                     if (le is TypeLoadException tle)

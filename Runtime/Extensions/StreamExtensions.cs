@@ -34,8 +34,6 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/ecad5ff79b1fa55162c23108029609b16e9ffe6d/Packages/com.unity.live-capture/Networking/Utilities/Extensions/StreamExtensions.cs
         #region Unity.LiveCapture.Networking
-        [ThreadStatic]
-        static byte[]? s_TempBuffer;
         static readonly UTF8Encoding s_Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         /// <summary>
@@ -61,10 +59,10 @@ namespace PKGE
         {
             var size = SizeOfCache<T>.Size;
 
-            EnsureBufferCapacity(size);
-            _ = s_TempBuffer.WriteStruct(ref data);
+            using var tempBuffer = new DisposeArrayPool<byte>(size);
+            _ = tempBuffer.PooledArray.WriteStruct(ref data);
 
-            stream.Write(s_TempBuffer, 0, size);
+            stream.Write(tempBuffer.PooledArray, 0, size);
         }
 
         /// <summary>
@@ -78,9 +76,10 @@ namespace PKGE
         {
             var size = SizeOfCache<T>.Size;
 
-            Read(stream, size);
+            using var tempBuffer = new DisposeArrayPool<byte>(size);
+            Read(stream, size, tempBuffer.PooledArray);
 
-            return s_TempBuffer.ReadStruct<T>();
+            return tempBuffer.PooledArray.ReadStruct<T>();
         }
 
         /// <summary>
@@ -94,11 +93,11 @@ namespace PKGE
             var strLen = s_Encoding.GetByteCount(str);
             var size = sizeof(int) + strLen;
 
-            EnsureBufferCapacity(size);
-            var offset = s_TempBuffer.WriteStruct(ref strLen);
-            _ = s_Encoding.GetBytes(str, 0, str.Length, s_TempBuffer, offset);
+            using var tempBuffer = new DisposeArrayPool<byte>(size);
+            var offset = tempBuffer.PooledArray.WriteStruct(ref strLen);
+            _ = s_Encoding.GetBytes(str, 0, str.Length, tempBuffer.PooledArray, offset);
 
-            stream.Write(s_TempBuffer, 0, size);
+            stream.Write(tempBuffer.PooledArray, 0, size);
         }
 
         /// <summary>
@@ -111,17 +110,19 @@ namespace PKGE
         {
             var strLen = stream.ReadStruct<int>();
 
-            Read(stream, strLen);
+            using var tempBuffer = new DisposeArrayPool<byte>(strLen);
+            Read(stream, strLen, tempBuffer.PooledArray);
 
-            return s_Encoding.GetString(s_TempBuffer, 0, strLen);
+            return s_Encoding.GetString(tempBuffer.PooledArray, 0, strLen);
         }
 
-        internal static void Read(this Stream stream, int count)
+        internal static void Read(this Stream stream, int count, byte[] buffer)
         {
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count), count, "Must be non negative.");
-
-            EnsureBufferCapacity(count);
+            
+            if (buffer.Length < count)
+                throw new ArgumentOutOfRangeException(nameof(buffer), buffer, "Must be greater than or equal to count.");
 
             if (count == 0)
                 return;
@@ -130,7 +131,7 @@ namespace PKGE
 
             do
             {
-                var readBytes = stream.Read(s_TempBuffer, offset, count);
+                var readBytes = stream.Read(buffer, offset, count);
 
                 if (readBytes <= 0)
                     throw new EndOfStreamException();
@@ -138,13 +139,6 @@ namespace PKGE
                 offset += readBytes;
             }
             while (offset < count);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void EnsureBufferCapacity(int capacity)
-        {
-            if (s_TempBuffer == null || s_TempBuffer.Length < capacity)
-                s_TempBuffer = new byte[capacity];
         }
         
         /// <summary>

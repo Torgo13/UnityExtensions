@@ -19,7 +19,7 @@ namespace PKGE.Editor
 
         const float k_PreviewNormalizedSize = 0.2f;
 
-        internal static Material s_GUITextureBlit2SRGBMaterial;
+        internal static Material? s_GUITextureBlit2SRGBMaterial;
 
         /// <summary>
         /// The material used to display a texture into SRGB
@@ -30,7 +30,7 @@ namespace PKGE.Editor
             {
                 if (!s_GUITextureBlit2SRGBMaterial)
                 {
-                    Shader shader = EditorGUIUtility.LoadRequired("SceneView/GUITextureBlit2SRGB.shader") as Shader;
+                    Shader shader = (Shader)EditorGUIUtility.LoadRequired("SceneView/GUITextureBlit2SRGB.shader");
                     s_GUITextureBlit2SRGBMaterial = new Material(shader);
                     s_GUITextureBlit2SRGBMaterial.hideFlags = HideFlags.HideAndDontSave;
                 }

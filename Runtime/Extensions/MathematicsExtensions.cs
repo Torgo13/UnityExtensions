@@ -106,7 +106,7 @@ namespace PKGE
         [FieldOffset(0)] public BitArray8 BitArray8;
 
         public readonly bool Equals(Union1 other) => Byte == other.Byte;
-        public readonly override bool Equals(object obj) => obj is Union1 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union1 other && Equals(other);
         public readonly override int GetHashCode() => Byte.GetHashCode();
     }
 
@@ -123,7 +123,7 @@ namespace PKGE
         [FieldOffset(1)] public Union1 _1;
 
         public readonly bool Equals(Union2 other) => Short == other.Short;
-        public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
         public readonly override int GetHashCode() => Short.GetHashCode();
     }
 
@@ -144,7 +144,7 @@ namespace PKGE
         [FieldOffset(2)] public Union2 _2;
 
         public readonly bool Equals(Union4 other) => Int == other.Int;
-        public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
         public readonly override int GetHashCode() => Int.GetHashCode();
     }
 
@@ -166,7 +166,7 @@ namespace PKGE
         [FieldOffset(4)] public Union4 _4;
 
         public readonly bool Equals(Union8 other) => Long == other.Long;
-        public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
         public readonly override int GetHashCode() => Long.GetHashCode();
     }
 
@@ -193,7 +193,7 @@ namespace PKGE
         [FieldOffset(0)] public Union12 _12;
 
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
-        public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
     }
 
@@ -209,7 +209,7 @@ namespace PKGE
         [FieldOffset(8)] public Union4 Union4_8;
 
         public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
-        public readonly override bool Equals(object obj) => obj is Union12 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
         public readonly override int GetHashCode() => Vector3Int.GetHashCode();
     }
 
@@ -227,7 +227,7 @@ namespace PKGE
         [FieldOffset(36)] public Union12 U12_36;
 
         public readonly bool Equals(Union48 other) => U16_00.Equals(other.U16_00) && U16_16.Equals(other.U16_16) && U16_32.Equals(other.U16_32);
-        public readonly override bool Equals(object obj) => obj is Union48 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
         public readonly override int GetHashCode() => U16_00.GetHashCode() ^ (U16_16.GetHashCode() << 2) ^ (U16_32.GetHashCode() >> 2);
     }
     #endregion // Union
@@ -446,7 +446,7 @@ namespace PKGE
 
         public static float3 zaxis(quaternion q)
         {
-            // This should be fast than math.quaternion.forward().
+            // This should be faster than math.quaternion.forward().
             // Need to make sure this doesn't get translated to
             // float-by-float operations.
 #if INCLUDE_MATHEMATICS
@@ -1766,7 +1766,7 @@ namespace PKGE
         /// <param name="m">A transformation matrix</param>
         /// <param name="q">A quaternion representing a 3D rotation. This quaternion does not need to be normalized.</param>
         /// <returns>
-        /// A quaternion containing the transformed rotation. This quaternion will normalized if the input quaternion is normalized.
+        /// A quaternion containing the transformed rotation. This quaternion will be normalized if the input quaternion is normalized.
         /// </returns>
         public static quaternion TransformRotation(in this float4x4 m, in quaternion q) =>
             math.mul(new quaternion(math.orthonormalize(new float3x3(m))), q);
@@ -1817,7 +1817,7 @@ namespace PKGE
         /// <returns>
         /// A quaternion containing the rotation which would cause a viewer at <paramref name="eyeWorldPosition"/> to face
         /// <paramref name="targetWorldPosition"/>, with the "up" direction in the resulting reference frame corresponding
-        /// as closely as possible to <typeparam name="worldUp"></typeparam>.
+        /// as closely as possible to <param name="worldUp"></param>.
         /// </returns>
         public static quaternion LookAtRotation(in float3 eyeWorldPosition, float3 targetWorldPosition, float3 worldUp)
         {
@@ -2022,7 +2022,7 @@ namespace PKGE.Mathematics
         [FieldOffset(0)] public half Half;
 
         public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object obj) => obj is Union2 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
         public readonly override int GetHashCode() => __0.Short.GetHashCode();
     }
 
@@ -2039,7 +2039,7 @@ namespace PKGE.Mathematics
         [FieldOffset(2)] public Union2 _2;
 
         public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object obj) => obj is Union4 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
         public readonly override int GetHashCode() => __0.Int.GetHashCode();
     }
 
@@ -2058,7 +2058,7 @@ namespace PKGE.Mathematics
         [FieldOffset(4)] public Union4 _4;
 
         public readonly bool Equals(Union8 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object obj) => obj is Union8 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }
 
@@ -2080,7 +2080,7 @@ namespace PKGE.Mathematics
         [FieldOffset(0)] public Union12 _12;
 
         public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
-        public readonly override bool Equals(object obj) => obj is Union16 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => UInt4.GetHashCode();
     }
 
@@ -2099,7 +2099,7 @@ namespace PKGE.Mathematics
         [FieldOffset(8)] public Union4 Union4_8;
 
         public readonly bool Equals(Union12 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object obj) => obj is Union12 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }
 
@@ -2122,7 +2122,7 @@ namespace PKGE.Mathematics
         [FieldOffset(00)] public float4x3 Float4x3_00;
 
         public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object obj) => obj is Union48 other && Equals(other);
+        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
         public readonly override int GetHashCode() => __0.GetHashCode();
     }
     #endregion // Union

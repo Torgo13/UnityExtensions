@@ -11,7 +11,7 @@ namespace PKGE
         public class CelestialBodyData
         {
             public Light light;
-            public Transform transform;
+            public Transform lightTransform;
             public float evaluatedIntensity;
             public float fadeFactor;
             public float shadowFadeFactor;
@@ -19,18 +19,10 @@ namespace PKGE
 
             public CelestialBodyData(Light celestialLight)
             {
-                if (celestialLight != null)
-                {
-                    light = celestialLight;
-                    transform = light.transform;
-                    evaluatedIntensity = light.intensity;
-                }
-                else
-                {
-                    light = null;
-                    transform = null;
-                    evaluatedIntensity = 1f;
-                }
+                UnityEngine.Assertions.Assert.IsNotNull(celestialLight);
+                light = celestialLight;
+                lightTransform = light.transform;
+                evaluatedIntensity = light.intensity;
                 fadeFactor = 1f;
                 shadowFadeFactor = 1f;
                 shadowEnabled = false;
@@ -38,7 +30,7 @@ namespace PKGE
 
             public float Evaluate(float fadeStart, float fadeEnd)
             {
-                var angle = transform.eulerAngles.x;
+                float angle = lightTransform.eulerAngles.x;
                 fadeFactor = GetHorizonMultiplier(angle, fadeStart, fadeEnd);
 
                 shadowFadeFactor = fadeFactor;
@@ -50,11 +42,7 @@ namespace PKGE
 
             public void ApplyFade(bool shadowsEnabled)
             {
-                if (light == null)
-                    return;
-
                 light.shadows = shadowsEnabled ? LightShadows.Soft : LightShadows.None;
-
                 light.intensity = 1f - fadeFactor;
                 light.shadowStrength = 1f - shadowFadeFactor;
             }
@@ -68,12 +56,11 @@ namespace PKGE
         [SerializeField]
         private List<Light> celestialBodies = new List<Light>();
 
-        private List<CelestialBodyData> _bodiesData;
+        private readonly List<CelestialBodyData> _bodiesData = new List<CelestialBodyData>();
 
         [SerializeField]
-        private Vector2 startEndDecreaseAngle = new Vector3(-15f, -20f);
+        private Vector2 startEndDecreaseAngle = new Vector2(-15f, -20f);
 
-        // Update is called once per frame
         void Update()
         {
             EvaluateBodies();
@@ -108,7 +95,7 @@ namespace PKGE
                 _bodiesData[1].shadowEnabled = _bodiesData[1].fadeFactor > 0;
             }
 
-            for (int i = 0; i<_bodiesData.Count; i++)
+            for (int i = 0; i < _bodiesData.Count; i++)
             {
                 // Disable light on bodies after two first ones
                 if (i > 1)
@@ -136,12 +123,12 @@ namespace PKGE
 
         private void Init()
         {
-            _bodiesData = new List<CelestialBodyData>(celestialBodies.Count);
+            _bodiesData.EnsureCapacity(celestialBodies);
             foreach (var celestialLight in celestialBodies)
                 _bodiesData.Add(new CelestialBodyData(celestialLight));
         }
-
-        // Returns a float between 0 and 1
+        
+        /// <summary>Returns a float between 0 and 1</summary>
         private static float GetHorizonMultiplier(float angle, float fadeStart, float fadeEnd)
         {
             angle %= 360f;

@@ -25,11 +25,13 @@ namespace PKGE
         public float sliceThreshold = 0.0044f;
 
         // Baked data
-        [HideInInspector] public List<float>? slicesY;
+        [HideInInspector] public List<float> slicesY = new List<float>();
         [HideInInspector] public Bounds bounds;
 
         public void Bake()
         {
+            Assert.IsNotNull(mesh);
+            
             List<Vector3> vertices = ListPool<Vector3>.Get();
             mesh.GetVertices(vertices);
 
@@ -37,10 +39,8 @@ namespace PKGE
                 vertices[i].Set(vertices[i].x, Mathf.Max(vertices[i].y, 0.0f), vertices[i].z);
 
             // Isolate slices & bounds
-            if (slicesY == null)
-                slicesY = new List<float>(vertices.Count);
-            else
-                slicesY.Clear();
+            slicesY.Clear();
+            slicesY.EnsureCapacity(vertices);
             bounds = new Bounds { min = vertices[0], max = vertices[0] };
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -142,6 +142,8 @@ namespace PKGE
 
         void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
         {
+            Assert.IsNotNull(mesh);
+            
             var vertices = ListPool<Vector3>.Get();
             var colors = ListPool<Color>.Get();
             var uvs = ListPool<Vector2>.Get();
@@ -194,7 +196,7 @@ namespace PKGE
 
         void OnDrawGizmos()
         {
-            if (slicesY == null)
+            if (slicesY.Count == 0)
                 return;
             
             sliceIndex = Mathf.Min(sliceIndex, slicesY.Count - 1);
@@ -253,7 +255,7 @@ namespace PKGE
             if (GUILayout.Button("Bake"))
                 baker.Bake();
 
-            if (baker.slicesY != null)
+            if (baker.slicesY.Count != 0)
             {
                 GUILayout.Label("Found " + baker.slicesY.Count + " slices");
                 GUILayout.Label("Bounds: " + baker.bounds.size.x + ", " + baker.bounds.size.y);

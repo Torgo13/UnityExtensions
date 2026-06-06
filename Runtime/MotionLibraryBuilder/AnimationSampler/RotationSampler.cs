@@ -35,11 +35,11 @@ namespace PKGE
             };
         }
 
-        public quaternion DefaultValue => new quaternion(x.DefaultValue, y.DefaultValue, z.DefaultValue, w.DefaultValue);
+        public readonly quaternion DefaultValue => new quaternion(x.DefaultValue, y.DefaultValue, z.DefaultValue, w.DefaultValue);
 
-        public quaternion this[int index] => new quaternion(x[index], y[index], z[index], w[index]);
+        public readonly quaternion this[int index] => new quaternion(x[index], y[index], z[index], w[index]);
 
-        public quaternion Evaluate(float sampleTimeInSeconds)
+        public readonly quaternion Evaluate(float sampleTimeInSeconds)
         {
             return new quaternion(
                 x.Evaluate(sampleTimeInSeconds),

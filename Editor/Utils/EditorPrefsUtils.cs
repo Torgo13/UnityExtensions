@@ -39,7 +39,7 @@ namespace PKGE.Editor
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         /// <returns>The bool value stored in the Editor preferences for the calling property.</returns>
         public static bool GetBool(string typeName, bool defaultValue = false,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             return GetEditorPrefsValueOrDefault(prefsKey, defaultValue);
@@ -53,7 +53,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">Name of calling property. When invoking this function from a property getter
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         public static void SetBool(string typeName, bool value,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             SetEditorPrefsValue(prefsKey, value);
@@ -68,7 +68,7 @@ namespace PKGE.Editor
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         /// <returns>The float value stored in the Editor preferences for the calling property.</returns>
         public static float GetFloat(string typeName, float defaultValue = 0f,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             return GetEditorPrefsValueOrDefault(prefsKey, defaultValue);
@@ -82,7 +82,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">Name of calling property. When invoking this function from a property getter
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         public static void SetFloat(string typeName, float value,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             SetEditorPrefsValue(prefsKey, value);
@@ -97,7 +97,7 @@ namespace PKGE.Editor
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         /// <returns>The int value stored in the Editor preferences for the calling property.</returns>
         public static int GetInt(string typeName, int defaultValue = 0,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             return GetEditorPrefsValueOrDefault(prefsKey, defaultValue);
@@ -111,7 +111,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">Name of calling property. When invoking this function from a property getter
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         public static void SetInt(string typeName, int value,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             SetEditorPrefsValue(prefsKey, value);
@@ -126,10 +126,10 @@ namespace PKGE.Editor
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         /// <returns>The string value stored in the Editor preferences for the calling property.</returns>
         public static string GetString(string typeName, string defaultValue = "",
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
-            return GetEditorPrefsValueOrDefault(prefsKey, defaultValue);
+            return GetEditorPrefsValueOrDefault(prefsKey, defaultValue) ?? string.Empty;
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">Name of calling property. When invoking this function from a property getter
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         public static void SetString(string typeName, string value,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             SetEditorPrefsValue(prefsKey, value);
@@ -155,7 +155,7 @@ namespace PKGE.Editor
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         /// <returns>The color value stored in the Editor preferences for the calling property.</returns>
         public static Color GetColor(string typeName, Color defaultValue,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             return GetEditorPrefsValueOrDefault(prefsKey, defaultValue);
@@ -169,7 +169,7 @@ namespace PKGE.Editor
         /// <param name="propertyName">Name of calling property. When invoking this function from a property getter
         /// or setter, you can leave this parameter blank and it will be filled in by the property name.</param>
         public static void SetColor(string typeName, Color value,
-            [CallerMemberName] string propertyName = null)
+            [CallerMemberName] string propertyName = "")
         {
             var prefsKey = GetPrefKey(typeName, propertyName);
             SetEditorPrefsValue(prefsKey, value);
@@ -185,7 +185,7 @@ namespace PKGE.Editor
 
         static void SetEditorPrefsValue<T>(string prefsKey, T value)
         {
-            if (TryGetCachedEditorPrefsValue(prefsKey, out T cachedValue) && cachedValue.Equals(value))
+            if (TryGetCachedEditorPrefsValue(prefsKey, out T? cachedValue) && cachedValue.Equals(value))
                 return;
 
             var type = typeof(T);
@@ -224,13 +224,14 @@ namespace PKGE.Editor
             k_EditorPrefsValueSessionCache[prefsKey] = value;
         }
 
-        static void GetEditorPrefsValue<T>(string prefsKey, out T prefValue)
+        static bool GetEditorPrefsValue<T>(string prefsKey,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? prefValue)
         {
+            var prefsSet = false;
             if (TryGetCachedEditorPrefsValue(prefsKey, out prefValue))
-                return;
+                return prefsSet;
 
             var type = typeof(T);
-            var prefsSet = false;
             if (type == typeof(bool))
             {
                 prefValue = (T)(object)EditorPrefs.GetBool(prefsKey);
@@ -264,19 +265,22 @@ namespace PKGE.Editor
             else
             {
                 Debug.LogError($"Could not get Editor Preference Default of type : {type} Type is not supported!");
+                return false;
             }
 
-            if (prefsSet && prefValue != null)
+            if (prefsSet)
             {
                 SetEditorPrefsValue(prefsKey, prefValue);
-                return;
+                return true;
             }
 
             SetEditorPrefsValue(prefsKey, default(T));
             prefValue = default;
+            return prefsSet;
         }
 
-        static bool TryGetCachedEditorPrefsValue<T>(string prefsKey, out T prefValue)
+        static bool TryGetCachedEditorPrefsValue<T>(string prefsKey,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? prefValue)
         {
             if (k_EditorPrefsValueSessionCache.TryGetValue(prefsKey, out var cachedObj))
             {
@@ -291,7 +295,7 @@ namespace PKGE.Editor
             return false;
         }
 
-        static T GetEditorPrefsValueOrDefault<T>(string prefsKey, T defaultValue = default)
+        static T? GetEditorPrefsValueOrDefault<T>(string prefsKey, T? defaultValue = default)
         {
             var value = defaultValue;
             if (!EditorPrefs.HasKey(prefsKey))

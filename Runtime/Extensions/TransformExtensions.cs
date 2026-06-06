@@ -358,7 +358,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The parent Transform that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
-        /// <param name="found">True if a descendant Transform with the specified name was found.</param>
+        /// <param name="foundObject">True if a descendant Transform with the specified name was found.</param>
         /// <returns>The returned child Transform or null if no child is found.</returns>
         public static bool GetNamedChild(this Transform transform, string name,
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? foundObject)

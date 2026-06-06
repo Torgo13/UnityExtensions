@@ -10,10 +10,10 @@ namespace PKGE
     public class RuntimeReflectionSystemCamera : MonoBehaviour
     {
         public bool CaptureCubemap;
-        [SerializeField] private Shader skyboxShader;
-        [SerializeField] internal Material skyboxMaterial;
-        [SerializeField] internal Camera reflectionCamera;
-        [SerializeField] internal ComputeShader texture2DArrayLerp;
+        [SerializeField] private Shader? skyboxShader;
+        [SerializeField] internal Material? skyboxMaterial;
+        [SerializeField] internal Camera? reflectionCamera;
+        [SerializeField] internal ComputeShader? texture2DArrayLerp;
         [SerializeField, Range(0.25f, 1.0f)] private float resolutionScale = 0.5f;
 
 #if BLEND_SHADER
@@ -24,7 +24,7 @@ namespace PKGE
         public float SkyRatio => ReflectionSystem.skyRatio;
 #endif // BLEND_SHADER
 
-        [SerializeField] private Transform targetOverride;
+        [SerializeField] private Transform? targetOverride;
         [SerializeField] private bool skyboxOverride;
         [SerializeField] private bool cameraSkyboxOverride;
         [SerializeField] private bool resolutionScaleOverride;
@@ -45,12 +45,11 @@ namespace PKGE
 
             if (!ReflectionSystem.InitialiseMaterial())
             {
-                ReflectionSystem.OnDestroy();
                 CoreUtils.Destroy(this);
                 return;
             }
 
-            GetReflectionCamera();
+            _ = GetReflectionCamera(out ReflectionSystem._reflectionCamera);
             ReflectionSystem.Awake();
         }
 
@@ -77,18 +76,21 @@ namespace PKGE
 
         #endregion // MonoBehaviour
 
-        internal void GetReflectionCamera()
+        internal bool GetReflectionCamera([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Camera? reflectionCamera)
         {
             // Check if the field has already been assigned
-            if (ReflectionSystem._reflectionCamera != null)
-                return;
+            reflectionCamera = ReflectionSystem._reflectionCamera;
+            if (reflectionCamera != null)
+                return true;
 
             // Check if it is on a child GameObject
             // It should be on a child because it will update its position to match the camera
-            ReflectionSystem._reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
+            reflectionCamera = GetComponentInChildren<Camera>(includeInactive: true);
 
-            if (ReflectionSystem._reflectionCamera == null)
-                ReflectionSystem.CreateReflectionCamera(transform);
+            if (reflectionCamera == null)
+                return ReflectionSystem.CreateReflectionCamera(transform, out reflectionCamera);
+
+            return true;
         }
     }
 
@@ -112,18 +114,18 @@ namespace PKGE
 
         private static bool _captureCubemap;
 
-        private static Shader _skyboxShader;
-        internal static Material _skyboxMaterial;
+        private static Shader? _skyboxShader;
+        internal static Material? _skyboxMaterial;
         private static bool _createdMaterial;
 
-        internal static Camera _reflectionCamera;
-        internal static Transform _reflectionCameraTransform;
+        internal static Camera? _reflectionCamera;
+        internal static Transform? _reflectionCameraTransform;
         private static bool _createdReflectionCamera;
 
-        public static Transform TargetOverride { set => _mainCameraTransform = value; }
-        private static Camera _mainCamera;
-        private static GameObject _mainCameraGameObject;
-        private static Transform _mainCameraTransform;
+        public static Transform? TargetOverride { set => _mainCameraTransform = value; }
+        private static Camera? _mainCamera;
+        private static GameObject? _mainCameraGameObject;
+        private static Transform? _mainCameraTransform;
         private static Vector3 _previousCameraPosition;
         private static Vector3 _currentCameraPosition;
 
@@ -134,7 +136,7 @@ namespace PKGE
         /// While one <see cref="RenderTexture"/> is being rendered to over six frames, the previous
         /// two completed RenderTextures will be blended to produce an interpolated cubemap.
         /// </remarks>
-        internal static RenderTexture[] _renderTextures;
+        internal static RenderTexture[] _renderTextures = System.Array.Empty<RenderTexture>();
 
 #if BLEND_SHADER
 #else
@@ -142,7 +144,7 @@ namespace PKGE
         /// Create a fourth <see cref="RenderTexture"/> for the blended result if it's needed for
         /// more than just the skybox.
         /// </summary>
-        internal static RenderTexture _blendedTexture;
+        internal static RenderTexture? _blendedTexture;
 
         private static AsyncGPUReadbackRequest _readbackRequest;
 
@@ -181,7 +183,7 @@ namespace PKGE
         /// </summary>
         private static bool supportsComputeShaders;
 
-        internal static ComputeShader _texture2DArrayLerp;
+        internal static ComputeShader? _texture2DArrayLerp;
 
         public static bool skyboxOverride;
         public static bool cameraSkyboxOverride;
@@ -226,10 +228,8 @@ namespace PKGE
         private const int BlendFrames = 6;
 
         public static void Init(bool captureCubemap,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] Shader skyboxShader = null,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] Material skyboxMaterial = null,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] Camera reflectionCamera = null,
-            [System.Diagnostics.CodeAnalysis.MaybeNull] ComputeShader texture2DArrayLerp = null)
+            Shader? skyboxShader = null, Material? skyboxMaterial = null,
+            Camera? reflectionCamera = null, ComputeShader? texture2DArrayLerp = null)
         {
             _captureCubemap = captureCubemap;
             _skyboxShader = skyboxShader;
@@ -272,7 +272,7 @@ namespace PKGE
                 autoGenerateMips = false,
             };
 
-            if (_renderTextures == null || _renderTextures.Length != ProbeCount)
+            if (_renderTextures.Length != ProbeCount)
                 _renderTextures = new RenderTexture[ProbeCount];
 
             for (int i = 0; i < ProbeCount; i++)
@@ -358,20 +358,17 @@ namespace PKGE
 #endif // BLEND_SHADER
 
             if (_createdMaterial)
-                CoreUtils.Destroy(ref _skyboxMaterial, skipNullCheck: true);
+                CoreUtils.Destroy(ref _skyboxMaterial);
 
             if (_createdReflectionCamera)
-                CoreUtils.Destroy(ref _reflectionCamera, skipNullCheck: true, destroyGameObject: true);
+                CoreUtils.Destroy(ref _reflectionCamera, destroyGameObject: true);
 
-            if (_renderTextures != null)
+            foreach (var rt in _renderTextures)
             {
-                foreach (var rt in _renderTextures)
-                {
-                    DestroyRenderTexture(rt);
-                }
-
-                System.Array.Clear(_renderTextures, index: 0, length: _renderTextures.Length);
+                DestroyRenderTexture(rt);
             }
+
+            System.Array.Clear(_renderTextures, index: 0, length: _renderTextures.Length);
         }
 
         #endregion // MonoBehaviour
@@ -400,8 +397,8 @@ namespace PKGE
                 if (customReflectionTexture is RenderTexture rt)
                     rt.GenerateMips();
 
-                if (FindMainCamera()
-                    && CameraExtensions.GetCameraCubemap(_mainCameraGameObject, out var cubemapMat))
+                if (FindMainCamera(out var mainCameraGameObject, out _)
+                    && CameraExtensions.GetCameraCubemap(mainCameraGameObject, out var cubemapMat))
                 {
                     cubemapMat.SetTexture(Tex, customReflectionTexture);
                 }
@@ -409,7 +406,7 @@ namespace PKGE
 #if BLEND_SHADER
 #else
                 if (RenderSettings.ambientMode == AmbientMode.Trilight
-                    && (_readbackRequest.Equals(default) || _readbackRequest.done))
+                    && (_readbackRequest.done || _readbackRequest.Equals(default(AsyncGPUReadback))))
                 {
                     UpdateAmbient(customReflectionTexture);
                 }
@@ -547,16 +544,24 @@ namespace PKGE
             _index = NextIndex();
         }
 
-        public static void CreateReflectionCamera(Transform transform)
+        public static bool CreateReflectionCamera(Transform transform,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Camera? reflectionCamera)
         {
             var reflectionCameraGO = new GameObject();
             reflectionCameraGO.transform.parent = transform;
-            _reflectionCamera = reflectionCameraGO.AddComponent<Camera>();
+            reflectionCamera = reflectionCameraGO.AddComponent<Camera>();
+            _reflectionCamera = reflectionCamera;
             _createdReflectionCamera = true;
+            return true;
         }
 
-        internal static bool FindMainCamera()
+        internal static bool FindMainCamera(
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out GameObject? mainCameraGameObject,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? mainCameraTransform)
         {
+            mainCameraGameObject = _mainCameraGameObject;
+            mainCameraTransform = _mainCameraTransform;
+            
             bool mainCameraFound = _mainCamera != null;
             if (!mainCameraFound)
             {
@@ -566,8 +571,10 @@ namespace PKGE
 
             if (mainCameraFound)
             {
-                _mainCameraGameObject = _mainCamera.gameObject;
-                _mainCameraTransform = _mainCamera.transform;
+                mainCameraGameObject = _mainCamera!.gameObject;
+                mainCameraTransform = _mainCamera.transform;
+                _mainCameraGameObject = mainCameraGameObject;
+                _mainCameraTransform = mainCameraTransform;
                 _previousCameraPosition = _currentCameraPosition;
                 _currentCameraPosition = _mainCameraTransform.position;
                 return true;
@@ -587,7 +594,7 @@ namespace PKGE
         /// </remarks>
         internal static void UpdateReflectionCameraPosition()
         {
-            if (FindMainCamera())
+            if (FindMainCamera(out _, out _))
             {
                 const float t = 2f;
                 _reflectionCameraTransform.position = extrapolatePosition
@@ -610,8 +617,8 @@ namespace PKGE
 
         internal static void UpdateCameraSkybox()
         {
-            if (FindMainCamera()
-                && _mainCameraGameObject.TryGetComponent<Skybox>(out var skybox))
+            if (FindMainCamera(out var mainCameraGameObject, out _)
+                && mainCameraGameObject.TryGetComponent<Skybox>(out var skybox))
             {
                 skybox.material = _skyboxMaterial;
             }
@@ -681,11 +688,7 @@ namespace PKGE
         /// <returns><see langword="false"/> if any of the RenderTextures could not be recreated.</returns>
         internal static bool EnsureCreated()
         {
-            bool created = _renderTextures != null;
-            if (!created)
-            {
-                return false;
-            }
+            bool created = true;
 
             foreach (var rt in _renderTextures)
             {
@@ -705,7 +708,7 @@ namespace PKGE
         /// and if not attempt to create it.
         /// </summary>
         /// <returns><see langword="true"/> if <paramref name="rt"/> is created.</returns>
-        private static bool CreateRenderTexture([System.Diagnostics.CodeAnalysis.NotNull] RenderTexture rt)
+        private static bool CreateRenderTexture(RenderTexture rt)
         {
             if (rt.IsCreated())
                 return true;
@@ -716,7 +719,7 @@ namespace PKGE
         /// <summary>
         /// Release and destroy a <see cref="RenderTexture"/>.
         /// </summary>
-        private static void DestroyRenderTexture(RenderTexture rt)
+        private static void DestroyRenderTexture(RenderTexture? rt)
         {
             if (rt != null)
             {
@@ -771,7 +774,7 @@ namespace PKGE
             UpdateExternalColours();
             UpdateAmbient();
 
-            bool sunFound = LightUtils.GetDirectionalLight(out Light sun);
+            bool sunFound = LightUtils.GetDirectionalLight(out Light? sun);
 
             for (int i = 0; i < ambientColours.Length; i++)
             {
@@ -786,7 +789,7 @@ namespace PKGE
 
                 if (sunFound)
                 {
-                    colorTemperature = sun.colorTemperature;
+                    colorTemperature = sun!.colorTemperature;
                     useColorTemperature = sun.useColorTemperature;
 
                     if (!useColorTemperature)
@@ -828,19 +831,19 @@ namespace PKGE
             var sampleHandles = new NativeArray<Unity.Jobs.JobHandle>(3, Allocator.Temp);
             
             // Forward is +Z, index 4
-            if (FindMainCamera())
+            if (FindMainCamera(out _, out var mainCameraTransform))
             {
                 sampleHandles[0] = Unity.Jobs.IJobExtensions.Schedule(new SampleCubemapBilinearJob
                 {
                     output = adaptiveColourRef,
                     colours = ambientColours,
-                    forward = _mainCameraTransform.forward,
+                    forward = mainCameraTransform.forward,
                 }, handle);
             }
             
             if (sunFound)
             {
-                Vector3 sunForward = sun.transform.forward;
+                Vector3 sunForward = sun!.transform.forward;
                 
                 sampleHandles[1] = Unity.Jobs.IJobExtensions.Schedule(new SampleCubemapBilinearJob
                 {

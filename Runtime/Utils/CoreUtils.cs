@@ -892,7 +892,7 @@ namespace PKGE
                                                   | System.Reflection.BindingFlags.NonPublic);
 
             var renderModeAccessor = System.Linq.Expressions.Expression.Property(
-                System.Linq.Expressions.Expression.Property(null, instance), renderMode);
+                System.Linq.Expressions.Expression.Property(null, instance!), renderMode!);
             var internalRenderModeLambda = System.Linq.Expressions.Expression.Lambda<Func<int>>(
                 System.Linq.Expressions.Expression.Convert(renderModeAccessor, typeof(int)));
             return internalRenderModeLambda.Compile();
@@ -1230,6 +1230,7 @@ namespace PKGE
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "arrayLength is unused.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "UnusedParameter.Local")]
         private static void CalculateRadixSortSupportArrays(
             int bitStates, int arrayLength, Span<uint> supportArray,
             out Span<uint> bucketIndices, out Span<uint> bucketSizes, out Span<uint> bucketPrefix, out Span<uint> arrayOutput)

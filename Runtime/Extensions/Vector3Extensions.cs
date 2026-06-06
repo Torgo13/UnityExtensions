@@ -172,7 +172,7 @@ namespace PKGE
         /// the up param</summary>
         /// <param name="vA">First direction</param>
         /// <param name="vB">Second direction</param>
-        /// <param name="t">Interpolation amoun t</param>
+        /// <param name="t">Interpolation amount</param>
         /// <param name="up">Defines the up direction</param>
         /// <returns>Interpolated vector</returns>
         public static Vector3 SlerpWithReferenceUp(

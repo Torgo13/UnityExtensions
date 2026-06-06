@@ -30,11 +30,11 @@ namespace PKGE
             };
         }
 
-        public AffineTransform DefaultTransform => AffineTransform.Create(positions.DefaultPosition, rotations.DefaultValue);
+        public readonly AffineTransform DefaultTransform => AffineTransform.Create(positions.DefaultPosition, rotations.DefaultValue);
 
-        public AffineTransform this[int index] => AffineTransform.Create(positions[index], rotations[index]);
+        public readonly AffineTransform this[int index] => AffineTransform.Create(positions[index], rotations[index]);
 
-        public AffineTransform Evaluate(float sampleTimeInSeconds)
+        public readonly AffineTransform Evaluate(float sampleTimeInSeconds)
         {
             return AffineTransform.Create(
                 positions.Evaluate(sampleTimeInSeconds),

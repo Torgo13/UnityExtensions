@@ -18,7 +18,7 @@ using UnsafeAtomicCounter32 = Unity.Collections.LowLevel.Unsafe.UnsafeAtomicCoun
 
 namespace PKGE.Unsafe
 {
-    public static partial class UnsafeExtensions
+    public static class UnsafeExtensions
     {
         //https://github.com/Unity-Technologies/UnityCsReference/blob/b42ec0031fc505c35aff00b6a36c25e67d81e59e/Runtime/Export/Unsafe/UnsafeUtility.cs
         #region Unity.Collections.LowLevel.Unsafe

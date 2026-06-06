@@ -13,15 +13,15 @@ namespace PKGE
     #region BoatAttack.UI
     public class EnumSelector : MonoBehaviour
     {
-        public string[] options;
-        public Text text;
+        public string[] options = System.Array.Empty<string>();
+        public Text? text;
         public bool loop;
         public int startOption;
         private int _currentOption;
 
         public delegate void UpdateValue(int index);
 
-        public UpdateValue updateVal;
+        public UpdateValue? updateVal;
 
         private void ValueUpdate(int i)
         {
@@ -61,7 +61,8 @@ namespace PKGE
 
         private void UpdateText()
         {
-            text.text = options[_currentOption];
+            if (text != null)
+                text.text = options[_currentOption];
         }
 
         private int ValidateIndex(int index)

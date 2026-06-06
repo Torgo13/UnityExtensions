@@ -218,7 +218,7 @@ namespace PKGE
         }
 #endif // INCLUDE_MATHEMATICS
 
-        /// <inheritdoc cref="Unity.Mathematics.Random.CreateFromIndexSafe(uint)"/>
+        /// <inheritdoc cref="CreateFromIndexSafe(uint)"/>
         [System.Runtime.CompilerServices.MethodImpl(256)]
 #if INCLUDE_MATHEMATICS
         public static Unity.Mathematics.Random CreateFromIndexSafe(int index)

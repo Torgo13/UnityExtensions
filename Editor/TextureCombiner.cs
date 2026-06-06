@@ -14,7 +14,7 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Editor/Core/TextureCombiner/TextureCombiner.cs
         #region UnityEditor.Rendering
-        static Texture2D _midGrey;
+        static Texture2D? _midGrey;
 
         /// <summary>
         /// Returns a 1 by 1 mid-grey (0.5, 0.5, 0.5, 1) Texture.
@@ -30,7 +30,7 @@ namespace PKGE.Editor
             }
         }
 
-        private static Dictionary<Color32, Texture2D> _singleColorTextures;
+        private static Dictionary<Color32, Texture2D>? _singleColorTextures;
 
         /// <summary>
         /// Returns a 1 by 1 Texture that is the color that you pass in.
@@ -176,8 +176,9 @@ namespace PKGE.Editor
         /// Unity creates the Texture Asset at the "savePath", and returns the Texture object.
         /// </summary>
         /// <param name="savePath">The path to save the Texture Asset to, relative to the Project folder.</param>
+        /// <param name="textureCombiner"></param>
         /// <returns></returns>
-        public Texture2D Combine(string savePath, Shader textureCombiner = default)
+        public Texture2D? Combine(string savePath, Shader? textureCombiner = null)
         {
             int xMin = int.MaxValue;
             int yMin = int.MaxValue;
@@ -206,7 +207,7 @@ namespace PKGE.Editor
             }
 
             if (!textureCombinerFound)
-                return default;
+                return null;
 
             Material combinerMaterial = new Material(textureCombiner);
             combinerMaterial.hideFlags = HideFlags.DontUnloadUnusedAsset;
@@ -302,7 +303,7 @@ namespace PKGE.Editor
                     rawImporter.npotScale = TextureImporterNPOTScale.None;
                     rawImporter.wrapMode = TextureWrapMode.Clamp;
 
-                    Texture2D originalTex2D = original as Texture2D;
+                    Texture2D? originalTex2D = original as Texture2D;
                     rawImporter.sRGBTexture = originalTex2D == null ? sRGBFallback : ((TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(original))).sRGBTexture;
 
                     rawImporter.maxTextureSize = 8192;

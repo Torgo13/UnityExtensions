@@ -12,7 +12,7 @@ namespace PKGE
     /// <see cref="CachedComponentFilter{TFilterType, TRootType}"/> filter.
     /// </summary>
     /// <typeparam name="THostType">The type of object the host component contains.</typeparam>
-    public interface IComponentHost<THostType> where THostType : class
+    public interface IComponentHost<THostType> where THostType : Component
     {
         /// <summary>
         /// The list of hosted components.
@@ -56,11 +56,11 @@ namespace PKGE
     /// }
     /// </code>
     /// </example>
-    public class CachedComponentFilter<TFilterType, TRootType> : IDisposable where TRootType : Component where TFilterType : class
+    public class CachedComponentFilter<TFilterType, TRootType> : IDisposable where TRootType : Component where TFilterType : Component
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/CachedComponentFilter.cs
         #region Unity.XR.CoreUtils
-        readonly List<TFilterType>? _masterComponentStorage = ListPool<TFilterType>.Get();
+        readonly List<TFilterType> _masterComponentStorage = ListPool<TFilterType>.Get();
 
         // Local method use only -- created here to reduce garbage collection. Collections must be cleared before use
         static readonly List<TFilterType> TempComponentList = new List<TFilterType>();
@@ -137,8 +137,10 @@ namespace PKGE
         /// </summary>
         /// <param name="outputList">The list to which to add matching components.</param>
         /// <typeparam name="TChildType">The type for which to search. Must inherit from or be TFilterType.</typeparam>
-        public void StoreMatchingComponents<TChildType>(List<TChildType> outputList) where TChildType : class, TFilterType
+        public void StoreMatchingComponents<TChildType>(List<TChildType> outputList) where TChildType : TFilterType
         {
+            UnityEngine.Assertions.Assert.IsFalse(_disposedValue, "Use after disposal");
+            
             foreach (var currentComponent in _masterComponentStorage)
             {
                 if (currentComponent is TChildType asChildType)
@@ -151,28 +153,13 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="TChildType">The type for which to search. Must inherit from or be TFilterType.</typeparam>
         /// <returns>The array of matching components.</returns>
-        public TChildType[] GetMatchingComponents<TChildType>() where TChildType : class, TFilterType
+        public TChildType[] GetMatchingComponents<TChildType>() where TChildType : TFilterType
         {
-            var componentCount = 0;
-            foreach (var currentComponent in _masterComponentStorage)
-            {
-                if (currentComponent is TChildType)
-                    componentCount++;
-            }
+            UnityEngine.Assertions.Assert.IsFalse(_disposedValue, "Use after disposal");
 
-            var outputArray = new TChildType[componentCount];
-            componentCount = 0;
-            foreach (var currentComponent in _masterComponentStorage)
-            {
-                var asChildType = currentComponent as TChildType;
-                if (asChildType == null)
-                    continue;
-
-                outputArray[componentCount] = asChildType;
-                componentCount++;
-            }
-
-            return outputArray;
+            using var _0 = ListPool<TChildType>.Get(out var temp);
+            StoreMatchingComponents(temp);
+            return temp.Count > 0 ? temp.ToArray() : Array.Empty<TChildType>();
         }
 
         void FilteredCopyToMaster(bool includeDisabled)
@@ -294,7 +281,7 @@ namespace PKGE
             if (_disposedValue)
                 return;
 
-            if (disposing && _masterComponentStorage != null)
+            if (disposing)
                 ListPool<TFilterType>.Release(_masterComponentStorage);
 
             _disposedValue = true;

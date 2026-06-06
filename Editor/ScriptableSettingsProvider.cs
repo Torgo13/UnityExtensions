@@ -10,13 +10,13 @@ namespace PKGE.Editor
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Editor/ScriptableSettingsProvider.cs
         #region Unity.XR.CoreUtils.Editor
-        T _target;
-        SerializedObject _serializedObject;
+        T? _target;
+        SerializedObject? _serializedObject;
 
         /// <summary>
         /// The ScriptableSettings being provided.
         /// </summary>
-        protected T Target
+        protected T? Target
         {
             get
             {

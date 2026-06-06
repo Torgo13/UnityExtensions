@@ -20,10 +20,10 @@ namespace PKGE.Editor
         /// </summary>
         /// <param name="property">The property with attributes to enumerate.</param>
         /// <returns>An array of attributes.</returns>
-        public static Attribute[] GetMemberAttributes(SerializedProperty property)
+        public static Attribute[]? GetMemberAttributes(SerializedProperty property)
         {
             var fi = GetFieldInfoFromProperty(property);
-            return fi.GetCustomAttributes(inherit: false) as Attribute[];
+            return fi?.GetCustomAttributes(inherit: false) as Attribute[];
         }
 
         /// <summary>
@@ -31,10 +31,10 @@ namespace PKGE.Editor
         /// </summary>
         /// <param name="property">The property to get information about.</param>
         /// <returns>Attributes and metadata about the field.</returns>
-        public static FieldInfo GetFieldInfoFromProperty(SerializedProperty property)
+        public static FieldInfo? GetFieldInfoFromProperty(SerializedProperty property)
         {
             var memberInfo = GetMemberInfoFromPropertyPath(property.serializedObject.targetObject.GetType(), property.propertyPath, out _);
-            if (memberInfo.MemberType != MemberTypes.Field)
+            if (memberInfo?.MemberType != MemberTypes.Field)
                 return null;
 
             return memberInfo as FieldInfo;
@@ -49,12 +49,12 @@ namespace PKGE.Editor
         /// <param name="type">Assigned the Type of the property.</param>
         /// <returns>Attributes and metadata about the member identified by <paramref name="host"/>
         /// and <paramref name="path"/>.</returns>
-        public static MemberInfo GetMemberInfoFromPropertyPath(Type host, string path, out Type type)
+        public static MemberInfo? GetMemberInfoFromPropertyPath(Type? host, string path, out Type? type)
         {
             type = host;
             if (host == null)
                 return null;
-            MemberInfo memberInfo = null;
+            MemberInfo? memberInfo = null;
 
             var parts = path.Split('.');
             for (var i = 0; i < parts.Length; i++)
@@ -68,13 +68,13 @@ namespace PKGE.Editor
                 // element before we do the skipping.
                 if (i < parts.Length - 1 && member == "Array" && parts[i + 1].StartsWith("data["))
                 {
-                    Type listType = null;
+                    Type? listType = null;
                     // ReSharper disable once PossibleNullReferenceException would have returned if host was null
-                    if (type.IsArray)
+                    if (type?.IsArray ?? false)
                     {
                         listType = type.GetElementType();
                     }
-                    else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+                    else if ((type?.IsGenericType ?? false) && type.GetGenericTypeDefinition() == typeof(List<>))
                     {
                         listType = type.GetGenericArguments()[0];
                     }
@@ -90,7 +90,7 @@ namespace PKGE.Editor
                 // so we have to iterate through the base classes and look there too.
                 // Private fields are relevant because they can still be shown in the Inspector,
                 // and that applies to private fields in base classes too.
-                MemberInfo foundMember = null;
+                MemberInfo? foundMember = null;
                 for (var currentType = type; foundMember == null && currentType != null; currentType =
                     currentType.BaseType)
                 {
@@ -141,7 +141,7 @@ namespace PKGE.Editor
         /// </remarks>
         /// <param name="property">The <c>SerializedProperty</c> to examine.</param>
         /// <returns>The best guess type.</returns>
-        public static Type SerializedPropertyToType(SerializedProperty property)
+        public static Type? SerializedPropertyToType(SerializedProperty property)
         {
             var field = SerializedPropertyToField(property);
             return field != null ? field.FieldType : null;
@@ -152,14 +152,14 @@ namespace PKGE.Editor
         /// </summary>
         /// <param name="property">The property to get information about.</param>
         /// <returns>The <see cref="FieldInfo"/>.</returns>
-        public static FieldInfo SerializedPropertyToField(SerializedProperty property)
+        public static FieldInfo? SerializedPropertyToField(SerializedProperty property)
         {
             var parts = property.propertyPath.Split('.');
             if (parts.Length == 0)
                 return null;
 
             var currentType = property.serializedObject.targetObject.GetType();
-            FieldInfo field = null;
+            FieldInfo? field = null;
             foreach (var part in parts)
             {
                 if (part == "Array")

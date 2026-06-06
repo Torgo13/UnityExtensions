@@ -11,12 +11,12 @@ namespace PKGE
         /// <summary>
         /// Event invoked before a frame update.
         /// </summary>
-        public static event Action PreFrameUpdate;
+        public static event Action? PreFrameUpdate;
 
         /// <summary>
         /// Event invoked after a frame update.
         /// </summary>
-        public static event Action PostFrameUpdate;
+        public static event Action? PostFrameUpdate;
 
         internal static void InvokePreFrameUpdate() => PreFrameUpdate?.Invoke();
         internal static void InvokePostFrameUpdate() => PostFrameUpdate?.Invoke();

@@ -80,10 +80,8 @@ namespace PKGE
             height: lpRect.Bottom - lpRect.Top
         );
 
-        private static void GetProcessRect(Process process, ref LpRect rect, ref bool gotProcessRect)
+        private static bool GetProcessRect(Process process, ref LpRect rect)
         {
-            gotProcessRect = false;
-
             using var _0 = UnityEngine.Pool.ListPool<IntPtr>.Get(out var winPtrs);
             GetProcessWindows(process.Id, winPtrs);
 
@@ -92,10 +90,11 @@ namespace PKGE
                 bool gotRect = GetWindowRect(winPtrs[i], ref rect);
                 if (gotRect && rect.Left != 0 && rect.Top != 0)
                 {
-                    gotProcessRect = true;
-                    break;
+                    return true;
                 }
             }
+            
+            return false;
         }
 #endif // WINDOWS
 
@@ -105,7 +104,7 @@ namespace PKGE
 #if WINDOWS
             var rect = RectIntToLpRect(rectInt);
 
-            GetProcessRect(process, ref rect, ref gotProcessRect);
+            gotProcessRect = GetProcessRect(process, ref rect);
 
             //rectInt.SetMinMax(new Vector2Int(rect.Left, rect.Top), new Vector2Int(rect.Right, rect.Bottom));
             rectInt = LpRectToRectInt(rect);
@@ -116,7 +115,7 @@ namespace PKGE
         public static void SetWindowPosition(int x, int y, int sizeX = 0, int sizeY = 0)
         {
 #if WINDOWS
-            var process = Process.GetCurrentProcess();
+            Process process = Process.GetCurrentProcess();
             process.Refresh();
 
             _ = EnumWindows(delegate (IntPtr wnd, IntPtr param)

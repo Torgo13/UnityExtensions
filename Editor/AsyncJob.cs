@@ -11,13 +11,13 @@ namespace PKGE.Editor
         protected int TaskId;
         bool _onCompleteLaunched;
         bool _isCancelled;
-        Action<IAsyncJob> _onComplete;
+        Action<IAsyncJob>? _onComplete;
 
         public abstract string name { get; }
         /// <inheritdoc cref="IAsyncJob.progress"/>
         public float progress { get; private set; }
         /// <inheritdoc cref="IAsyncJob.message"/>
-        public string message { get; private set; }
+        public string? message { get; private set; }
 
         /// <inheritdoc cref="IAsyncJob.Tick"/>
         public bool Tick()

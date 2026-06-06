@@ -23,7 +23,7 @@ namespace PKGE
         /// Internal Gradient used to generate the Texture
         /// </summary>
         [SerializeField]
-        Gradient gradient;
+        Gradient? gradient;
 
         Texture2D? _texture;
 
@@ -55,6 +55,7 @@ namespace PKGE
         {
             mode = baseCurve.mode;
             colorSpace = baseCurve.colorSpace;
+            gradient ??= new Gradient();
             gradient.mode = baseCurve.mode;
             gradient.colorSpace = baseCurve.colorSpace;
         }
@@ -228,7 +229,7 @@ namespace PKGE
             if (textureSize <= 0)
                 return Color.black;
 
-            return gradient.Evaluate(time);
+            return gradient?.Evaluate(time) ?? default;
         }
 
         /// <summary>
@@ -241,6 +242,7 @@ namespace PKGE
         public void SetKeys(GradientColorKey[] cKeys, GradientAlphaKey[] aKeys,
             GradientMode gradientMode, ColorSpace cSpace)
         {
+            gradient ??= new Gradient();
             gradient.SetKeys(cKeys, aKeys);
             gradient.mode = gradientMode;
             gradient.colorSpace = cSpace;

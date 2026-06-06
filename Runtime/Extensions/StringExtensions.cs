@@ -438,25 +438,25 @@ namespace PKGE
         #region FPSSample
         public static string AfterLast(this string str, string sub)
         {
-            var idx = str.LastIndexOf(sub);
+            var idx = str.LastIndexOf(sub, StringComparison.InvariantCulture);
             return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
         }
 
         public static string BeforeLast(this string str, string sub)
         {
-            var idx = str.LastIndexOf(sub);
+            var idx = str.LastIndexOf(sub, StringComparison.InvariantCulture);
             return idx < 0 ? string.Empty : str.Substring(0, idx);
         }
 
         public static string AfterFirst(this string str, string sub)
         {
-            var idx = str.IndexOf(sub);
+            var idx = str.IndexOf(sub, StringComparison.InvariantCulture);
             return idx < 0 ? string.Empty : str.Substring(idx + sub.Length);
         }
 
         public static string BeforeFirst(this string str, string sub)
         {
-            var idx = str.IndexOf(sub);
+            var idx = str.IndexOf(sub, StringComparison.InvariantCulture);
             return idx < 0 ? string.Empty : str.Substring(0, idx);
         }
 
@@ -680,7 +680,6 @@ namespace PKGE
             if (value.Length == 1)
                 return str.IndexOfOrdinal(value[0]);
 
-            int num3;
             int length = value.Length;
             int num2 = str.Length - length;
 
@@ -688,7 +687,7 @@ namespace PKGE
             {
                 if (str[i] == value[0])
                 {
-                    num3 = 1;
+                    int num3 = 1;
                     while ((num3 < length) && (str[i + num3] == value[num3]))
                     {
                         num3++;
@@ -726,7 +725,6 @@ namespace PKGE
             if (value.Length == 1)
                 return str.IndexOfOrdinal(value[0]);
 
-            int num3;
             int length = value.Length;
             int num2 = startIndex + count - length;
 
@@ -734,7 +732,7 @@ namespace PKGE
             {
                 if (str[i] == value[0])
                 {
-                    num3 = 1;
+                    int num3 = 1;
                     while ((num3 < length) && (str[i + num3] == value[num3]))
                     {
                         num3++;

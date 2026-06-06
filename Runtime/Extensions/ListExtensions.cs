@@ -49,6 +49,14 @@ namespace PKGE
             if (list.Capacity < capacity)
                 list.Capacity = capacity;
         }
+        
+        /// <inheritdoc cref="EnsureCapacity{T}(List{T}, int)"/>
+        public static void EnsureCapacity<T>(this List<T> list, System.Collections.ICollection collection)
+        {
+            int count = collection.Count;
+            if (list.Capacity < count)
+                list.Capacity = count;
+        }
 
         /// <summary>
         /// Swaps the elements at <paramref name="first"/> and <paramref name="second"/> with minimal copying.
@@ -71,16 +79,23 @@ namespace PKGE
         
         public static void EnsureRoom<T>(this List<T> list, int room)
         {
-            var capacity = list.Count + room;
+            int capacity = list.Count + room;
+            if (list.Capacity < capacity)
+                list.Capacity = capacity;
+        }
+        
+        public static void EnsureRoom<T>(this List<T> list, System.Collections.ICollection collection)
+        {
+            int capacity = list.Count + collection.Count;
             if (list.Capacity < capacity)
                 list.Capacity = capacity;
         }
 
-        public static void RemoveNull<T>(this List<T?> list)
+        public static List<T> RemoveNull<T>(this List<T?> list)
             where T : class
         {
             var temp = UnityEngine.Pool.ListPool<T>.Get();
-            temp.EnsureCapacity(list.Count);
+            temp.EnsureCapacity(list);
 
             foreach (var item in list)
             {
@@ -91,6 +106,7 @@ namespace PKGE
             list.Clear();
             list.AddRange(temp);
             UnityEngine.Pool.ListPool<T>.Release(temp);
+            return list!;
         }
 
         /// <summary>

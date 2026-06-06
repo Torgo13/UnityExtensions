@@ -49,7 +49,7 @@ namespace PKGE
                 throw new ArgumentNullException(nameof(texture));
 
             if (string.IsNullOrEmpty(filename))
-                filename = DateTime.UtcNow.ToString();
+                filename = DateTime.UtcNow.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
@@ -71,7 +71,7 @@ namespace PKGE
                 throw new ArgumentNullException(nameof(texture));
 
             if (string.IsNullOrEmpty(filename))
-                filename = DateTime.UtcNow.ToString();
+                filename = DateTime.UtcNow.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.png";
@@ -94,7 +94,7 @@ namespace PKGE
                 throw new ArgumentNullException(nameof(texture));
 
             if (string.IsNullOrEmpty(filename))
-                filename = DateTime.UtcNow.ToString();
+                filename = DateTime.UtcNow.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";
@@ -116,7 +116,7 @@ namespace PKGE
                 throw new ArgumentNullException(nameof(texture));
 
             if (string.IsNullOrEmpty(filename))
-                filename = DateTime.UtcNow.ToString();
+                filename = DateTime.UtcNow.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             filename = FileNameFormatter.Format(filename);
             var assetPath = $"{directory}/{filename}.exr";

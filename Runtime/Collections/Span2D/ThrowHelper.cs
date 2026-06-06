@@ -59,7 +59,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Throws an <see cref="IndexOutOfRangeException"/> when the a given coordinate is invalid.
+        /// Throws an <see cref="IndexOutOfRangeException"/> when the given coordinate is invalid.
         /// </summary>
         /// <remarks>
         /// Throwing <see cref="IndexOutOfRangeException"/> is technically discouraged in the docs, but

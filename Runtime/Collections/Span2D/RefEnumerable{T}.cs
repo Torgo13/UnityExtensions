@@ -380,7 +380,7 @@ namespace PKGE
                     ref T r0 = ref this.span.DangerousGetReference();
 
                     // Here we just offset by shifting down as if we were traversing a 2D array with a
-                    // a single column, with the width of each row represented by the step, the height
+                    // single column, with the width of each row represented by the step, the height
                     // represented by the current position, and with only the first element of each row
                     // being inspected. We can perform all the indexing operations in this type as nint,
                     // as the maximum offset is guaranteed never to exceed the maximum value, since on

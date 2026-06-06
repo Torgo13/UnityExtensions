@@ -66,7 +66,7 @@ namespace PKGE
             return p0 * h00 + m0 * h10 + p1 * h01 + m1 * h11;
         }
 
-        public SplinePoint EvaluatePointAtDistance(float distance)
+        public readonly SplinePoint EvaluatePointAtDistance(float distance)
         {
             float t = DistanceToTime(distance);
             return new SplinePoint()

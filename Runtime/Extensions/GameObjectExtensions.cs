@@ -232,7 +232,7 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
-        /// <param name="found">True if a descendant GameObject with the specified name was found.</param>
+        /// <param name="foundObject">True if a descendant GameObject with the specified name was found.</param>
         /// <returns>The returned child GameObject or null if no child is found.</returns>
         public static bool GetNamedChild(this GameObject go, string name,
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out GameObject? foundObject)
@@ -258,12 +258,12 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Instantiate multiple <see cref="UnityEngine.GameObject"/>s. Results are stored in the provided <see cref="System.Collections.Generic.List{UnityEngine.GameObject}"/>.
+        /// Instantiate multiple <see cref="UnityEngine.GameObject"/>s. Results are stored in the provided <see cref="System.Collections.Generic.List{T}"/>.
         /// </summary>
         /// <remarks>Must be called from the main thread.</remarks>
         /// <param name="go">Input <see cref="UnityEngine.GameObject"/></param>
         /// <param name="count">Number of copies to instantiate</param>
-        /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{UnityEngine.GameObject}"/> to store the results</param>
+        /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{T}"/> to store the results</param>
         /// <param name="destinationScene">Optionally specify the destination <see cref="UnityEngine.SceneManagement.Scene"/></param>
         /// <exception cref="System.InvalidOperationException">EnsureRunningOnMainThread can only be called from the main thread</exception>
         public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,

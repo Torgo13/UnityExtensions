@@ -67,12 +67,12 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Log(object message) => UnityEngine.Debug.Log(message);
+        public static void Log(object? message) => UnityEngine.Debug.Log(message);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Log(object message, UnityObject context) => UnityEngine.Debug.Log(message, context);
+        public static void Log(object? message, UnityObject? context) => UnityEngine.Debug.Log(message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -82,22 +82,22 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogFormat(UnityObject context, string format, params object[] args) => UnityEngine.Debug.LogFormat(context, format, args);
+        public static void LogFormat(UnityObject? context, string format, params object[] args) => UnityEngine.Debug.LogFormat(context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogFormat(LogType logType, LogOption logOptions, UnityObject context, string format, params object[] args) => UnityEngine.Debug.LogFormat(logType, logOptions, context, format, args);
+        public static void LogFormat(LogType logType, LogOption logOptions, UnityObject? context, string format, params object[] args) => UnityEngine.Debug.LogFormat(logType, logOptions, context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogError(object message) => UnityEngine.Debug.LogError(message);
+        public static void LogError(object? message) => UnityEngine.Debug.LogError(message);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogError(object message, UnityObject context) => UnityEngine.Debug.LogError(message, context);
+        public static void LogError(object? message, UnityObject? context) => UnityEngine.Debug.LogError(message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -107,7 +107,7 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogErrorFormat(UnityObject context, string format, params object[] args) => UnityEngine.Debug.LogErrorFormat(context, format, args);
+        public static void LogErrorFormat(UnityObject? context, string format, params object[] args) => UnityEngine.Debug.LogErrorFormat(context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -122,17 +122,17 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogException(Exception exception, UnityObject context) => UnityEngine.Debug.LogException(exception, context);
+        public static void LogException(Exception exception, UnityObject? context) => UnityEngine.Debug.LogException(exception, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogWarning(object message) => UnityEngine.Debug.LogWarning(message);
+        public static void LogWarning(object? message) => UnityEngine.Debug.LogWarning(message);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogWarning(object message, UnityObject context) => UnityEngine.Debug.LogWarning(message, context);
+        public static void LogWarning(object? message, UnityObject? context) => UnityEngine.Debug.LogWarning(message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -142,7 +142,7 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogWarningFormat(UnityObject context, string format, params object[] args) => UnityEngine.Debug.LogWarningFormat(context, format, args);
+        public static void LogWarningFormat(UnityObject? context, string format, params object[] args) => UnityEngine.Debug.LogWarningFormat(context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -152,12 +152,12 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Assert(bool condition, UnityObject context) => UnityEngine.Debug.Assert(condition, context);
+        public static void Assert(bool condition, UnityObject? context) => UnityEngine.Debug.Assert(condition, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Assert(bool condition, object message) => UnityEngine.Debug.Assert(condition, message);
+        public static void Assert(bool condition, object? message) => UnityEngine.Debug.Assert(condition, message);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -167,12 +167,12 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Assert(bool condition, object message, UnityObject context) => UnityEngine.Debug.Assert(condition, message, context);
+        public static void Assert(bool condition, object? message, UnityObject? context) => UnityEngine.Debug.Assert(condition, message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void Assert(bool condition, string message, UnityObject context) => UnityEngine.Debug.Assert(condition, message, context);
+        public static void Assert(bool condition, string message, UnityObject? context) => UnityEngine.Debug.Assert(condition, message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -182,17 +182,17 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void AssertFormat(bool condition, UnityObject context, string format, params object[] args) => UnityEngine.Debug.AssertFormat(condition, context, format, args);
+        public static void AssertFormat(bool condition, UnityObject? context, string format, params object[] args) => UnityEngine.Debug.AssertFormat(condition, context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogAssertion(object message) => UnityEngine.Debug.LogAssertion(message);
+        public static void LogAssertion(object? message) => UnityEngine.Debug.LogAssertion(message);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogAssertion(object message, UnityObject context) => UnityEngine.Debug.LogAssertion(message, context);
+        public static void LogAssertion(object? message, UnityObject? context) => UnityEngine.Debug.LogAssertion(message, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -202,7 +202,7 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogAssertionFormat(UnityObject context, string format, params object[] args) => UnityEngine.Debug.LogAssertionFormat(context, format, args);
+        public static void LogAssertionFormat(UnityObject? context, string format, params object[] args) => UnityEngine.Debug.LogAssertionFormat(context, format, args);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]

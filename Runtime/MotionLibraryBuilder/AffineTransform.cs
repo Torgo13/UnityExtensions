@@ -107,13 +107,13 @@ namespace PKGE
 
         public readonly AffineTransform alignHorizontally()
         {
-            quaternion alignRotation = PKGE.MathematicsExtensions.forRotation(transformDirection(new float3(0.0f, 1.0f, 0.0f)), new float3(0.0f, 1.0f, 0.0f));
+            quaternion alignRotation = MathematicsExtensions.forRotation(transformDirection(new float3(0.0f, 1.0f, 0.0f)), new float3(0.0f, 1.0f, 0.0f));
 
             return new AffineTransform(
                 t, mul(alignRotation, q));
         }
 
         public readonly float3 Forward => transformDirection(new float3(0.0f, 0.0f, 1.0f));
-#endregion // Unity.Mathematics
+        #endregion // Unity.Mathematics
     }
 }

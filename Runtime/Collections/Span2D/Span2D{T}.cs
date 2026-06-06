@@ -130,13 +130,13 @@ namespace PKGE
             this.Stride = width + pitch;
         }
 #else
-        /// <inheritdoc cref="Span2D(ref T, int, int, int)"/>
+        /// <inheritdoc cref="Span2D{T}(ref T, int, int, int)"/>
         public Span2D(Span<T> span, int height, int width, int pitch)
             : this(span, 0, height, width, pitch)
         {
         }
 
-        /// <inheritdoc cref="Span2D(ref T, int, int, int)"/>
+        /// <inheritdoc cref="Span2D{T}(ref T, int, int, int)"/>
         public Span2D(Memory<T> memory, int height, int width, int pitch)
             : this(memory.Span, 0, height, width, pitch)
         {

@@ -29,7 +29,7 @@ namespace PKGE.Editor
         private Vector2 m_DesiredLuminance = new Vector2(0.2f, 0.9f);
         // the colors obtained
         [SerializeField]
-        private Color[] m_Palette;
+        private Color[] m_Palette = System.Array.Empty<Color>();
         // the number of unique colors in the palette before they repeat
         [SerializeField]
         private int m_NumUniqueColors;

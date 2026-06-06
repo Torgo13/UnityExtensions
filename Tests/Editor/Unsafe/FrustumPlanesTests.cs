@@ -86,9 +86,8 @@ namespace PKGE.Unsafe.Tests
             }
         }
 
-        private FrustumPlanes.IntersectResult ReferenceTest(NativeArray<Plane> par, AABB box)
+        static FrustumPlanes.IntersectResult ReferenceTest(NativeArray<Plane> par, AABB box)
         {
-            FrustumPlanes.IntersectResult result;
             var temp = new NativeArray<float4>(par.Length, Allocator.TempJob);
 
             for (int i = 0; i < par.Length; ++i)
@@ -96,7 +95,7 @@ namespace PKGE.Unsafe.Tests
                 temp[i] = new float4(par[i].normal, par[i].distance);
             }
 
-            result = FrustumPlanes.Intersect(temp.AsReadOnly(), box.Center, box.Extents);
+            FrustumPlanes.IntersectResult result = FrustumPlanes.Intersect(temp.AsReadOnly(), box.Center, box.Extents);
 
             temp.Dispose();
             return result;

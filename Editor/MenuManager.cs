@@ -13,11 +13,11 @@ namespace PKGE.Editor
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/MenuManager.cs
         #region UnityEditor.Rendering
         #region Add Menu Item
-        static Action<string, string, bool, int, Action, Func<bool>> _addMenuItem;
+        static Action<string, string, bool, int, Action, Func<bool>>? _addMenuItem;
         static Action<string, string, bool, int, Action, Func<bool>> AddMenuItemMethod => _addMenuItem ??= GetAddMenuItemMethod();
         static Action<string, string, bool, int, Action, Func<bool>> GetAddMenuItemMethod()
         {
-            MethodInfo addMenuItemMethodInfo = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo addMenuItemMethodInfo = typeof(Menu).GetMethod("AddMenuItem", BindingFlags.Static | BindingFlags.NonPublic)!;
             var nameParam = Expression.Parameter(typeof(string), "name");
             var shortcutParam = Expression.Parameter(typeof(string), "shortcut");
             var checkedParam = Expression.Parameter(typeof(bool), "checked");
@@ -60,11 +60,11 @@ namespace PKGE.Editor
         #endregion
 
         #region Remove Menu Item
-        static Action<string> _removeMenuItem;
+        static Action<string>? _removeMenuItem;
         static Action<string> RemoveMenuItemMethod => _removeMenuItem ??= GetRemoveMenuItemMethod();
         static Action<string> GetRemoveMenuItemMethod()
         {
-            MethodInfo removeMenuItemMethodInfo = typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic);
+            MethodInfo removeMenuItemMethodInfo = typeof(Menu).GetMethod("RemoveMenuItem", BindingFlags.Static | BindingFlags.NonPublic)!;
             var nameParam = Expression.Parameter(typeof(string), "name");
             return Expression.Lambda<Action<string>>(
                 Expression.Call(null, removeMenuItemMethodInfo, nameParam),

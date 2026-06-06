@@ -17,9 +17,12 @@ namespace PKGE
         public static void CreateAttribute(this XmlNode node, string name, string value)
         {
             var document = node.OwnerDocument;
+            if (document == null)
+                return;
+
             var attribute = document.CreateAttribute(name);
             attribute.Value = value;
-            _ = node.Attributes.Append(attribute);
+            _ = node.Attributes?.Append(attribute);
         }
 
         public static void CreateAttribute(this XmlNode node, string name, int value)
@@ -29,12 +32,15 @@ namespace PKGE
 
         public static void CreateAttribute(this XmlNode node, string name, float value)
         {
-            node.CreateAttribute(name, value.ToString());
+            node.CreateAttribute(name, value.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         public static void CreateVector3Node(this XmlNode parentNode, string name, float3 position)
         {
             var document = parentNode.OwnerDocument;
+            if (document == null)
+                return;
+
             var node = document.CreateElement(name);
             node.CreateAttribute("x", position.x);
             node.CreateAttribute("y", position.y);
@@ -45,6 +51,9 @@ namespace PKGE
         public static void CreateQuaternionNode(this XmlNode parentNode, string name, quaternion rotation)
         {
             var document = parentNode.OwnerDocument;
+            if (document == null)
+                return;
+            
             var node = document.CreateElement(name);
 #if INCLUDE_MATHEMATICS
             node.CreateAttribute("x", rotation.value.x);

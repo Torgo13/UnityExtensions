@@ -86,7 +86,8 @@ namespace PKGE.Tests
             var invalidLength = -1;
 
             // Act & Assert
-            _ = Assert.Throws<ArgumentOutOfRangeException>(() => _stream.Read(invalidLength));
+            using var tempBuffer = new DisposeArrayPool<byte>(1);
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => StreamExtensions.Read(_stream, invalidLength, tempBuffer.PooledArray));
         }
 
         [Test]
@@ -119,7 +120,7 @@ namespace PKGE.Tests
             var data = new TestStruct { Value1 = 42, Value2 = 99.9f };
 
             // Act
-            StreamExtensions.EnsureBufferCapacity(1024);
+            using var tempBuffer = new DisposeArrayPool<byte>(1024);
             _stream.WriteStruct(data);
 
             // Assert

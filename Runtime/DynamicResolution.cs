@@ -69,7 +69,8 @@ namespace PKGE
         #endregion // Internal Tracking
 
 #if ENABLE_DYNAMIC_RESOLUTION_DEBUG
-        static GUIStyle DebugStyle;
+        static GUIStyle? _debugStyle;
+        static GUIStyle DebugStyle { get { if (_debugStyle == null) { _debugStyle = new GUIStyle(); } return _debugStyle; } set { _debugStyle = value; } }
 #endif
 
         public static void Update()
@@ -293,13 +294,6 @@ namespace PKGE
 
 #if !PIPELINE_IMPLEMENTS_DRH
             CanUpdate = true;
-#endif
-
-#if ENABLE_DYNAMIC_RESOLUTION_DEBUG
-            if (DebugStyle == null)
-            {
-                DebugStyle = new GUIStyle();
-            }
 #endif
         }
 

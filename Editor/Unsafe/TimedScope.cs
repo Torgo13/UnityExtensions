@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 
 namespace PKGE.Editor.Unsafe
 {
@@ -20,7 +19,7 @@ namespace PKGE.Editor.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Editor/Utilities/TimedScope.cs
         #region UnityEditor.Rendering
-        static readonly ThreadLocal<Stopwatch> StopWatch = new ThreadLocal<Stopwatch>(() => new Stopwatch());
+        static readonly System.Threading.ThreadLocal<Stopwatch> StopWatch = new System.Threading.ThreadLocal<Stopwatch>(() => new Stopwatch());
 
         readonly double* _durationMsPtr;
 

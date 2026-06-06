@@ -15,7 +15,7 @@ namespace PKGE.Editor
         /// </summary>
         float progress { get; }
         /// <summary>A descriptive message for the current step of the job.</summary>
-        string message { get; }
+        string? message { get; }
         string name { get; }
 
         /// <summary>Process an increment of the job.</summary>

@@ -23,7 +23,7 @@ namespace PKGE.Editor
         /// <param name="command">The command that is executing the removal</param>
         /// <param name="promptDisplay">If the command must prompt a display to get user confirmation</param>
         /// <exception cref="Exception">If the given <see cref="MonoBehaviour"/> is not an <see cref="IAdditionalData"/></exception>
-        public static void RemoveAdditionalData([DisallowNull] MenuCommand command, bool promptDisplay = true)
+        public static void RemoveAdditionalData(MenuCommand command, bool promptDisplay = true)
         {
             if (command.context is not Component component)
                 return;
@@ -35,7 +35,7 @@ namespace PKGE.Editor
                 RemoveAdditionalData(component, promptDisplay);
         }
 
-        static void RemoveAdditionalData([DisallowNull] Component additionalDataComponent, bool promptDisplay = true)
+        static void RemoveAdditionalData(Component additionalDataComponent, bool promptDisplay = true)
         {
             using (ListPool<Type>.Get(out var componentTypesToRemove))
             {
@@ -71,7 +71,7 @@ namespace PKGE.Editor
             return true;
         }
 
-        static void RemoveAdditionalDataComponentOnSelection([DisallowNull] Type additionalDataType, [DisallowNull] List<Type> componentsTypeToRemove)
+        static void RemoveAdditionalDataComponentOnSelection(Type additionalDataType, List<Type> componentsTypeToRemove)
         {
             foreach (var selectedGameObject in Selection.gameObjects)
             {
@@ -79,7 +79,7 @@ namespace PKGE.Editor
             }
         }
 
-        static void RemoveAdditionalDataComponent([DisallowNull] Component additionalDataComponent, [DisallowNull] List<Type> componentsTypeToRemove)
+        static void RemoveAdditionalDataComponent(Component additionalDataComponent, List<Type> componentsTypeToRemove)
         {
             using (ListPool<Component>.Get(out var components))
             {
@@ -99,7 +99,8 @@ namespace PKGE.Editor
 
         //internal for tests
         [MustUseReturnValue]
-        internal static bool TryGetComponentsToRemove([DisallowNull] IAdditionalData additionalData, [DisallowNull] List<Type> componentsToRemove, [NotNullWhen(false)] out Exception error)
+        internal static bool TryGetComponentsToRemove(IAdditionalData additionalData, List<Type> componentsToRemove,
+            [NotNullWhen(false)] out Exception? error)
         {
             var type = additionalData.GetType();
             var requiredComponents = type.GetCustomAttributes(typeof(RequireComponent), inherit: true) as RequireComponent[];

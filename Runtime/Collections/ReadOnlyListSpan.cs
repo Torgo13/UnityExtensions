@@ -149,7 +149,7 @@ namespace PKGE
         /// </remarks>
         public bool Equals(ReadOnlyListSpan<T> other)
         {
-            return ReferenceEquals(_enumerator.List, other._enumerator.List)
+            return _enumerator.List.Equals(other._enumerator.List)
                 && _enumerator.start == other._enumerator.start
                 && _enumerator.end == other._enumerator.end;
         }
@@ -159,11 +159,11 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">An object to compare with this object.</param>
         /// <returns>`true` if the current object is equal to the `other` parameter. Otherwise, `false`.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
             => obj is ReadOnlyListSpan<T> other && Equals(other);
 
         /// <summary>
-        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `true` if objects are equal by <see cref="Equals(PKGE.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `false`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -172,7 +172,7 @@ namespace PKGE
         public static bool operator ==(ReadOnlyListSpan<T> lhs, ReadOnlyListSpan<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>
-        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.Collections.ReadOnlyListSpan{T})"/>.
+        /// Returns `false` if objects are equal by <see cref="Equals(PKGE.ReadOnlyListSpan{T})"/>.
         /// Otherwise, `true`.
         /// </summary>
         /// <param name="lhs">The left-hand side of the comparison.</param>
@@ -243,7 +243,7 @@ namespace PKGE
                 }
             }
 
-            object? IEnumerator.Current => Current;
+            readonly object? IEnumerator.Current => Current;
             internal readonly IReadOnlyList<T?> List;
             int _currentIndex;
 

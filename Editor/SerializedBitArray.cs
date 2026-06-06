@@ -36,7 +36,8 @@ namespace PKGE.Editor
         /// <param name="targetSerializedObjects">An individual SerializedObject for each targetObject</param>
         /// <param name="serializedBitArray">Out SerializedBitArray</param>
         /// <returns>True if construction was successful</returns>
-        public static bool TryGetSerializedBitArray(this SerializedProperty serializedProperty, SerializedObject[] targetSerializedObjects, out SerializedBitArrayAny serializedBitArray)
+        public static bool TryGetSerializedBitArray(this SerializedProperty serializedProperty, SerializedObject[] targetSerializedObjects,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out SerializedBitArrayAny? serializedBitArray)
         {
             serializedBitArray = null;
             if (!TryGetCapacityFromTypeName(serializedProperty, out uint capacity))
@@ -51,7 +52,8 @@ namespace PKGE.Editor
         /// <returns>True if construction was successful</returns>
         /// <remarks>Note that this variant doesn't properly support editing multiple targets, especially if there
         /// are several BitArrays on the target objects.</remarks>
-        public static bool TryGetSerializedBitArray(this SerializedProperty serializedProperty, out SerializedBitArrayAny serializedBitArray)
+        public static bool TryGetSerializedBitArray(this SerializedProperty serializedProperty,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out SerializedBitArrayAny? serializedBitArray)
         {
             serializedBitArray = null;
             if (!TryGetCapacityFromTypeName(serializedProperty, out uint capacity))
@@ -205,7 +207,7 @@ namespace PKGE.Editor
         {
             AssertInRange(bitIndex);
             if (HasBitMultipleDifferentValue(bitIndex))
-                return default; //we cannot assess anything if different
+                return false; //we cannot assess anything if different
 
             //As no different value on this bit, lets use the one from first target
             return ExtractBitFrom64BitsPart(GetTargetValueUnverified(0, (int)bitIndex / 64), bitIndex % 64);

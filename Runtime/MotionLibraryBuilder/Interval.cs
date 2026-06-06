@@ -15,7 +15,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Math/Interval.cs
         #region Unity.Kinematica
-        int firstFrame;
+        readonly int firstFrame;
         int onePastLastFrame;
 
         public static Interval Create(int firstFrame, int onePastLastFrame)

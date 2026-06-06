@@ -78,17 +78,17 @@ namespace PKGE.Editor
 
         public int GetInt(int key)
         {
-            return _items.TryGetValue(key, out Item t) ? t.@int : default;
+            return _items.TryGetValue(key, out Item t) ? t.@int : 0;
         }
 
         public uint GetUInt(int key)
         {
-            return _items.TryGetValue(key, out Item t) ? t.@uint : default;
+            return _items.TryGetValue(key, out Item t) ? t.@uint : 0;
         }
 
         public string GetString(int key)
         {
-            return _items.TryGetValue(key, out Item t) ? t.@string : default;
+            return _items.TryGetValue(key, out Item t) ? t.@string : string.Empty;
         }
 
         public void Clear()

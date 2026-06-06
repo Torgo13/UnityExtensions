@@ -23,7 +23,7 @@ namespace PKGE
         /// <param name="ct">Optional <see cref="CancellationToken"/>.</param>
         /// <typeparam name="TInput">The type of each item.</typeparam>
         /// <typeparam name="TOutput">The type of the result.</typeparam>
-        /// <returns>An enumerable of the execution results.</returns>
+        /// <returns>An <see cref="System.Collections.Generic.IEnumerable{T}"/> of the execution results.</returns>
         public static IEnumerable<TOutput> RunTasks<TInput, TOutput>(
             List<TInput> items,
             Action<TInput, ConcurrentBag<TOutput>> action,

@@ -86,7 +86,7 @@ namespace PKGE.Unsafe
         public PinnedArray(List<T> list)
         {
             Assert.IsNotNull(list);
-            managedArray = list.ExtractArrayFromList()!;
+            managedArray = list.ExtractArrayFromList();
             unsafe
             {
                 nativeArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
@@ -110,7 +110,7 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Rendering.Universal
     }
 
-    public static partial class ArrayExtensions
+    public static class ArrayExtensions
     {
         public static PinnedArray<T> AsNativeArray<T>(this T[] array, int start, int length, out NativeArray<T> nativeArray)
             where T : struct
@@ -137,7 +137,7 @@ namespace PKGE.Unsafe
         }
     }
 
-    public static partial class ListExtensions
+    public static class ListExtensions
     {
         public static PinnedArray<T> AsNativeArray<T>(this List<T> list, out NativeArray<T> nativeArray)
             where T : struct

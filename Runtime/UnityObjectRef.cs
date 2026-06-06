@@ -101,7 +101,7 @@ namespace PKGE
             return instanceId == other.instanceId;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is UntypedUnityObjectRef other && Equals(other);
         }
@@ -228,7 +228,7 @@ namespace PKGE
         /// <param name="obj">The object to compare.</param>
         /// <returns>True, if the <paramref name="obj"/> parameter is a UnityEngine.Object instance that points to the same
         /// instance as this.</returns>
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is UnityObjectRef<T> other && Equals(other);
         }
@@ -302,7 +302,8 @@ namespace PKGE
         /// </param>
         public static void SetActive(this UnityObjectRef<GameObject> obj, bool value)
         {
-            obj.Value.SetActive(value);
+            if (obj.Value != null)
+                obj.Value.SetActive(value);
         }
     }
 }

@@ -66,7 +66,7 @@ namespace PKGE
         /// </summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if <paramref name="obj"/> is a SerializableGuid with the same field values.</returns>
-        public readonly override bool Equals(object obj)
+        public readonly override bool Equals(object? obj)
         {
             return obj is SerializableGuid serializableGuid
                 && Equals(serializableGuid);
