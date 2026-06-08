@@ -6,6 +6,16 @@ namespace PKGE
 {
     public static class EnumUtilities
     {
+        public static bool TryGetAttribute<T, U>(string name,
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out U? attribute)
+            where T : struct, Enum where U : Attribute
+        {
+            attribute = System.Reflection.CustomAttributeExtensions.
+                GetCustomAttribute<U>(typeof(T).GetField(name), inherit: false);
+
+            return attribute != null;
+        }
+
         //https://github.com/needle-mirror/com.unity.kinematica/blob/d5ae562615dab42e9e395479d5e3b4031f7dccaf/Runtime/Supplementary/Utility/EnumUtility.cs
         #region Unity.Kinematica
         public static string GetDescription<T>(this T val) where T : struct, Enum
@@ -15,26 +25,16 @@ namespace PKGE
 
         public static string GetDescription<T>(string name) where T : struct, Enum
         {
-            if (TryGetDescription<T>(name, out var description))
-                return description;
-
-            return string.Empty;
+            _ = TryGetDescription<T>(name, out var description);
+            return description;
         }
 
         public static bool TryGetDescription<T>(string name, out string description) where T : struct, Enum
         {
-            System.Reflection.MemberInfo[] memberInfo = typeof(T).GetMember(name);
-            foreach (var member in memberInfo)
+            if (TryGetAttribute<T, System.ComponentModel.DescriptionAttribute>(name, out var attribute))
             {
-                object[] customAttributes = member.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), inherit: false);
-                foreach (var attribute in customAttributes)
-                {
-                    if (attribute is System.ComponentModel.DescriptionAttribute descriptionAttribute)
-                    {
-                        description = descriptionAttribute.Description;
-                        return true;
-                    }
-                }
+                description = attribute.Description;
+                return true;
             }
 
             description = string.Empty;
@@ -43,18 +43,15 @@ namespace PKGE
 
         public static List<string> GetAllDescriptions<T>(List<string>? list = null) where T : struct, Enum
         {
-            list ??= new List<string>();
+            list ??= new List<string>(EnumValues<T>.Length);
             list.Clear();
+            list.EnsureCapacity(EnumValues<T>.Length);
 
-            string[] names = EnumValues<T>.Names;
-            list.EnsureCapacity(names.Length);
-
-            foreach (var name in names)
+            foreach (var name in EnumValues<T>.Names)
             {
-                if (TryGetDescription<T>(name, out var description))
-                {
-                    list.Add(description);
-                }
+                list.Add(TryGetAttribute<T, System.ComponentModel.DescriptionAttribute>(name, out var attribute)
+                    ? attribute.Description
+                    : string.Empty);
             }
 
             return list;
@@ -96,8 +93,7 @@ namespace PKGE
 
         public static T TypeFromName<T>(string name) where T : struct, Enum
         {
-            var values = EnumValues<T>.Values;
-            foreach (var value in values)
+            foreach (var value in EnumValues<T>.Values)
             {
                 if (value.GetDescription().Equals(name, StringComparison.Ordinal))
                     return value;
@@ -120,42 +116,35 @@ namespace PKGE
         /// unless manually preserved with <see cref="UnityEngine.Scripting.PreserveAttribute"/> or link.xml.</remarks>
         public static string GetDisplayName<T>(this T value) where T : struct, Enum
         {
-            var memberInfo = typeof(T).GetMember(EnumValues<T>.Name(value));
-
-            if (memberInfo.Length > 0)
-            {
-                var attrs = memberInfo[0].GetCustomAttributes(typeof(UnityEngine.InspectorNameAttribute), false);
-
-                if (attrs.Length > 0)
-                {
-                    return ((UnityEngine.InspectorNameAttribute)attrs[0]).displayName;
-                }
-            }
-
-            return value.ToString();
+            return TryGetAttribute<T, UnityEngine.InspectorNameAttribute>(EnumValues<T>.Name(value), out var attribute)
+                ? attribute.displayName
+                : string.Empty;
         }
         #endregion // Unity.LiveCapture.Editor
 
         /// <inheritdoc cref="GetDisplayName{T}(T)"/>
+        public static List<string> GetDisplayNames<T>(List<string>? list = null) where T : struct, Enum
+        {
+            list ??= new List<string>(EnumValues<T>.Length);
+            list.Clear();
+            list.EnsureCapacity(EnumValues<T>.Length);
+
+            foreach (var name in EnumValues<T>.Names)
+            {
+                list.Add(TryGetAttribute<T, UnityEngine.InspectorNameAttribute>(name, out var attribute)
+                    ? attribute.displayName
+                    : string.Empty);
+            }
+
+            return list;
+        }
+
+        /// <inheritdoc cref="GetDisplayName{T}(T)"/>
         public static string[] GetDisplayNames<T>() where T : struct, Enum
         {
-            var displayNames = new string[EnumValues<T>.Values.Length];
-            for (int i = 0; i < displayNames.Length; i++)
-            {
-                System.Reflection.MemberInfo[] memberInfo = typeof(T).GetMember(EnumValues<T>.Names[i]);
-
-                if (memberInfo.Length > 0)
-                {
-                    object[] attrs = memberInfo[0].GetCustomAttributes(typeof(UnityEngine.InspectorNameAttribute), inherit: false);
-
-                    if (attrs.Length > 0)
-                    {
-                        displayNames[i] = ((UnityEngine.InspectorNameAttribute)attrs[0]).displayName;
-                        continue;
-                    }
-                }
-            }
-            
+            var list = UnityEngine.Pool.ListPool<string>.Get();
+            var displayNames = GetDisplayNames<T>(list).ToArray();
+            UnityEngine.Pool.ListPool<string>.Release(list);
             return displayNames;
         }
 #endif // UNITY_EDITOR
@@ -171,7 +160,7 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/EnumValues.cs
         #region Unity.XR.CoreUtils
         /// <summary>
-        /// Cached result of Enum.GetValues.
+        /// Cached result of <see cref="Enum.GetValues"/>.
         /// </summary>
         /// <remarks>
         /// The elements of the array are sorted by the binary values of the enumeration constants (that is, by their unsigned magnitude).
@@ -181,20 +170,23 @@ namespace PKGE
         #endregion // Unity.XR.CoreUtils
 
         /// <summary>
-        /// Cached result of Enum.GetNames.
+        /// Cached result of <see cref="Enum.GetNames"/>.
         /// </summary>
-        public static readonly string[] Names = Enum.GetNames(typeof(T));
+        public static string[] Names => _names ??= Enum.GetNames(typeof(T));
+        private static string[]? _names;
 
         /// <summary>
-        /// Cached result of EnumUtilities.GetDescriptions.
+        /// Cached result of <see cref="EnumUtilities.GetDescriptions"/>.
         /// </summary>
-        public static readonly string[] Descriptions = EnumUtilities.GetDescriptions<T>();
+        public static string[] Descriptions => _descriptions ??= EnumUtilities.GetDescriptions<T>();
+        private static string[]? _descriptions;
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Cached result of EnumUtilities.GetDisplayNames.
+        /// Cached result of <see cref="EnumUtilities.GetDisplayNames"/>.
         /// </summary>
-        public static readonly string[] DisplayNames = EnumUtilities.GetDisplayNames<T>();
+        public static string[] DisplayNames => _displayNames ??= EnumUtilities.GetDisplayNames<T>();
+        private static string[]? _displayNames;
 #endif // UNITY_EDITOR
 
         /// <summary>
@@ -202,7 +194,8 @@ namespace PKGE
         /// This creates a copy of the array and sorts it so that negative values are before the positive ones.
         /// </summary>
         /// <remarks>Cannot be used to index other arrays if sorting was performed.</remarks>
-        public static readonly T[] SortedValues = SortValues();
+        public static T[] SortedValues => _sortedValues ??= SortValues();
+        private static T[]? _sortedValues;
 
         public static int Length => Values.Length;
 

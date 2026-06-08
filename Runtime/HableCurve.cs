@@ -53,7 +53,7 @@ namespace PKGE
             /// </summary>
             /// <param name="x">The point to evaluate.</param>
             /// <returns>The value of the curve, at the point specified.</returns>
-            public float Eval(float x)
+            public readonly float Eval(float x)
             {
                 float x0 = (x - offsetX) * scaleX;
                 float y0 = 0f;
@@ -120,9 +120,6 @@ namespace PKGE
         /// </summary>
         public HableCurve()
         {
-            for (int i = 0; i < 3; i++)
-                segments[i] = new Segment();
-
             uniforms = new Uniforms(this);
         }
 
@@ -219,8 +216,8 @@ namespace PKGE
             paramsCopy.x1 /= srcParams.W;
             paramsCopy.overshootX = srcParams.overshootX / srcParams.W;
 
-            float toeM = 0f;
-            float shoulderM = 0f;
+            float toeM;
+            float shoulderM;
             {
                 AsSlopeIntercept(out float m, out float b, paramsCopy.x0, paramsCopy.x1, paramsCopy.y0, paramsCopy.y1);
 
@@ -349,7 +346,7 @@ namespace PKGE
         /// <summary>
         /// A utility class to ease the binding of curve parameters to shaders.
         /// </summary>
-        public class Uniforms
+        public readonly struct Uniforms
         {
             readonly HableCurve parent;
 

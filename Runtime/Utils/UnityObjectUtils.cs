@@ -18,7 +18,7 @@ namespace PKGE
         /// </summary>
         /// <typeparam name="T">The specific type of UnityObject in the dictionary.</typeparam>
         /// <param name="list">A list of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedObjects<T>(this List<T> list) where T : UnityObject
+        public static List<T> RemoveDestroyedObjects<T>(this List<T?> list) where T : UnityObject
         {
             var nonNull = ListPool<T>.Get();
             nonNull.EnsureCapacity(list.Count);
@@ -32,6 +32,8 @@ namespace PKGE
             list.Clear();
             list.AddRange(nonNull);
             ListPool<T>.Release(nonNull);
+
+            return (List<T>)list!;
         }
 
         /// <summary>
@@ -40,7 +42,7 @@ namespace PKGE
         /// <typeparam name="TKey">The specific type of UnityObject serving as keys in the dictionary.</typeparam>
         /// <typeparam name="TValue">The value type of the dictionary.</typeparam>
         /// <param name="dictionary">A dictionary of UnityObjects that may contain destroyed objects.</param>
-        public static void RemoveDestroyedKeys<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+        public static Dictionary<TKey, TValue> RemoveDestroyedKeys<TKey, TValue>(this Dictionary<TKey?, TValue> dictionary)
             where TKey : UnityObject
         {
             var keepList = ListPool<(TKey, TValue)>.Get();
@@ -60,6 +62,8 @@ namespace PKGE
             }
 
             ListPool<(TKey, TValue)>.Release(keepList);
+
+            return (Dictionary<TKey, TValue>)dictionary!;
         }
         #endregion // Unity.XR.CoreUtils
     }
