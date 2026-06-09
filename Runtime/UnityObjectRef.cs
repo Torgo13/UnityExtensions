@@ -166,7 +166,7 @@ namespace PKGE
 
         internal static UnityObjectRef<T> FromInstanceID(EntityId instanceId)
         {
-            var result = new UnityObjectRef<T>{Id = new UntypedUnityObjectRef{ instanceId = instanceId }};
+            var result = new UnityObjectRef<T>{ Id = new UntypedUnityObjectRef{ instanceId = instanceId } };
             return result;
         }
 
@@ -182,11 +182,11 @@ namespace PKGE
 
 #if UNITY_6000_3_OR_NEWER // EntityIdToObject() cannot be used in a background thread because it calls GetInstanceID()
             var currentThread = System.Threading.Thread.CurrentThread;
-            if (!currentThread.IsThreadPoolThread && !currentThread.IsBackground)
-                return (T)Resources.EntityIdToObject(unityObjectRef.Id.instanceId);
+            Allocator allocator = currentThread.IsThreadPoolThread || currentThread.IsBackground
+                ? Allocator.TempJob // Cannot use Allocator.Temp in a background thread
+                : Allocator.Temp;   // Cannot use Allocator.TempJob in a job
 
-            // Cannot use Allocator.Temp in a background thread
-            var entityIds = new NativeArray<EntityId>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory)
+            var entityIds = new NativeArray<EntityId>(1, allocator, NativeArrayOptions.UninitializedMemory)
             {
                 [0] = unityObjectRef.Id.instanceId,
             };
