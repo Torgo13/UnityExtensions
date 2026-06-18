@@ -62,6 +62,32 @@ namespace PKGE
             dst[index] = src0[index].Equals(src1[index]);
         }
     }
+    
+    [Unity.Burst.BurstCompile]
+    public struct SetIntJob : IJobFor
+    {
+        [NativeMatchesParallelForLength]
+        [WriteOnly] public NativeArray<int> dst;
+        [ReadOnly] public int offset;
+
+        public void Execute(int index)
+        {
+            dst[index] = index + offset;
+        }
+    }
+    
+    [Unity.Burst.BurstCompile]
+    public struct SetUShortJob : IJobFor
+    {
+        [NativeMatchesParallelForLength]
+        [WriteOnly] public NativeArray<ushort> dst;
+        [ReadOnly] public int offset;
+
+        public void Execute(int index)
+        {
+            dst[index] = (ushort)(index + offset);
+        }
+    }
 
 #if INCLUDE_COLLECTIONS
     //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Gameplay/Traffic/UtilityJobs.cs
