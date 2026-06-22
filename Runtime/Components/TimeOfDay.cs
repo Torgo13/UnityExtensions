@@ -21,7 +21,7 @@ namespace PKGE
         public float longitude = 2.367259f;
 
         // Arbitrary date to have the sunset framed in the camera frustum. 
-        readonly DateTime _date = new DateTime(2024, 4, 21).Date;
+        readonly DateTime _date = new DateTime(2024, 4, 21, 0, 0, 0, DateTimeKind.Utc).Date;
         DateTime _time;
 
         [SerializeField, HideInInspector]

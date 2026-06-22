@@ -83,7 +83,17 @@ namespace PKGE
                 return string.Empty;
 
             using var _0 = StringBuilderPool.Get(out var stringBuilder);
-            stringBuilder.Append(str[0]);
+            return str.InsertSpacesBetweenWords(stringBuilder).ToString();
+        }
+        
+        /// <inheritdoc cref="InsertSpacesBetweenWords(string)"/>
+        public static StringBuilder InsertSpacesBetweenWords(this string? str,
+            StringBuilder stringBuilder)
+        {
+            if (string.IsNullOrEmpty(str))
+                return stringBuilder;
+
+            _ = stringBuilder.Append(str[0]);
 
             var strLength = str.Length;
             for (var i = 0; i < strLength - 1; i++)
@@ -106,12 +116,12 @@ namespace PKGE
                 }
 
                 if (needsSpace)
-                    stringBuilder.Append(' ');
+                    _ = stringBuilder.Append(' ');
 
-                stringBuilder.Append(nextChar);
+                _ = stringBuilder.Append(nextChar);
             }
 
-            return stringBuilder.ToString();
+            return stringBuilder;
         }
         #endregion // Unity.XR.CoreUtils
 
