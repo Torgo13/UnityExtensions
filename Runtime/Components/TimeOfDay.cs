@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEngine;
 
@@ -9,7 +10,8 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Samples~/Environment%20Samples/Scripts/TimeOfDay.cs
         #region UnityEngine.Rendering.HighDefinition
-        [Tooltip("Time of day normalized between 0 and 24h. For example 6.5 amount to 6:30am.")]
+        [Range(0f, 24f)]
+        [Tooltip("Time of day normalized between 0 and 24h. For example, 6.5 amounts to 6:30am.")]
         public float timeOfDay = 12f;
 
         [SerializeField]
@@ -22,30 +24,34 @@ namespace PKGE
 
         // Arbitrary date to have the sunset framed in the camera frustum. 
         readonly DateTime _date = new DateTime(2024, 4, 21, 0, 0, 0, DateTimeKind.Utc).Date;
-        DateTime _time;
 
         [SerializeField, HideInInspector]
 	    private GUIStyle sliderStyle;
 
         private static TimeOfDay _instance;
 
-	    private void OnEnable()
+        #region MonoBehaviour
+        private void OnEnable()
 	    {
             _instance = this;
 	    }
 
-	    private void Awake()
-        {
-            GetHoursMinutesSecondsFromTimeOfDay(out var hours, out var minutes, out _);
-            _time = _date + new TimeSpan(hours, minutes, 0);
-        }
-
         private void OnValidate()
         {
-            GetHoursMinutesSecondsFromTimeOfDay(out var hours, out var minutes, out var seconds);
-            _time = _date + new TimeSpan(hours, minutes, seconds);
-            
-            SetSunPosition();
+            while (timeOfDay < 0f)
+            {
+                timeOfDay += 24f;
+            }
+
+            timeOfDay %= 24f;
+
+#if UNITY_6000_3_OR_NEWER
+            var t = transformHandle;
+#else
+            var t = transform;
+#endif // UNITY_6000_3_OR_NEWER
+
+            TimeOfDayUtils.SetSunPosition(t, _date.AddHours(timeOfDay), latitude, longitude);
         }
 
         void Update()
@@ -53,65 +59,17 @@ namespace PKGE
             timeOfDay += timeSpeed * Time.deltaTime;
 
             //This is for the variable to loop for easier use.
-            if (timeOfDay > 24f)
-                timeOfDay = 0f;
+            timeOfDay %= 24f;
 
-            if (timeOfDay < 0f)
-                timeOfDay = 24f;
+#if UNITY_6000_3_OR_NEWER
+            var t = transformHandle;
+#else
+            var t = transform;
+#endif // UNITY_6000_3_OR_NEWER
 
-            SetSunPosition();
+            TimeOfDayUtils.SetSunPosition(t, _date.AddHours(timeOfDay), latitude, longitude);
         }
-
-        void SetSunPosition()
-        {
-            CalculateSunPosition(_time.DayOfYear, latitude * Mathf.Deg2Rad, timeOfDay,
-                out var azi, out var alt);
-
-            if (float.IsNaN(azi))
-                azi = transform.localRotation.y;
-
-            Vector3 angles = new Vector3(alt, azi, 0);
-            transform.localRotation = Quaternion.Euler(angles);
-        }
-
-        static
-        private void CalculateSunPosition(int dayOfYear, float latRad, float localSolarTime,
-            out float azimuth, out float altitude)
-        {
-            float declination = -23.45f * Mathf.Cos(Mathf.PI * 2f * (dayOfYear + 10) / 365f);
-
-            float localHourAngle = 15f * (localSolarTime - 12f);
-            localHourAngle *= Mathf.Deg2Rad;
-
-            declination *= Mathf.Deg2Rad;
-
-            float latSin = Mathf.Sin(latRad);
-            float latCos = Mathf.Cos(latRad);
-
-            float hourCos = Mathf.Cos(localHourAngle);
-
-            float declinationSin = Mathf.Sin(declination);
-            float declinationCos = Mathf.Cos(declination);
-
-            float elevation = Mathf.Asin(declinationSin * latSin + declinationCos * latCos * hourCos);
-            float elevationCos = Mathf.Cos(elevation);
-            azimuth = Mathf.Acos((declinationSin * latCos - declinationCos * latSin * hourCos) / elevationCos);
-
-            elevation *= Mathf.Rad2Deg;
-            azimuth *= Mathf.Rad2Deg;
-
-            if (localHourAngle >= 0f)
-                azimuth = 360 - azimuth;
-
-            altitude = elevation;
-        }
-
-        private void GetHoursMinutesSecondsFromTimeOfDay(out int hours, out int minutes, out int seconds)
-        {
-            hours = (int)timeOfDay;
-            minutes = (int)((timeOfDay - hours) * 60f);
-            seconds = (int)((timeOfDay - hours - (minutes / 60f)) * 60f * 60f);
-        }
+        #endregion // MonoBehaviour
 
         #if UNITY_EDITOR
         void OnGUI()
@@ -119,7 +77,7 @@ namespace PKGE
             DrawWindow();
 
             // Force repaint of game view
-            Type type = ReflectionUtils.FindTypeByFullName("UnityEditor.GameView");
+            Type type = ReflectionUtils.FindTypeByFullName("UnityEditor.GameView")!;
             UnityEditor.EditorUtility.SetDirty(UnityEditor.EditorWindow.GetWindow(type, false, null, false));
         }
 
@@ -128,7 +86,7 @@ namespace PKGE
             UnityEditor.Handles.BeginGUI();
 
             const float windowHeight = 15 + 30;
-            GUI.Window(0, new Rect(Screen.width * 0.1f, Screen.height * 0.89f, Screen.width * 0.8f,
+            _ = GUI.Window(0, new Rect(Screen.width * 0.1f, Screen.height * 0.89f, Screen.width * 0.8f,
                 windowHeight), Window_StatusPanel, "", GUIStyle.none);
 
             UnityEditor.Handles.EndGUI();
@@ -172,4 +130,197 @@ namespace PKGE
     }
     #endif
     #endregion // UnityEngine.Rendering.HighDefinition
+
+    [Unity.Burst.BurstCompile]
+    public static class TimeOfDayUtils
+    {
+        //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Samples~/Environment%20Samples/Scripts/TimeOfDay.cs
+        #region UnityEngine.Rendering.HighDefinition
+        public static void SetSunPosition(Transform transform, DateTime dateTime,
+            float latitude, float longitude = 0)
+        {
+            transform.localRotation = CalculateSunPosition(dateTime, latitude, longitude);
+        }
+
+#if UNITY_6000_3_OR_NEWER
+        public static void SetSunPosition(TransformHandle transform, DateTime dateTime,
+            float latitude, float longitude = 0)
+        {
+            transform.localRotation = CalculateSunPosition(dateTime, latitude, longitude);
+        }
+#endif // UNITY_6000_3_OR_NEWER
+
+        /// <param name="t">Time in linear 0-24</param>
+        public static void GetHoursMinutesSecondsFromTimeOfDay(float timeOfDay,
+            out int hours, out int minutes, out int seconds)
+        {
+            hours = (int)timeOfDay;
+            minutes = (int)((timeOfDay - hours) * 60f);
+            seconds = (int)((timeOfDay - hours - (minutes / 60f)) * 60f * 60f);
+        }
+        #endregion // UnityEngine.Rendering.HighDefinition
+
+        //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/Environment/DayNightController.cs
+        #region BoatAttack
+        /// <param name="time">Time in linear 0-1</param>
+        /// <param name="latitude">Degrees</param>
+        /// <param name="longitude">Degrees</param>
+        public static void UpdateSun(Transform sunTransform, Light? sun, Gradient? sunColour, double time, float northHeading,
+            int year = 2000, int month = 1, int day = 1,
+            double latitude = 56, double longitude = 9)
+        {
+            var rotation = CalculateSunPosition(NormalizedDateTime(time, year, month, day), latitude, longitude);
+            sunTransform.rotation = rotation;
+            sunTransform.Rotate(new Vector3(0f, northHeading, 0f), Space.World);
+
+            if (sun != null && sunColour != null)
+            {
+                sun.color = sunColour.Evaluate(Mathf.Clamp01(Vector3.Dot(sunTransform.forward, Vector3.down)));
+            }
+        }
+
+        /// <param name="latitude">Degrees</param>
+        /// <param name="longitude">Degrees</param>
+        public static Quaternion CalculateSunPosition(DateTime dateTime, double latitude, double longitude)
+        {
+            // Convert to UTC
+            dateTime = dateTime.ToUniversalTime();
+
+            CalculateSunPosition(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.TimeOfDay.TotalHours,
+                latitude * Mathf.Deg2Rad, longitude, out Quaternion rot);
+
+            return rot;
+        }
+
+        /// <inheritdoc cref="CalculateSunPosition(int, int, int, double, double, double, out double, out double)"/>
+        public static void CalculateSunPosition(int year, int month, int day, double totalHours,
+            double latitude, double longitude,
+            out Quaternion rot)
+        {
+            CalculateSunPosition(year, month, day, totalHours,
+                latitude, longitude,
+                out double azimuth, out double altitude);
+
+            rot = Quaternion.Euler(0f, (float)(azimuth * Mathf.Rad2Deg), 0f)
+                * Quaternion.AngleAxis((float)(altitude * Mathf.Rad2Deg), Vector3.right);
+        }
+
+        /// <param name="year">UTC</param>
+        /// <param name="latitude">Radians</param>
+        /// <param name="longitude">Degrees</param>
+        /// <param name="azimuth">Radians</param>
+        /// <param name="altitude">Radians</param>
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+        public static void CalculateSunPosition(int year, int month, int day, double totalHours,
+            double latitude, double longitude,
+            out double azimuth, out double altitude)
+        {
+            // Number of days from J2000.0.
+            double julianDate = 367 * year -
+                (int)(7.0 / 4.0 * (year +
+                (int)((month + 9.0) / 12.0))) +
+                (int)(275.0 * month / 9.0) +
+                day - 730531.5;
+
+            double julianCenturies = julianDate / 36525.0;
+
+            // Sidereal Time
+            double siderealTimeHours = 6.6974 + 2400.0513 * julianCenturies;
+
+            double siderealTimeUt = siderealTimeHours + 366.2422 / 365.2422 * totalHours;
+
+            double siderealTime = siderealTimeUt * 15 + longitude;
+
+            // Refine to number of days (fractional) to specific time.
+            julianCenturies += totalHours / (24 * 36525);
+
+            // Solar Coordinates
+            double meanLongitude = CorrectAngle(280.466 + 36000.77 * julianCenturies);
+
+            double meanAnomaly = CorrectAngle(357.529 + 35999.05 * julianCenturies);
+
+            double equationOfCenter = (1.915 - 0.005 * julianCenturies) *
+                Math.Sin(meanAnomaly) + 0.02 * Math.Sin(2 * meanAnomaly);
+
+            double ellipticalLongitude = CorrectAngle(Mathf.Rad2Deg * meanLongitude + equationOfCenter);
+            var ellipticalLongitudeSin = Math.Sin(ellipticalLongitude);
+            var ellipticalLongitudeCos = Math.Cos(ellipticalLongitude);
+
+            double obliquity = (23.439 - 0.013 * julianCenturies) * Mathf.Deg2Rad;
+            var obliquitySin = Math.Sin(obliquity);
+            var obliquityCos = Math.Cos(obliquity);
+
+            // Right Ascension
+            double rightAscension = Math.Atan2(
+                obliquityCos * ellipticalLongitudeSin,
+                ellipticalLongitudeCos);
+
+            double declination = Math.Asin(Math.Sin(rightAscension) * obliquitySin);
+
+            // Horizontal Coordinates
+            double hourAngle = CorrectAngle(siderealTime) - rightAscension;
+
+            if (hourAngle > Math.PI)
+            {
+                hourAngle -= 2 * Math.PI;
+            }
+
+            var hourAngleSin = Math.Sin(hourAngle);
+            var hourAngleCos = Math.Cos(hourAngle);
+            var latitudeSin = Math.Sin(latitude);
+            var latitudeCos = Math.Cos(latitude);
+            var declinationSin = Math.Sin(declination);
+            var declinationCos = Math.Cos(declination);
+            var declinationTan = Math.Tan(declination);
+
+            altitude = Math.Asin(latitudeSin * declinationSin
+                + latitudeCos * declinationCos * hourAngleCos);
+
+            // Nominator and denominator for calculating Azimuth
+            // angle. Needed to test which quadrant the angle is in.
+            double aziNom = -hourAngleSin;
+            double aziDenom = declinationTan * latitudeCos - latitudeSin * hourAngleCos;
+
+            azimuth = Math.Atan(aziNom / aziDenom);
+
+            if (aziDenom < 0) // In 2nd or 3rd quadrant
+            {
+                azimuth += Math.PI;
+            }
+            else if (aziNom < 0) // In 4th quadrant
+            {
+                azimuth += 2 * Math.PI;
+            }
+        }
+
+        /// <returns>Correct Angle in Radians</returns>
+        private static double CorrectAngle(double angleInDegrees)
+        {
+            if (angleInDegrees < 0)
+            {
+                return Mathf.Deg2Rad * (360 - Math.Abs(angleInDegrees) % 360);
+            }
+
+            if (angleInDegrees > 360)
+            {
+                return Mathf.Deg2Rad * (angleInDegrees % 360);
+            }
+
+            return Mathf.Deg2Rad * angleInDegrees;
+        }
+
+        /// <param name="t">Time in linear 0-1</param>
+        public static DateTime NormalizedDateTime(double t,
+            int year = 2000, int month = 1, int day = 1)
+        {
+            return new DateTime(year, month, day).AddDays(t);
+        }
+
+        /// <param name="t">Time in linear 0-1</param>
+        public static float TimeToGradient(float t)
+        {
+            return Math.Abs(t * 2f - 1f);
+        }
+        #endregion // BoatAttack
+    }
 }

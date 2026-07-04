@@ -847,7 +847,7 @@ namespace PKGE
 #else
             UnityEngine.Assertions.Assert.IsTrue(span != null);
             UnityEngine.Assertions.Assert.IsTrue(span.Length > 0);
-            return ref span[0];
+            return ref span.GetPinnableReference();
 #endif // ZERO
         }
 

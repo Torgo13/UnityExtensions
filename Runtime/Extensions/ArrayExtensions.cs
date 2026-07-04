@@ -1056,6 +1056,57 @@ namespace PKGE
         }
         #endregion // UnityEngine.XR.ARSubsystems
 
+        //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.UI.Editor/Utility/Internal/ArrayUtility.cs
+        #region Unity.Entities.UI
+        public static T[] RemoveAt<T>(this T[] source, int index)
+        {
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("index must be in [0, Length -1] range.");
+
+            var dest = new T[source.Length - 1];
+            if (index > 0)
+                Copy(source, 0, dest, 0, index);
+
+            if (index < source.Length - 1)
+                Copy(source, index + 1, dest, index, source.Length - index - 1);
+
+            return dest;
+        }
+
+        public static T[] InsertAt<T>(this T[] source, int index, T value)
+        {
+            if (index < 0 || index > source.Length)
+                throw new ArgumentOutOfRangeException("index must be in [0, Length] range.");
+
+            var dest = new T[source.Length + 1];
+            if (index == 0)
+            {
+                dest[0] = value;
+                Copy(source, 0, dest, 1, source.Length);
+                return dest;
+            }
+
+            if (index == source.Length)
+            {
+                dest[source.Length] = value;
+                Copy(source, 0, dest, 0, source.Length);
+                return dest;
+            }
+
+            dest[index] = value;
+            Copy(source, 0, dest, 0, index);
+            Copy(source, index, dest, index + 1, source.Length - index);
+            return dest;
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static void Copy<T>(T[] sourceArray, int sourceIndex,
+            T[] destinationArray, int destinationIndex, int count)
+        {
+            sourceArray.AsSpan(sourceIndex, count).CopyTo(destinationArray.AsSpan(destinationIndex, count));
+        }
+        #endregion // Unity.Entities.UI
+
         private static class ThrowHelper
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]

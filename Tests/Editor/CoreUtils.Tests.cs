@@ -7,46 +7,26 @@ using Object = UnityEngine.Object;
 
 namespace PKGE.Editor.Tests
 {
-    public class AdditionalCoreUtilsTests
+    partial class CoreUtilsTests
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture.tests/Tests/Editor/UtilitiesTests.cs
         #region Unity.LiveCapture.Tests.Editor
         [Test]
         public void CanCreateEmptyGameObject()
         {
-            var gameObject = AdditionalCoreUtils.CreateEmptyGameObject();
+            var gameObject = CoreUtils.CreateEmptyGameObject();
             var components = gameObject.GetComponents<Component>();
-            Assert.IsTrue(components.Length == 1);
+            Assert.AreEqual(1, components.Length);
             Assert.IsTrue(components[0] is Transform);
             Object.DestroyImmediate(gameObject);
         }
         #endregion // Unity.LiveCapture.Tests.Editor
 
-        private List<Object> _createdObjects;
-
-        [SetUp]
-        public void SetUp()
-        {
-            _createdObjects = new List<Object>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            // Clean up any surviving objects
-            foreach (var o in _createdObjects)
-            {
-                if (o != null)
-                    Object.DestroyImmediate(o);
-            }
-            _createdObjects.Clear();
-        }
-
         #region CreateEmptyGameObject
         [Test]
         public void CreateEmptyGameObject_StripsAllComponentsExceptTransform()
         {
-            var go = AdditionalCoreUtils.CreateEmptyGameObject();
+            var go = CoreUtils.CreateEmptyGameObject();
             _createdObjects.Add(go);
 
             Assert.IsNotNull(go);
@@ -60,7 +40,7 @@ namespace PKGE.Editor.Tests
         [Test]
         public void CreateEmptyGameObject_HasUniqueNameAndActive()
         {
-            var go = AdditionalCoreUtils.CreateEmptyGameObject();
+            var go = CoreUtils.CreateEmptyGameObject();
             _createdObjects.Add(go);
 
             Assert.IsTrue(go.activeSelf);

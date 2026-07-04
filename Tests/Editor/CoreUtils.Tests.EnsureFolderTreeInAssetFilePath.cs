@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using UnityEditor;
@@ -31,10 +32,27 @@ namespace PKGE.Editor.Tests
             Assert.Throws<ArgumentException>(() => CoreUtils.EnsureFolderTreeInAssetFilePath(folderPath));
         }
 
+        private List<UnityEngine.Object> _createdObjects;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _createdObjects = new List<UnityEngine.Object>();
+        }
+
         [TearDown]
         public void TearDown()
         {
             AssetDatabase.DeleteAsset("Assets/TestFolder");
+
+            // Clean up any surviving objects
+            foreach (var o in _createdObjects)
+            {
+                if (o != null)
+                    UnityEngine.Object.DestroyImmediate(o);
+            }
+
+            _createdObjects.Clear();
         }
         #endregion // UnityEditor.Rendering.Tests
     }

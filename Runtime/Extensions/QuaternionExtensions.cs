@@ -50,7 +50,7 @@ namespace PKGE
         
         //https://github.com/needle-mirror/com.unity.cinemachine/blob/85e81c94d0839e65c46a6fe0cd638bd1c6cd48af/Runtime/Core/UnityVectorExtensions.cs
         #region Unity.Cinemachine
-/// <summary>Normalize a quaternion</summary>
+        /// <summary>Normalize a quaternion</summary>
         /// <param name="q">The quaternion to normalize</param>
         /// <returns>The normalized quaternion.  Unit length is 1.</returns>
         public static Quaternion Normalized(this Quaternion q)

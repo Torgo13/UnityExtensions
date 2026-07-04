@@ -16,6 +16,7 @@ namespace PKGE
         [SerializeField] private string? enumTypeAsString;
 
         /// <summary> Value as enum </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
         public Enum? value
         {
             get => !string.IsNullOrEmpty(enumTypeAsString)

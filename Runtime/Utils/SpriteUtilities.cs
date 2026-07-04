@@ -30,12 +30,7 @@ namespace PKGE
                 mipChain, linear: false, createUninitialized: true);
 
             var colours = texture.GetRawTextureData<Color32>();
-
-            Unity.Jobs.IJobForExtensions.Run(new SetArrayJob<Color32>
-            {
-                src = default,
-                dst = colours,
-            }, colours.Length);
+            colours.AsSpan().Fill(default);
 
             Unity.Jobs.IJobForExtensions.Run(new CreateCircleSpriteJob
             {

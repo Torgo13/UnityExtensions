@@ -1473,5 +1473,35 @@ namespace PKGE
             return -1;
         }
         #endregion // UnityEngine.Rendering
+
+        //https://github.com/Unity-Technologies/UnityLiveCapture/blob/4.0.1/Packages/com.unity.live-capture/Runtime/Core/Utilities/AdditionalCoreUtils.cs
+        #region Unity.LiveCapture
+        /// <summary>
+        /// Creates and returns a reference to an empty GameObject.
+        /// </summary>
+        /// <remarks>
+        /// This is a temporary workaround method. You might fail to create GameObjects via the `new GameObject()` method in some circumstances,
+        /// for example when you invoke it in OnEnable through a component that you just added manually in the Inspector window,
+        /// depending on the Editor configuration.
+        /// See https://fogbugz.unity3d.com/f/cases/1196137/.
+        /// </remarks>
+        public static GameObject CreateEmptyGameObject()
+        {
+            var result = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            // Strip all components but the transform to get an empty game object.
+            List<Component> components = ListPool<Component>.Get();
+            result.GetComponents(components);
+            foreach (var component in components)
+            {
+                if (component is Transform)
+                    continue;
+
+                UnityObject.DestroyImmediate(component);
+            }
+
+            ListPool<Component>.Release(components);
+            return result;
+        }
+        #endregion // Unity.LiveCapture
     }
 }
