@@ -172,9 +172,9 @@ namespace PKGE
                     return !l.enabled;
                 case Behaviour b:
                     return !b.enabled;
+                default:
+                    return false;
             }
-
-            return false;
         }
 
         public static bool GetComponentsBaking(this GameObject gameObject, List<Component?> componentsCache)
@@ -201,6 +201,52 @@ namespace PKGE
         }
         #endregion // Unity.Entities.Conversion
 
+        /// <summary>
+        ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInChildren(System.Type, bool)"/>.</para>
+        /// </summary>
+        /// <param name="gameObject">The <c>GameObject</c> component.</param>
+        /// <param name="type">The type of component to search for.</param>
+        /// <param name="results">A list of all found components matching the specified type.</param>
+        /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.
+        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
+        public static void GetComponentsInChildren(this GameObject gameObject, System.Type type, List<Component> results,
+            bool includeInactive = false)
+        {
+            var children = ListPool<Transform>.Get();
+            gameObject.GetComponentsInChildren(includeInactive: true, children);
+            
+            if (children[0].TryGetComponent(type, out var component))
+            {
+                results.Add(component);
+            }
+            
+            for (int i = 1, childCount = children.Count; i < childCount; i++)
+            {
+                gameObject = children[i].gameObject;
+                if ((includeInactive || gameObject.activeInHierarchy)
+                    && gameObject.TryGetComponent(type, out component))
+                {
+                    results.Add(component);
+                }
+            }
+            
+            ListPool<Transform>.Release(children);
+        }
+        
+        /// <summary>
+        ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInParent(System.Type, bool)"/>.</para>
+        /// </summary>
+        /// <param name="gameObject">The <c>GameObject</c> component.</param>
+        /// <param name="type">The type of component to search for.</param>
+        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
+        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
+        /// <param name="results">A list of all found components matching the specified type.</param>
+        public static void GetComponentsInParent(this GameObject gameObject, System.Type type, List<Component> results,
+            bool includeInactive = false)
+        {
+            gameObject.transform.GetComponentsInParent(type, results, includeInactive);
+        }
+        
         /// <summary>
         /// Get the direct children GameObjects of this GameObject.
         /// </summary>
@@ -232,28 +278,13 @@ namespace PKGE
         /// </summary>
         /// <param name="go">The parent object that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
-        /// <param name="foundObject">True if a descendant GameObject with the specified name was found.</param>
-        /// <returns>The returned child GameObject or null if no child is found.</returns>
+        /// <param name="namedChild">The returned child GameObject or <see langword="null"/> if no child is found.</param>
+        /// <returns><see langword="true"/> if the child is found.</returns>
         public static bool GetNamedChild(this GameObject go, string name,
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out GameObject? foundObject)
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out GameObject? namedChild)
         {
-            foundObject = null;
-            bool found = false;
-            var transforms = ListPool<Transform>.Get();
-            go.GetComponentsInChildren(includeInactive: true, transforms);
-
-            // Start index at 1 as 0 is the current transform
-            for (var i = 1; i < transforms.Count; i++)
-            {
-                if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
-                {
-                    found = true;
-                    foundObject = transforms[i].gameObject;
-                    break;
-                }
-            }
-
-            ListPool<Transform>.Release(transforms);
+            bool found = go.transform.GetNamedChild(name, out var foundObject);
+            namedChild = found ? foundObject!.gameObject : null;
             return found;
         }
 

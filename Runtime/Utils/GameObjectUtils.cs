@@ -366,33 +366,6 @@ namespace PKGE
                     GetComponentsInScene(scene, components, includeInactive);
             }
         }
-
-        /// <summary>
-        /// Gets a descendant GameObject with a specific name
-        /// </summary>
-        /// <param name="go">The parent object that is searched for a named child.</param>
-        /// <param name="name">Name of child to be found.</param>
-        /// <param name="namedChild">The returned child GameObject or <see langword="null"/> if no child is found.</param>
-        /// <returns><see langword="true"/> if the child is found.</returns>
-        public static bool GetNamedChild(this GameObject go, string name,
-            [NotNullWhen(true)] out GameObject? namedChild)
-        {
-            namedChild = null;
-
-            using var _0 = ListPool<Transform>.Get(out var transforms);
-            go.GetComponentsInChildren(transforms);            
-            for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
-            {
-                Transform currentTransform = transforms[i];
-                if (string.Equals(currentTransform.name, name, StringComparison.Ordinal))
-                {
-                    namedChild = currentTransform.gameObject;
-                    return true;
-                }
-            }
-
-            return false;
-        }
         #endregion // Unity.XR.CoreUtils
     }
 }

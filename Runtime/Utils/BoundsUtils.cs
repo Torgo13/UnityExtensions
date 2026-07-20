@@ -99,20 +99,19 @@ namespace PKGE
         /// <returns>The aggregated bounds.</returns>
         public static Bounds GetBounds(System.ReadOnlySpan<Renderer> renderers)
         {
-            if (renderers.Length > 0)
+            if (renderers.Length <= 0)
+                return default;
+            
+            Renderer first = renderers[0];
+            Bounds b = new Bounds(first.transform.position, Vector3.zero);
+            foreach (var r in renderers)
             {
-                var first = renderers[0];
-                var b = new Bounds(first.transform.position, Vector3.zero);
-                foreach (var r in renderers)
-                {
-                    if (r.bounds.size != Vector3.zero)
-                        b.Encapsulate(r.bounds);
-                }
-
-                return b;
+                Bounds bounds = r.bounds;
+                if (bounds.size != Vector3.zero)
+                    b.Encapsulate(bounds);
             }
 
-            return default;
+            return b;
         }
 
 #if INCLUDE_PHYSICS_MODULE
@@ -188,7 +187,7 @@ namespace PKGE
         {
             Bounds bounds = renderer.bounds;
             Matrix4x4 matrix = transform.worldToLocalMatrix;
-            CalcLocalBounds(bounds.min, bounds.max, ref matrix, out newBounds);
+            CalcLocalBounds(bounds.min, bounds.max, matrix, out newBounds);
         }
         
         public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
@@ -199,20 +198,19 @@ namespace PKGE
         #endregion // Unity.HLODSystem.Utils
         
         [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-        public static void CalcLocalBounds(in Vector3 min, in Vector3 max, ref Matrix4x4 matrix,
+        public static void CalcLocalBounds(in Vector3 min, in Vector3 max, in Matrix4x4 matrix,
             out Bounds newBounds)
         {
-            var points = new NativeArray<Vector3>(8,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory)
+            System.ReadOnlySpan<Vector3> points = stackalloc Vector3[]
             {
-                [0] = matrix.MultiplyPoint(new Vector3(min.x, min.y, min.z)),
-                [1] = matrix.MultiplyPoint(new Vector3(max.x, min.y, min.z)),
-                [2] = matrix.MultiplyPoint(new Vector3(min.x, min.y, max.z)),
-                [3] = matrix.MultiplyPoint(new Vector3(max.x, min.y, max.z)),
-                [4] = matrix.MultiplyPoint(new Vector3(min.x, max.y, min.z)),
-                [5] = matrix.MultiplyPoint(new Vector3(max.x, max.y, min.z)),
-                [6] = matrix.MultiplyPoint(new Vector3(min.x, max.y, max.z)),
-                [7] = matrix.MultiplyPoint(new Vector3(max.x, max.y, max.z)),
+                matrix.MultiplyPoint(new Vector3(min.x, min.y, min.z)),
+                matrix.MultiplyPoint(new Vector3(max.x, min.y, min.z)),
+                matrix.MultiplyPoint(new Vector3(min.x, min.y, max.z)),
+                matrix.MultiplyPoint(new Vector3(max.x, min.y, max.z)),
+                matrix.MultiplyPoint(new Vector3(min.x, max.y, min.z)),
+                matrix.MultiplyPoint(new Vector3(max.x, max.y, min.z)),
+                matrix.MultiplyPoint(new Vector3(min.x, max.y, max.z)),
+                matrix.MultiplyPoint(new Vector3(max.x, max.y, max.z)),
             };
 
             Vector3 newMin = points[0];
@@ -229,15 +227,33 @@ namespace PKGE
                 if (newMin.z > points[i].z) newMin.z = points[i].z;
                 if (newMax.z < points[i].z) newMax.z = points[i].z;
             }
-            
-            points.Dispose();
 
-            var extents = (newMax - newMin) * 0.5f;
+            Vector3 extents = (newMax - newMin) * 0.5f;
             newBounds = new Bounds
             {
                 extents = extents,
                 center = newMin + extents,
             };
+        }
+
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+        public struct CalcLocalBoundsJob : Unity.Jobs.IJob
+        {
+            public Matrix4x4 matrix;
+            [ReadOnly] public NativeArray<Bounds> bounds;
+            [WriteOnly] public NativeReference<Bounds> result;
+            
+            public void Execute()
+            {
+                CalcLocalBounds(bounds[0].min, bounds[0].max, matrix, out Bounds temp);
+                result.Value = temp;
+                
+                for (int i = 1; i < bounds.Length; ++i)
+                {
+                    CalcLocalBounds(bounds[i].min, bounds[i].max, matrix, out temp);
+                    result.Value.Encapsulate(temp);
+                }
+            }
         }
 
         //https://github.com/Unity-Technologies/HLODSystem/blob/master/com.unity.hlod/Runtime/HLOD.cs
@@ -279,12 +295,25 @@ namespace PKGE
                 return false;
             }
 
-            CalcLocalBounds(renderers[0], transform, out result);
-            for (int i = 1; i < renderers.Count; ++i)
+            var resultBounds = new NativeReference<Bounds>(Allocator.TempJob);
+            var rendererBounds = new NativeArray<Bounds>(renderers.Count,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < rendererBounds.Length; i++)
             {
-                CalcLocalBounds(renderers[i], transform, out var temp);
-                result.Encapsulate(temp);
+                rendererBounds[i] = renderers[i].bounds;
             }
+
+            Unity.Jobs.IJobExtensions.Run(new CalcLocalBoundsJob
+            {
+                matrix = transform.worldToLocalMatrix,
+                bounds = rendererBounds,
+                result = resultBounds,
+            });
+            
+            result = resultBounds.Value;
+
+            rendererBounds.Dispose();
+            resultBounds.Dispose();
 
             return true;
         }

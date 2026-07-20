@@ -237,26 +237,12 @@ namespace PKGE
         /// <param name="transform">The <c>Transform</c> component.</param>
         /// <param name="type">The type of component to search for.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
-        /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.</param>
-        public static void GetComponentsInChildren(
-            this Transform transform,
-            System.Type type,
-            List<Component> results,
+        /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.
+        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
+        public static void GetComponentsInChildren(this Transform transform, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
-            var children = ListPool<Transform>.Get();
-            transform.GetComponentsInChildren(includeInactive: true, children);
-            
-            for (int i = 0, childCount = children.Count; i < childCount; i++)
-            {
-                if ((includeInactive || children[i].gameObject.activeInHierarchy)
-                    && children[i].TryGetComponent(type, out var root))
-                {
-                    results.Add(root);
-                }
-            }
-            
-            ListPool<Transform>.Release(children);
+            transform.gameObject.GetComponentsInChildren(type, results, includeInactive);
         }
         
         /// <summary>
@@ -264,20 +250,25 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The <c>Transform</c> component.</param>
         /// <param name="type">The type of component to search for.</param>
-        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.</param>
+        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
+        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
         public static void GetComponentsInParent(this Transform transform, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
-            for (var ancestor = transform; ancestor; ancestor = ancestor.parent)
+            if (transform.TryGetComponent(type, out var component))
             {
-                if ((includeInactive || transform.gameObject.activeInHierarchy)
-                    && ancestor.TryGetComponent(type, out var parent))
-                {
-                    results.Add(parent);
-                }
+                results.Add(component);
+            }
 
-                transform.GetComponentsInParent(type, results, includeInactive);
+            for (var ancestor = transform.parent; ancestor != null; ancestor = ancestor.parent)
+            {
+                GameObject gameObject = ancestor.gameObject;
+                if ((includeInactive || gameObject.activeInHierarchy)
+                    && gameObject.TryGetComponent(type, out component))
+                {
+                    results.Add(component);
+                }
             }
         }
 
@@ -286,9 +277,7 @@ namespace PKGE
         /// </summary>
         /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
         /// <param name="childTransforms">The direct children of a Transform.</param>
-        public static void GetChildTransforms(
-            this Transform transform,
-            List<Transform> childTransforms)
+        public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
             childTransforms.EnsureCapacity(childCount);
@@ -298,9 +287,7 @@ namespace PKGE
             }
         }
 
-        public static void GetChildInstanceIDs(
-            this Transform transform,
-            List<EntityId> childInstanceIDs)
+        public static void GetChildInstanceIDs(this Transform transform, List<EntityId> childInstanceIDs)
         {
             var children = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(children);
@@ -324,7 +311,7 @@ namespace PKGE
             if (childInstanceIDs.Count > 0)
             {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+                GameObject.SetGameObjectsActive(childInstanceIDs.AsReadOnlySpan(), active);
 #else
                 GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
 #endif // UNITY_6000_3_OR_NEWER
@@ -344,7 +331,7 @@ namespace PKGE
             if (childInstanceIDs.Count > 0)
             {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(childInstanceIDs.AsSpan(), active);
+                GameObject.SetGameObjectsActive(childInstanceIDs.AsReadOnlySpan(), active);
 #else
                 GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
 #endif // UNITY_6000_3_OR_NEWER
@@ -367,6 +354,8 @@ namespace PKGE
             bool found = false;
             var transforms = ListPool<Transform>.Get();
             transform.GetComponentsInChildren(transforms);
+            
+            // Start index at 1 as 0 is the current transform
             for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
             {
                 if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))

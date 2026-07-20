@@ -38,14 +38,7 @@ namespace PKGE
         /// <returns>The component, if one exists.</returns>
         public static T? GetComponentInChildren(GameObject gameObject)
         {
-            var foundComponent = default(T);
-            List<T> retrievalList = ListPool<T>.Get();
-            gameObject.GetComponentsInChildren(retrievalList);
-            if (retrievalList.Count > 0)
-                foundComponent = retrievalList[0];
-
-            ListPool<T>.Release(retrievalList);
-            return foundComponent;
+            return TryGetComponentInChildren(gameObject, out var foundComponent) ? foundComponent : null;
         }
         #endregion // Unity.XR.CoreUtils
 
