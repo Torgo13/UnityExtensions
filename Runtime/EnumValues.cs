@@ -10,8 +10,13 @@ namespace PKGE
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out U? attribute)
             where T : struct, Enum where U : Attribute
         {
+            attribute = null;
+            var field = typeof(T).GetField(name);
+            if (field == null)
+                return false;
+            
             attribute = System.Reflection.CustomAttributeExtensions.
-                GetCustomAttribute<U>(typeof(T).GetField(name), inherit: false);
+                GetCustomAttribute<U>(field, inherit: false);
 
             return attribute != null;
         }
@@ -49,9 +54,8 @@ namespace PKGE
 
             foreach (var name in EnumValues<T>.Names)
             {
-                list.Add(TryGetAttribute<T, System.ComponentModel.DescriptionAttribute>(name, out var attribute)
-                    ? attribute.Description
-                    : string.Empty);
+                if (TryGetAttribute<T, System.ComponentModel.DescriptionAttribute>(name, out var attribute))
+                    list.Add(attribute.Description);
             }
 
             return list;
@@ -116,14 +120,15 @@ namespace PKGE
         /// unless manually preserved with <see cref="UnityEngine.Scripting.PreserveAttribute"/> or link.xml.</remarks>
         public static string GetDisplayName<T>(this T value) where T : struct, Enum
         {
-            return TryGetAttribute<T, UnityEngine.InspectorNameAttribute>(EnumValues<T>.Name(value), out var attribute)
+            string name = EnumValues<T>.Name(value);
+            return !string.IsNullOrEmpty(name) && TryGetAttribute<T, UnityEngine.InspectorNameAttribute>(name, out var attribute)
                 ? attribute.displayName
-                : string.Empty;
+                : value.ToString();
         }
         #endregion // Unity.LiveCapture.Editor
 
         /// <inheritdoc cref="GetDisplayName{T}(T)"/>
-        public static List<string> GetDisplayNames<T>(List<string>? list = null) where T : struct, Enum
+        public static List<string> GetDisplayNames<T>(List<string>? list) where T : struct, Enum
         {
             list ??= new List<string>(EnumValues<T>.Length);
             list.Clear();

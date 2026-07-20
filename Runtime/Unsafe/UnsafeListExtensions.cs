@@ -81,7 +81,7 @@ namespace PKGE.Unsafe
         {
             Assert.IsTrue(unsafeList.IsCreated);
             
-            if (span == null || span.Length == 0)
+            if (span == default || span.Length == 0)
                 return;
 
             unsafeList.AddRange(span.AsUnsafeList());
@@ -114,7 +114,19 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this Span<T> span) where T : unmanaged
         {
-            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref span[0]), span.Length);
+            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref span.GetPinnableReference()), span.Length);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe UnsafeList<T>.ReadOnly AsReadOnlyUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length).AsReadOnly();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe UnsafeList<T>.ReadOnly AsReadOnlyUnsafeList<T>(this NativeArray<T>.ReadOnly nativeArray) where T : unmanaged
+        {
+            return new UnsafeList<T>((T*)nativeArray.GetUnsafeReadOnlyPtr(), nativeArray.Length).AsReadOnly();
         }
     }
 }

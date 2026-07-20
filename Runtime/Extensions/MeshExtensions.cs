@@ -158,7 +158,7 @@ namespace TCGE
         /// Generates tangents and applies them on the specified mesh.
         /// </summary>
         /// <param name="mesh">The <see cref="Mesh"/> mesh target.</param>
-        public static void GenerateTangent(Mesh mesh)
+        public static void GenerateTangent(this Mesh mesh)
         {
             if (mesh == null)
                 throw new ArgumentNullException(nameof(mesh));
@@ -167,20 +167,28 @@ namespace TCGE
 
             // speed up math by copying the mesh arrays
             var triangles = ListPool<int>.Get();
+            var trianglesTemp = ListPool<int>.Get();
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
-                mesh.GetTriangles(triangles, i); // TODO Check if this appends to the List or clears it
+                trianglesTemp.Clear();
+                mesh.GetTriangles(trianglesTemp, i);
+                triangles.AddRange(trianglesTemp);
             }
 
+            ListPool<int>.Release(trianglesTemp);
             var vertices = ListPool<Vector3>.Get();
             mesh.GetVertices(vertices);
 
             var uv = ListPool<Vector2>.Get();
+            var uvTemp = ListPool<Vector2>.Get();
             for (int i = 0; i < 8; i++)
             {
-                mesh.GetUVs(i, uv);
+                uvTemp.Clear();
+                mesh.GetUVs(i, uvTemp);
+                uv.AddRange(uvTemp);
             }
 
+            ListPool<Vector2>.Release(uvTemp);
             var normals = ListPool<Vector3>.Get();
             mesh.GetNormals(normals);
 
@@ -188,9 +196,11 @@ namespace TCGE
             int triangleCount = triangles.Count;
             int vertexCount = vertices.Count;
 
-            var tan1 = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var tan2 = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var tangents = new NativeArray<Vector4>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+            var tan1 = new NativeArray<Vector3>(vertexCount, allocator, options);
+            var tan2 = new NativeArray<Vector3>(vertexCount, allocator, options);
+            var tangents = new NativeArray<Vector4>(vertexCount, allocator, options);
 
             for (int a = 0; a < triangleCount; a += 3)
             {
@@ -260,10 +270,10 @@ namespace TCGE
         /// </summary>
         /// <param name="source">The mesh to copy from.</param>
         /// <returns>A new <see cref="Mesh"/> object with the same values as the source mesh.</returns>
-        public static Mesh DeepCopy(Mesh source)
+        public static Mesh DeepCopy(this Mesh source)
         {
             Mesh m = new Mesh();
-            CopyTo(source, m);
+            source.CopyTo(m);
             return m;
         }
 
@@ -273,7 +283,7 @@ namespace TCGE
         /// <param name="source">The mesh from which to copy attribute values.</param>
         /// <param name="destination">The destination mesh to copy attribute values to.</param>
         /// <exception cref="ArgumentNullException">Throws if source or destination is null.</exception>
-        public static void CopyTo(Mesh source, Mesh destination)
+        public static void CopyTo(this Mesh source, Mesh destination)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
@@ -418,7 +428,7 @@ namespace TCGE
         /// </summary>
         /// <param name="mesh">The mesh to print information for.</param>
         /// <returns>A tab-delimited string (positions, normals, colors, tangents, and UV coordinates).</returns>
-        public static string Print(Mesh mesh)
+        public static string Print(this Mesh mesh)
         {
             if (mesh == null)
                 throw new ArgumentNullException(nameof(mesh));
@@ -551,7 +561,7 @@ namespace TCGE
         /// </summary>
         /// <param name="mesh">The source mesh to sum submesh index counts from.</param>
         /// <returns>The count of all indices contained within this mesh's submeshes.</returns>
-        public static uint GetIndexCount(Mesh? mesh)
+        public static uint GetIndexCount(this Mesh? mesh)
         {
             uint sum = 0;
 
@@ -569,7 +579,7 @@ namespace TCGE
         /// </summary>
         /// <param name="mesh">The source mesh to sum submesh primitive counts from.</param>
         /// <returns>The count of all triangles or quads contained within this mesh's submeshes.</returns>
-        public static uint GetPrimitiveCount(Mesh? mesh)
+        public static uint GetPrimitiveCount(this Mesh? mesh)
         {
             uint sum = 0;
 
@@ -590,7 +600,7 @@ namespace TCGE
 
         //https://github.com/Unity-Technologies/com.unity.probuilder/blob/master/Runtime/Core/MeshHandles.cs
         #region UnityEngine.ProBuilder
-        public static void CreatePointMesh(List<Vector3> positions, List<int> indexes, Mesh target)
+        public static void CreatePointMesh(this Mesh target, List<Vector3> positions, List<int> indexes)
         {
             int vertexCount = positions.Count;
             target.Clear();
@@ -601,10 +611,22 @@ namespace TCGE
 
             target.SetIndices(indexes, MeshTopology.Points, 0);
         }
-
-        public static void CreatePointBillboardMesh(List<Vector3> positions, Mesh target)
+        
+        public static void CreatePointMesh(this Mesh target, NativeArray<Vector3> positions, NativeArray<int> indexes)
         {
-            var pointCount = positions.Count;
+            int vertexCount = positions.Length;
+            target.Clear();
+            target.indexFormat = vertexCount > ushort.MaxValue ? IndexFormat.UInt32 : IndexFormat.UInt16;
+            target.name = "ProBuilder::PointMesh";
+            target.SetVertices(positions);
+            target.subMeshCount = 1;
+
+            target.SetIndices(indexes, MeshTopology.Points, 0);
+        }
+
+        public static void CreatePointBillboardMesh(this Mesh target, ReadOnlySpan<Vector3> positions)
+        {
+            var pointCount = positions.Length;
             var vertexCount = pointCount * 4;
 
             Vector2 billboard0 = new Vector2(-1f, -1f);
@@ -612,9 +634,11 @@ namespace TCGE
             Vector2 billboard2 = new Vector2(1f, -1f);
             Vector2 billboard3 = new Vector2(1f, 1f);
 
-            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+            var vector2List = new NativeArray<Vector2>(vertexCount, allocator, options);
+            var vector3List = new NativeArray<Vector3>(vertexCount, allocator, options);
+            var indexList = new NativeArray<int>(vertexCount, allocator, options);
 
             for (int i = 0; i < pointCount; i++)
             {
@@ -642,9 +666,10 @@ namespace TCGE
             target.SetIndices(indexList, MeshTopology.Quads, 0);
         }
 
-        public static void CreatePointBillboardMesh(List<Vector3> positions, List<int> indexes, Mesh target)
+        public static void CreatePointBillboardMesh(this Mesh target, ReadOnlySpan<Vector3> positions,
+            ReadOnlySpan<int> indexes)
         {
-            var pointCount = indexes.Count;
+            var pointCount = indexes.Length;
             var vertexCount = pointCount * 4;
 
             Vector2 billboard0 = new Vector2(-1f, -1f);
@@ -652,9 +677,11 @@ namespace TCGE
             Vector2 billboard2 = new Vector2(1f, -1f);
             Vector2 billboard3 = new Vector2(1f, 1f);
 
-            var vector2List = new NativeArray<Vector2>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var vector3List = new NativeArray<Vector3>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-            var indexList = new NativeArray<int>(vertexCount, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+            var vector2List = new NativeArray<Vector2>(vertexCount, allocator, options);
+            var vector3List = new NativeArray<Vector3>(vertexCount, allocator, options);
+            var indexList = new NativeArray<int>(vertexCount, allocator, options);
 
             for (int i = 0; i < pointCount; i++)
             {
@@ -716,7 +743,7 @@ namespace TCGE
                         for (int i = subMesh.indexStart, count = 0; count < subMesh.indexCount; i += 3, count += 3)
                         {
                             triangles[trianglesIndex] =
-                                ((int3)new uint3(indices16[i], indices16[i + 1], indices16[i + 2]));
+                                new int3(indices16[i], indices16[i + 1], indices16[i + 2]);
 
                             ++trianglesIndex;
                         }
@@ -736,11 +763,7 @@ namespace TCGE
                         for (int i = subMesh.indexStart, count = 0; count < subMesh.indexCount; i += 3, count += 3)
                         {
                             triangles[trianglesIndex] =
-#if INCLUDE_MATHEMATICS
-                                ((int3)new uint3(indices32[i], indices32[i + 1], indices32[i + 2]));
-#else
-                                (new int3((int)indices32[i], (int)indices32[i + 1], (int)indices32[i + 2]));
-#endif // INCLUDE_MATHEMATICS
+                                new int3((int)indices32[i], (int)indices32[i + 1], (int)indices32[i + 2]);
 
                             ++trianglesIndex;
                         }
