@@ -173,4 +173,22 @@ namespace PKGE
         }
         #endregion // CommunityToolkit.HighPerformance
     }
+
+    internal static class Unsafe
+    {
+        public static ref T Add<T>(ref T r0, int offset)
+        {
+            return ref MemoryMarshal.CreateSpan(ref r0, 1 + offset)[^1];
+        }
+        
+        public static ref T Add<T>(ref T r0, uint offset)
+        {
+            return ref Add(ref r0, (int)offset);
+        }
+        
+        public static ref T Add<T>(ref T r0, nint offset)
+        {
+            return ref Add(ref r0, (int)offset);
+        }
+    }
 }
