@@ -4,12 +4,6 @@ using UnityEngine;
 using Unity.Collections;
 using AffineTransform = PKGE.AffineTransform;
 
-#if INCLUDE_MATHEMATICS
-using Unity.Mathematics;
-#else
-using PKGE.Mathematics;
-#endif // INCLUDE_MATHEMATICS
-
 namespace PKGE
 {
     public struct TransformSampler

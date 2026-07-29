@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-using Debug = UnityEngine.Debug;
-
 namespace PKGE
 {
     /// <summary>
@@ -14,30 +12,11 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/DebugDraw.cs
         #region Unity.XR.CoreUtils
-        /// <summary>
-        /// Draws a line around a polygonal shape.
-        /// </summary>
-        /// <param name="vertices">Polygon made of a series of adjacent points in world space.</param>
-        /// <param name="color">Color of the line.</param>
-        /// <param name="duration">How long the line should be visible for.</param>
+        /// <inheritdoc cref="Polygon(System.ReadOnlySpan{Vector3}, Color, float)"/>
         [Conditional("DEBUG")]
         public static void Polygon(List<Vector3> vertices, Color color, float duration = 10f)
         {
-            var vertexCount = vertices.Count;
-            if (vertexCount < 2)
-                return;
-
-            var lengthMinusOne = vertexCount - 1;
-            for (var i = 0; i < lengthMinusOne; i++)
-            {
-                var a = vertices[i];
-                var b = vertices[i + 1];
-                Debug.DrawLine(a, b, color, duration);
-            }
-
-            var last = vertices[lengthMinusOne];
-            var first = vertices[0];
-            Debug.DrawLine(last, first, color, duration);
+            Polygon(vertices.AsSpan(), color, duration);
         }
 
         /// <summary>
@@ -49,7 +28,7 @@ namespace PKGE
         /// <param name="color">Color of the line.</param>
         /// <param name="duration">How long the line should be visible for.</param>
         [Conditional("DEBUG")]
-        public static void Polygon(Vector3[] vertices, Color color, float duration = 10f)
+        public static void Polygon(System.ReadOnlySpan<Vector3> vertices, Color color, float duration = 10f)
         {
             var vertexCount = vertices.Length;
             if (vertexCount < 2)
@@ -60,12 +39,12 @@ namespace PKGE
             {
                 var a = vertices[i];
                 var b = vertices[i + 1];
-                Debug.DrawLine(a, b, color, duration);
+                UnityEngine.Debug.DrawLine(a, b, color, duration);
             }
 
             var last = vertices[lengthMinusOne];
             var first = vertices[0];
-            Debug.DrawLine(last, first, color, duration);
+            UnityEngine.Debug.DrawLine(last, first, color, duration);
         }
         #endregion // Unity.XR.CoreUtils
     }

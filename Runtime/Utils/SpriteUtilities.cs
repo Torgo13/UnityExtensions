@@ -1,11 +1,5 @@
 using UnityEngine;
 
-#if INCLUDE_MATHEMATICS
-using static Unity.Mathematics.math;
-#else
-using static PKGE.Mathematics.math;
-#endif // INCLUDE_MATHEMATICS
-
 namespace PKGE
 {
     public static class SpriteUtilities
@@ -72,7 +66,7 @@ namespace PKGE
                 // for the current column, calculate what the x coordinate of the circle would be
                 // using x^2 + y^2 = r^2, or x^2 = r^2 - y^2. The square root of the value of the
                 // x coordinate will equal half the width of the circle at the current y coordinate
-                var halfWidth = (int)sqrt(rSquared - y * y);
+                var halfWidth = (int)System.Math.Sqrt(rSquared - y * y);
 
                 // position the pointer so it points at the memory where we should start filling in
                 // the current line

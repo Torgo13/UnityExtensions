@@ -5,12 +5,6 @@ using System.Text;
 using TMPro;
 using UnityEngine.Pool;
 
-#if INCLUDE_MATHEMATICS
-using Unity.Mathematics;
-#else
-using PKGE.Mathematics;
-#endif // INCLUDE_MATHEMATICS
-
 namespace PKGE
 {
     public static class TextMeshProExtensions
@@ -106,7 +100,7 @@ namespace PKGE
         {
             if (int.TryParse(input.text, out var rawValue))
             {
-                var validValue = math.clamp(rawValue, min, max);
+                var validValue = UnityEngine.Mathf.Clamp(rawValue, min, max);
                 if (validValue != rawValue)
                     AssignText(input, validValue);
 
@@ -123,7 +117,7 @@ namespace PKGE
         {
             if (float.TryParse(input.text, out var rawValue))
             {
-                var validValue = math.clamp(rawValue, min, max);
+                var validValue = UnityEngine.Mathf.Clamp(rawValue, min, max);
                 if (validValue < min || validValue > max)
                     AssignText(input, validValue);
 

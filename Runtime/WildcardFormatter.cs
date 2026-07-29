@@ -9,7 +9,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/UnityLiveCapture/blob/main/Packages/com.unity.live-capture/Runtime/Core/Utilities/WildcardFormatter.cs
         #region Unity.LiveCapture
-        protected readonly Dictionary<string, string?> Replacements = new Dictionary<string, string?>(System.StringComparer.Ordinal);
+        protected readonly Dictionary<string, string> Replacements = new Dictionary<string, string>(System.StringComparer.Ordinal);
 
         protected string Format(string str)
         {
@@ -23,10 +23,7 @@ namespace PKGE
         {
             foreach (var pair in Replacements)
             {
-                if (pair.Value != null)
-                {
-                    _ = stringBuilder.Replace(pair.Key, pair.Value);
-                }
+                _ = stringBuilder.Replace(pair.Key, pair.Value);
             }
 
             return stringBuilder;

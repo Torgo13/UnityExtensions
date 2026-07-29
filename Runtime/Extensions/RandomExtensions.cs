@@ -133,7 +133,7 @@ namespace PKGE
             {
                 System.Span<byte> bytes = stackalloc byte[sizeof(uint)];
                 System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
-                return System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(bytes)[0];
+                return System.Runtime.InteropServices.MemoryMarshal.Read<uint>(bytes);
             }
         }
 
@@ -143,7 +143,7 @@ namespace PKGE
             {
                 System.Span<byte> bytes = stackalloc byte[sizeof(ulong)];
                 System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
-                return System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ulong>(bytes)[0];
+                return System.Runtime.InteropServices.MemoryMarshal.Read<ulong>(bytes);
             }
         }
 
@@ -151,7 +151,7 @@ namespace PKGE
         {
             System.Span<byte> bytes = stackalloc byte[SizeOfCache<T>.Size];
             System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
-            return System.Runtime.InteropServices.MemoryMarshal.Cast<byte, T>(bytes)[0];
+            return System.Runtime.InteropServices.MemoryMarshal.Read<T>(bytes);
         }
         #endregion // Secure
 

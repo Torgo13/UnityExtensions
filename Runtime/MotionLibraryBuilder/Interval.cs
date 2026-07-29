@@ -1,11 +1,5 @@
 using UnityEngine.Assertions;
 
-#if INCLUDE_MATHEMATICS
-using Unity.Mathematics;
-#else
-using PKGE.Mathematics;
-#endif // INCLUDE_MATHEMATICS
-
 namespace PKGE
 {
     /// <summary>
@@ -110,8 +104,8 @@ namespace PKGE
             Assert.IsTrue(OverlapsOrAdjacent(rhs.firstFrame, rhs.onePastLastFrame));
 
             return new Interval(
-                math.max(rhs.firstFrame, firstFrame),
-                math.min(rhs.onePastLastFrame, onePastLastFrame));
+                UnityEngine.Mathf.Max(rhs.firstFrame, firstFrame),
+                UnityEngine.Mathf.Min(rhs.onePastLastFrame, onePastLastFrame));
         }
 
         public readonly Interval Union(int start, int end)
@@ -120,8 +114,8 @@ namespace PKGE
             Assert.IsTrue(OverlapsOrAdjacent(start, end));
 
             return new Interval(
-                math.min(start, firstFrame),
-                math.max(end, onePastLastFrame));
+                UnityEngine.Mathf.Min(start, firstFrame),
+                UnityEngine.Mathf.Max(end, onePastLastFrame));
         }
 
         public void Union(Interval rhs)

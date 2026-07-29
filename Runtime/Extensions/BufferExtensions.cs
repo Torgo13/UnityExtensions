@@ -36,7 +36,7 @@ namespace PKGE
             UnityEngine.Assertions.Assert.IsTrue(buffer != null);
             UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
 
-            MemoryMarshal.Cast<byte, T>(buffer[offset..])[0] = data;
+            _ = MemoryMarshal.TryWrite(buffer[offset..], ref data);
             return offset + SizeOfCache<T>.Size;
         }
 
@@ -64,7 +64,7 @@ namespace PKGE
             UnityEngine.Assertions.Assert.IsTrue(buffer != null);
             UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
 
-            return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
+            return MemoryMarshal.Read<T>(buffer[offset..]);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace PKGE
             UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
 
             nextOffset = offset + SizeOfCache<T>.Size;
-            return MemoryMarshal.Cast<byte, T>(buffer[offset..])[0];
+            return MemoryMarshal.Read<T>(buffer[offset..]);
         }
     }
     #endregion // Unity.LiveCapture.Networking

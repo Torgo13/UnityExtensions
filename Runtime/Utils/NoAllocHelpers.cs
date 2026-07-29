@@ -496,7 +496,7 @@ namespace PKGE
             // Bits out of short.
             if (bitOffset + bitCount <= 16)
             {
-                var value = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ushort>(ptr)[0];
+                var value = System.Runtime.InteropServices.MemoryMarshal.Read<ushort>(ptr);
                 value >>= (int)bitOffset;
                 var mask = 0xFFFFu >> (16 - (int)bitCount);
                 return value & mask;
@@ -505,7 +505,7 @@ namespace PKGE
             // Bits out of int.
             if (bitOffset + bitCount <= 32)
             {
-                var value = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(ptr)[0];
+                var value = System.Runtime.InteropServices.MemoryMarshal.Read<uint>(ptr);
                 value >>= (int)bitOffset;
                 var mask = 0xFFFFFFFFu >> (32 - (int)bitCount);
                 return value & mask;
