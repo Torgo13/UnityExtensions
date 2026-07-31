@@ -238,11 +238,11 @@ namespace PKGE
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float3 NextInsideUnitSphere(ref this Unity.Mathematics.Random random)
             => random.NextOnUnitSphere() * random.NextFloat();
-#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float3 NextInsideUnitSphere(ref System.Random random)
             => random.NextOnUnitSphere() * random.NextFloat();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static UnityEngine.Vector3 NextInsideUnitSphere(this System.Random random)
@@ -252,11 +252,11 @@ namespace PKGE
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float3 NextOnUnitSphere(ref this Unity.Mathematics.Random random)
             => random.NextFloat3Direction();
-#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float3 NextOnUnitSphere(ref System.Random random)
             => random.NextFloat3Direction();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static UnityEngine.Vector3 NextOnUnitSphere(this System.Random random)
@@ -277,11 +277,11 @@ namespace PKGE
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float2 NextInsideUnitCircle(ref this Unity.Mathematics.Random random)
             => random.NextOnUnitCircle() * random.NextFloat();
-#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float2 NextInsideUnitCircle(ref System.Random random)
             => random.NextOnUnitCircle() * random.NextFloat();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static UnityEngine.Vector2 NextInsideUnitCircle(this System.Random random)
@@ -291,11 +291,11 @@ namespace PKGE
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float2 NextOnUnitCircle(ref this Unity.Mathematics.Random random)
             => random.NextFloat2Direction();
-#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static Unity.Mathematics.float2 NextOnUnitCircle(ref System.Random random)
             => random.NextFloat2Direction();
+#endif // INCLUDE_MATHEMATICS
 
         [System.Runtime.CompilerServices.MethodImpl(256)]
         public static UnityEngine.Vector2 NextOnUnitCircle(this System.Random random)

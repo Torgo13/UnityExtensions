@@ -1,3 +1,4 @@
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine.Assertions;
@@ -144,3 +145,4 @@ namespace PKGE
         #endregion // UnityEngine.Rendering
     }
 }
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER

@@ -241,17 +241,18 @@ namespace PKGE
         {
             public Matrix4x4 matrix;
             [ReadOnly] public NativeArray<Bounds> bounds;
-            [WriteOnly] public NativeReference<Bounds> result;
+            [NativeFixedLength(1)]
+            [WriteOnly] public NativeArray<Bounds> result;
             
             public void Execute()
             {
                 CalcLocalBounds(bounds[0].min, bounds[0].max, matrix, out Bounds temp);
-                result.Value = temp;
+                result[0] = temp;
                 
                 for (int i = 1; i < bounds.Length; ++i)
                 {
                     CalcLocalBounds(bounds[i].min, bounds[i].max, matrix, out temp);
-                    result.Value.Encapsulate(temp);
+                    result[0].Encapsulate(temp);
                 }
             }
         }
@@ -295,7 +296,7 @@ namespace PKGE
                 return false;
             }
 
-            var resultBounds = new NativeReference<Bounds>(Allocator.TempJob);
+            var resultBounds = new NativeArray<Bounds>(1, Allocator.TempJob);
             var rendererBounds = new NativeArray<Bounds>(renderers.Count,
                 Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             for (int i = 0; i < rendererBounds.Length; i++)
@@ -310,7 +311,7 @@ namespace PKGE
                 result = resultBounds,
             });
             
-            result = resultBounds.Value;
+            result = resultBounds[0];
 
             rendererBounds.Dispose();
             resultBounds.Dispose();

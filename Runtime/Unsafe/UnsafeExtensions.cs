@@ -14,7 +14,9 @@ using UnityEngine.Assertions;
 using UnityEngine.Pool;
 using PKGE;
 using UnsafeUtility = Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
 using UnsafeAtomicCounter32 = Unity.Collections.LowLevel.Unsafe.UnsafeAtomicCounter32;
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 
 namespace PKGE.Unsafe
 {
@@ -68,6 +70,7 @@ namespace PKGE.Unsafe
         #endregion // Blittable
         #endregion // Unity.Collections.LowLevel.Unsafe
 
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
         public static unsafe UnsafeAtomicCounter32 AtomicCounter32(this NativeArray<int> value)
         {
             return new UnsafeAtomicCounter32(Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafePtr(value));
@@ -82,6 +85,7 @@ namespace PKGE.Unsafe
         {
             return new UnsafeAtomicCounter32(Unity.Collections.LowLevel.Unsafe.NativeReferenceUnsafeUtility.GetUnsafePtr(value));
         }
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 
 #if PKGE_USING_UNSAFE
         #region Unmanaged

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace PKGE
 {
+    [Unity.Burst.BurstCompile]
     public static class RectTransformExtensions
     {
         //https://github.com/Unity-Technologies/arfoundation-samples/blob/7eaa39b7bd6fc9a540949188e6aa45a849fc7de7/Assets/Scripts/Runtime/UI/RectTransformExtensions.cs
@@ -141,7 +142,7 @@ namespace PKGE
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static void GetLocalCorners(Rect rect, System.Span<Vector2> fourCornersArray)
+            public static void GetLocalCorners(Rect rect, System.Span<Vector2> fourCornersArray)
             {
                 float x = rect.x;
                 float y = rect.y;
@@ -153,5 +154,101 @@ namespace PKGE
                 fourCornersArray[3] = new Vector2(xMax, y);
             }
         }
+
+        public static Bounds GetBounds(this RectTransform rectTransform, in Matrix4x4 worldToLocalMatrix)
+        {
+            return GetBounds(rectTransform.rect, rectTransform.localToWorldMatrix, worldToLocalMatrix);
+        }
+
+#if ZERO
+        public static Bounds GetBounds(this Rect rect, in Matrix4x4 localToWorldMatrix, in Matrix4x4 worldToLocalMatrix)
+        {
+            var corners = new Unity.Collections.NativeArray<Vector3>(4,
+                Unity.Collections.Allocator.TempJob, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+            Unity.Jobs.IJobExtensions.Run(new FourCornersJob
+            {
+                fourCornersArray = corners,
+                matrix4x = localToWorldMatrix,
+                rect = rect,
+            });
+
+            var boundsArray = new Unity.Collections.NativeArray<Bounds>(1,
+                Unity.Collections.Allocator.TempJob, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+            Unity.Jobs.IJobExtensions.Run(new GetBoundsJob
+            {
+                boundsArray = boundsArray,
+                fourCornersArray = corners,
+                worldToLocalMatrix = worldToLocalMatrix,
+            });
+
+            Bounds bounds = boundsArray[0];
+            boundsArray.Dispose();
+            corners.Dispose();
+            return bounds;
+        }
+
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+        struct GetBoundsJob : Unity.Jobs.IJob
+        {
+            [Unity.Collections.WriteOnly]
+            [Unity.Collections.NativeFixedLength(1)]
+            public Unity.Collections.NativeArray<Bounds> boundsArray;
+
+            [Unity.Collections.ReadOnly]
+            [Unity.Collections.NativeFixedLength(4)]
+            public Unity.Collections.NativeArray<Vector3> fourCornersArray;
+
+            public Matrix4x4 worldToLocalMatrix;
+
+            public void Execute()
+            {
+                Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+                for (int j = 0; j < 4; j++)
+                {
+                    Vector3 v = worldToLocalMatrix.MultiplyPoint3x4(fourCornersArray[j]);
+                    min = Vector3.Min(v, min);
+                    max = Vector3.Max(v, max);
+                }
+
+                Bounds bounds = new Bounds(min, Vector3.zero);
+                bounds.Encapsulate(max);
+                boundsArray[0] = bounds;
+            }
+        }
+#else
+        public static Bounds GetBounds(this Rect rect, in Matrix4x4 localToWorldMatrix, in Matrix4x4 worldToLocalMatrix)
+        {
+            rect.GetBounds(localToWorldMatrix, worldToLocalMatrix, out Bounds bounds);
+            return bounds;
+        }
+
+        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+        public static void GetBounds(this in Rect rect, in Matrix4x4 localToWorldMatrix, in Matrix4x4 worldToLocalMatrix,
+            out Bounds bounds)
+        {
+            System.Span<Vector2> fourCorners = stackalloc Vector2[4];
+            FourCornersJob.GetLocalCorners(rect, fourCorners);
+
+            Vector4 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector4 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            System.Span<Vector4> v = stackalloc Vector4[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                v[i] = worldToLocalMatrix.MultiplyPoint3x4(localToWorldMatrix.MultiplyPoint(fourCorners[i]));
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                min = Vector4.Min(v[i], min);
+                max = Vector4.Max(v[i], max);
+            }
+
+            bounds = new Bounds(min, default);
+            bounds.Encapsulate(max);
+        }
+#endif // ZERO
     }
 }

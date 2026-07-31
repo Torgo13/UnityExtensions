@@ -679,7 +679,7 @@ namespace PKGE
             }
         }
 
-        static void QuickSort<T>(Span<T> data, int left, int right) where T : IComparable<T>, new()
+        public static void QuickSort<T>(Span<T> data, int left, int right) where T : IComparable<T>, new()
         {
             while (true)
             {

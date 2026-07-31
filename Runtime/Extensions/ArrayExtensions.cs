@@ -36,6 +36,7 @@ namespace PKGE
             array = new NativeArray<T>(capacity, allocator, NativeArrayOptions.ClearMemory);
         }
 
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
         /// <inheritdoc cref="ResizeArray{T}(ref NativeArray{T}, int, Allocator)"/>
         public static void ResizeArray<T>(this ref NativeArray<T> array, int capacity, AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
@@ -53,6 +54,7 @@ namespace PKGE
 
             array = CollectionHelper.CreateNativeArray<T>(capacity, allocator, NativeArrayOptions.ClearMemory);
         }
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 
         /// <summary>
         /// Resizes a transform access array.

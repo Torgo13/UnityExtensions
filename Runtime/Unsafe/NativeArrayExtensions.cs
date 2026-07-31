@@ -76,6 +76,7 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.InputSystem.Utilities
     }
 
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
     public static class NativeReferenceExtensions
     {
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
@@ -96,4 +97,5 @@ namespace PKGE.Unsafe
         }
         #endregion // UnityEngine.Rendering.Universal
     }
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 }

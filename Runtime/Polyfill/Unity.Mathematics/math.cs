@@ -1,22 +1,70 @@
 #if INCLUDE_MATHEMATICS
 #else
 using System.Runtime.CompilerServices;
-using PKGE;
 using float2 = UnityEngine.Vector2;
 using float3 = UnityEngine.Vector3;
-using float3x3 = UnityEngine.Matrix4x4;
 using float4 = UnityEngine.Vector4;
 using quaternion = UnityEngine.Quaternion;
 
+#pragma warning disable IDE1006 // Naming Styles
+
 namespace PKGE.Mathematics
 {
-#pragma warning disable IDE1006 // Naming Styles
+    public struct float3x3
+    {
+        public float m00, m10, m20;
+        public float m01, m11, m21;
+        public float m02, m12, m22;
+
+        public float3x3(float3 column0, float3 column1, float3 column2)
+        {
+            m00 = column0.x;
+            m01 = column1.x;
+            m02 = column2.x;
+            m10 = column0.y;
+            m11 = column1.y;
+            m12 = column2.y;
+            m20 = column0.z;
+            m21 = column1.z;
+            m22 = column2.z;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3x3 operator *(float3x3 lhs, float3x3 rhs)
+        {
+            float3x3 result;
+            result.m00 = lhs.m00 * rhs.m00 + lhs.m01 * rhs.m10 + lhs.m02 * rhs.m20;
+            result.m01 = lhs.m00 * rhs.m01 + lhs.m01 * rhs.m11 + lhs.m02 * rhs.m21;
+            result.m02 = lhs.m00 * rhs.m02 + lhs.m01 * rhs.m12 + lhs.m02 * rhs.m22;
+            result.m10 = lhs.m10 * rhs.m00 + lhs.m11 * rhs.m10 + lhs.m12 * rhs.m20;
+            result.m11 = lhs.m10 * rhs.m01 + lhs.m11 * rhs.m11 + lhs.m12 * rhs.m21;
+            result.m12 = lhs.m10 * rhs.m02 + lhs.m11 * rhs.m12 + lhs.m12 * rhs.m22;
+            result.m20 = lhs.m20 * rhs.m00 + lhs.m21 * rhs.m10 + lhs.m22 * rhs.m20;
+            result.m21 = lhs.m20 * rhs.m01 + lhs.m21 * rhs.m11 + lhs.m22 * rhs.m21;
+            result.m22 = lhs.m20 * rhs.m02 + lhs.m21 * rhs.m12 + lhs.m22 * rhs.m22;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 operator *(float3x3 lhs, float3 vector)
+        {
+            float3 result;
+            result.x = lhs.m00 * vector.x + lhs.m01 * vector.y + lhs.m02 * vector.z;
+            result.y = lhs.m10 * vector.x + lhs.m11 * vector.y + lhs.m12 * vector.z;
+            result.z = lhs.m20 * vector.x + lhs.m21 * vector.y + lhs.m22 * vector.z;
+            return result;
+        }
+    }
+
     public static class math
     {
-        public static readonly float SQRT2 = (float)System.Math.Sqrt(2);
+        public const double SQRT2_DBL = 1.4142135623730950488016887242097;
+        public const float SQRT2 = (float)SQRT2_DBL;
         public const float FLT_MIN_NORMAL = 1.175494351e-38F;
-        public const float PI = (float)System.Math.PI;
-        public const float PI2 = (float)(System.Math.PI * 2);
+        public const double PI_DBL = System.Math.PI;
+        public const float PI = (float)PI_DBL;
+        public const double PI2_DBL = System.Math.PI * 2;
+        public const float PI2 = (float)PI2_DBL;
 
         public static int asint(float f) => new Union4 { Float = f }.Int;
         public static float asfloat(int i) => new Union4 { Int = i }.Float;
@@ -32,16 +80,16 @@ namespace PKGE.Mathematics
             return x + 1;
         }
 
-        public static int max(int a, int b) => System.Math.Max(a, b);
+        public static int max(int a, int b) => UnityEngine.Mathf.Max(a, b);
         public static uint max(uint a, uint b) => System.Math.Max(a, b);
         public static uint max(uint a, int b) => System.Math.Max(a, (uint)b);
-        public static float max(float a, float b) => System.Math.Max(a, b);
+        public static float max(float a, float b) => UnityEngine.Mathf.Max(a, b);
         public static double max(double a, double b) => System.Math.Max(a, b);
 
-        public static int min(int a, int b) => System.Math.Min(a, b);
+        public static int min(int a, int b) => UnityEngine.Mathf.Min(a, b);
         public static uint min(uint a, uint b) => System.Math.Min(a, b);
         public static uint min(uint a, int b) => System.Math.Min(a, (uint)b);
-        public static float min(float a, float b) => System.Math.Min(a, b);
+        public static float min(float a, float b) => UnityEngine.Mathf.Min(a, b);
 
         public static int mad(int a, int b, int c) => a * b + c;
         public static float mad(float a, float b, float c) => a * b + c;
@@ -51,8 +99,8 @@ namespace PKGE.Mathematics
         public static float ceil(float a) => (float)System.Math.Ceiling(a);
         public static float floor(float a) => (float)System.Math.Floor(a);
 
-        public static int clamp(int a, int b, int c) => System.Math.Clamp(a, b, c);
-        public static float clamp(float a, float b, float c) => System.Math.Clamp(a, b, c);
+        public static int clamp(int a, int b, int c) => UnityEngine.Mathf.Clamp(a, b, c);
+        public static float clamp(float a, float b, float c) => UnityEngine.Mathf.Clamp(a, b, c);
 
         public static float log(float a) => (float)System.Math.Log(a);
         public static float exp(float a) => (float)System.Math.Exp(a);
@@ -62,8 +110,8 @@ namespace PKGE.Mathematics
 
         public static float length(float2 a) => sqrt(lengthsq(a));
         public static float length(float3 a) => sqrt(lengthsq(a));
-        public static float lengthsq(float2 a) => a.x * a.x + a.y * a.y;
-        public static float lengthsq(float3 a) => a.x * a.x + a.y * a.y + a.z * a.z;
+        public static float lengthsq(float2 a) => float2.Dot(a, a);
+        public static float lengthsq(float3 a) => float3.Dot(a, a);
 
         public static float sign(float x) => (x > 0.0f ? 1.0f : 0.0f) - (x < 0.0f ? 1.0f : 0.0f);
 
@@ -86,9 +134,8 @@ namespace PKGE.Mathematics
         public static float distance(float3 a, float3 b) => float3.Distance(a, b);
         public static float distancesq(float2 a, float2 b)
         {
-            float num = a.x - b.x;
-            float num2 = a.y - b.y;
-            return num * num + num2 * num2;
+            float2 d = a - b;
+            return float2.Dot(d, d);
         }
 
         public static float acos(float a) => (float)System.Math.Acos(a);
@@ -100,7 +147,7 @@ namespace PKGE.Mathematics
         public static float radians(float a) => UnityEngine.Mathf.Deg2Rad * a;
         public static float degrees(float a) => UnityEngine.Mathf.Rad2Deg * a;
 
-        public static float saturate(float a) => System.Math.Clamp(a, 0, 1);
+        public static float saturate(float a) => UnityEngine.Mathf.Clamp(a, 0, 1);
 
         public static float2 normalizesafe(float2 x, float2 defaultvalue = new float2())
         {
@@ -195,9 +242,8 @@ namespace PKGE.Mathematics
             // {{c_1, 0, s_1}, {0, 1, 0}, {-s_1, 0, c_1}}
             float s, c;
             sincos(angle, out s, out c);
-            return new float3x3(new float4(c, 0, -s), new float4(0, 1, 0), new float4(s, 0, c), default);
+            return new float3x3(new float3(c, 0, -s), new float3(0, 1, 0), new float3(s, 0, c));
         }
     }
-#pragma warning restore IDE1006 // Naming Styles
 }
 #endif // INCLUDE_MATHEMATICS

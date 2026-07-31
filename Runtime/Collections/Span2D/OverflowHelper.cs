@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using static Unity.Mathematics.math;
 
 namespace PKGE
 {
@@ -51,7 +50,7 @@ namespace PKGE
             // Additionally, we're also ensuring that the stride is never greater than int.MaxValue, for
             // consistency with how ND arrays work (int.MaxValue as upper bound for each axis), and to
             // allow for faster iteration in the RefEnumerable<T> type, when traversing columns.
-            _ = checked(((nint)(width + pitch) * max(unchecked(height - 1), 0)) + max(unchecked(width - 1), 0));
+            _ = checked(((nint)(width + pitch) * UnityEngine.Mathf.Max(unchecked(height - 1), 0)) + UnityEngine.Mathf.Max(unchecked(width - 1), 0));
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeInt32Area(int height, int width, int pitch)
         {
-            return max(checked(((width + pitch) * (height - 1)) + width), 0);
+            return UnityEngine.Mathf.Max(checked(((width + pitch) * (height - 1)) + width), 0);
         }
         #endregion // CommunityToolkit.HighPerformance.Memory.Internals
     }

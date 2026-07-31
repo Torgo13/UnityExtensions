@@ -105,7 +105,11 @@ namespace PKGE
                     times[i + cKeys.Length] = aKeys[i].time;
                 }
 
+#if UNITY_COLLECTIONS_2_1_4_OR_NEWER
                 Unity.Collections.NativeSortExtension.Sort(times);
+#else
+                DynamicArrayExtensions.QuickSort<float>(times, 0, times.Length - 1);
+#endif // UNITY_COLLECTIONS_2_1_4_OR_NEWER
 
                 // Found the smallest increment between 2 keys
                 for (int i = 1; i < times.Length; ++i)

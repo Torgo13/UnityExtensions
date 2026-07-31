@@ -1489,7 +1489,7 @@ namespace PKGE
         {
             var result = GameObject.CreatePrimitive(PrimitiveType.Cube);
             // Strip all components but the transform to get an empty game object.
-            List<Component> components = ListPool<Component>.Get();
+            List<Component> components = UnityEngine.Pool.ListPool<Component>.Get();
             result.GetComponents(components);
             foreach (var component in components)
             {
@@ -1499,7 +1499,7 @@ namespace PKGE
                 UnityObject.DestroyImmediate(component);
             }
 
-            ListPool<Component>.Release(components);
+            UnityEngine.Pool.ListPool<Component>.Release(components);
             return result;
         }
         #endregion // Unity.LiveCapture

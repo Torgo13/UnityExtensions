@@ -435,7 +435,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static float4 mul(Color24 input, float scale)
         {
-            return new float4(input) * scale;
+            return (float4)input * scale;
         }
 #pragma warning restore IDE1006 // Naming Styles
     }
@@ -695,7 +695,7 @@ namespace PKGE
                 rgb += new float4(m.r, m.g, m.b, 0);
             }
 
-            rawTextureData[index] = new Color24((rgb * mipmapCountInv).xyz);
+            rawTextureData[index] = new Color24((rgb * mipmapCountInv));
         }
     }
 

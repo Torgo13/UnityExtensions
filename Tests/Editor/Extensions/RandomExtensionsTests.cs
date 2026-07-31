@@ -1,5 +1,11 @@
 using NUnit.Framework;
 
+#if INCLUDE_MATHEMATICS
+using Random = Unity.Mathematics.Random;
+#else
+using Random = System.Random;
+#endif // INCLUDE_MATHEMATICS
+
 namespace PKGE.Tests
 {
     public class RandomNormalTest
@@ -16,7 +22,7 @@ namespace PKGE.Tests
         [Test]
         public void RandomNormalTestTwoDouble()
         {
-            var rand = new Unity.Mathematics.Random(2018);
+            var rand = new Random(2018);
             double spareGaussian = double.NaN;
 
             var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian);
@@ -29,7 +35,7 @@ namespace PKGE.Tests
         [Test]
         public void RandomNormalTestWithMean()
         {
-            var rand = new Unity.Mathematics.Random(2018);
+            var rand = new Random(2018);
             double spareGaussian = double.NaN;
 
             var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 5);
@@ -42,7 +48,7 @@ namespace PKGE.Tests
         [Test]
         public void RandomNormalTestWithStddev()
         {
-            var rand = new Unity.Mathematics.Random(2018);
+            var rand = new Random(2018);
             double spareGaussian = double.NaN;
 
             var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean: 0, stdDev: 4.2);
@@ -57,7 +63,7 @@ namespace PKGE.Tests
         {
             const float mean = -3.2f;
             const float stddev = 2.2f;
-            var rand = new Unity.Mathematics.Random(2018);
+            var rand = new Random(2018);
             double spareGaussian = double.NaN;
 
             var rn = RandomExtensions.NextGaussian(ref rand, ref spareGaussian, mean, stddev);
@@ -72,7 +78,7 @@ namespace PKGE.Tests
         {
             const float mean = -3.2f;
             const float stddev = 2.2f;
-            var rand = new Unity.Mathematics.Random(2018);
+            var rand = new Random(2018);
             double spareGaussian = double.NaN;
 
             const int numSamples = 100000;
