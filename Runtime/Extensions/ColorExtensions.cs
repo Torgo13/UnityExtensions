@@ -218,14 +218,14 @@ namespace PKGE
             this.b = (byte)(b * byte.MaxValue);
         }
 
-        public Color24(Vector3 f)
+        public Color24(Vector3 f, float scale = byte.MaxValue)
         {
-            this.r = (byte)(f.x * byte.MaxValue);
-            this.g = (byte)(f.y * byte.MaxValue);
-            this.b = (byte)(f.z * byte.MaxValue);
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
         }
 
-        public Color24(Vector3 f, float scale)
+        public Color24(Vector4 f, float scale = byte.MaxValue)
         {
             this.r = (byte)(f.x * scale);
             this.g = (byte)(f.y * scale);
@@ -242,14 +242,14 @@ namespace PKGE
         public static implicit operator Color32(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
 
 #if INCLUDE_MATHEMATICS
-        public Color24(Unity.Mathematics.float3 f)
+        public Color24(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
         {
-            this.r = (byte)(f.x * byte.MaxValue);
-            this.g = (byte)(f.y * byte.MaxValue);
-            this.b = (byte)(f.z * byte.MaxValue);
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
         }
 
-        public Color24(Unity.Mathematics.float3 f, float scale)
+        public Color24(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
         {
             this.r = (byte)(f.x * scale);
             this.g = (byte)(f.y * scale);

@@ -695,7 +695,7 @@ namespace PKGE
                 rgb += new float4(m.r, m.g, m.b, 0);
             }
 
-            rawTextureData[index] = new Color24((rgb * mipmapCountInv));
+            rawTextureData[index] = new Color24(rgb * mipmapCountInv);
         }
     }
 
