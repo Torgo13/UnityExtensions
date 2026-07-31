@@ -11,22 +11,20 @@ namespace PKGE
         #region UnityEditor.ShaderGraph
         public static void AppendIndentedLines(this StringBuilder sb, ReadOnlySpan<char> lines, ReadOnlySpan<char> indentation)
         {
-#if INCLUDE_STRINGBUILDER_EXTENSIONS
-            System.Text.StringBuilderExtensions.EnsureRoom(sb, lines.Length);
-#else
             _ = sb.EnsureCapacity(sb.Length + lines.Length);
-#endif // INCLUDE_STRINGBUILDER_EXTENSIONS
-
             var charIndex = 0;
             while (charIndex < lines.Length)
             {
-                var nextNewLineIndex = MemoryExtensions.IndexOf(lines.Slice(charIndex), Environment.NewLine, StringComparison.Ordinal);
+                var nextNewLineIndex = lines.Slice(charIndex).IndexOf(Environment.NewLine, StringComparison.Ordinal);
                 if (nextNewLineIndex == -1)
                 {
                     nextNewLineIndex = lines.Length;
                 }
+                else
+                {
+                    nextNewLineIndex += charIndex;
+                }
 
-                nextNewLineIndex += charIndex;
                 sb.Append(indentation);
 
                 for (var i = charIndex; i < nextNewLineIndex; i++)

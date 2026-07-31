@@ -8,11 +8,14 @@ namespace PKGE.Tests
         // A simple derived class to expose the Format method for testing
         private class TestWildcardFormatter : WildcardFormatter
         {
-            public TestWildcardFormatter(Dictionary<string, string> replacements)
+            public TestWildcardFormatter(Dictionary<string, string?> replacements)
             {
                 foreach (var pair in replacements)
                 {
-                    Replacements[pair.Key] = pair.Value;
+                    if (pair.Value != null)
+                    {
+                        Replacements[pair.Key] = pair.Value;
+                    }
                 }
             }
 
@@ -29,7 +32,7 @@ namespace PKGE.Tests
         public void Format_ReplacesWildcardsCorrectly()
         {
             // Arrange
-            var replacements = new Dictionary<string, string>
+            var replacements = new Dictionary<string, string?>
             {
                 { "{name}", "Alice" },
                 { "{greeting}", "Hello" }
@@ -53,7 +56,7 @@ namespace PKGE.Tests
         public void Format_IgnoresNullValues()
         {
             // Arrange
-            var replacements = new Dictionary<string, string>
+            var replacements = new Dictionary<string, string?>
             {
                 { "{name}", null },
                 { "{greeting}", "Hello" }
@@ -77,7 +80,7 @@ namespace PKGE.Tests
         public void Format_HandlesEmptyInput()
         {
             // Arrange
-            var replacements = new Dictionary<string, string>
+            var replacements = new Dictionary<string, string?>
             {
                 { "{name}", "Alice" }
             };

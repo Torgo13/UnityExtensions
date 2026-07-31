@@ -14,8 +14,8 @@ namespace PKGE.Tests
         const double k_FirstValue = -0.36536631752896848;
         const double k_SecondValue = 0.27865908699308078;
 #else
-        const float k_FirstValue = -1.19580f;
-        const float k_SecondValue = -0.97345f;
+        const float k_FirstValue = -0.97345f;
+        const float k_SecondValue = -1.19580f;
 #endif // INCLUDE_MATHEMATICS
         const double k_Epsilon = 0.0001;
 
