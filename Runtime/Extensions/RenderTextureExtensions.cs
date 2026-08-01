@@ -32,3 +32,280 @@ namespace PKGE
         #endregion // Unity.FilmInternalUtilities
     }
 }
+
+namespace TCGE
+{
+    public static class TextureExtensions
+    {
+        public static bool Uncompressed(TextureFormat format)
+        {
+            return format <= TextureFormat.R16
+                || (format >= TextureFormat.RGBA4444 && format <= TextureFormat.RGB9e5Float)
+                || (format >= TextureFormat.RG16 && format <= TextureFormat.R8)
+                || (format >= TextureFormat.RG32 && format <= TextureFormat.RGBA64_SIGNED);
+        }
+
+        public static bool Compressed(TextureFormat format)
+        {
+            return (format >= TextureFormat.DXT1 && format <= TextureFormat.DXT5)
+                || (format >= TextureFormat.BC4 && format <= TextureFormat.ASTC_12x12)
+                || (format >= TextureFormat.ETC_RGB4Crunched && format <= TextureFormat.ASTC_HDR_12x12);
+        }
+
+        public static Unity.Collections.NativeArray<Color32> AsColor32(this Texture2D tex, out bool dispose)
+        {
+            const Unity.Collections.Allocator allocator = Unity.Collections.Allocator.Persistent;
+            const Unity.Collections.NativeArrayOptions options = Unity.Collections.NativeArrayOptions.UninitializedMemory;
+
+            TextureFormat format = tex.format;
+            dispose = format != TextureFormat.RGBA32 && format != TextureFormat.ARGB32 && format != TextureFormat.BGRA32;
+            Unity.Collections.NativeArray<Color32> rgba32;
+
+            if (format == TextureFormat.Alpha8)
+            {
+                var a8 = tex.GetPixelData<byte>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(a8.Length, allocator, options);
+
+                for (int i = a8.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, a8[i]);
+                }
+            }
+            else if (format == TextureFormat.ARGB4444)
+            {
+                var argb16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(argb16.Length, allocator, options);
+
+                for (int i = argb16.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(argb16[i]._0.Byte & 0b1111),
+                        (byte)(argb16[i]._1.Byte >> 4),
+                        (byte)(argb16[i]._1.Byte & 0b1111),
+                        (byte)(argb16[i]._0.Byte >> 4));
+                }
+            }
+            else if (format == TextureFormat.RGB24)
+            {
+                var rgb24 = tex.GetPixelData<PKGE.Color24>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb24.Length, allocator, options);
+
+                for (int i = rgb24.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = (Color32)rgb24[i];
+                }
+            }
+            else if (format == TextureFormat.RGBA32)
+            {
+                rgba32 = tex.GetPixelData<Color32>(mipLevel: 0);
+            }
+            else if (format == TextureFormat.ARGB32)
+            {
+                var argb32 = tex.GetPixelData<Color32>(mipLevel: 0);
+                for (int i = argb32.Length - 1; i >= 0; i--)
+                {
+                    argb32[i] = new Color32(argb32[i].g, argb32[i].b, argb32[i].a, argb32[i].r);
+                }
+                    
+                rgba32 = argb32;
+            }
+            else if (format == TextureFormat.RGB565)
+            {
+                var rgb16 = tex.GetPixelData<ushort>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb16.Length, allocator, options);
+
+                for (int i = rgb16.Length - 1; i >= 0; i--)
+                {
+                    int r = rgb16[i] & 0b1111_1000_0000_0000;
+                    r |= (r >> 5) | (r >> 11);
+                    
+                    int g = rgb16[i] & 0b0000_0111_1110_0000;
+                    g |= (g << 5) | (g >> 5);
+                    
+                    int b = rgb16[i] & 0b0000_0000_0001_1111;
+                    b |= (b << 11) | (b << 5);
+                    
+                    rgba32[i] = new Color32((byte)r, (byte)g, (byte)b, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.R16)
+            {
+                var r16 = tex.GetPixelData<ushort>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(r16.Length, allocator, options);
+
+                for (int i = r16.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32((byte)(r16[i] >> 8), 0, 0, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RGBA4444)
+            {
+                var rgba16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgba16.Length, allocator, options);
+
+                for (int i = rgba16.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(rgba16[i]._0.Byte >> 4),
+                        (byte)(rgba16[i]._0.Byte & 0b1111),
+                        (byte)(rgba16[i]._1.Byte >> 4),
+                        (byte)(rgba16[i]._1.Byte & 0b1111));
+                }
+            }
+            else if (format == TextureFormat.BGRA32)
+            {
+                var bgra32 = tex.GetPixelData<Color32>(mipLevel: 0);
+                for (int i = bgra32.Length - 1; i >= 0; i--)
+                {
+                    bgra32[i] = new Color32(bgra32[i].b, bgra32[i].g, bgra32[i].r, bgra32[i].a);
+                }
+
+                rgba32 = bgra32;
+            }
+#if INCLUDE_MATHEMATICS
+            else if (format == TextureFormat.RHalf)
+            {
+                var rHalf = tex.GetPixelData<PKGE.Mathematics.Union2>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rHalf.Length, allocator, options);
+
+                for (int i = rHalf.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32((byte)(rHalf[i].Half * byte.MaxValue), 0, 0, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RGHalf)
+            {
+                var rgHalf = tex.GetPixelData<PKGE.Mathematics.Union4>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgHalf.Length, allocator, options);
+
+                for (int i = rgHalf.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(rgHalf[i]._0.Half * byte.MaxValue),
+                        (byte)(rgHalf[i]._2.Half * byte.MaxValue),
+                        0,
+                        byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RGBAHalf)
+            {
+                var rgbaFloat = tex.GetPixelData<PKGE.Mathematics.Union8>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length, allocator, options);
+
+                for (int i = rgbaFloat.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(byte.MaxValue * rgbaFloat[i]._0._0.Half),
+                        (byte)(byte.MaxValue * rgbaFloat[i]._0._2.Half),
+                        (byte)(byte.MaxValue * rgbaFloat[i]._4._0.Half),
+                        (byte)(byte.MaxValue * rgbaFloat[i]._4._2.Half));
+                }
+            }
+#endif // INCLUDE_MATHEMATICS
+            else if (format == TextureFormat.RFloat)
+            {
+                var rFloat = tex.GetPixelData<float>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rFloat.Length, allocator, options);
+
+                for (int i = rFloat.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32((byte)(rFloat[i] * byte.MaxValue), 0, 0, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RGFloat)
+            {
+                var rgFloat = tex.GetPixelData<Vector2>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgFloat.Length, allocator, options);
+
+                for (int i = rgFloat.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(rgFloat[i].x * byte.MaxValue),
+                        (byte)(rgFloat[i].y * byte.MaxValue),
+                        0,
+                        byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RGBAFloat)
+            {
+                var rgbaFloat = tex.GetPixelData<Color>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length, allocator, options);
+
+                for (int i = rgbaFloat.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = (Color32)rgbaFloat[i];
+                }
+            }
+            else if (format == TextureFormat.RG16)
+            {
+                var rg16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rg16.Length, allocator, options);
+
+                for (int i = rg16.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(rg16[i]._0.Byte, rg16[i]._1.Byte, 0, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.R8)
+            {
+                var r8 = tex.GetPixelData<byte>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(r8.Length, allocator, options);
+
+                for (int i = r8.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(r8[i], 0, 0, byte.MaxValue);
+                }
+            }
+            else if (format == TextureFormat.RG32)
+            {
+                var rg32 = tex.GetPixelData<PKGE.Union4>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rg32.Length, allocator, options);
+
+                for (int i = rg32.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        rg32[i]._0._0.Byte,
+                        rg32[i]._2._0.Byte,
+                        0,
+                        byte.MaxValue);
+                }
+            }
+#if ZERO
+            else if (format == TextureFormat.RGB48)
+            {
+                var rgb48 = tex.GetPixelData<PKGE.Union6>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb48.Length, allocator, options);
+
+                for (int i = rgb48.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        (byte)(rgb48[i]._0.UShort >> 8),
+                        (byte)(rgb48[i]._2.UShort >> 8),
+                        (byte)(rgb48[i]._4.UShort >> 8),
+                        byte.MaxValue);
+                }
+            }
+#endif // ZERO
+            else if (format == TextureFormat.RGBA64)
+            {
+                var rgba64 = tex.GetPixelData<PKGE.Union8>(mipLevel: 0);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(rgba64.Length, allocator, options);
+
+                for (int i = rgba64.Length - 1; i >= 0; i--)
+                {
+                    rgba32[i] = new Color32(
+                        rgba64[i]._0._0._0.Byte,
+                        rgba64[i]._0._2._0.Byte,
+                        rgba64[i]._4._0._0.Byte,
+                        rgba64[i]._4._2._0.Byte);
+                }
+            }
+            else // TODO Handle signed 8-bit and 16-bit formats
+            {
+                rgba32 = new Unity.Collections.NativeArray<Color32>(tex.GetPixels32(miplevel: 0), allocator);
+            }
+
+            return rgba32;
+        }
+    }
+}
