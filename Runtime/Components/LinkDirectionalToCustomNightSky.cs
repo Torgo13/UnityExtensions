@@ -1,3 +1,4 @@
+#nullable enable
 using UnityEngine;
 
 namespace PKGE
@@ -14,21 +15,32 @@ namespace PKGE
         Color _previousColor;
         static readonly int MoonlightForwardDirection = Shader.PropertyToID("_Moonlight_Forward_Direction");
         
-        Material SkyMat
+        bool MainLight([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Light? light)
         {
-            get
+            light = mainLight;
+            if (light == null && LightUtils.GetDirectionalLight(out light))
             {
-                if (skyMat == null)
-                {
-                    skyMat = RenderSettings.skybox;
-                }
-                return skyMat;
+                mainLight = light;
+                return true;
             }
+
+            return false;
+        }
+
+        bool SkyMat([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material? sky)
+        {
+            sky = skyMat;
+            if (sky == null)
+            {
+                skyMat = sky = RenderSettings.skybox;
+            }
+
+            return sky != null;
         }
 
         void OnEnable()
         {
-            if (mainLight != null || LightUtils.GetDirectionalLight(out mainLight))
+            if (MainLight(out var mainLight))
             {
                 //Force the mainLight to specific intensity and color to approximate the Sun
                 _previousIntensity = mainLight.intensity;
@@ -41,7 +53,7 @@ namespace PKGE
         void OnDisable()
         {
             //Reverting the forced values
-            if (mainLight != null)
+            if (MainLight(out var mainLight))
             {
                 mainLight.intensity = _previousIntensity;
                 mainLight.color = _previousColor;
@@ -50,12 +62,14 @@ namespace PKGE
 
         void Update()
         {
-            if (update
-                && mainLight != null)
+            if (!update)
+                return;
+
+            if (MainLight(out var mainLight) && SkyMat(out var skyMat))
             {
                 //Sending the forward vector to the material           
-                Vector4 dir = (Vector4)mainLight.transform.forward;
-                SkyMat.SetVector(MoonlightForwardDirection, dir);
+                Vector3 dir = mainLight.transform.forward;
+                skyMat.SetVector(MoonlightForwardDirection, (Vector4)dir);
             }
         }
         #endregion // UnityEngine.Rendering

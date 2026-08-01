@@ -13,7 +13,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.high-definition/Samples~/WaterSamples/Scripts/MeshBaker.cs
         #region UnityEngine.Rendering
-        public Mesh mesh;
+        public Mesh? mesh;
 
         [Range(0, 98)]
         public int sliceIndex;
@@ -30,7 +30,8 @@ namespace PKGE
 
         public void Bake()
         {
-            Assert.IsNotNull(mesh);
+            if (mesh == null)
+                return;
             
             List<Vector3> vertices = ListPool<Vector3>.Get();
             mesh.GetVertices(vertices);
@@ -74,7 +75,7 @@ namespace PKGE
             //int idx = sliceIndex;
             for (int idx = 0; idx < slicesY.Count; idx++)
             {
-                GetSlice(slice, idx, out float sliceLength);
+                GetSlice(slice, idx, out float sliceLength, mesh);
 
                 for (int i = 0; i < resolution; i++)
                 {
@@ -140,10 +141,9 @@ namespace PKGE
             public Vector2 uv;
         }
 
-        void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength)
+        void GetSlice(List<PointWithUV> slice, int idx, out float sliceLength,
+            Mesh mesh)
         {
-            Assert.IsNotNull(mesh);
-            
             var vertices = ListPool<Vector3>.Get();
             var colors = ListPool<Color>.Get();
             var uvs = ListPool<Vector2>.Get();
@@ -198,6 +198,9 @@ namespace PKGE
         {
             if (slicesY.Count == 0)
                 return;
+
+            if (mesh == null)
+                return;
             
             sliceIndex = Mathf.Min(sliceIndex, slicesY.Count - 1);
 
@@ -212,7 +215,7 @@ namespace PKGE
             Gizmos.DrawRay(position + offsetMax, -new Vector3(0.0f, bounds.size.y, 0.0f));
 
             List<PointWithUV> slice = ListPool<PointWithUV>.Get();
-            GetSlice(slice, sliceIndex, out float sliceLength);
+            GetSlice(slice, sliceIndex, out float sliceLength, mesh);
 
             var lastPos = slice[0].pos;
             for (int i = 1; i < slice.Count; i++)

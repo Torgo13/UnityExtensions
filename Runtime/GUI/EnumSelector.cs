@@ -1,5 +1,5 @@
+#nullable enable
 using UnityEngine;
-using PKGE;
 
 #if INCLUDE_TEXTMESH_PRO
 using Text = TMPro.TextMeshProUGUI;

@@ -1,4 +1,4 @@
-using System;
+#nullable enable
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
@@ -22,7 +22,7 @@ namespace PKGE
             set { UnityEngine.Debug.developerConsoleVisible = value;}
         }
 
-        public static bool isDebugBuild => UnityEngine.Debug.isDebugBuild;
+        public static readonly bool isDebugBuild = UnityEngine.Debug.isDebugBuild;
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
@@ -117,12 +117,12 @@ namespace PKGE
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogException(Exception exception) => UnityEngine.Debug.LogException(exception);
+        public static void LogException(System.Exception exception) => UnityEngine.Debug.LogException(exception);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
 #endif // CONDITIONAL_DEBUG
-        public static void LogException(Exception exception, UnityObject? context) => UnityEngine.Debug.LogException(exception, context);
+        public static void LogException(System.Exception exception, UnityObject? context) => UnityEngine.Debug.LogException(exception, context);
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]

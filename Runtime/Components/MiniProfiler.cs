@@ -1,6 +1,6 @@
+#nullable enable
 using UnityEngine;
 using UnityEngine.Profiling;
-using UnityEngine.Pool;
 using Unity.Collections;
 
 namespace PKGE
@@ -13,7 +13,8 @@ namespace PKGE
         private const float AverageStatDuration = 1.0f; // stats refresh each second
         private int _frameCount;
 		private float _accDeltaTime;
-        private string _statsLabel = string.Empty;
+        private string _statsLabel = "Gathering data...";
+        private readonly System.Text.StringBuilder _stats = new System.Text.StringBuilder();
         private GUIStyle _style;
 
         private const int _frameTimeCount = 4096;
@@ -22,7 +23,7 @@ namespace PKGE
         private float _minFrameTime = 1000f;
         private float _maxFrameTime;
 
-        sealed class RecorderEntry
+        struct RecorderEntry
         {
             public string Name;
             public int CallCount;
@@ -94,10 +95,11 @@ namespace PKGE
         {
             if (enable)
             {
-                _accDeltaTime += Time.unscaledDeltaTime;
+                float unscaledDeltaTime = Time.unscaledDeltaTime;
+                _accDeltaTime += unscaledDeltaTime;
                 _frameCount++;
 
-                _frameTimes[(int)Mathf.Repeat(_totalFrames, _frameTimeCount)] = Time.unscaledDeltaTime;
+                _frameTimes[(int)Mathf.Repeat(_totalFrames, _frameTimeCount)] = unscaledDeltaTime;
 
                 int frameFactor = Mathf.Clamp(_totalFrames, 0, _frameTimeCount);
 
@@ -110,13 +112,14 @@ namespace PKGE
 
                 if (_frameCount > 10)
                 {
-                    _minFrameTime = Time.unscaledDeltaTime < _minFrameTime ? Time.unscaledDeltaTime : _minFrameTime;
-                    _maxFrameTime = Time.unscaledDeltaTime > _maxFrameTime ? Time.unscaledDeltaTime : _maxFrameTime;
+                    _minFrameTime = unscaledDeltaTime < _minFrameTime ? unscaledDeltaTime : _minFrameTime;
+                    _maxFrameTime = unscaledDeltaTime > _maxFrameTime ? unscaledDeltaTime : _maxFrameTime;
                 }
 
                 // get timing & update average accumulators
-                foreach (RecorderEntry entry in _recordersList)
+                for (int i = 0; i < _recordersList.Length; i++)
                 {
+                    RecorderEntry entry = _recordersList[i];
                     if (entry.Recorder != null)
                     {
                         entry.AccTime += entry.Recorder.elapsedNanoseconds / 1000000.0f; // acc time in ms
@@ -133,7 +136,7 @@ namespace PKGE
 					float avgDraw = _recordersList[(int)Markers.Draw].AccTime * ooFrameCount;
 					float avgPost = _recordersList[(int)Markers.Post].AccTime * ooFrameCount;
 
-                    var sb = StringBuilderPool.Get();
+                    var sb = _stats.Clear();
                     sb.Append("Rendering Loop Main Thread:\t").Append((int)avgLoop).AppendLine("ms");
                     sb.Append("\tCulling:\t\t").Append((int)avgCulling).AppendLine("ms");
                     sb.Append("\tShadows:\t").Append((int)avgShadow).AppendLine("ms");
@@ -148,9 +151,6 @@ namespace PKGE
                         .Append((int)(1 / _minFrameTime)).AppendLine(" FPS)");
                     sb.Append("Maximum:\t").AppendFormat("{0:F2}", _maxFrameTime * 1000f).Append("ms\t(")
                         .Append((int)(1 / _maxFrameTime)).AppendLine(" FPS)");
-                    
-                    _statsLabel = sb.ToString();
-                    StringBuilderPool.Release(sb);
                     
 					RazCounters();
 				}
@@ -167,6 +167,10 @@ namespace PKGE
                 GUI.color = Color.white;
                 const float w = 356 * 2, h = 356;
                 GUILayout.BeginArea(new Rect(32, 50, w, h), "Profiler", GUI.skin.window);
+
+                if (_accDeltaTime >= AverageStatDuration)
+                    _statsLabel = _stats.ToString();
+
                 GUILayout.Label(_statsLabel, _style);
                 GUILayout.EndArea();
             }

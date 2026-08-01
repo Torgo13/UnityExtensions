@@ -81,12 +81,21 @@ namespace PKGE
         
         public static Color[] ColorPalette = System.Array.Empty<Color>();
         private static Texture2D? _colorPaletteRaw;
-        private static Texture2D ColorPaletteRaw { get { if (_colorPaletteRaw == null) { _colorPaletteRaw = Resources.Load<Texture2D>("textures/colorSwatch"); } return _colorPaletteRaw; } }
+        private static bool ColorPaletteRaw([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Texture2D? colorPalette)
+        {
+            colorPalette = _colorPaletteRaw;
+            if (colorPalette == null)
+            {
+                _colorPaletteRaw = colorPalette = Resources.Load<Texture2D>("textures/colorSwatch");
+            }
+
+            return colorPalette;
+        }
 
         public static Color GetPaletteColor(int index)
         {
             GenerateColors();
-            return ColorPalette[index];
+            return index >= 0 && index < ColorPalette.Length ? ColorPalette[index] : Color.magenta;
         }
 
         public static Color GetRandomPaletteColor
@@ -105,7 +114,7 @@ namespace PKGE
             if (ColorPalette.Length != 0)
                 return;
 
-            if (_colorPaletteRaw == null)
+            if (!ColorPaletteRaw(out var colorPalette))
             {
                 const int colourDepth = 4;
                 const int colourDepthSq = colourDepth * colourDepth;
@@ -125,11 +134,10 @@ namespace PKGE
             }
             else
             {
-                ColorPalette = _colorPaletteRaw.GetPixels();
+                ColorPalette = colorPalette.GetPixels();
             }
-#if DEBUG
+
             Debug.Log($"Found {ColorPalette.Length} colors.");
-#endif // DEBUG
         }
         #endregion // BoatAttack
     }

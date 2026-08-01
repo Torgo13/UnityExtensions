@@ -1058,7 +1058,11 @@ namespace PKGE
         /// <param name="array">The input 2D array to convert.</param>
         public static implicit operator Span2D<T>(T[,]? array) => new(array);
 #endif // ZERO
-#endregion // CommunityToolkit.HighPerformance
+        #endregion // CommunityToolkit.HighPerformance
+
+        public override int GetHashCode() => HashCode.Combine(span.GetPinnableReference()?.GetHashCode() ?? 0, width, Stride);
+        public override bool Equals(object? obj) => false;
+        public bool Equals(Span2D<T> other) => this == other;
     }
 
     public static class Span2DExtensions

@@ -444,12 +444,12 @@ namespace TCGE
             var tangents = ListPool<Vector4>.Get();
             mesh.GetTangents(tangents);
             var uv0 = ListPool<Vector4>.Get();
-            var uv2 = ListPool<Vector2>.Get();
-            mesh.GetUVs(1, uv2);
+            var uv2 = ListPool<Vector4>.Get();
             var uv3 = ListPool<Vector4>.Get();
             var uv4 = ListPool<Vector4>.Get();
 
             mesh.GetUVs(0, uv0);
+            mesh.GetUVs(1, uv2);
             mesh.GetUVs(2, uv3);
             mesh.GetUVs(3, uv4);
 
@@ -549,7 +549,7 @@ namespace TCGE
             ListPool<Color>.Release(colors);
             ListPool<Vector4>.Release(tangents);
             ListPool<Vector4>.Release(uv0);
-            ListPool<Vector2>.Release(uv2);
+            ListPool<Vector4>.Release(uv2);
             ListPool<Vector4>.Release(uv3);
             ListPool<Vector4>.Release(uv4);
 
