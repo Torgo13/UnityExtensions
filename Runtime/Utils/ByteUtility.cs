@@ -73,13 +73,13 @@ namespace PKGE
     public static class BoolExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte ToByte(this bool b) => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<bool, byte>(ref b);
+        public static byte ToByte(this bool b) => new TCGE.Union1 { Bool = b }.Byte;
     }
 
     public static class ByteExtensions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ToBool(this byte b) => Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<byte, bool>(ref b);
+        public static bool ToBool(this byte b) => new TCGE.Union1 { Byte = b }.Bool;
     }
     #endregion // Unity.Netcode
 }

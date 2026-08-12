@@ -30,8 +30,7 @@ namespace PKGE
             var names = EnumValues<TEnum>.Names;
 #if USE_UNSAFE
             UnityEngine.Assertions.Assert.AreEqual(sizeof(int), SizeOfCache<TEnum>.Size);
-            var enumValues = EnumValues<TEnum>.Values;
-            var values = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<TEnum[], int[]>(ref enumValues);
+            int[] values = (int[])EnumValues<TEnum>.Array;
             Samples = new TProfilingSampler<TEnum>[values.Max() + 1];
 #else
             var values = Enum.GetValues(typeof(TEnum));

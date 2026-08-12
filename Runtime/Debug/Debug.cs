@@ -8,6 +8,7 @@ namespace PKGE
     {
         //https://github.com/needle-mirror/com.unity.entities/blob/7866660bdd3140414ffb634a962b4bad37887261/Unity.Entities/Stubs/Unity/Debug.cs
         #region Unity.Entities
+#pragma warning disable IDE1006 // Naming Styles
         public static ILogger unityLogger => UnityEngine.Debug.unityLogger;
 
         public static bool developerConsoleEnabled
@@ -22,7 +23,14 @@ namespace PKGE
             set { UnityEngine.Debug.developerConsoleVisible = value;}
         }
 
-        public static readonly bool isDebugBuild = UnityEngine.Debug.isDebugBuild;
+        /// <summary>Must not be <see langword="static"/> <see langword="readonly"/>.</summary>
+        /// <remarks>
+        /// get_isDebugBuild can only be called from the main thread.
+        /// Constructors and field initializers will be executed from the loading thread when loading a scene.
+        /// Don't use this function in the constructor or field initializers, instead move initialization code to the Awake or Start function.
+        /// </remarks>
+        public static bool isDebugBuild => UnityEngine.Debug.isDebugBuild;
+#pragma warning restore IDE1006 // Naming Styles
 
 #if CONDITIONAL_DEBUG
         [System.Diagnostics.Conditional("DEBUG")]

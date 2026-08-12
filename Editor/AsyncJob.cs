@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using UnityEditor;
 
@@ -17,7 +18,7 @@ namespace PKGE.Editor
         /// <inheritdoc cref="IAsyncJob.progress"/>
         public float progress { get; private set; }
         /// <inheritdoc cref="IAsyncJob.message"/>
-        public string? message { get; private set; }
+        public string message { get; private set; } = string.Empty;
 
         /// <inheritdoc cref="IAsyncJob.Tick"/>
         public bool Tick()

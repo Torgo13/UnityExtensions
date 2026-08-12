@@ -20,6 +20,160 @@ using float3 = UnityEngine.Vector3;
 using quaternion = UnityEngine.Quaternion;
 #endif // INCLUDE_MATHEMATICS
 
+namespace TCGE
+{
+    #region Union
+    /// <summary>
+    /// <see href="https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/UIntFloat.cs"/>
+    /// A struct with an explicit memory layout.
+    /// Every field has the same starting point in memory. If you insert a float value, it can be extracted as a uint.
+    /// This is to allow for lockless and garbage free conversion from float to uint and double to ulong.
+    /// This allows for VarInt encoding and other integer encodings.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="System.Runtime.InteropServices.Marshal.SizeOf{T}()"/> will return at least 4 bytes.
+    /// Use <see cref="Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf{T}()"/> to return the actual size.
+    /// </remarks>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union1 : System.IEquatable<Union1>
+    {
+        [FieldOffset(0)] public byte Byte;
+        [FieldOffset(0)] public sbyte SByte;
+        [MarshalAs(UnmanagedType.U1)]
+        [FieldOffset(0)] public bool Bool;
+
+        [FieldOffset(0)] public PKGE.ByteBool ByteBool;
+
+        [FieldOffset(0)] public PKGE.BitArray8 BitArray8;
+
+        public readonly bool Equals(Union1 other) => Byte == other.Byte;
+        public readonly override bool Equals(object? obj) => obj is Union1 other && Equals(other);
+        public readonly override int GetHashCode() => Byte.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union2 : System.IEquatable<Union2>
+    {
+        [FieldOffset(0)] public short Short;
+        [FieldOffset(0)] public ushort UShort;
+
+        [FieldOffset(0)] public PKGE.BitArray16 BitArray16;
+
+        [FieldOffset(0)] public Union1 _0;
+        [FieldOffset(1)] public Union1 _1;
+
+        public readonly bool Equals(Union2 other) => Short == other.Short;
+        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
+        public readonly override int GetHashCode() => Short.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union4 : System.IEquatable<Union4>
+    {
+        [FieldOffset(0)] public float Float;
+        [FieldOffset(0)] public int Int;
+        [FieldOffset(0)] public uint UInt;
+        [FieldOffset(0)] public Color32 Color32;
+
+        [FieldOffset(0)] public Color24 Color24;
+
+        [FieldOffset(0)] public PKGE.BitArray32 BitArray32;
+
+        [FieldOffset(0)] public Union2 _0;
+        [FieldOffset(2)] public Union2 _2;
+
+        public readonly bool Equals(Union4 other) => Int == other.Int;
+        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
+        public readonly override int GetHashCode() => Int.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union8 : System.IEquatable<Union8>
+    {
+        [FieldOffset(0)] public double Double;
+        [FieldOffset(0)] public long Long;
+        [FieldOffset(0)] public ulong ULong;
+        [FieldOffset(0)] public GradientAlphaKey GradientAlphaKey;
+        [FieldOffset(0)] public RangeInt RangeInt;
+        [FieldOffset(0)] public Vector2 Vector2;
+        [FieldOffset(0)] public Vector2Int Vector2Int;
+
+        [FieldOffset(0)] public PKGE.BitArray64 BitArray64;
+
+        [FieldOffset(0)] public Union4 _0;
+        [FieldOffset(4)] public Union4 _4;
+
+        public readonly bool Equals(Union8 other) => Long == other.Long;
+        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
+        public readonly override int GetHashCode() => Long.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union16 : System.IEquatable<Union16>
+    {
+        [FieldOffset(0)] public Quaternion Quaternion;
+        [FieldOffset(0)] public Color Color;
+        [FieldOffset(0)] public Rect Rect;
+        [FieldOffset(0)] public RectInt RectInt;
+        [FieldOffset(0)] public Plane Plane;
+        [FieldOffset(0)] public UnityEngine.Random.State State;
+        [FieldOffset(0)] public Vector4 Vector4;
+
+        [FieldOffset(0)] public Vector3 Vector3;
+        [FieldOffset(0)] public Vector3Int Vector3Int;
+
+        [FieldOffset(0)] public PKGE.BitArray128 BitArray128;
+
+        [FieldOffset(0)] public Union8 _0;
+        [FieldOffset(8)] public Union8 _8;
+
+        [FieldOffset(0)] public Union12 _12;
+
+        public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
+        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
+        public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union12 : System.IEquatable<Union12>
+    {
+        [FieldOffset(0)] public Vector3 Vector3;
+        [FieldOffset(0)] public Vector3Int Vector3Int;
+
+        [FieldOffset(0)] public Union4 Union4_0;
+        [FieldOffset(4)] public Union4 Union4_4;
+        [FieldOffset(8)] public Union4 Union4_8;
+
+        public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
+        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
+        public readonly override int GetHashCode() => Vector3Int.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union48 : System.IEquatable<Union48>
+    {
+        [FieldOffset(00)] public Union16 U16_00;
+        [FieldOffset(16)] public Union16 U16_16;
+        [FieldOffset(32)] public Union16 U16_32;
+
+        [FieldOffset(00)] public Union12 U12_00;
+        [FieldOffset(12)] public Union12 U12_12;
+        [FieldOffset(24)] public Union12 U12_24;
+        [FieldOffset(36)] public Union12 U12_36;
+
+        public readonly bool Equals(Union48 other) => U16_00.Equals(other.U16_00) && U16_16.Equals(other.U16_16) && U16_32.Equals(other.U16_32);
+        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
+        public readonly override int GetHashCode() => U16_00.GetHashCode() ^ (U16_16.GetHashCode() << 2) ^ (U16_32.GetHashCode() >> 2);
+    }
+    #endregion // Union
+}
+
 namespace PKGE
 {
     //https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/ByteBool.cs
@@ -80,157 +234,6 @@ namespace PKGE
         public static byte AsByte(bool @bool) => new ByteBool { BoolValue = @bool }.ByteValue;
     }
     #endregion // Unity.Netcode
-
-    #region Union
-    /// <summary>
-    /// <see href="https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/UIntFloat.cs"/>
-    /// A struct with an explicit memory layout.
-    /// Every field has the same starting point in memory. If you insert a float value, it can be extracted as a uint.
-    /// This is to allow for lockless and garbage free conversion from float to uint and double to ulong.
-    /// This allows for VarInt encoding and other integer encodings.
-    /// </summary>
-    /// <remarks>
-    /// <see cref="System.Runtime.InteropServices.Marshal.SizeOf{T}()"/> will return at least 4 bytes.
-    /// Use <see cref="Unity.Collections.LowLevel.Unsafe.UnsafeUtility.SizeOf{T}()"/> to return the actual size.
-    /// </remarks>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union1 : System.IEquatable<Union1>
-    {
-        [FieldOffset(0)] public byte Byte;
-        [FieldOffset(0)] public sbyte SByte;
-        [MarshalAs(UnmanagedType.U1)]
-        [FieldOffset(0)] public bool Bool;
-
-        [FieldOffset(0)] public ByteBool ByteBool;
-
-        [FieldOffset(0)] public BitArray8 BitArray8;
-
-        public readonly bool Equals(Union1 other) => Byte == other.Byte;
-        public readonly override bool Equals(object? obj) => obj is Union1 other && Equals(other);
-        public readonly override int GetHashCode() => Byte.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union2 : System.IEquatable<Union2>
-    {
-        [FieldOffset(0)] public short Short;
-        [FieldOffset(0)] public ushort UShort;
-
-        [FieldOffset(0)] public BitArray16 BitArray16;
-
-        [FieldOffset(0)] public Union1 _0;
-        [FieldOffset(1)] public Union1 _1;
-
-        public readonly bool Equals(Union2 other) => Short == other.Short;
-        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
-        public readonly override int GetHashCode() => Short.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union4 : System.IEquatable<Union4>
-    {
-        [FieldOffset(0)] public float Float;        
-        [FieldOffset(0)] public int Int;
-        [FieldOffset(0)] public uint UInt;
-        [FieldOffset(0)] public Color32 Color32;
-
-        [FieldOffset(0)] public Color24 Color24;
-
-        [FieldOffset(0)] public BitArray32 BitArray32;
-
-        [FieldOffset(0)] public Union2 _0;
-        [FieldOffset(2)] public Union2 _2;
-
-        public readonly bool Equals(Union4 other) => Int == other.Int;
-        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
-        public readonly override int GetHashCode() => Int.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union8 : System.IEquatable<Union8>
-    {
-        [FieldOffset(0)] public double Double;
-        [FieldOffset(0)] public long Long;
-        [FieldOffset(0)] public ulong ULong;
-        [FieldOffset(0)] public GradientAlphaKey GradientAlphaKey;
-        [FieldOffset(0)] public RangeInt RangeInt;
-        [FieldOffset(0)] public Vector2 Vector2;
-        [FieldOffset(0)] public Vector2Int Vector2Int;
-
-        [FieldOffset(0)] public BitArray64 BitArray64;
-
-        [FieldOffset(0)] public Union4 _0;
-        [FieldOffset(4)] public Union4 _4;
-
-        public readonly bool Equals(Union8 other) => Long == other.Long;
-        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
-        public readonly override int GetHashCode() => Long.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union16 : System.IEquatable<Union16>
-    {
-        [FieldOffset(0)] public Quaternion Quaternion;
-        [FieldOffset(0)] public Color Color;
-        [FieldOffset(0)] public Rect Rect;
-        [FieldOffset(0)] public RectInt RectInt;
-        [FieldOffset(0)] public Plane Plane;
-        [FieldOffset(0)] public UnityEngine.Random.State State;
-        [FieldOffset(0)] public Vector4 Vector4;
-
-        [FieldOffset(0)] public Vector3 Vector3;
-        [FieldOffset(0)] public Vector3Int Vector3Int;
-
-        [FieldOffset(0)] public BitArray128 BitArray128;
-
-        [FieldOffset(0)] public Union8 _0;
-        [FieldOffset(8)] public Union8 _8;
-
-        [FieldOffset(0)] public Union12 _12;
-
-        public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
-        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
-        public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union12 : System.IEquatable<Union12>
-    {
-        [FieldOffset(0)] public Vector3 Vector3;
-        [FieldOffset(0)] public Vector3Int Vector3Int;
-
-        [FieldOffset(0)] public Union4 Union4_0;
-        [FieldOffset(4)] public Union4 Union4_4;
-        [FieldOffset(8)] public Union4 Union4_8;
-
-        public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
-        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
-        public readonly override int GetHashCode() => Vector3Int.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union48 : System.IEquatable<Union48>
-    {
-        [FieldOffset(00)] public Union16 U16_00;
-        [FieldOffset(16)] public Union16 U16_16;
-        [FieldOffset(32)] public Union16 U16_32;
-
-        [FieldOffset(00)] public Union12 U12_00;
-        [FieldOffset(12)] public Union12 U12_12;
-        [FieldOffset(24)] public Union12 U12_24;
-        [FieldOffset(36)] public Union12 U12_36;
-
-        public readonly bool Equals(Union48 other) => U16_00.Equals(other.U16_00) && U16_16.Equals(other.U16_16) && U16_32.Equals(other.U16_32);
-        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
-        public readonly override int GetHashCode() => U16_00.GetHashCode() ^ (U16_16.GetHashCode() << 2) ^ (U16_32.GetHashCode() >> 2);
-    }
-    #endregion // Union
 
     public static class MathematicsExtensions
     {
@@ -303,25 +306,25 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="SafeRange"/>
-        public static bool SafeRange(this Union1 Union1)
+        public static bool SafeRange(this TCGE.Union1 Union1)
         {
             return Union1.SByte >= 0;
         }
 
         /// <inheritdoc cref="SafeRange"/>
-        public static bool SafeRange(this Union2 Union2)
+        public static bool SafeRange(this TCGE.Union2 Union2)
         {
             return Union2.Short >= 0;
         }
 
         /// <inheritdoc cref="SafeRange"/>
-        public static bool SafeRange(this Union4 Union4)
+        public static bool SafeRange(this TCGE.Union4 Union4)
         {
             return Union4.Int >= 0;
         }
 
         /// <inheritdoc cref="SafeRange"/>
-        public static bool SafeRange(this Union8 Union8)
+        public static bool SafeRange(this TCGE.Union8 Union8)
         {
             return Union8.Long >= 0;
         }
@@ -2009,7 +2012,7 @@ namespace PKGE
 }
 
 #if INCLUDE_MATHEMATICS
-namespace PKGE.Mathematics
+namespace TCGE.Mathematics
 {
     #region Union
     /// <remarks>Use __0 to access the Union without extensions.</remarks>
@@ -2017,7 +2020,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union2 : System.IEquatable<Union2>
     {
-        [FieldOffset(0)] public PKGE.Union2 __0;
+        [FieldOffset(0)] public TCGE.Union2 __0;
 
         [FieldOffset(0)] public half Half;
 
@@ -2030,7 +2033,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union4 : System.IEquatable<Union4>
     {
-        [FieldOffset(0)] public PKGE.Union4 __0;
+        [FieldOffset(0)] public TCGE.Union4 __0;
 
         [FieldOffset(0)] public Random Random;
         [FieldOffset(0)] public half2 Half2;
@@ -2047,7 +2050,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union8 : System.IEquatable<Union8>
     {
-        [FieldOffset(0)] public PKGE.Union8 __0;
+        [FieldOffset(0)] public TCGE.Union8 __0;
 
         [FieldOffset(0)] public float2 Float2;
         [FieldOffset(0)] public int2 Int2;
@@ -2066,7 +2069,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union16 : System.IEquatable<Union16>
     {
-        [FieldOffset(0)] public PKGE.Union16 __0;
+        [FieldOffset(0)] public TCGE.Union16 __0;
 
         [FieldOffset(0)] public quaternion Quaternion;
         [FieldOffset(0)] public double2 Double2;
@@ -2088,7 +2091,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union12 : System.IEquatable<Union12>
     {
-        [FieldOffset(0)] public PKGE.Union12 __0;
+        [FieldOffset(0)] public TCGE.Union12 __0;
 
         [FieldOffset(0)] public float3 Float3;
         [FieldOffset(0)] public int3 Int3;
@@ -2107,7 +2110,7 @@ namespace PKGE.Mathematics
     [StructLayout(LayoutKind.Explicit)]
     public struct Union48 : System.IEquatable<Union48>
     {
-        [FieldOffset(0)] public PKGE.Union48 __0;
+        [FieldOffset(0)] public TCGE.Union48 __0;
 
         [FieldOffset(00)] public Union16 U16_00;
         [FieldOffset(16)] public Union16 U16_16;

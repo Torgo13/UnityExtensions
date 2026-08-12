@@ -43,7 +43,7 @@ namespace PKGE.Unsafe
             /// Constructor.
             /// </summary>
             /// <param name="ptr">Buffer pointer.</param>
-            /// <param name="length">Length of the provided allocated buffer in byte.</param>
+            /// <param name="length">Length of the provided allocated buffer in bytes.</param>
             public FixedBufferStringQueue(byte* ptr, int length)
             {
                 _bufferStart = ptr;

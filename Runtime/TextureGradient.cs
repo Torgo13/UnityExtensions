@@ -47,9 +47,9 @@ namespace PKGE
         public ColorSpace colorSpace = ColorSpace.Uninitialized;
 
         /// <summary>
-        /// Creates a new <see cref="TextureGradient"/> from an existing <c>Gradient</c>.
+        /// Creates a new <see cref="TextureGradient"/> from an existing <see cref="Gradient"/>.
         /// </summary>
-        /// <param name="baseCurve">The source <c>Gradient</c>.</param>
+        /// <param name="baseCurve">The source <see cref="Gradient"/>.</param>
         public TextureGradient(Gradient baseCurve)
             : this(baseCurve.colorKeys, baseCurve.alphaKeys)
         {

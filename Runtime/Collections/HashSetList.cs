@@ -75,7 +75,7 @@ namespace PKGE
         /// <summary>
         /// Adds item to the existing internal list.
         /// </summary>
-        /// <param name="item">Item of type <c>T</c> to add.</param>
+        /// <param name="item">Item of type <typeparamref name="T"/> to add.</param>
         void ICollection<T>.Add(T item)
         {
             if (_internalHashSet.Add(item))
@@ -88,7 +88,7 @@ namespace PKGE
         /// <summary>
         /// Attempt to add item to internal hashset. If it is not already in the hashset, add it to the list.
         /// </summary>
-        /// <param name="item">Item of type <c>T</c> to add.</param>
+        /// <param name="item">Item of type <typeparamref name="T"/> to add.</param>
         /// <returns>True if the item was added to both list and hashset.</returns>
         public bool Add(T item)
         {

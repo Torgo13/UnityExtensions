@@ -7,7 +7,7 @@ using UnityEngine.Experimental.Rendering;
 namespace PKGE
 {
     /// <summary>
-    /// A wrapper around <c>AnimationCurve</c> to automatically bake it into a texture.
+    /// A wrapper around <see cref="AnimationCurve"/> to automatically bake it into a texture.
     /// </summary>
     /// <remarks><list type="bullet">
     /// <item>Dirty state handling so we know when a curve has changed or not.</item>
@@ -61,9 +61,9 @@ namespace PKGE
         public Keyframe this[int index] => curve[index];
 
         /// <summary>
-        /// Creates a new <see cref="TextureCurve"/> from an existing <c>AnimationCurve</c>.
+        /// Creates a new <see cref="TextureCurve"/> from an existing <see cref="AnimationCurve"/>.
         /// </summary>
-        /// <param name="baseCurve">The source <c>AnimationCurve</c>.</param>
+        /// <param name="baseCurve">The source <see cref="AnimationCurve"/>.</param>
         /// <param name="zeroValue">The default value to use when the curve doesn't have any key.</param>
         /// <param name="loop">Should the curve automatically loop in the given <paramref name="bounds"/>?</param>
         /// <param name="bounds">The boundaries of the curve.</param>

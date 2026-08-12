@@ -15,7 +15,7 @@ namespace PKGE
 		private float _accDeltaTime;
         private string _statsLabel = "Gathering data...";
         private readonly System.Text.StringBuilder _stats = new System.Text.StringBuilder();
-        private GUIStyle _style;
+        private GUIStyle _style = null!;
 
         private const int _frameTimeCount = 4096;
         private NativeArray<float> _frameTimes;

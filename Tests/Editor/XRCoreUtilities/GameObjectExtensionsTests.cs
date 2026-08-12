@@ -96,7 +96,7 @@ namespace PKGE.Editor.Tests
         public void SetLayerAndHideFlagsRecursively()
         {
             const HideFlags hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSaveInBuild;
-            m_RootObject.SetLayerAndHideFlagsRecursively(10, hideFlags);
+            m_RootObject.SetLayerAndHideFlagsRecursively(setLayer: true, 10, setHideFlags: true, hideFlags);
             AssertLayerEqual(10);
             AssertHideFlagsEqual(hideFlags);
         }
@@ -105,7 +105,7 @@ namespace PKGE.Editor.Tests
         public void SetLayerAndAddToHideFlagsRecursively()
         {
             m_RootObject.SetHideFlagsRecursively(HideFlags.NotEditable);
-            m_RootObject.SetLayerAndAddToHideFlagsRecursively(10, HideFlags.HideAndDontSave);
+            m_RootObject.SetLayerAndHideFlagsRecursively(setLayer: true, 10, setHideFlags: true, HideFlags.HideAndDontSave);
             AssertLayerEqual(10);
             AssertHideFlagsEqual(HideFlags.NotEditable | HideFlags.HideAndDontSave);
         }

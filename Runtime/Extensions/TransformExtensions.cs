@@ -15,7 +15,7 @@ namespace PKGE
         /// <summary>
         /// Gets the local position and rotation as a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The transform from which to get the pose.</param>
+        /// <param name="transform">The <see cref="Transform"/> from which to get the pose.</param>
         /// <returns>The local pose.</returns>
         public static Pose GetLocalPose(this Transform transform)
         {
@@ -30,7 +30,7 @@ namespace PKGE
         /// <summary>
         /// Gets the world position and rotation as a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The transform from which to get the pose.</param>
+        /// <param name="transform">The <see cref="Transform"/> from which to get the pose.</param>
         /// <returns>The world pose.</returns>
         public static Pose GetWorldPose(this Transform transform)
         {
@@ -45,7 +45,7 @@ namespace PKGE
         /// <summary>
         /// Sets the local position and rotation from a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The transform on which to set the pose.</param>
+        /// <param name="transform">The <see cref="Transform"/> on which to set the pose.</param>
         /// <param name="pose">Pose specifying the new position and rotation.</param>
         public static void SetLocalPose(this Transform transform, Pose pose)
         {
@@ -60,7 +60,7 @@ namespace PKGE
         /// <summary>
         /// Sets the world position and rotation from a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The transform on which to set the pose.</param>
+        /// <param name="transform">The <see cref="Transform"/> on which to set the pose.</param>
         /// <param name="pose">Pose specifying the new position and rotation.</param>
         public static void SetWorldPose(this Transform transform, Pose pose)
         {
@@ -70,9 +70,9 @@ namespace PKGE
         /// <summary>
         /// Transforms a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
-        /// <param name="pose">The <c>Pose</c> to transform.</param>
-        /// <returns>A new <c>Pose</c> representing the transformed <paramref name="pose"/>.</returns>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
+        /// <param name="pose">The <see cref="Pose"/> to transform.</param>
+        /// <returns>A new <see cref="Pose"/> representing the transformed <paramref name="pose"/>.</returns>
         public static Pose TransformPose(this Transform transform, Pose pose)
         {
             return pose.GetTransformedBy(transform);
@@ -81,9 +81,9 @@ namespace PKGE
         /// <summary>
         /// Inverse transforms a <see cref="Pose"/>.
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
-        /// <param name="pose">The <c>Pose</c> to inversely transform.</param>
-        /// <returns>A new <c>Pose</c> representing the inversely transformed <paramref name="pose"/>.</returns>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
+        /// <param name="pose">The <see cref="Pose"/> to inversely transform.</param>
+        /// <returns>A new <see cref="Pose"/> representing the inversely transformed <paramref name="pose"/>.</returns>
         /// <exception cref="System.ArgumentNullException">transform</exception>
         public static Pose InverseTransformPose(this Transform transform, Pose pose)
         {
@@ -100,9 +100,9 @@ namespace PKGE
         /// <summary>
         /// Inverse transforms a <see cref="Ray"/>.
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
-        /// <param name="ray">The <c>Ray</c> to inversely transform.</param>
-        /// <returns>A new <c>Ray</c> representing the inversely transformed <paramref name="ray"/>.</returns>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
+        /// <param name="ray">The <see cref="Ray"/> to inversely transform.</param>
+        /// <returns>A new <see cref="Ray"/> representing the inversely transformed <paramref name="ray"/>.</returns>
         /// <exception cref="System.ArgumentNullException">transform</exception>
         public static Ray InverseTransformRay(this Transform transform, Ray ray)
         {
@@ -118,9 +118,9 @@ namespace PKGE
         /// <summary>
         /// Transforms a <see cref="Ray"/>.
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
-        /// <param name="ray">The <c>Ray</c> to transform.</param>
-        /// <returns>A new <c>Ray</c> representing the transformed <paramref name="ray"/>.</returns>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
+        /// <param name="ray">The <see cref="Ray"/> to transform.</param>
+        /// <returns>A new <see cref="Ray"/> representing the transformed <paramref name="ray"/>.</returns>
         public static Ray TransformRay(this Transform transform, Ray ray)
         {
             return new Ray(
@@ -234,49 +234,36 @@ namespace PKGE
         /// <summary>
         ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInChildren(System.Type, bool)"/>.</para>
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
         /// <param name="type">The type of component to search for.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
         /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.
-        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
+        /// The <see cref="GameObject"/> on which the method is called is always searched regardless of this parameter.</param>
         public static void GetComponentsInChildren(this Transform transform, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
             transform.gameObject.GetComponentsInChildren(type, results, includeInactive);
         }
-        
+
         /// <summary>
         ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInParent(System.Type, bool)"/>.</para>
         /// </summary>
-        /// <param name="transform">The <c>Transform</c> component.</param>
+        /// <param name="transform">The <see cref="Transform"/> component.</param>
         /// <param name="type">The type of component to search for.</param>
-        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
-        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
+        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
+        /// The <see cref="GameObject"/> on which the method is called is always searched regardless of this parameter.</param>
         public static void GetComponentsInParent(this Transform transform, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
-            if (transform.TryGetComponent(type, out var component))
-            {
-                results.Add(component);
-            }
-
-            for (var ancestor = transform.parent; ancestor != null; ancestor = ancestor.parent)
-            {
-                GameObject gameObject = ancestor.gameObject;
-                if ((includeInactive || gameObject.activeInHierarchy)
-                    && gameObject.TryGetComponent(type, out component))
-                {
-                    results.Add(component);
-                }
-            }
+            transform.gameObject.GetComponentsInParent(type, results, includeInactive);
         }
 
         /// <summary>
-        /// Get the direct children Transforms of this Transform.
+        /// Get the direct children <see cref="Transform"/>s of this <see cref="Transform"/>.
         /// </summary>
-        /// <param name="transform">The parent Transform that we will want to get the child Transforms on.</param>
-        /// <param name="childTransforms">The direct children of a Transform.</param>
+        /// <param name="transform">The parent <see cref="Transform"/> that we will want to get the child <see cref="Transform"/>s on.</param>
+        /// <param name="childTransforms">The direct children of a <see cref="Transform"/>.</param>
         public static void GetChildTransforms(this Transform transform, List<Transform> childTransforms)
         {
             var childCount = transform.childCount;
@@ -289,35 +276,16 @@ namespace PKGE
 
         public static void GetChildInstanceIDs(this Transform transform, List<EntityId> childInstanceIDs)
         {
-            var children = ListPool<Transform>.Get();
-            transform.GetComponentsInChildren(children);
-            
-            var childCount = children.Count;
-            childInstanceIDs.EnsureCapacity(childCount);
-            
-            for (var i = 1; i < childCount; i++)
-            {
-                childInstanceIDs.Add(children[i].GetEntityId());
-            }
-            
-            ListPool<Transform>.Release(children);
+            transform.gameObject.GetChildInstanceIDs(childInstanceIDs);
         }
 
         public static void SetActiveRecursively(this Transform transform, bool active)
         {
-            var childInstanceIDs = ListPool<EntityId>.Get();
-            transform.GetChildInstanceIDs(childInstanceIDs);
-
-            if (childInstanceIDs.Count > 0)
-            {
 #if UNITY_6000_3_OR_NEWER
-                GameObject.SetGameObjectsActive(childInstanceIDs.AsReadOnlySpan(), active);
+            transform.gameObject.SetActive(active);
 #else
-                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
+            transform.gameObject.SetActiveRecursively(active);
 #endif // UNITY_6000_3_OR_NEWER
-            }
-
-            ListPool<EntityId>.Release(childInstanceIDs);
         }
 
         public static void SetGrandchildrenActiveRecursively(this Transform transform, bool active)
@@ -340,34 +308,11 @@ namespace PKGE
             ListPool<EntityId>.Release(childInstanceIDs);
         }
 
-        /// <summary>
-        /// Gets a descendant Transform with a specific name
-        /// </summary>
-        /// <param name="transform">The parent Transform that is searched for a named child.</param>
-        /// <param name="name">Name of child to be found.</param>
-        /// <param name="foundObject">True if a descendant Transform with the specified name was found.</param>
-        /// <returns>The returned child Transform or null if no child is found.</returns>
+        /// <inheritdoc cref="GameObjectExtensions.GetNamedChild(GameObject, string, out Transform?)"/>
         public static bool GetNamedChild(this Transform transform, string name,
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? foundObject)
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? namedChild)
         {
-            foundObject = null;
-            bool found = false;
-            var transforms = ListPool<Transform>.Get();
-            transform.GetComponentsInChildren(transforms);
-            
-            // Start index at 1 as 0 is the current transform
-            for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
-            {
-                if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
-                {
-                    found = true;
-                    foundObject = transforms[i];
-                    break;
-                }
-            }
-
-            ListPool<Transform>.Release(transforms);
-            return found;
+            return transform.gameObject.GetNamedChild(name, out namedChild);
         }
     }
 }

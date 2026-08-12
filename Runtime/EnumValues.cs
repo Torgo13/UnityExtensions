@@ -174,6 +174,13 @@ namespace PKGE
         public static readonly T[] Values = (T[])Enum.GetValues(typeof(T));
         #endregion // Unity.XR.CoreUtils
 
+        /// <remarks>
+        /// Can be cast to the desired array type.
+        /// </remarks>
+        /// <inheritdoc cref="Values"/>
+        public static Array Array => _array ??= Enum.GetValues(typeof(T));
+        public static Array? _array;
+
         /// <summary>
         /// Cached result of <see cref="Enum.GetNames"/>.
         /// </summary>

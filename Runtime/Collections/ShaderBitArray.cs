@@ -73,7 +73,7 @@ namespace PKGE
                 if (_data == null || elemIndex >= _data.Length)
                     return false;
 
-                var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
+                var uintElem = new TCGE.Union4 { Float = _data[elemIndex] }.UInt;
                 return (uintElem & (1u << bitOffset)) != 0u;
             }
             set
@@ -83,13 +83,13 @@ namespace PKGE
                 if (_data == null || elemIndex >= _data.Length)
                     return;
 
-                var uintElem = new Union4 { Float = _data[elemIndex] }.UInt;
+                var uintElem = new TCGE.Union4 { Float = _data[elemIndex] }.UInt;
                 if (value)
                     uintElem |= 1u << bitOffset;
                 else
                     uintElem &= ~(1u << bitOffset);
 
-                _data[elemIndex] = new Union4 { UInt = uintElem }.Float;
+                _data[elemIndex] = new TCGE.Union4 { UInt = uintElem }.Float;
             }
         }
 

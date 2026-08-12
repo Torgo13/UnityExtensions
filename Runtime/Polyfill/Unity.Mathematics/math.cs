@@ -66,8 +66,8 @@ namespace PKGE.Mathematics
         public const double PI2_DBL = System.Math.PI * 2;
         public const float PI2 = (float)PI2_DBL;
 
-        public static int asint(float f) => new Union4 { Float = f }.Int;
-        public static float asfloat(int i) => new Union4 { Int = i }.Float;
+        public static int asint(float f) => new TCGE.Union4 { Float = f }.Int;
+        public static float asfloat(int i) => new TCGE.Union4 { Int = i }.Float;
 
         public static uint ceilpow2(uint x)
         {
@@ -207,7 +207,7 @@ namespace PKGE.Mathematics
             if (x == 0)
                 return 32;
 
-            Union8 u;
+            TCGE.Union8 u;
             u.Double = 0.0;
             u.Long = 0x4330000000000000L + x;
             u.Double -= 4503599627370496.0;
@@ -221,7 +221,7 @@ namespace PKGE.Mathematics
                 return 32;
 
             x &= (uint)-x;
-            Union8 u;
+            TCGE.Union8 u;
             u.Double = 0.0;
             u.Long = 0x4330000000000000L + x;
             u.Double -= 4503599627370496.0;

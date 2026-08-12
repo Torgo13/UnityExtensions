@@ -685,7 +685,7 @@ namespace PKGE
         /// <summary>
         /// Erase an element from the array by moving the tail element into its place.
         /// </summary>
-        /// <param name="array">Array to modify. May be not <c>null</c>.</param>
+        /// <param name="array">Array to modify. May not be <see langword="null"/>.</param>
         /// <param name="count">Current number of elements inside of array. May be less than <c>array.Length</c>.</param>
         /// <param name="index">Index of element to remove. Tail element will get moved into its place.</param>
         /// <typeparam name="TValue"></typeparam>
@@ -1006,12 +1006,12 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.xr.arfoundation/blob/8ced5e7002ad2e622a7968f0007ab0bf7298c137/Runtime/ARSubsystems/NativeCopyUtility.cs
         #region UnityEngine.XR.ARSubsystems
         /// <summary>
-        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// Copies the contents of <paramref name="source"/> into the <see cref="NativeArray{T}"/> <paramref name="destination"/>.
         /// The lengths of both collections must match.
         /// </summary>
-        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
-        /// <param name="source">The <c>IReadOnlyList</c> that provides the data</param>
-        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <typeparam name="T">The type of the <see cref="NativeArray{T}"/> structs that will be copied.</typeparam>
+        /// <param name="destination">The <see cref="NativeArray{T}"/> that will be written to.</param>
+        /// <param name="source">The <see cref="IReadOnlyList{T}"/> that provides the data.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
         /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
         public static void CopyFromReadOnlyList<T>(this NativeArray<T> destination, IReadOnlyList<T> source)
@@ -1023,22 +1023,22 @@ namespace PKGE
                 return;
             }
 
-            for (var i = 0; i < source.Count; i++)
+            for (var i = source.Count - 1; i >= 0; --i)
             {
                 destination[i] = source[i];
             }
         }
 
         /// <summary>
-        /// Copies the contents of <paramref name="source"/> into the <c>NativeArray</c> <paramref name="destination"/>.
+        /// Copies the contents of <paramref name="source"/> into the <see cref="NativeArray{T}"/> <paramref name="destination"/>.
         /// The lengths of both collections must match.
         /// </summary>
-        /// <typeparam name="T">The type of the <c>NativeArray</c> structs that will be copied</typeparam>
-        /// <param name="source">The <c>IReadOnlyCollection</c> that provides the data</param>
-        /// <param name="destination">The <c>NativeArray</c> that will be written to</param>
+        /// <typeparam name="T">The type of the <see cref="NativeArray{T}"/> structs that will be copied.</typeparam>
+        /// <param name="destination">The <see cref="NativeArray{T}"/> that will be written to.</param>
+        /// <param name="source">The <see cref="IReadOnlyCollection{T}"/> that provides the data.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when there is a mismatch between
         /// <paramref name="source"/> and <paramref name="destination"/> sizes.</exception>
-        /// <remarks> Prefer IReadOnlyList over IReadOnlyCollection for copy performance where possible.</remarks>
+        /// <remarks> Prefer <see cref="IReadOnlyList{T}"/> over <see cref="IReadOnlyCollection{T}"/> for copy performance where possible.</remarks>
         /// <seealso cref="CopyFromReadOnlyList{T}"/>
         public static void CopyFromReadOnlyCollection<T>(this NativeArray<T> destination, IReadOnlyCollection<T> source)
             where T : struct
@@ -1139,6 +1139,13 @@ namespace PKGE
 
         /// <exception cref="IndexOutOfRangeException"/>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T AsRefReadonly<T>(this T[] array, int index) where T : struct
+        {
+            return ref array.AsRef(index);
+        }
+
+        /// <exception cref="IndexOutOfRangeException"/>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ref T AsRef<T>(this T[] array, int index) where T : struct
         {
             return ref array[index];
@@ -1149,5 +1156,28 @@ namespace PKGE
         {
             return array == null || array.Length == 0;
         }
+
+        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
+        #region UnityEngine.Rendering.Universal
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+
+            return ref MemoryMarshal.GetReference(array.AsReadOnlySpan()[index..]);
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+
+            return ref MemoryMarshal.GetReference(array.AsSpan()[index..]);
+        }
+        #endregion // UnityEngine.Rendering.Universal
     }
 }

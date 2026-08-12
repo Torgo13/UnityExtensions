@@ -65,9 +65,10 @@ namespace PKGE.Editor.Tests
         [Test]
         public void CreateEngineMaterial_ReturnsNull_AndLogsError_WhenShaderNotFound()
         {
-            LogAssert.Expect(LogType.Error, $"Cannot create required material because shader NON_EXISTENT_SHADER could not be found");
+            string shaderPath = "NON_EXISTENT_SHADER";
+            LogAssert.Expect(LogType.Error, $"Cannot create required material because shader {shaderPath} could not be found");
 
-            var mat = CoreUtils.CreateEngineMaterial("NON_EXISTENT_SHADER");
+            var mat = CoreUtils.CreateEngineMaterial(shaderPath);
             Assert.IsNull(mat);
         }
 
@@ -75,15 +76,16 @@ namespace PKGE.Editor.Tests
         public void CreateEngineMaterial_ReturnsNull_AndLogsError_WhenShaderUnsupported()
         {
             // Simulate unsupported shader using a fake Shader
-            var shader = Shader.Find("Sprites/Default");
+            string shaderPath = "Sprites/Default";
+            var shader = Shader.Find(shaderPath);
             Assert.NotNull(shader);
 
             // Forcing isSupported to false in runtime isn't possible without mocking,
             // so we guard this test with assumption
             if (!shader.isSupported)
             {
-                LogAssert.Expect(LogType.Error, $"Shader Sprites/Default is not supported by the current graphics hardware.");
-                var mat = CoreUtils.CreateEngineMaterial("Sprites/Default");
+                LogAssert.Expect(LogType.Error, $"Shader {shaderPath} is not supported by the current graphics hardware.");
+                var mat = CoreUtils.CreateEngineMaterial(shaderPath);
                 Assert.IsNull(mat);
             }
             else

@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 using ValueTask = System.Threading.Tasks.ValueTask;
 using ValueTaskSourceStatus = System.Threading.Tasks.Sources.ValueTaskSourceStatus;
 
-namespace PKGE
+namespace TCGE
 {
     /// <summary>
     /// Ensure that an <see cref="AsyncGPUReadbackRequest"/> does not outlive
@@ -44,23 +44,23 @@ namespace PKGE
         [MarshalAs(UnmanagedType.U1)]
         private bool disposed;
 
-        /// <param name="tex">The original <see cref="Texture"/> to be kept but not modified.</param>
+        /// <param name="texture">The original <see cref="Texture"/> to be kept but not modified.</param>
         /// <param name="allocator">Only change to <see cref="Allocator.TempJob"/> if the
         /// <see cref="AsyncGPUReadbackRequest"/> and job will complete within four frames.</param>
         /// <param name="mipChain">Set to <see langword="true"/> to keep any existing mip chain.</param>
-        public Texture2DProperties(Texture tex, Allocator allocator = Allocator.TempJob, bool mipChain = true)
+        public Texture2DProperties(Texture texture, Allocator allocator = Allocator.TempJob, bool mipChain = true)
         {
             Assert.IsTrue((int)allocator > (int)Allocator.Temp);
-            Assert.AreEqual(TextureDimension.Tex2D, tex.dimension);
+            Assert.AreEqual(TextureDimension.Tex2D, texture.dimension);
 
-            this.tex = tex;
-            var inputParams = new Texture2DParameters(tex);
+            tex = texture;
             texReadable = new Texture2DReadable(tex);
             disposed = false;
-            
+
+            var inputParams = new Texture2DParameters(tex);
             if (inputParams.mipCount == 1)
                 mipChain = false;
-            
+
             if (texReadable.UncompressedReadable)
             {
                 tempTex = default;
@@ -134,7 +134,7 @@ namespace PKGE
 
             for (int i = 0; i < mipParameters.Length; i++)
             {
-                TextureUtils.GetMipData(mipLevel: i, texParams.width, texParams.height,
+                PKGE.TextureUtils.GetMipData(mipLevel: i, texParams.width, texParams.height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
                 mipParameters[i] = new MipLevelParameters(mipWidth, mipHeight, offset, mipLevel: i);
             }
@@ -202,9 +202,9 @@ namespace PKGE
         }
 
         /// <inheritdoc cref="data"/>
-        public readonly NativeArray<byte> GetData8()
+        public readonly NativeArray<byte> GetData8(bool waitForCompletion = false)
         {
-            if (!IsReady())
+            if (!IsReady(waitForCompletion))
                 return default;
 
             return data;
@@ -320,7 +320,7 @@ namespace PKGE
         #region IEnumerator
         public readonly object? Current => null;
         public readonly bool MoveNext() => texReadable.PerformedReadback && readback.GetStatus(token: 0) == ValueTaskSourceStatus.Pending;
-        public readonly void Reset() {}
+        public readonly void Reset() { }
         #endregion // IEnumerator
 
         #region Dispose
@@ -363,7 +363,7 @@ namespace PKGE
                 data.Dispose();
 
             if (texReadable.PerformedBlit)
-                CoreUtils.Destroy(tempTex, skipNullCheck: true);
+                PKGE.CoreUtils.Destroy(tempTex, skipNullCheck: true);
 
             if (texParams.mipCount > 1)
                 mipParams.Dispose();
@@ -399,21 +399,21 @@ namespace PKGE
         [MarshalAs(UnmanagedType.U1)]
         public readonly bool isTexture2D;
         #endregion // Fields
-        
+
         #region Constructors
         public Texture2DReadable(bool isReadable, bool isCompressed, bool isLinear, bool isTexture2D)
         {
-            this.isReadable =  isReadable;
+            this.isReadable = isReadable;
             this.isCompressed = isCompressed;
             this.isLinear = isLinear;
             this.isTexture2D = isTexture2D;
-            
+
             CheckSupportsAsyncGPUReadback();
         }
-        
+
         public Texture2DReadable(Texture tex)
         {
-            this.isReadable =  tex.isReadable;
+            this.isReadable = tex.isReadable;
             this.isCompressed = Texture2DParameters.PixelSize(tex.graphicsFormat) == -1;
             this.isLinear = !tex.isDataSRGB;
             this.isTexture2D = tex is Texture2D;
@@ -421,7 +421,7 @@ namespace PKGE
             CheckSupportsAsyncGPUReadback();
         }
         #endregion // Constructors
-        
+
         #region SupportsAsyncGPUReadback
         private enum SupportsAsyncGPUReadback : sbyte
         {
@@ -458,16 +458,18 @@ namespace PKGE
         /// <summary>A <see cref="Graphics.Blit(Texture, RenderTexture)"/> is required if the <see cref="Texture"/> is
         /// compressed or <see cref="supportsAsyncGPUReadback"/> is <see langword="false"/></summary>
         public bool Compressed => !UncompressedReadable && !UncompressedUnreadable;
-        
+
         public bool NoAllocation => !isCompressed && isReadable;
         public bool PerformedReadback => !isCompressed && !isReadable && supportsAsyncGPUReadback == SupportsAsyncGPUReadback.True;
         public bool PerformedBlit => !NoAllocation && !PerformedReadback;
         public bool IsReady => isCompressed || isReadable;
         #endregion // Accessors
     }
-    
+
     /// <summary>
     /// Store Texture parameters in a struct to avoid internal Unity calls.
+    /// Uses Length to refer to the number of elements.
+    /// Uses Size to refer to the number of bytes.
     /// </summary>
     /// <remarks>
     /// Create a new struct if any of the stored parameters change
@@ -477,9 +479,13 @@ namespace PKGE
     public readonly struct Texture2DParameters
     {
         #region Fields
+        /// <summary>The original width of the texture at mip 0.</summary>
         public readonly int width;
+        /// <summary>The original height of the texture at mip 0.</summary>
         public readonly int height;
+        /// <summary>The Texture Format, determining the number of bits per pixel.</summary>
         public readonly TextureFormat format;
+        /// <summary>The number of mip levels in the texture.</summary>
         public readonly int mipCount;
         #endregion // Fields
 
@@ -490,7 +496,7 @@ namespace PKGE
             Assert.IsTrue(height > 0);
             Assert.IsTrue(Enum.IsDefined(typeof(TextureFormat), format));
             Assert.IsTrue(mipCount > 0);
-            
+
             this.width = width;
             this.height = height;
             this.format = format;
@@ -516,14 +522,11 @@ namespace PKGE
         }
         #endregion // Constructors
 
-        // Use length to refer to the number of elements
-        // Use size to refer to the number of bytes
-
         #region Accessors
         /// <summary>Number of elements in mip 0.</summary>
         public int Mip0Length => width * height;
         /// <summary>Number of elements in mip chain.</summary>
-        public int MipChainLength => TextureUtils.MipChainLength(mipCount, width, height);
+        public int MipChainLength => PKGE.TextureUtils.MipChainLength(mipCount, width, height);
 
         /// <summary>Number of bytes in mip 0.</summary>
         public int Mip0Size => PixelSize() * Mip0Length;
@@ -550,7 +553,7 @@ namespace PKGE
         public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
         #endregion // Accessors
 
-        public MipLevelParameters GetMipParameters([AssumeRange(TextureUtils.minMipLevel, TextureUtils.maxMipLevel)] int mipLevel)
+        public MipLevelParameters GetMipParameters([AssumeRange(PKGE.TextureUtils.minMipLevel, PKGE.TextureUtils.maxMipLevel)] int mipLevel)
         {
             int offset = 0;
             int mipWidth = width;
@@ -560,10 +563,10 @@ namespace PKGE
             // They are already correct for mip 0
             if (mipLevel > 0)
             {
-                Assert.IsTrue(mipLevel < TextureUtils.MipmapCount(mipWidth, mipHeight),
+                Assert.IsTrue(mipLevel < PKGE.TextureUtils.MipmapCount(mipWidth, mipHeight),
                     "Provided mipLevel is too large for the texture dimensions.");
 
-                TextureUtils.GetMipData(mipLevel, width, height,
+                PKGE.TextureUtils.GetMipData(mipLevel, width, height,
                     out offset, out _, out mipWidth, out mipHeight);
             }
 
@@ -609,7 +612,7 @@ namespace PKGE
                     return -1;
             }
         }
-        
+
         /// <inheritdoc cref="PixelSize(TextureFormat)"/>
         public static int PixelSize(GraphicsFormat format)
         {
@@ -747,7 +750,7 @@ namespace PKGE
             }
         }
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct MipLevelParameters
     {
@@ -768,6 +771,10 @@ namespace PKGE
             this.offset = offset;
             this.mipLevel = mipLevel;
         }
+
+        public int MipLength => mipWidth * mipHeight;
+        public int MipStart => offset;
+        public int MipEnd => MipStart + MipLength;
     }
 
     /// <summary>
@@ -786,7 +793,7 @@ namespace PKGE
         public ReadbackAsyncDispose(ref NativeArray<byte> output, Texture src)
         {
             Assert.IsTrue(output.IsCreated);
-            
+
             _readbackRequest = AsyncGPUReadback.RequestIntoNativeArray(ref output, src, mipIndex: 0);
         }
 
@@ -819,7 +826,7 @@ namespace PKGE
 
             if (_readbackRequest.done)
                 return ValueTaskSourceStatus.Succeeded;
-            
+
             return ValueTaskSourceStatus.Pending;
         }
 
@@ -830,7 +837,7 @@ namespace PKGE
         }
         #endregion // IValueTaskSource
     }
-    
+
     /// <inheritdoc cref="ReadbackAsyncDispose"/>
     public readonly struct ReadbackMipsAsyncDispose : System.Threading.Tasks.Sources.IValueTaskSource, IDisposable, IAsyncDisposable
     {
@@ -912,7 +919,7 @@ namespace PKGE
             {
                 completed &= GetCompleted(token: i);
             }
-            
+
             return completed;
         }
 
@@ -965,7 +972,7 @@ namespace PKGE
 
             return _readbackRequests[mipIndex].GetData<byte>(layer: 0);
         }
-        
+
         public void GetData(ref NativeArray<byte> data, NativeArray<MipLevelParameters> mips)
         {
             WaitForCompletionAll();
@@ -1020,7 +1027,7 @@ namespace PKGE
                 WaitForCompletionAll();
                 return;
             }
-            
+
             Assert.IsTrue(token < _readbackRequests.Length);
             _readbackRequests[token].WaitForCompletion();
         }
@@ -1039,16 +1046,16 @@ namespace PKGE
                     else if (request.done)
                         succeeded = ValueTaskSourceStatus.Succeeded;
                 }
-                
+
                 if (faulted == ValueTaskSourceStatus.Faulted)
                     return faulted;
-                
+
                 if (succeeded == ValueTaskSourceStatus.Succeeded)
                     return succeeded;
-                
+
                 return ValueTaskSourceStatus.Pending;
             }
-            
+
             Assert.IsTrue(token < _readbackRequests.Length);
 
             if (_readbackRequests[token].hasError)
@@ -1056,7 +1063,7 @@ namespace PKGE
 
             if (_readbackRequests[token].done)
                 return ValueTaskSourceStatus.Succeeded;
-            
+
             return ValueTaskSourceStatus.Pending;
         }
 
@@ -1067,7 +1074,10 @@ namespace PKGE
         }
         #endregion // IValueTaskSource
     }
+}
 
+namespace PKGE
+{
     /// <summary>
     /// Utilities for manipulating Textures.
     /// </summary>
@@ -1081,7 +1091,8 @@ namespace PKGE
         /// </summary>
         /// <param name="renderTexture">The source <see cref="RenderTexture" />.</param>
         /// <param name="texture">The destination <see cref="Texture2D" />.</param>
-        public static void RenderTextureToTexture2D(this RenderTexture renderTexture, Texture2D texture)
+        public static void RenderTextureToTexture2D(this RenderTexture renderTexture, Texture2D texture,
+            bool updateMipmaps = true, bool makeNoLongerReadable = false)
         {
             Assert.AreEqual(renderTexture.width, texture.width);
             Assert.AreEqual(renderTexture.height, texture.height);
@@ -1089,8 +1100,8 @@ namespace PKGE
             var temp = RenderTexture.active;
             
             RenderTexture.active = renderTexture;
-            texture.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
-            texture.Apply();
+            texture.ReadPixels(new Rect(x: 0, y: 0, texture.width, texture.height), destX: 0, destY: 0);
+            texture.Apply(updateMipmaps, makeNoLongerReadable);
             
             RenderTexture.active = temp;
         }

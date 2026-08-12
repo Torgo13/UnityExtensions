@@ -73,7 +73,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.ARGB4444)
             {
-                var argb16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                var argb16 = tex.GetPixelData<Union2>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(argb16.Length, allocator, options);
 
                 for (int i = argb16.Length - 1; i >= 0; i--)
@@ -87,7 +87,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RGB24)
             {
-                var rgb24 = tex.GetPixelData<PKGE.Color24>(mipLevel: 0);
+                var rgb24 = tex.GetPixelData<Color24>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgb24.Length, allocator, options);
 
                 for (int i = rgb24.Length - 1; i >= 0; i--)
@@ -140,7 +140,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RGBA4444)
             {
-                var rgba16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                var rgba16 = tex.GetPixelData<Union2>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgba16.Length, allocator, options);
 
                 for (int i = rgba16.Length - 1; i >= 0; i--)
@@ -165,7 +165,7 @@ namespace TCGE
 #if INCLUDE_MATHEMATICS
             else if (format == TextureFormat.RHalf)
             {
-                var rHalf = tex.GetPixelData<PKGE.Mathematics.Union2>(mipLevel: 0);
+                var rHalf = tex.GetPixelData<TCGE.Mathematics.Union2>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rHalf.Length, allocator, options);
 
                 for (int i = rHalf.Length - 1; i >= 0; i--)
@@ -175,7 +175,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RGHalf)
             {
-                var rgHalf = tex.GetPixelData<PKGE.Mathematics.Union4>(mipLevel: 0);
+                var rgHalf = tex.GetPixelData<TCGE.Mathematics.Union4>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgHalf.Length, allocator, options);
 
                 for (int i = rgHalf.Length - 1; i >= 0; i--)
@@ -189,7 +189,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RGBAHalf)
             {
-                var rgbaFloat = tex.GetPixelData<PKGE.Mathematics.Union8>(mipLevel: 0);
+                var rgbaFloat = tex.GetPixelData<TCGE.Mathematics.Union8>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length, allocator, options);
 
                 for (int i = rgbaFloat.Length - 1; i >= 0; i--)
@@ -238,7 +238,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RG16)
             {
-                var rg16 = tex.GetPixelData<PKGE.Union2>(mipLevel: 0);
+                var rg16 = tex.GetPixelData<Union2>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rg16.Length, allocator, options);
 
                 for (int i = rg16.Length - 1; i >= 0; i--)
@@ -258,7 +258,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RG32)
             {
-                var rg32 = tex.GetPixelData<PKGE.Union4>(mipLevel: 0);
+                var rg32 = tex.GetPixelData<Union4>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rg32.Length, allocator, options);
 
                 for (int i = rg32.Length - 1; i >= 0; i--)
@@ -273,7 +273,7 @@ namespace TCGE
 #if ZERO
             else if (format == TextureFormat.RGB48)
             {
-                var rgb48 = tex.GetPixelData<PKGE.Union6>(mipLevel: 0);
+                var rgb48 = tex.GetPixelData<Union6>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgb48.Length, allocator, options);
 
                 for (int i = rgb48.Length - 1; i >= 0; i--)
@@ -288,7 +288,7 @@ namespace TCGE
 #endif // ZERO
             else if (format == TextureFormat.RGBA64)
             {
-                var rgba64 = tex.GetPixelData<PKGE.Union8>(mipLevel: 0);
+                var rgba64 = tex.GetPixelData<Union8>(mipLevel: 0);
                 rgba32 = new Unity.Collections.NativeArray<Color32>(rgba64.Length, allocator, options);
 
                 for (int i = rgba64.Length - 1; i >= 0; i--)

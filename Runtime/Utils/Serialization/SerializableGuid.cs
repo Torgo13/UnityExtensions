@@ -6,10 +6,10 @@ using UnityEngine;
 namespace PKGE
 {
     /// <summary>
-    /// A <c>Guid</c> that can be serialized by Unity.
+    /// A <see cref="System.Guid"/> that can be serialized by Unity.
     /// </summary>
     /// <remarks>
-    /// The 128-bit <c>Guid</c>
+    /// The 128-bit <see cref="SerializableGuid"/>
     /// is stored as two 64-bit <see langword="ulong"/>s. See the creation utility,
     /// <see cref="SerializableGuidUtil"/>, for additional information.
     /// </remarks>

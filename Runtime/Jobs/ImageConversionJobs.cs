@@ -15,94 +15,10 @@ using float3 = UnityEngine.Vector3;
 using float4 = UnityEngine.Vector4;
 #endif // INCLUDE_MATHEMATICS
 
-namespace PKGE
+namespace TCGE
 {
     public static class ImageConversionJobs
     {
-        //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
-        #region UnityEngine.XR.ARCore
-        /// <exception cref="System.InvalidOperationException">Texture format is not supported</exception>
-        public static JobHandle Schedule(
-            NativeSlice<byte> inputImage,
-            Vector2Int sizeInPixels,
-            TextureFormat format,
-            NativeArray<byte> grayscaleImage,
-            JobHandle inputDeps)
-        {
-            int width = sizeInPixels.x;
-            int height = sizeInPixels.y;
-
-            if (format == TextureFormat.R8 || format == TextureFormat.Alpha8)
-            {
-                return new FlipVerticalJob
-                {
-                    width = width,
-                    height = height,
-                    grayscaleIn = inputImage,
-                    grayscaleOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-
-            // We'll have to convert it. Create an output buffer.
-            if (format == TextureFormat.RGB24)
-            {
-                return new ConvertStridedToGrayscaleJob
-                {
-                    stride = 3,
-                    width = width,
-                    height = height,
-                    colorImageIn = inputImage,
-                    grayscaleImageOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-            else if (format == TextureFormat.RGBA32)
-            {
-                return new ConvertStridedToGrayscaleJob
-                {
-                    stride = 4,
-                    width = width,
-                    height = height,
-                    colorImageIn = inputImage,
-                    grayscaleImageOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-            else if (format == TextureFormat.ARGB32)
-            {
-                return new ConvertARGB32ToGrayscaleJob
-                {
-                    width = width,
-                    height = height,
-                    colorImageIn = inputImage,
-                    grayscaleImageOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-            else if (format == TextureFormat.BGRA32)
-            {
-                return new ConvertBGRA32ToGrayscaleJob
-                {
-                    width = width,
-                    height = height,
-                    colorImageIn = inputImage,
-                    grayscaleImageOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-            else if (format == TextureFormat.RFloat)
-            {
-                return new ConvertRFloatToGrayscaleJob
-                {
-                    width = width,
-                    height = height,
-                    rfloatIn = inputImage.SliceConvert<float>(),
-                    grayscaleImageOut = grayscaleImage
-                }.Schedule(height, 1, inputDeps);
-            }
-            else
-            {
-                throw new System.InvalidOperationException($"Texture format {format} is not supported.");
-            }
-        }
-        #endregion // UnityEngine.XR.ARCore
-
         const float rec601r = 0.299f;
         const float rec601g = 0.587f;
         const float rec601b = 0.144f;
@@ -134,7 +50,7 @@ namespace PKGE
             // Only iterate to the penultimate mipmap level as the job accesses data from the current and following mip level
             for (int i = 0, maxMipmapLevel = mipmapCount - 2; i < maxMipmapLevel; i++)
             {
-                TextureUtils.GetMipData(i, width, height,
+                PKGE.TextureUtils.GetMipData(i, width, height,
                     out int offset, out _, out int mipWidth, out int mipHeight);
 
                 var length = mipWidth * mipHeight;
@@ -159,7 +75,7 @@ namespace PKGE
                         output = output,
                     }.Schedule(output.Length, handle);
             }
-            
+
             if (layered)
             {
                 handle = new LayerMipsAverageJob
@@ -198,8 +114,8 @@ namespace PKGE
             int height = texture.height;
             int size = width * height;
 
-            mipmapCount = TextureUtils.MipmapCount(width, height);
-            int length = TextureUtils.MipChainLength(mipmapCount, width, height);
+            mipmapCount = PKGE.TextureUtils.MipmapCount(width, height);
+            int length = PKGE.TextureUtils.MipChainLength(mipmapCount, width, height);
             colour32 = new NativeArray<Color32>(length, Allocator.TempJob,
                 NativeArrayOptions.UninitializedMemory);
 
@@ -290,15 +206,15 @@ namespace PKGE
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color24 NormalMap(
-            [AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)] int width,
+            [AssumeRange(PKGE.TextureUtils.minTextureSize, PKGE.TextureUtils.maxTextureSize)] int width,
             float normalStrength,
             in NativeArray<Color32>.ReadOnly input,
-            [AssumeRange(0, TextureUtils.maxTextureSize)] int x0,
-            [AssumeRange(0, TextureUtils.maxTextureSize)] int y0,
-            [AssumeRange(0, TextureUtils.maxTextureSize)] int xn,
-            [AssumeRange(0, TextureUtils.maxTextureSize)] int yn,
-            [AssumeRange(1, TextureUtils.maxTextureSize)] int xp,
-            [AssumeRange(1, TextureUtils.maxTextureSize)] int yp)
+            [AssumeRange(0, PKGE.TextureUtils.maxTextureSize)] int x0,
+            [AssumeRange(0, PKGE.TextureUtils.maxTextureSize)] int y0,
+            [AssumeRange(0, PKGE.TextureUtils.maxTextureSize)] int xn,
+            [AssumeRange(0, PKGE.TextureUtils.maxTextureSize)] int yn,
+            [AssumeRange(1, PKGE.TextureUtils.maxTextureSize)] int xp,
+            [AssumeRange(1, PKGE.TextureUtils.maxTextureSize)] int yp)
         {
             // Obtain the colors of the eight surrounding pixels
             Color32 c_xn_yn = input[mad(yn, width, xn)];
@@ -438,6 +354,277 @@ namespace PKGE
             return (float4)input * scale;
         }
 #pragma warning restore IDE1006 // Naming Styles
+    }
+
+
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+    public struct CalculateMipsJob : IJobFor
+    {
+        [ReadOnly] public int offset;
+        [ReadOnly] public int offsetn;
+        [ReadOnly] public int mipWidth;
+        [ReadOnly] public int mipWidthn;
+        [ReadOnly] public int mipHeightn;
+
+        [NativeDisableParallelForRestriction]
+        public NativeArray<Color32> rawTextureData;
+
+        public void Execute(int index)
+        {
+            int y = System.Math.DivRem(index, mipWidth, out int x);
+
+            // Convert coordinates from source mip level to target mip level
+            int wn = mipWidthn - 1;
+            int hn = mipHeightn - 1;
+            int x0 = min(wn, x + x) + offsetn;
+            int y0 = min(hn, y + y);
+            int x1 = min(wn, x0 + 1) + offsetn;
+            int y1 = min(hn, y0 + 1);
+
+            Color32 tl = rawTextureData[mad(y0, mipWidthn, x0)];
+            Color32 tr = rawTextureData[mad(y0, mipWidthn, x1)];
+            Color32 bl = rawTextureData[mad(y1, mipWidthn, x0)];
+            Color32 br = rawTextureData[mad(y1, mipWidthn, x1)];
+
+            byte r = (byte)((tl.r + tr.r + bl.r + br.r) >> 2);
+            byte g = (byte)((tl.g + tr.g + bl.g + br.g) >> 2);
+            byte b = (byte)((tl.b + tr.b + bl.b + br.b) >> 2);
+            byte a = (byte)((tl.a + tr.a + bl.a + br.a) >> 2);
+
+            rawTextureData[offset + index] = new Color32(r, g, b, a);
+        }
+    }
+
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+    public struct LayerMipsJob : IJobFor
+    {
+        [ReadOnly] public int width;
+        [ReadOnly] public int height;
+        [ReadOnly] public int mipmapCount;
+
+        public NativeArray<Color24> rawTextureData;
+
+        public void Execute(int index)
+        {
+            int y = System.Math.DivRem(index, width, out int x);
+            var rawTextureDataRO = rawTextureData.AsReadOnly();
+
+            const float scale = 1f / byte.MaxValue;
+            Color24 c = rawTextureDataRO[index];
+            var rgb = new float3(c.r, c.g, c.b) * scale;
+
+            for (int mip = 1; mip < mipmapCount; mip++)
+            {
+                PKGE.TextureUtils.GetMipData(mip, width, height,
+                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
+
+                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                    mipWidth, mipHeight, offset, rawTextureDataRO);
+
+                rgb = ImageConversionJobs.BlendNormal(rgb, new float3(m.r, m.g, m.b) * scale);
+            }
+
+            rawTextureData[index] = new Color24(rgb);
+        }
+    }
+
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+    public struct LayerMipsAverageJob : IJobFor
+    {
+        [ReadOnly] public int width;
+        [ReadOnly] public int height;
+        [ReadOnly] public int mipmapCount;
+        [ReadOnly] public float mipmapCountInv;
+
+        public NativeArray<Color24> rawTextureData;
+
+        public void Execute(int index)
+        {
+            int y = System.Math.DivRem(index, width, out int x);
+            var rawTextureDataRO = rawTextureData.AsReadOnly();
+
+            Color24 c = rawTextureDataRO[index];
+            var rgb = new float4(c.r, c.g, c.b, 0);
+
+            for (int mip = 1; mip < mipmapCount; mip++)
+            {
+                PKGE.TextureUtils.GetMipData(mip, width, height,
+                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
+
+                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
+                    mipWidth, mipHeight, offset, rawTextureDataRO);
+
+                rgb += new float4(m.r, m.g, m.b, 0);
+            }
+
+            rawTextureData[index] = new Color24(rgb * mipmapCountInv);
+        }
+    }
+
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+    public struct CreateNormalMapJob : IJobFor
+    {
+        [ReadOnly] public int width;
+        [ReadOnly] public int hn;
+        [ReadOnly] public float normalStrength;
+        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
+        [NativeMatchesParallelForLength]
+        [WriteOnly] public NativeArray<Color24> output;
+
+        public void Execute(int index)
+        {
+            // Fix out of bounds array access on image edges
+            int wn = width - 1;
+
+            int y0 = System.Math.DivRem(index, width, out int x0);
+
+            int xn = ImageConversionJobs.MaxUnlikely(0, x0 - 1);
+            int yn = ImageConversionJobs.MaxUnlikely(0, y0 - 1);
+
+            int xp = ImageConversionJobs.MinUnlikely(x0 + 1, wn);
+            int yp = ImageConversionJobs.MinUnlikely(y0 + 1, hn);
+
+            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
+                input, x0, y0, xn, yn, xp, yp);
+        }
+    }
+
+    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
+    public struct CreateNormalMapWrapJob : IJobFor
+    {
+        [ReadOnly] public int width;
+        [ReadOnly] public int hn;
+        [ReadOnly] public float normalStrength;
+        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
+        [NativeMatchesParallelForLength]
+        [WriteOnly] public NativeArray<Color24> output;
+
+        public void Execute(int index)
+        {
+            // Fix out of bounds array access on image edges
+            int wn = width - 1;
+
+            int y0 = System.Math.DivRem(index, width, out int x0);
+
+            int xn = mod(x0 - 1, wn);
+            int yn = mod(y0 - 1, hn);
+
+            int xp = mod(x0 + 1, wn);
+            int yp = mod(y0 + 1, hn);
+
+            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
+                input, x0, y0, xn, yn, xp, yp);
+        }
+
+#pragma warning disable IDE1006 // Naming Styles
+        /// <summary>
+        /// Integer modulus function to allow texture coordinates
+        /// to wrap around to the other side.
+        /// </summary>
+        /// <remarks>
+        /// Does not support integer values that are less than -<paramref name="b"/>.
+        /// </remarks>
+        /// <param name="a">Input integer value.</param>
+        /// <param name="b">Maximum value (i.e. texture width - 1).</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: AssumeRange(PKGE.TextureUtils.minTextureSize, PKGE.TextureUtils.maxTextureSize)]
+        static int mod(
+            [AssumeRange(-1, PKGE.TextureUtils.maxTextureSize)] int a,
+            [AssumeRange(1, PKGE.TextureUtils.maxTextureSize)] int b)
+        {
+            return (a + b) % b;
+        }
+#pragma warning restore IDE1006 // Naming Styles
+    }
+}
+
+namespace PKGE
+{
+    public static class ImageConversionJobs
+    {
+        //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
+        #region UnityEngine.XR.ARCore
+        /// <exception cref="System.InvalidOperationException">Texture format is not supported</exception>
+        public static JobHandle Schedule(
+            NativeSlice<byte> inputImage,
+            Vector2Int sizeInPixels,
+            TextureFormat format,
+            NativeArray<byte> grayscaleImage,
+            JobHandle inputDeps)
+        {
+            int width = sizeInPixels.x;
+            int height = sizeInPixels.y;
+
+            if (format == TextureFormat.R8 || format == TextureFormat.Alpha8)
+            {
+                return new FlipVerticalJob
+                {
+                    width = width,
+                    height = height,
+                    grayscaleIn = inputImage,
+                    grayscaleOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+
+            // We'll have to convert it. Create an output buffer.
+            if (format == TextureFormat.RGB24)
+            {
+                return new ConvertStridedToGrayscaleJob
+                {
+                    stride = 3,
+                    width = width,
+                    height = height,
+                    colorImageIn = inputImage,
+                    grayscaleImageOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+            else if (format == TextureFormat.RGBA32)
+            {
+                return new ConvertStridedToGrayscaleJob
+                {
+                    stride = 4,
+                    width = width,
+                    height = height,
+                    colorImageIn = inputImage,
+                    grayscaleImageOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+            else if (format == TextureFormat.ARGB32)
+            {
+                return new ConvertARGB32ToGrayscaleJob
+                {
+                    width = width,
+                    height = height,
+                    colorImageIn = inputImage,
+                    grayscaleImageOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+            else if (format == TextureFormat.BGRA32)
+            {
+                return new ConvertBGRA32ToGrayscaleJob
+                {
+                    width = width,
+                    height = height,
+                    colorImageIn = inputImage,
+                    grayscaleImageOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+            else if (format == TextureFormat.RFloat)
+            {
+                return new ConvertRFloatToGrayscaleJob
+                {
+                    width = width,
+                    height = height,
+                    rfloatIn = inputImage.SliceConvert<float>(),
+                    grayscaleImageOut = grayscaleImage
+                }.Schedule(height, 1, inputDeps);
+            }
+            else
+            {
+                throw new System.InvalidOperationException($"Texture format {format} is not supported.");
+            }
+        }
+        #endregion // UnityEngine.XR.ARCore
     }
 
     //https://github.com/needle-mirror/com.unity.xr.arcore/blob/595a566141f05d4d0ef96057cae1b474818e046e/Runtime/ImageConversionJobs.cs
@@ -594,184 +781,4 @@ namespace PKGE
         }
     }
     #endregion // UnityEngine.XR.ARCore
-
-    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-    public struct CalculateMipsJob : IJobFor
-    {
-        [ReadOnly] public int offset;
-        [ReadOnly] public int offsetn;
-        [ReadOnly] public int mipWidth;
-        [ReadOnly] public int mipWidthn;
-        [ReadOnly] public int mipHeightn;
-
-        [NativeDisableParallelForRestriction]
-        public NativeArray<Color32> rawTextureData;
-
-        public void Execute(int index)
-        {
-            int y = System.Math.DivRem(index, mipWidth, out int x);
-
-            // Convert coordinates from source mip level to target mip level
-            int wn = mipWidthn - 1;
-            int hn = mipHeightn - 1;
-            int x0 = min(wn, x + x) + offsetn;
-            int y0 = min(hn, y + y);
-            int x1 = min(wn, x0 + 1) + offsetn;
-            int y1 = min(hn, y0 + 1);
-
-            Color32 tl = rawTextureData[mad(y0, mipWidthn, x0)];
-            Color32 tr = rawTextureData[mad(y0, mipWidthn, x1)];
-            Color32 bl = rawTextureData[mad(y1, mipWidthn, x0)];
-            Color32 br = rawTextureData[mad(y1, mipWidthn, x1)];
-
-            byte r = (byte)((tl.r + tr.r + bl.r + br.r) >> 2);
-            byte g = (byte)((tl.g + tr.g + bl.g + br.g) >> 2);
-            byte b = (byte)((tl.b + tr.b + bl.b + br.b) >> 2);
-            byte a = (byte)((tl.a + tr.a + bl.a + br.a) >> 2);
-
-            rawTextureData[offset + index] = new Color32(r, g, b, a);
-        }
-    }
-
-    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-    public struct LayerMipsJob : IJobFor
-    {
-        [ReadOnly] public int width;
-        [ReadOnly] public int height;
-        [ReadOnly] public int mipmapCount;
-
-        public NativeArray<Color24> rawTextureData;
-
-        public void Execute(int index)
-        {
-            int y = System.Math.DivRem(index, width, out int x);
-            var rawTextureDataRO = rawTextureData.AsReadOnly();
-
-            const float scale = 1f / byte.MaxValue;
-            Color24 c = rawTextureDataRO[index];
-            var rgb = new float3(c.r, c.g, c.b) * scale;
-
-            for (int mip = 1; mip < mipmapCount; mip++)
-            {
-                TextureUtils.GetMipData(mip, width, height,
-                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
-
-                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
-                    mipWidth, mipHeight, offset, rawTextureDataRO);
-
-                rgb = ImageConversionJobs.BlendNormal(rgb, new float3(m.r, m.g, m.b) * scale);
-            }
-
-            rawTextureData[index] = new Color24(rgb);
-        }
-    }
-
-    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-    public struct LayerMipsAverageJob : IJobFor
-    {
-        [ReadOnly] public int width;
-        [ReadOnly] public int height;
-        [ReadOnly] public int mipmapCount;
-        [ReadOnly] public float mipmapCountInv;
-
-        public NativeArray<Color24> rawTextureData;
-
-        public void Execute(int index)
-        {
-            int y = System.Math.DivRem(index, width, out int x);
-            var rawTextureDataRO = rawTextureData.AsReadOnly();
-
-            Color24 c = rawTextureDataRO[index];
-            var rgb = new float4(c.r, c.g, c.b, 0);
-
-            for (int mip = 1; mip < mipmapCount; mip++)
-            {
-                TextureUtils.GetMipData(mip, width, height,
-                    out int offset, out int pow2, out int mipWidth, out int mipHeight);
-
-                Color24 m = ImageConversionJobs.GetHigherMipColor(x / pow2, y / pow2,
-                    mipWidth, mipHeight, offset, rawTextureDataRO);
-
-                rgb += new float4(m.r, m.g, m.b, 0);
-            }
-
-            rawTextureData[index] = new Color24(rgb * mipmapCountInv);
-        }
-    }
-
-    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-    public struct CreateNormalMapJob : IJobFor
-    {
-        [ReadOnly] public int width;
-        [ReadOnly] public int hn;
-        [ReadOnly] public float normalStrength;
-        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
-        [NativeMatchesParallelForLength]
-        [WriteOnly] public NativeArray<Color24> output;
-
-        public void Execute(int index)
-        {
-            // Fix out of bounds array access on image edges
-            int wn = width - 1;
-
-            int y0 = System.Math.DivRem(index, width, out int x0);
-
-            int xn = ImageConversionJobs.MaxUnlikely(0, x0 - 1);
-            int yn = ImageConversionJobs.MaxUnlikely(0, y0 - 1);
-
-            int xp = ImageConversionJobs.MinUnlikely(x0 + 1, wn);
-            int yp = ImageConversionJobs.MinUnlikely(y0 + 1, hn);
-
-            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
-                input, x0, y0, xn, yn, xp, yp);
-        }
-    }
-
-    [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-    public struct CreateNormalMapWrapJob : IJobFor
-    {
-        [ReadOnly] public int width;
-        [ReadOnly] public int hn;
-        [ReadOnly] public float normalStrength;
-        [ReadOnly] public NativeArray<Color32>.ReadOnly input;
-        [NativeMatchesParallelForLength]
-        [WriteOnly] public NativeArray<Color24> output;
-
-        public void Execute(int index)
-        {
-            // Fix out of bounds array access on image edges
-            int wn = width - 1;
-
-            int y0 = System.Math.DivRem(index, width, out int x0);
-
-            int xn = mod(x0 - 1, wn);
-            int yn = mod(y0 - 1, hn);
-
-            int xp = mod(x0 + 1, wn);
-            int yp = mod(y0 + 1, hn);
-
-            output[index] = ImageConversionJobs.NormalMap(width, normalStrength,
-                input, x0, y0, xn, yn, xp, yp);
-        }
-
-#pragma warning disable IDE1006 // Naming Styles
-        /// <summary>
-        /// Integer modulus function to allow texture coordinates
-        /// to wrap around to the other side.
-        /// </summary>
-        /// <remarks>
-        /// Does not support integer values that are less than -<paramref name="b"/>.
-        /// </remarks>
-        /// <param name="a">Input integer value.</param>
-        /// <param name="b">Maximum value (i.e. texture width - 1).</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: AssumeRange(TextureUtils.minTextureSize, TextureUtils.maxTextureSize)]
-        static int mod(
-            [AssumeRange(-1, TextureUtils.maxTextureSize)] int a,
-            [AssumeRange(1, TextureUtils.maxTextureSize)] int b)
-        {
-            return (a + b) % b;
-        }
-#pragma warning restore IDE1006 // Naming Styles
-    }
 }

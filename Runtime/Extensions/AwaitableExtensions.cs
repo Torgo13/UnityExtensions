@@ -178,12 +178,14 @@ namespace PKGE
 #endif // SAFETY
         }
 
-        public static async Task<T> AsTask<T>(this Awaitable<T> a)
+        public static async Task<T?> AsTask<T>(this Awaitable<T> a)
         {
 #if SAFETY
+            var result = default(T);
+
             try
             {
-                return await a;
+                result = await a;
             }
             catch (System.Exception e)
             {
@@ -191,7 +193,7 @@ namespace PKGE
                     Debug.LogException(e);
             }
 
-            return default;
+            return result;
 #else
             return await a;
 #endif // SAFETY

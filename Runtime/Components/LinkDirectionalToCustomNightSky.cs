@@ -30,11 +30,10 @@ namespace PKGE
         bool SkyMat([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material? sky)
         {
             sky = skyMat;
-            if (sky == null)
-            {
-                skyMat = sky = RenderSettings.skybox;
-            }
+            if (sky != null)
+                return true;
 
+            skyMat = sky = RenderSettings.skybox;
             return sky != null;
         }
 

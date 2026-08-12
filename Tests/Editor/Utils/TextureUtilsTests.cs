@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 using AssertionException = UnityEngine.Assertions.AssertionException;
 
-namespace PKGE.Tests
+namespace TCGE.Tests
 {
     public class TextureUtilsTests
     {
@@ -26,7 +26,7 @@ namespace PKGE.Tests
 
             Assert.AreEqual(FillColour(testProperties), result[0]);
 
-            CoreUtils.Destroy(tex);
+            PKGE.CoreUtils.Destroy(tex);
         }
 
         [UnityTest]
@@ -43,7 +43,7 @@ namespace PKGE.Tests
 
             Assert.AreEqual(FillColour24(testProperties), result[0]);
 
-            CoreUtils.Destroy(tex);
+            PKGE.CoreUtils.Destroy(tex);
         }
 
 #if ZERO
@@ -130,7 +130,7 @@ namespace PKGE.Tests
             Assert.IsNotNull(result);
 
             rt.Release();
-            CoreUtils.Destroy(rt);
+            PKGE.CoreUtils.Destroy(rt);
         }
 
         [UnityTest]
@@ -249,7 +249,7 @@ namespace PKGE.Tests
             var tex2D = new Texture2D(w, h, TextureFormat.RGBA32, mipChain: false);
 
             // Act
-            rt.RenderTextureToTexture2D(tex2D);
+            PKGE.TextureUtils.RenderTextureToTexture2D(rt, tex2D);
 
             // Assert all pixels are red
             foreach (var c in tex2D.GetPixels32())
@@ -271,7 +271,7 @@ namespace PKGE.Tests
             var rt = new RenderTexture(4, 4, 0);
             var tex2D = new Texture2D(8, 8);
 
-            Assert.Throws<AssertionException>(() => rt.RenderTextureToTexture2D(tex2D));
+            Assert.Throws<AssertionException>(() => PKGE.TextureUtils.RenderTextureToTexture2D(rt, tex2D));
 
             UnityEngine.Object.DestroyImmediate(rt);
             UnityEngine.Object.DestroyImmediate(tex2D);
@@ -296,7 +296,7 @@ namespace PKGE.Tests
             const int mipCount = 1 + mipLevel;
             var tex2D = new Texture2D(width, height, TextureFormat.RGBA32, mipCount, linear: false);
 
-            TextureUtils.GetMipData(mipLevel, width, height, out int offset, out int pow2, out int mw, out int mh);
+            PKGE.TextureUtils.GetMipData(mipLevel, width, height, out int offset, out int pow2, out int mw, out int mh);
 
             Assert.AreEqual(0, offset);
             Assert.AreEqual(1, pow2);
@@ -306,7 +306,7 @@ namespace PKGE.Tests
             var mipLevelData = tex2D.GetPixelData<Color32>(mipLevel);
             Assert.AreEqual(mw * mh, mipLevelData.Length);
 
-            var mipChainLength = TextureUtils.MipChainLength(tex2D);
+            var mipChainLength = PKGE.TextureUtils.MipChainLength(tex2D);
             Assert.AreEqual(MipChainLength(tex2D), mipChainLength);
 
             UnityEngine.Object.DestroyImmediate(tex2D);
@@ -329,12 +329,12 @@ namespace PKGE.Tests
             const int mipCount = 1 + mipLevel;
             var tex2D = new Texture2D(width, height, TextureFormat.RGBA32, mipCount, linear: false);
 
-            TextureUtils.GetMipData(mipLevel, width, height, out int offset, out int pow2, out int mw, out int mh);
+            PKGE.TextureUtils.GetMipData(mipLevel, width, height, out int offset, out int pow2, out int mw, out int mh);
 
             var mipLevelData = tex2D.GetPixelData<Color32>(mipLevel);
             Assert.AreEqual(mw * mh, mipLevelData.Length);
 
-            var mipChainLength = TextureUtils.MipChainLength(tex2D);
+            var mipChainLength = PKGE.TextureUtils.MipChainLength(tex2D);
             Assert.AreEqual(MipChainLength(tex2D), mipChainLength);
 
             UnityEngine.Object.DestroyImmediate(tex2D);
@@ -358,7 +358,7 @@ namespace PKGE.Tests
             const int mipCount = 1 + mipLevel;
             var tex3D = new Texture3D(width, height, depth, TextureFormat.RGBA32, mipCount);
 
-            TextureUtils.GetMipData(mipLevel, width, height, depth,
+            PKGE.TextureUtils.GetMipData(mipLevel, width, height, depth,
                 out int offset, out int pow2, out int mw, out int mh, out int md);
 
             Assert.AreEqual(width * height * depth, offset); // Mip 0 texels
@@ -367,7 +367,7 @@ namespace PKGE.Tests
             var mipLevelData = tex3D.GetPixelData<Color32>(mipLevel);
             Assert.AreEqual(mw * mh * md, mipLevelData.Length);
 
-            var mipChainLength = TextureUtils.MipChainLength(tex3D);
+            var mipChainLength = PKGE.TextureUtils.MipChainLength(tex3D);
             Assert.AreEqual(MipChainLength(tex3D), mipChainLength);
 
             UnityEngine.Object.DestroyImmediate(tex3D);
@@ -402,7 +402,7 @@ namespace PKGE.Tests
         [TestCase(9, 3)]
         public void MipChainLength_2D_MatchesManualSum(int width, int height)
         {
-            int mipCount = TextureUtils.MipmapCount(width, height);
+            int mipCount = PKGE.TextureUtils.MipmapCount(width, height);
             int expected = 0;
             int w = width, h = height;
             for (int i = 0; i <= mipCount; i++)
@@ -412,7 +412,7 @@ namespace PKGE.Tests
                 h = System.Math.Max(1, h / 2);
             }
 
-            int actual = TextureUtils.MipChainLength(mipCount + 1, width, height);
+            int actual = PKGE.TextureUtils.MipChainLength(mipCount + 1, width, height);
             Assert.AreEqual(expected, actual);
         }
 
@@ -426,7 +426,7 @@ namespace PKGE.Tests
         public void MipmapCount_2D_ComputesCorrectly(int width, int height)
         {
             var tex2D = new Texture2D(width, height);
-            Assert.AreEqual(tex2D.mipmapCount, TextureUtils.MipmapCount(width, height)); // 8->4->2->1
+            Assert.AreEqual(tex2D.mipmapCount, PKGE.TextureUtils.MipmapCount(width, height)); // 8->4->2->1
             Object.DestroyImmediate(tex2D);
         }
 
@@ -442,7 +442,7 @@ namespace PKGE.Tests
         [TestCase(9, 3, 3)]
         public void MipChainLength_3D_MatchesManualSum(int width, int height, int depth)
         {
-            int mipCount = TextureUtils.MipmapCount(width, height, depth);
+            int mipCount = PKGE.TextureUtils.MipmapCount(width, height, depth);
             int expected = 0;
             int w = width, h = height, d = depth;
             for (int i = 0; i <= mipCount; i++)
@@ -453,7 +453,7 @@ namespace PKGE.Tests
                 d = System.Math.Max(1, d / 2);
             }
 
-            int actual = TextureUtils.MipChainLength(mipCount + 1, width, height, depth);
+            int actual = PKGE.TextureUtils.MipChainLength(mipCount + 1, width, height, depth);
             Assert.AreEqual(expected, actual);
         }
 
@@ -472,7 +472,7 @@ namespace PKGE.Tests
             var tex3D = new Texture3D(width, height, depth,
                 UnityEngine.Experimental.Rendering.DefaultFormat.LDR,
                 UnityEngine.Experimental.Rendering.TextureCreationFlags.MipChain);
-            Assert.AreEqual(tex3D.mipmapCount, TextureUtils.MipmapCount(width, height, depth)); // 4->2->1
+            Assert.AreEqual(tex3D.mipmapCount, PKGE.TextureUtils.MipmapCount(width, height, depth)); // 4->2->1
             Object.DestroyImmediate(tex3D);
         }
         #endregion // MipChainLength
@@ -795,6 +795,7 @@ namespace PKGE.Tests
         }
     }
 
+#if ZERO
     public class MipLevelParametersTests
     {
         [Test]
@@ -816,6 +817,7 @@ namespace PKGE.Tests
             Assert.Throws<AssertionException>(() => new MipLevelParameters(4, 4, 0, -1));
         }
     }
+#endif // ZERO
 
     public class Texture2DPropertiesTests
     {

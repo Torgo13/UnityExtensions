@@ -28,7 +28,7 @@ namespace PKGE
         [SerializeField, HideInInspector]
 	    private GUIStyle sliderStyle;
 
-        private static TimeOfDay _instance;
+        private static TimeOfDay _instance = null!;
 
         #region MonoBehaviour
         private void OnEnable()

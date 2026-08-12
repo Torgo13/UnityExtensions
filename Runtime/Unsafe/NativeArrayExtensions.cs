@@ -24,30 +24,6 @@ namespace PKGE.Unsafe
         #endregion // UnityEngine.Formats.Alembic.Importer
 #endif // PKGE_USING_UNSAFE
 
-        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
-        #region UnityEngine.Rendering.Universal
-        /// <summary>
-        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
-        {
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
-
-            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafeReadOnlyPtr(), index);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
-        {
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
-            
-            return ref UnsafeUtility.ArrayElementAsRef<T>(array.GetUnsafePtr(), index);
-        }
-        #endregion // UnityEngine.Rendering.Universal
-
         //https://github.com/Unity-Technologies/InputSystem/blob/fb786d2a7d01b8bcb8c4218522e5f4b9afea13d7/Packages/com.unity.inputsystem/InputSystem/Utilities/ArrayHelpers.cs
         #region UnityEngine.InputSystem.Utilities
         public static void EraseAtWithCapacity<TValue>(this NativeArray<TValue> array, ref int count, int index)

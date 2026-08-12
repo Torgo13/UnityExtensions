@@ -387,14 +387,14 @@ namespace PKGE
         public static implicit operator Span<T>(DynamicArray<T> array) => new Span<T>(array.Array, 0, array.size);
 
         /// <summary>
-        /// IEnumerator-like struct used to loop over this entire array. See the IEnumerator docs for more info:
+        /// <see cref="System.Collections.IEnumerator"/>-like struct used to loop over this entire array. See the <see cref="System.Collections.IEnumerator"/> docs for more info:
         /// <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.ienumerator">IEnumerator</a>
         /// </summary>
         /// <remarks>
-        /// This struct intentionally does not explicitly implement the IEnumerable/IEnumerator interfaces it just follows
-        /// the same function signatures. This means the duck typing used by <c>foreach</c> on the compiler level will
-        /// pick it up as IEnumerable but at the same time avoids generating Garbage.
-        /// For more info, see the C# language specification of the <c>foreach</c> statement.
+        /// This struct intentionally does not explicitly implement the <see cref="System.Collections.IEnumerable"/>/<see cref="System.Collections.IEnumerator"/> interfaces it just follows
+        /// the same function signatures. This means the duck typing used by <see langword="foreach"/> on the compiler level will
+        /// pick it up as <see cref="System.Collections.IEnumerable"/> but at the same time avoids generating Garbage.
+        /// For more info, see the C# language specification of the <see langword="foreach"/> statement.
         /// </remarks>
         /// <seealso cref="RangeEnumerable.RangeIterator"/>
         public struct Iterator

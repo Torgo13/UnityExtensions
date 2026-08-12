@@ -4,6 +4,73 @@ using UnityEngine;
 
 namespace TCGE
 {
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct Color24
+    {
+        public byte r;
+        public byte g;
+        public byte b;
+
+        public Color24(byte r, byte g, byte b)
+        {
+            this.r = r;
+            this.g = g;
+            this.b = b;
+        }
+
+        public Color24(float r, float g, float b)
+        {
+            this.r = (byte)(r * byte.MaxValue);
+            this.g = (byte)(g * byte.MaxValue);
+            this.b = (byte)(b * byte.MaxValue);
+        }
+
+        public Color24(Vector3 f, float scale = byte.MaxValue)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public Color24(Vector4 f, float scale = byte.MaxValue)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public static implicit operator Color24(Vector3 f) => new Color24(f);
+        public static implicit operator Vector3(Color24 c) => new Vector3(c.r, c.g, c.b);
+
+        public static implicit operator Color24(Vector4 f) => new Color24(f);
+        public static implicit operator Vector4(Color24 c) => new Vector4(c.r, c.g, c.b, 1f);
+
+        public static implicit operator Color24(Color32 c32) => new Color24(c32.r, c32.g, c32.b);
+        public static implicit operator Color32(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
+#if INCLUDE_MATHEMATICS
+        public Color24(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public Color24(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
+        {
+            this.r = (byte)(f.x * scale);
+            this.g = (byte)(f.y * scale);
+            this.b = (byte)(f.z * scale);
+        }
+
+        public static implicit operator Color24(Unity.Mathematics.float3 f) => new Color24(f);
+        public static implicit operator Unity.Mathematics.float3(Color24 c) => new Unity.Mathematics.float3(c.r, c.g, c.b);
+
+        public static implicit operator Color24(Unity.Mathematics.float4 f) => new Color24(f.x, f.y, f.z);
+        public static implicit operator Unity.Mathematics.float4(Color24 c) => new Unity.Mathematics.float4(c.r, c.g, c.b, 1f);
+#endif // INCLUDE_MATHEMATICS
+    }
+
     public static class ColorExtensions
     {
         #region System.Drawing
@@ -21,6 +88,32 @@ namespace TCGE
         /// Convert <see cref="System.Drawing.KnownColor"/> to <see cref="UnityEngine.Color32"/>.
         /// </summary>
         public static Color32 FromKnownColor(System.Drawing.KnownColor knownColor) => System.Drawing.Color.FromKnownColor(knownColor).ToColor32();
+
+        public const int KnownColorsCount = 1 + (int)System.Drawing.KnownColor.YellowGreen - (int)System.Drawing.KnownColor.AliceBlue;
+
+        /// <summary>
+        /// Convert <see cref="System.Drawing.KnownColor"/> index to <see cref="UnityEngine.Color32"/>.
+        /// </summary>
+        /// <param name="index">Pass 0 for the first valid colour.</param>
+        /// <returns>The <see cref="System.Drawing.KnownColor"/> at <paramref name="index"/> converted to a <see cref="UnityEngine.Color32"/>,
+        /// or <see cref="Color.magenta"/> if not in range.</returns>
+        public static Color32 FromKnownColor(int index)
+        {
+            if (index < 0 || index >= KnownColorsCount)
+                return (Color32)Color.magenta;
+
+            // 1 is added as KnownColor enum has no value for 0
+            return FromKnownColor(1 + index + System.Drawing.KnownColor.AliceBlue);
+        }
+
+        public static string KnownColorName(int index)
+        {
+            if (index < 0 || index >= KnownColorsCount)
+                return string.Empty;
+
+            // 1 is added as KnownColor enum has no value for 0
+            return (1 + index + System.Drawing.KnownColor.AliceBlue).ToString();
+        }
 
         /// <summary>
         /// Convert <see cref="UnityEngine.Color32"/> to <see cref="System.Drawing.KnownColor"/>.
@@ -69,6 +162,7 @@ namespace TCGE
         }
         #endregion // System.Drawing
 
+        #region Colour
         /// <summary>
         /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
         /// </summary>
@@ -187,83 +281,73 @@ namespace TCGE
                 (b & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
         }
 
-        public static int Color32ToInt(this Color32 color) => new PKGE.Union4 { Color32 = color }.Int;
-        public static Color32 IntToColor32(this int color) => new PKGE.Union4 { Int = color }.Color32;
+        public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;
+        public static Color32 IntToColor32(this int color) => new Union4 { Int = color }.Color32;
 
-        public static uint Color32ToUInt(this Color32 color) => new PKGE.Union4 { Color32 = color }.UInt;
-        public static Color32 UIntToColor32(this uint color) => new PKGE.Union4 { UInt = color }.Color32;
+        public static uint Color32ToUInt(this Color32 color) => new Union4 { Color32 = color }.UInt;
+        public static Color32 UIntToColor32(this uint color) => new Union4 { UInt = color }.Color32;
+        #endregion // Colour
+
+        #region ColourHex
+        public static string GetColorHex(this Color32 color)
+        {
+            System.Span<char> hex = stackalloc char[8];
+
+            return color.GetColorHexSpan(hex).ToString();
+        }
+
+        public static string GetColorTextCode(this Color32 color)
+        {
+            System.Span<char> hex = stackalloc char[17] { '<', 'c', 'o', 'l', 'o', 'r', '=', '#', 'R', 'r', 'G', 'g', 'B', 'b', 'A', 'a', '>' };
+
+            _ = color.GetColorHexSpan(hex.Slice(start: 8, length: 8));
+
+            return hex.ToString();
+        }
+
+        public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
+        {
+            (hex[0], hex[1]) = ByteToHex(color.r);
+            (hex[2], hex[3]) = ByteToHex(color.g);
+            (hex[4], hex[5]) = ByteToHex(color.b);
+            (hex[6], hex[7]) = ByteToHex(color.a);
+
+            return hex;
+        }
+
+        public static (char, char) ByteToHex(int b)
+        {
+            return (NibbleToHex(b >> 4), NibbleToHex(b & 15));
+        }
+
+        public static char NibbleToHex(int nibble)
+        {
+            return nibble switch
+            {
+                1 => '1',
+                2 => '2',
+                3 => '3',
+                4 => '4',
+                5 => '5',
+                6 => '6',
+                7 => '7',
+                8 => '8',
+                9 => '9',
+                10 => 'A',
+                11 => 'B',
+                12 => 'C',
+                13 => 'D',
+                14 => 'E',
+                15 => 'F',
+                _ => '0',
+            };
+        }
+        #endregion // ColourHex
     }
 }
 
 namespace PKGE
 {
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public struct Color24
-    {
-        public byte r;
-        public byte g;
-        public byte b;
-
-        public Color24(byte r, byte g, byte b)
-        {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-        }
-
-        public Color24(float r, float g, float b)
-        {
-            this.r = (byte)(r * byte.MaxValue);
-            this.g = (byte)(g * byte.MaxValue);
-            this.b = (byte)(b * byte.MaxValue);
-        }
-
-        public Color24(Vector3 f, float scale = byte.MaxValue)
-        {
-            this.r = (byte)(f.x * scale);
-            this.g = (byte)(f.y * scale);
-            this.b = (byte)(f.z * scale);
-        }
-
-        public Color24(Vector4 f, float scale = byte.MaxValue)
-        {
-            this.r = (byte)(f.x * scale);
-            this.g = (byte)(f.y * scale);
-            this.b = (byte)(f.z * scale);
-        }
-
-        public static implicit operator Color24(Vector3 f) => new Color24(f);
-        public static implicit operator Vector3(Color24 c) => new Vector3(c.r, c.g, c.b);
-
-        public static implicit operator Color24(Vector4 f) => new Color24(f);
-        public static implicit operator Vector4(Color24 c) => new Vector4(c.r, c.g, c.b, 1f);
-
-        public static implicit operator Color24(Color32 c32) => new Color24(c32.r, c32.g, c32.b);
-        public static implicit operator Color32(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
-
-#if INCLUDE_MATHEMATICS
-        public Color24(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
-        {
-            this.r = (byte)(f.x * scale);
-            this.g = (byte)(f.y * scale);
-            this.b = (byte)(f.z * scale);
-        }
-
-        public Color24(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
-        {
-            this.r = (byte)(f.x * scale);
-            this.g = (byte)(f.y * scale);
-            this.b = (byte)(f.z * scale);
-        }
-
-        public static implicit operator Color24(Unity.Mathematics.float3 f) => new Color24(f);
-        public static implicit operator Unity.Mathematics.float3(Color24 c) => new Unity.Mathematics.float3(c.r, c.g, c.b);
-
-        public static implicit operator Color24(Unity.Mathematics.float4 f) => new Color24(f.x, f.y, f.z);
-        public static implicit operator Unity.Mathematics.float4(Color24 c) => new Unity.Mathematics.float4(c.r, c.g, c.b, 1f);
-#endif // INCLUDE_MATHEMATICS
-    }
-
     public static class ColorExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/MaterialUtils.cs
@@ -547,60 +631,6 @@ namespace PKGE
 
             return (min, max);
         }
-        #endregion // com.unity.search.extensions
-
-        public static string GetColorHex(this Color32 color)
-        {
-            System.Span<char> hex = stackalloc char[8];      
-            
-            return color.GetColorHexSpan(hex).ToString();
-        }
-
-        public static string GetColorTextCode(this Color32 color)
-        {
-            System.Span<char> hex = stackalloc char[17] { '<', 'c', 'o', 'l', 'o', 'r', '=', '#', 'R', 'r', 'G', 'g', 'B', 'b', 'A', 'a', '>' };
-            
-            _ = color.GetColorHexSpan(hex.Slice(start: 8, length: 8));
-
-            return hex.ToString();
-        }
-
-        public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
-        {
-            (hex[0], hex[1]) = ByteToHex(color.r);
-            (hex[2], hex[3]) = ByteToHex(color.g);
-            (hex[4], hex[5]) = ByteToHex(color.b);
-            (hex[6], hex[7]) = ByteToHex(color.a);
-
-            return hex;
-        }
-
-        public static (char, char) ByteToHex(int b)
-        {
-            return (NibbleToHex(b >> 4), NibbleToHex(b & 15));
-        }
-
-        public static char NibbleToHex(int nibble)
-        {
-            return nibble switch 
-            {
-                1 => '1',
-                2 => '2',
-                3 => '3',
-                4 => '4',
-                5 => '5',
-                6 => '6',
-                7 => '7',
-                8 => '8',
-                9 => '9',
-                10 => 'A',
-                11 => 'B',
-                12 => 'C',
-                13 => 'D',
-                14 => 'E',
-                15 => 'F',
-                _ => '0',
-            };
-        }
+        #endregion // com.unity.search.extensions        
     }
 }

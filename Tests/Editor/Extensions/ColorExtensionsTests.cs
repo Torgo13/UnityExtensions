@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace PKGE.Tests
+namespace TCGE.Tests
 {
     class ColorExtensionsTests
     {

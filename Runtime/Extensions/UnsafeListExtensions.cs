@@ -31,7 +31,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
+        public static ref readonly T UnsafeElementAt<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
             return ref unsafeList.UnsafeElementAtMutable(index);
         }

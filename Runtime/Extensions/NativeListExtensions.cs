@@ -47,7 +47,6 @@ namespace PKGE
         public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsTrue(count >= 0);
             Assert.IsTrue(count <= array.Length);
 
             int start = nativeList.Length;
@@ -70,7 +69,7 @@ namespace PKGE
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
+        public static ref readonly T UnsafeElementAt<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             return ref nativeList.UnsafeElementAtMutable(index);
         }

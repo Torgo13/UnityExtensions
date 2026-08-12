@@ -280,11 +280,15 @@ namespace PKGE
             return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<List<U>, List<T>>(ref list);
         }
 
+        /// <exception cref="IndexOutOfRangeException"/>
+        public static ref readonly T AsRefReadonly<T>(this List<T> list, int index) where T : struct
+        {
+            return ref list.AsRef(index);
+        }
+
+        /// <exception cref="IndexOutOfRangeException"/>
         public static ref T AsRef<T>(this List<T> list, int index) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(index >= 0);
-            UnityEngine.Assertions.Assert.IsTrue(index < list.Count);
-
             return ref NoAllocHelpers.ExtractArrayFromList(list)[index];
         }
 

@@ -5,6 +5,61 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
 
+namespace TCGE
+{
+    /// <summary>
+    /// Extensions methods for the <see cref="GameObject"/> class.
+    /// </summary>
+    public static class GameObjectExtensions
+    {
+        /// <summary>
+        /// Instantiate multiple <see cref="UnityEngine.GameObject"/>s. Results are stored in the provided <see cref="System.Collections.Generic.List{T}"/>.
+        /// </summary>
+        /// <remarks>Must be called from the main thread.</remarks>
+        /// <param name="go">Input <see cref="UnityEngine.GameObject"/></param>
+        /// <param name="count">Number of copies to instantiate</param>
+        /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{T}"/> to store the results</param>
+        /// <param name="destinationScene">Optionally specify the destination <see cref="UnityEngine.SceneManagement.Scene"/></param>
+        /// <exception cref="System.InvalidOperationException">EnsureRunningOnMainThread can only be called from the main thread</exception>
+        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,
+            UnityEngine.SceneManagement.Scene destinationScene = default)
+        {
+            go.InstantiateObjects(count, PKGE.ListExtensions.As<GameObject, Object>(instances), destinationScene);
+        }
+
+        /// <inheritdoc cref="InstantiateGameObjects(GameObject, int, List{GameObject}, UnityEngine.SceneManagement.Scene)"/>
+        public static void InstantiateObjects(this GameObject go, int count, List<Object> instances,
+            UnityEngine.SceneManagement.Scene destinationScene = default)
+        {
+            Assert.IsTrue(count > 0);
+
+            const Allocator allocator = Allocator.Temp;
+            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
+
+            var id = go.GetEntityId();
+#if UNITY_6000_3_OR_NEWER
+            var ids = new NativeArray<EntityId>(2 * count, allocator, options);
+#else
+            var ids = new NativeArray<int>(2 * count, allocator, options);
+#endif // UNITY_6000_3_OR_NEWER
+
+            var instanceIDs = ids.GetSubArray(start: 0, length: count);
+            var transformIDs = ids.GetSubArray(start: count, length: count);
+
+            GameObject.InstantiateGameObjects(id,
+                count, instanceIDs, transformIDs, destinationScene);
+
+#if UNITY_6000_3_OR_NEWER
+            Resources.EntityIdsToObjectList(instanceIDs, instances);
+#else
+            Resources.InstanceIDToObjectList(instanceIDs, instances);
+#endif // UNITY_6000_3_OR_NEWER
+
+            ids.Dispose();
+        }
+    }
+}
+
 namespace PKGE
 {
     /// <summary>
@@ -15,95 +70,80 @@ namespace PKGE
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/Extensions/GameObjectExtensions.cs
         #region Unity.XR.CoreUtils
         /// <summary>
-        /// Sets the hide flags on this GameObject and all of its descendants.
+        /// Sets the hide flags on this <see cref="GameObject"/> and all of its descendants.
         /// </summary>
         /// <remarks>
         /// This function overwrites the existing flags of a <see cref="GameObject"/> with those specified by <paramref name="hideFlags"/>.
         /// </remarks>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> at the root of the hierarchy to be modified.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
         public static void SetHideFlagsRecursively(this GameObject gameObject, HideFlags hideFlags)
         {
-            gameObject.hideFlags = hideFlags;
-            foreach (Transform child in gameObject.transform)
-            {
-                child.gameObject.SetHideFlagsRecursively(hideFlags);
-            }
+            gameObject.SetLayerAndHideFlagsRecursively(setHideFlags: true, hideFlags: hideFlags);
         }
 
         /// <summary>
-        /// Adds <paramref name="hideFlags"/> to the hide flags on this GameObject and all of its descendants.
+        /// Adds <paramref name="hideFlags"/> to the hide flags on this <see cref="GameObject"/> and all of its descendants.
         /// </summary>
         /// <remarks>
         /// This function combines the <paramref name="hideFlags"/> with the existing flags of a <see cref="GameObject"/>.
         /// </remarks>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> at the root of the hierarchy to be modified.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene or modifiable by the user?</param>
         public static void AddToHideFlagsRecursively(this GameObject gameObject, HideFlags hideFlags)
         {
-            gameObject.hideFlags |= hideFlags;
-            foreach (Transform child in gameObject.transform)
-            {
-                child.gameObject.AddToHideFlagsRecursively(hideFlags);
-            }
+            gameObject.SetLayerAndHideFlagsRecursively(setHideFlags: false, hideFlags: hideFlags);
         }
 
         /// <summary>
-        /// Sets the layer of this GameObject and all of its descendants.
+        /// Sets the layer of this <see cref="GameObject"/> and all of its descendants.
         /// </summary>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
-        /// <param name="layer">The layer to recursively assign GameObjects to.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> at the root of the hierarchy to be modified.</param>
+        /// <param name="layer">The layer to recursively assign each <see cref="GameObject"/> to.</param>
         public static void SetLayerRecursively(this GameObject gameObject, int layer)
         {
-            gameObject.layer = layer;
-            foreach (Transform child in gameObject.transform)
-            {
-                child.gameObject.SetLayerRecursively(layer);
-            }
+            gameObject.SetLayerAndHideFlagsRecursively(setLayer: true, layer: layer);
         }
 
         /// <summary>
-        /// Sets the layer of this GameObject and adds to its HideFlags, and does the same for all of its descendants.
-        /// </summary>
-        /// <remarks>
-        /// This function combines the <paramref name="hideFlags"/> with the existing flags of a <see cref="GameObject"/>.
-        /// </remarks>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
-        /// <param name="layer">The layer to recursively assign GameObjects to.</param>
-        /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
-        public static void SetLayerAndAddToHideFlagsRecursively(this GameObject gameObject, int layer, HideFlags hideFlags)
-        {
-            gameObject.layer = layer;
-            gameObject.hideFlags |= hideFlags;
-            foreach (Transform child in gameObject.transform)
-            {
-                child.gameObject.SetLayerAndAddToHideFlagsRecursively(layer, hideFlags);
-            }
-        }
-
-        /// <summary>
-        /// Sets the layer and HideFlags of this GameObject and all of its descendants.
+        /// Sets the layer and HideFlags of this <see cref="GameObject"/> and all of its descendants.
         /// </summary>
         /// <remarks>
         /// This function overwrites the existing flags of a <see cref="GameObject"/> with those specified by <paramref name="hideFlags"/>.
         /// </remarks>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
-        /// <param name="layer">The layer to recursively assign GameObjects to.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> at the root of the hierarchy to be modified.</param>
+        /// <param name="setLayer"><see langword="true"/> to overwrite the layer.</param>
+        /// <param name="layer">The layer to recursively assign each <see cref="GameObject"/> to.</param>
+        /// <param name="setLayer"><see langword="true"/> to overwrite the <see cref="HideFlags"/>, otherwise append the new flags.</param>
         /// <param name="hideFlags">Should the GameObjects be hidden, saved with the scene, or modifiable by the user?</param>
-        public static void SetLayerAndHideFlagsRecursively(this GameObject gameObject, int layer, HideFlags hideFlags)
+        public static void SetLayerAndHideFlagsRecursively(this GameObject gameObject,
+            bool setLayer = false, int layer = 0,
+            bool setHideFlags = false, HideFlags hideFlags = default)
         {
-            gameObject.layer = layer;
-            gameObject.hideFlags = hideFlags;
+            if (setLayer)
+            {
+                gameObject.layer = layer;
+            }
+
+            if (setHideFlags)
+            {
+                gameObject.hideFlags = hideFlags;
+            }
+            else if (hideFlags != default)
+            {
+                gameObject.hideFlags |= hideFlags;
+            }
+
             foreach (Transform child in gameObject.transform)
             {
-                child.gameObject.SetLayerAndHideFlagsRecursively(layer, hideFlags);
+                child.gameObject.SetLayerAndHideFlagsRecursively(setLayer, layer, setHideFlags, hideFlags);
             }
         }
 
         /// <summary>
-        /// Sets <see cref="MonoBehaviour.runInEditMode"/> for all MonoBehaviours on this GameObject and its children.
+        /// Sets <see cref="MonoBehaviour.runInEditMode"/> for all MonoBehaviours on this <see cref="GameObject"/> and its children.
         /// </summary>
-        /// <param name="gameObject">The GameObject at the root of the hierarchy to be modified.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> at the root of the hierarchy to be modified.</param>
         /// <param name="enabled">The value to assign to runInEditMode.</param>
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         public static void SetRunInEditModeRecursively(this GameObject gameObject, bool enabled)
@@ -202,24 +242,24 @@ namespace PKGE
         #endregion // Unity.Entities.Conversion
 
         /// <summary>
-        ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInChildren(System.Type, bool)"/>.</para>
+        ///   <para>The non-generic, non-allocating version of <see cref="GameObject.GetComponentsInChildren(System.Type, bool)"/>.</para>
         /// </summary>
-        /// <param name="gameObject">The <c>GameObject</c> component.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> to search.</param>
         /// <param name="type">The type of component to search for.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
         /// <param name="includeInactive">Whether to include inactive child GameObjects in the search.
-        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
+        /// The <see cref="GameObject"/> on which the method is called is always searched regardless of this parameter.</param>
         public static void GetComponentsInChildren(this GameObject gameObject, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
             var children = ListPool<Transform>.Get();
             gameObject.GetComponentsInChildren(includeInactive: true, children);
-            
+
             if (children[0].TryGetComponent(type, out var component))
             {
                 results.Add(component);
             }
-            
+
             for (int i = 1, childCount = children.Count; i < childCount; i++)
             {
                 gameObject = children[i].gameObject;
@@ -229,24 +269,37 @@ namespace PKGE
                     results.Add(component);
                 }
             }
-            
+
             ListPool<Transform>.Release(children);
         }
-        
+
         /// <summary>
-        ///   <para>The non-generic, non-allocating version of <see cref="Component.GetComponentsInParent(System.Type, bool)"/>.</para>
+        ///   <para>The non-generic, non-allocating version of <see cref="GameObject.GetComponentsInParent(System.Type, bool)"/>.</para>
         /// </summary>
-        /// <param name="gameObject">The <c>GameObject</c> component.</param>
+        /// <param name="gameObject">The <see cref="GameObject"/> to search.</param>
         /// <param name="type">The type of component to search for.</param>
-        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
-        /// The GameObject on which the method is called is always searched regardless of this parameter.</param>
         /// <param name="results">A list of all found components matching the specified type.</param>
+        /// <param name="includeInactive">Whether to include inactive parent GameObjects in the search.
+        /// The <see cref="GameObject"/> on which the method is called is always searched regardless of this parameter.</param>
         public static void GetComponentsInParent(this GameObject gameObject, System.Type type, List<Component> results,
             bool includeInactive = false)
         {
-            gameObject.transform.GetComponentsInParent(type, results, includeInactive);
+            if (gameObject.TryGetComponent(type, out var component))
+            {
+                results.Add(component);
+            }
+
+            for (var ancestor = gameObject.transform.parent; ancestor != null; ancestor = ancestor.parent)
+            {
+                gameObject = ancestor.gameObject;
+                if ((includeInactive || gameObject.activeInHierarchy)
+                    && gameObject.TryGetComponent(type, out component))
+                {
+                    results.Add(component);
+                }
+            }
         }
-        
+
         /// <summary>
         /// Get the direct children GameObjects of this GameObject.
         /// </summary>
@@ -265,67 +318,80 @@ namespace PKGE
 
         public static void GetChildInstanceIDs(this GameObject go, List<EntityId> childInstanceIDs)
         {
-            go.transform.GetChildInstanceIDs(childInstanceIDs);
+            var children = ListPool<Transform>.Get();
+            go.GetComponentsInChildren(children);
+
+            var childCount = children.Count;
+            childInstanceIDs.EnsureCapacity(childCount);
+
+            for (var i = 1; i < childCount; i++)
+            {
+                childInstanceIDs.Add(children[i].GetEntityId());
+            }
+
+            ListPool<Transform>.Release(children);
         }
 
         public static void SetActiveRecursively(this GameObject go, bool active)
         {
-            go.transform.SetActiveRecursively(active);
+#if UNITY_6000_3_OR_NEWER
+            go.SetActive(active);
+#else
+            var children = ListPool<Transform>.Get();
+            go.GetComponentsInChildren(includeInactive: true, children);
+
+            var childCount = children.Count;
+            System.Span<EntityId> childInstanceIDs = stackalloc EntityId[childCount];
+
+            for (var i = 0; i < childCount; i++)
+            {
+                childInstanceIDs[i] = children[i].GetEntityId();
+            }
+
+            ListPool<Transform>.Release(children);
+
+            if (childInstanceIDs.Length > 0)
+            {
+                GameObject.SetGameObjectsActive(childInstanceIDs.Cast<EntityId, int>(), active);
+            }
+#endif // UNITY_6000_3_OR_NEWER
         }
 
         /// <summary>
-        /// Gets a descendant GameObject with a specific name
+        /// Gets a descendant <see cref="Transform"/> with a specific name
         /// </summary>
-        /// <param name="go">The parent object that is searched for a named child.</param>
+        /// <param name="go">The parent <see cref="GameObject"/> that is searched for a named child.</param>
         /// <param name="name">Name of child to be found.</param>
-        /// <param name="namedChild">The returned child GameObject or <see langword="null"/> if no child is found.</param>
+        /// <param name="namedChild">The returned child <see cref="Transform"/>
+        /// or <see langword="null"/> if no child is found.</param>
         /// <returns><see langword="true"/> if the child is found.</returns>
         public static bool GetNamedChild(this GameObject go, string name,
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out GameObject? namedChild)
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Transform? namedChild)
         {
-            bool found = go.transform.GetNamedChild(name, out var foundObject);
-            namedChild = found ? foundObject!.gameObject : null;
+            namedChild = null;
+            bool found = false;
+            var transforms = ListPool<Transform>.Get();
+            go.GetComponentsInChildren(includeInactive: true, transforms);
+
+            // Start index at 1 as 0 is the current transform
+            for (int i = 1, transformsCount = transforms.Count; i < transformsCount; i++)
+            {
+                if (string.Equals(transforms[i].name, name, System.StringComparison.Ordinal))
+                {
+                    found = true;
+                    namedChild = transforms[i];
+                    break;
+                }
+            }
+
+            ListPool<Transform>.Release(transforms);
             return found;
         }
-
-        /// <summary>
-        /// Instantiate multiple <see cref="UnityEngine.GameObject"/>s. Results are stored in the provided <see cref="System.Collections.Generic.List{T}"/>.
-        /// </summary>
-        /// <remarks>Must be called from the main thread.</remarks>
-        /// <param name="go">Input <see cref="UnityEngine.GameObject"/></param>
-        /// <param name="count">Number of copies to instantiate</param>
-        /// <param name="instances">An empty, non-<see langword="null"/> <see cref="System.Collections.Generic.List{T}"/> to store the results</param>
-        /// <param name="destinationScene">Optionally specify the destination <see cref="UnityEngine.SceneManagement.Scene"/></param>
-        /// <exception cref="System.InvalidOperationException">EnsureRunningOnMainThread can only be called from the main thread</exception>
-        public static void InstantiateGameObjects(this GameObject go, int count, List<GameObject> instances,
-            UnityEngine.SceneManagement.Scene destinationScene = default)
-        {
-            Assert.IsTrue(count > 0);
-
-            const Allocator allocator = Allocator.Temp;
-            const NativeArrayOptions options = NativeArrayOptions.UninitializedMemory;
-
-            var id = go.GetEntityId();
-#if UNITY_6000_3_OR_NEWER
-            var ids = new NativeArray<EntityId>(2 * count, allocator, options);
-#else
-            var ids = new NativeArray<int>(2 * count, allocator, options);
-#endif // UNITY_6000_3_OR_NEWER
-
-            var instanceIDs = ids.GetSubArray(start: 0, length: count);
-            var transformIDs = ids.GetSubArray(start: count, length: count);
-
-            GameObject.InstantiateGameObjects(id,
-                count, instanceIDs, transformIDs, destinationScene);
-
-#if UNITY_6000_3_OR_NEWER
-            Resources.EntityIdsToObjectList(instanceIDs, instances.As<GameObject, Object>());
-#else
-            Resources.InstanceIDToObjectList(instanceIDs, instances.As<GameObject, Object>());
-#endif // UNITY_6000_3_OR_NEWER
-        }
     }
+}
 
+namespace TCGE
+{
     public static class AssetDatabaseExtensions
     {
         public static Object LoadAssetAtPath(string path)

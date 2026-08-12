@@ -11,7 +11,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/Environment/DayNightController.cs
         #region BoatAttack
-        private static DayNightController _instance;
+        private static DayNightController _instance = null!;
         [Range(0, 1)]
         public float time = 0.5f; // the global 'time'
 
@@ -26,25 +26,25 @@ namespace PKGE
 
         // Skybox
         [Header("Skybox Settings")]
-        public Material skybox; // skybox reference
-        public Gradient skyboxColour; // skybox tint over time
-        public ReflectionProbe[] reflections;
+        public Material? skybox; // skybox reference
+        public Gradient skyboxColour = DefaultGradient(); // skybox tint over time
+        public ReflectionProbe[] reflections = Array.Empty<ReflectionProbe>();
 
         // Sunlight
         [Header("Sun Settings")]
         public Light? sun; // sunlight
-        public Gradient sunColour; // sunlight colour over time
+        public Gradient sunColour = DefaultGradient(); // sunlight colour over time
         [Range(0, 360)]
         public float northHeading = 136; // north
 
         //Ambient light
         [Header("Ambient Lighting")]
-        public Gradient ambientColour; // ambient light colour over time
+        public Gradient ambientColour = DefaultGradient(); // ambient light colour over time
 
         // Fog
         [Header("Fog Settings")]
         [GradientUsage(hdr: true)]
-        public Gradient fogColour; // fog colour over time
+        public Gradient fogColour = DefaultGradient(); // fog colour over time
 
         // vars
         private float _prevTime; // previous time
@@ -96,9 +96,9 @@ namespace PKGE
             time = t;
             _prevTime = t;
 
-            if (reflectionUpdate && _instance.reflections?.Length > 0)
+            if (reflectionUpdate && reflections.Length > 0)
             {
-                foreach (var probe in _instance.reflections)
+                foreach (var probe in reflections)
                 {
                     _ = probe.RenderProbe();
                 }
@@ -107,12 +107,12 @@ namespace PKGE
             GlobalTime = time;
             
             // do update
-            if (sun)
+            if (MainLight(out sun))
             {
                 sun.color = sunColour.Evaluate(TimeOfDayUtils.TimeToGradient(time));
             }
             
-            if (skybox)
+            if (SkyMat(out skybox))
             {
                 // update skybox
                 skybox.SetFloat(Rotation, 85 + (time - 0.5f) * 20f); // rotate slightly for a moving cloud effect
@@ -132,5 +132,53 @@ namespace PKGE
             _instance.SetTimeOfDay(_instance._presets[_instance._currentPreset], true);
         }
         #endregion // BoatAttack
+
+        bool MainLight([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Light? light)
+        {
+            light = sun;
+            if (light == null && LightUtils.GetDirectionalLight(out light))
+            {
+                sun = light;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool SkyMat([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Material? sky)
+        {
+            sky = skybox;
+            if (sky != null)
+                return true;
+
+            skybox = sky = RenderSettings.skybox;
+            return sky != null;
+        }
+
+        static Gradient DefaultGradient()
+        {
+            ReadOnlySpan<GradientColorKey> colorKeys = stackalloc GradientColorKey[]
+            {
+                new GradientColorKey(Color.black, time: 0.0f),
+                new GradientColorKey(Color.white, time: 0.5f),
+                new GradientColorKey(Color.black, time: 1.0f)
+            };
+
+            ReadOnlySpan<GradientAlphaKey> alphaKeys = stackalloc GradientAlphaKey[]
+            {
+                new GradientAlphaKey(alpha: 1, time: 0),
+                new GradientAlphaKey(alpha: 1, time: 1),
+            };
+
+            Gradient gradient = new Gradient();
+
+#if UNITY_6000_3_OR_NEWER
+            gradient.SetKeys(colorKeys, alphaKeys);
+#else
+            gradient.SetKeys(colorKeys.ToArray(), alphaKeys.ToArray());
+#endif // UNITY_6000_3_OR_NEWER
+
+            return gradient;
+        }
     }
 }
