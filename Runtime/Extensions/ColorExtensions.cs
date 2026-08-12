@@ -336,13 +336,13 @@ namespace TCGE
         public Color332(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
         }
 
         public Color332(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
         }
 
         public static implicit operator Color332(Unity.Mathematics.float3 f) => new Color332(f);

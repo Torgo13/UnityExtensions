@@ -11,9 +11,9 @@ namespace PKGE.Editor
         //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Utils/Editor/UnusedAssetsChecker.cs
         #region Unity.Megacity.EditorTools
         private static readonly string[] assetTypes = { "Prefab", "AudioClip", "Texture", "Model", "Material" };
-        private Dictionary<string, bool> usedAssets = new Dictionary<string, bool>();
-        private List<string> unusedAssets = new List<string>();
-        private List<string> excludedPaths = new List<string> { "Packages" };
+        private readonly Dictionary<string, bool> usedAssets = new Dictionary<string, bool>(System.StringComparer.Ordinal);
+        private readonly List<string> unusedAssets = new List<string>();
+        private readonly List<string> excludedPaths = new List<string> { "Packages" };
 
         [MenuItem("Assets/AssetDatabase/Check Unused Assets")]
         static void Init()
@@ -117,10 +117,9 @@ namespace PKGE.Editor
 
             EditorUtility.ClearProgressBar();
 
-            var list = new List<string>(usedAssets.Keys);
-            foreach (var usedAssetPath in list)
+            foreach ((string usedAssetPath, bool used) in usedAssets)
             {
-                if (!usedAssets[usedAssetPath])
+                if (!used)
                 {
                     unusedAssets.Add(usedAssetPath);
                 }
