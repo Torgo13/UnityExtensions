@@ -11,6 +11,41 @@ namespace TCGE
         public byte g;
         public byte b;
 
+        #region Properties
+#pragma warning disable IDE1006 // Naming Styles
+        public readonly byte a
+        {
+            get => byte.MaxValue;
+            set { /**/ }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
+        public float R
+        {
+            readonly get => r * (1f / byte.MaxValue);
+            set => r = (byte)(value * byte.MaxValue);
+        }
+
+        public float G
+        {
+            readonly get => g * (1f / byte.MaxValue);
+            set => g = (byte)(value * byte.MaxValue);
+        }
+
+        public float B
+        {
+            readonly get => b * (1f / byte.MaxValue);
+            set => b = (byte)(value * byte.MaxValue);
+        }
+
+        public readonly float A
+        {
+            get => 1f;
+            set { /**/ }
+        }
+        #endregion // Properties
+
+        #region Constructors
         public Color24(byte r, byte g, byte b)
         {
             this.r = r;
@@ -38,15 +73,26 @@ namespace TCGE
             this.g = (byte)(f.y * scale);
             this.b = (byte)(f.z * scale);
         }
+        #endregion // Constructors
 
+        #region Operators
         public static implicit operator Color24(Vector3 f) => new Color24(f);
-        public static implicit operator Vector3(Color24 c) => new Vector3(c.r, c.g, c.b);
+        public static implicit operator Vector3(Color24 c) => new Vector3(c.R, c.G, c.B);
 
         public static implicit operator Color24(Vector4 f) => new Color24(f);
-        public static implicit operator Vector4(Color24 c) => new Vector4(c.r, c.g, c.b, 1f);
+        public static implicit operator Vector4(Color24 c) => new Vector4(c.R, c.G, c.B, 1f);
 
         public static implicit operator Color24(Color32 c32) => new Color24(c32.r, c32.g, c32.b);
         public static implicit operator Color32(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
+        public static implicit operator Color24(Color c) => new Color24(c.r, c.g, c.b);
+        public static implicit operator Color(Color24 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
+        #region System.Drawing
+        public static implicit operator Color24(System.Drawing.Color f) => new Color24(f.R, f.G, f.B);
+        public static implicit operator System.Drawing.Color(Color24 c) => System.Drawing.Color.FromArgb(c.r, c.g, c.b);
+        #endregion // System.Drawing
+        #endregion // Operators
 
 #if INCLUDE_MATHEMATICS
         public Color24(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
@@ -64,10 +110,246 @@ namespace TCGE
         }
 
         public static implicit operator Color24(Unity.Mathematics.float3 f) => new Color24(f);
-        public static implicit operator Unity.Mathematics.float3(Color24 c) => new Unity.Mathematics.float3(c.r, c.g, c.b);
+        public static implicit operator Unity.Mathematics.float3(Color24 c) => new Unity.Mathematics.float3(c.R, c.G, c.B);
 
         public static implicit operator Color24(Unity.Mathematics.float4 f) => new Color24(f.x, f.y, f.z);
-        public static implicit operator Unity.Mathematics.float4(Color24 c) => new Unity.Mathematics.float4(c.r, c.g, c.b, 1f);
+        public static implicit operator Unity.Mathematics.float4(Color24 c) => new Unity.Mathematics.float4(c.R, c.G, c.B, 1f);
+#endif // INCLUDE_MATHEMATICS
+    }
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct Color565
+    {
+        public ushort rgb;
+
+        #region Properties
+#pragma warning disable IDE1006 // Naming Styles
+        public byte r
+        {
+            readonly get => (byte)(((rgb >> 8) & 0b1111_1000) | (rgb >> 13));
+            set => rgb = (ushort)((rgb & 0b0000_0111_1111_1111) | ((value & 0b1111_1000) << 8));
+        }
+
+        public byte g
+        {
+            readonly get => (byte)(((rgb >> 3) & 0b1111_1100) | ((rgb >> 9) & 0b0000_0011));
+            set => rgb = (ushort)((rgb & 0b1111_1000_0001_1111) | ((value & 0b1111_1100) << 3));
+        }
+
+        public byte b
+        {
+            readonly get => (byte)(((rgb << 3) & 0b1111_1000) | ((rgb >> 2) & 0b0000_0111));
+            set => rgb = (ushort)((rgb & 0b1111_1111_1110_0000) | ((value & 0b1111_1000) >> 3));
+        }
+
+        public readonly byte a
+        {
+            get => byte.MaxValue;
+            set { /**/ }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
+        public float R
+        {
+            readonly get => (rgb >> 11) * (1f / 0b0001_1111);
+            set => r = (byte)(value * byte.MaxValue);
+        }
+
+        public float G
+        {
+            readonly get => ((rgb >> 5) & 0b0011_1111) * (1f / 0b0011_1111);
+            set => g = (byte)(value * byte.MaxValue);
+        }
+
+        public float B
+        {
+            readonly get => (rgb & 0b0001_1111) * (1f / 0b0001_1111);
+            set => b = (byte)(value * byte.MaxValue);
+        }
+
+        public readonly float A
+        {
+            get => 1f;
+            set { /**/ }
+        }
+        #endregion // Properties
+
+        #region Constructors
+        public Color565(byte r, byte g, byte b)
+        {
+            rgb = ColorExtensions.Color32ToUShort(new Color32(r, g, b, 0));
+        }
+
+        public Color565(float r, float g, float b)
+        {
+            rgb = ColorExtensions.Color32ToUShort(new Color(r, g, b));
+        }
+
+        public Color565(Vector3 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+
+        public Color565(Vector4 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+        #endregion // Constructors
+
+        #region Operators
+        public static implicit operator Color565(Vector3 f) => new Color565(f);
+        public static implicit operator Vector3(Color565 c) => new Vector3(c.R, c.G, c.B);
+
+        public static implicit operator Color565(Vector4 f) => new Color565(f);
+        public static implicit operator Vector4(Color565 c) => new Vector4(c.R, c.G, c.B, 1f);
+
+        public static implicit operator Color565(Color32 c32) => new Color565(c32.r, c32.g, c32.b);
+        public static implicit operator Color32(Color565 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
+        #region System.Drawing
+        public static implicit operator Color565(System.Drawing.Color f) => new Color565(f.R, f.G, f.B);
+        public static implicit operator System.Drawing.Color(Color565 c) => System.Drawing.Color.FromArgb(c.r, c.g, c.b);
+        #endregion // System.Drawing
+        #endregion // Operators
+
+#if INCLUDE_MATHEMATICS
+        public Color565(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+
+        public Color565(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+
+        public static implicit operator Color565(Unity.Mathematics.float3 f) => new Color565(f);
+        public static implicit operator Unity.Mathematics.float3(Color565 c) => new Unity.Mathematics.float3(c.R, c.G, c.B);
+
+        public static implicit operator Color565(Unity.Mathematics.float4 f) => new Color565(f.x, f.y, f.z);
+        public static implicit operator Unity.Mathematics.float4(Color565 c) => new Unity.Mathematics.float4(c.R, c.G, c.B, 1f);
+#endif // INCLUDE_MATHEMATICS
+    }
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct Color332
+    {
+        public byte rgb;
+
+        #region Properties
+#pragma warning disable IDE1006 // Naming Styles
+        public byte r
+        {
+            readonly get => (byte)((rgb & 0b1110_0000) | ((rgb >> 3) & 0b0001_1100) | (rgb >> 6));
+            set => rgb = (byte)((rgb & 0b0001_1111) | (value & 0b1110_0000));
+        }
+
+        public byte g
+        {
+            readonly get => (byte)(((rgb << 3) & 0b1110_0000) | (rgb & 0b0001_1100) | ((rgb >> 3) & 0b0000_0011));
+            set => rgb = (byte)((rgb & 0b1110_0011) | ((value & 0b1110_0000) >> 3));
+        }
+
+        public byte b
+        {
+            readonly get => (byte)(((rgb << 6) & 0b1100_0000) | ((rgb << 4) & 0b0011_0000) | ((rgb << 2) & 0b0000_1100) | (rgb & 0b0000_0011));
+            set => rgb = (byte)((rgb & 0b1111_1100) | ((value & 0b1100_0000) >> 6));
+        }
+
+        public readonly byte a
+        {
+            get => byte.MaxValue;
+            set { /**/ }
+        }
+#pragma warning restore IDE1006 // Naming Styles
+
+        public float R
+        {
+            readonly get => (rgb >> 5) * (1f / 0b0000_0111);
+            set => r = (byte)(value * byte.MaxValue);
+        }
+
+        public float G
+        {
+            readonly get => ((rgb >> 2) & 0b0000_0111) * (1f / 0b0000_0111);
+            set => g = (byte)(value * byte.MaxValue);
+        }
+
+        public float B
+        {
+            readonly get => (rgb & 0b0000_0011) * (1f / 0b0000_0011);
+            set => b = (byte)(value * byte.MaxValue);
+        }
+
+        public readonly float A
+        {
+            get => 1f;
+            set { /**/ }
+        }
+        #endregion // Properties
+
+        #region Constructors
+        public Color332(byte r, byte g, byte b)
+        {
+            rgb = ColorExtensions.Color32ToByte(new Color32(r, g, b, 0));
+        }
+
+        public Color332(float r, float g, float b)
+        {
+            rgb = ColorExtensions.Color32ToByte(new Color(r, g, b));
+        }
+
+        public Color332(Vector3 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
+        }
+
+        public Color332(Vector4 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
+        }
+        #endregion // Constructors
+
+        #region Operators
+        public static implicit operator Color332(Vector3 f) => new Color332(f);
+        public static implicit operator Vector3(Color332 c) => new Vector3(c.R, c.G, c.B);
+
+        public static implicit operator Color332(Vector4 f) => new Color332(f);
+        public static implicit operator Vector4(Color332 c) => new Vector4(c.R, c.G, c.B, 1f);
+
+        public static implicit operator Color332(Color32 c32) => new Color332(c32.r, c32.g, c32.b);
+        public static implicit operator Color32(Color332 c24) => new Color32(c24.r, c24.g, c24.b, byte.MaxValue);
+
+        #region System.Drawing
+        public static implicit operator Color332(System.Drawing.Color f) => new Color332(f.R, f.G, f.B);
+        public static implicit operator System.Drawing.Color(Color332 c) => System.Drawing.Color.FromArgb(c.r, c.g, c.b);
+        #endregion // System.Drawing
+        #endregion // Operators
+
+#if INCLUDE_MATHEMATICS
+        public Color332(Unity.Mathematics.float3 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+
+        public Color332(Unity.Mathematics.float4 f, float scale = byte.MaxValue)
+        {
+            f *= scale;
+            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+        }
+
+        public static implicit operator Color332(Unity.Mathematics.float3 f) => new Color332(f);
+        public static implicit operator Unity.Mathematics.float3(Color332 c) => new Unity.Mathematics.float3(c.R, c.G, c.B);
+
+        public static implicit operator Color332(Unity.Mathematics.float4 f) => new Color332(f.x, f.y, f.z);
+        public static implicit operator Unity.Mathematics.float4(Color332 c) => new Unity.Mathematics.float4(c.R, c.G, c.B, 1f);
 #endif // INCLUDE_MATHEMATICS
     }
 
@@ -89,7 +371,7 @@ namespace TCGE
         /// </summary>
         public static Color32 FromKnownColor(System.Drawing.KnownColor knownColor) => System.Drawing.Color.FromKnownColor(knownColor).ToColor32();
 
-        public const int KnownColorsCount = 1 + (int)System.Drawing.KnownColor.YellowGreen - (int)System.Drawing.KnownColor.AliceBlue;
+        public const int NamedColorsCount = 1 + (int)System.Drawing.KnownColor.YellowGreen - (int)System.Drawing.KnownColor.AliceBlue;
 
         /// <summary>
         /// Convert <see cref="System.Drawing.KnownColor"/> index to <see cref="UnityEngine.Color32"/>.
@@ -97,26 +379,26 @@ namespace TCGE
         /// <param name="index">Pass 0 for the first valid colour.</param>
         /// <returns>The <see cref="System.Drawing.KnownColor"/> at <paramref name="index"/> converted to a <see cref="UnityEngine.Color32"/>,
         /// or <see cref="Color.magenta"/> if not in range.</returns>
-        public static Color32 FromKnownColor(int index)
+        public static Color32 FromNamedColor(int index)
         {
-            if (index < 0 || index >= KnownColorsCount)
+            if (index < 0 || index >= NamedColorsCount)
                 return (Color32)Color.magenta;
 
             // 1 is added as KnownColor enum has no value for 0
-            return FromKnownColor(1 + index + System.Drawing.KnownColor.AliceBlue);
+            return FromKnownColor(1 + System.Drawing.KnownColor.AliceBlue + index);
         }
 
-        public static string KnownColorName(int index)
+        public static string ColorName(int index)
         {
-            if (index < 0 || index >= KnownColorsCount)
+            if (index < 0 || index >= NamedColorsCount)
                 return string.Empty;
 
             // 1 is added as KnownColor enum has no value for 0
-            return (1 + index + System.Drawing.KnownColor.AliceBlue).ToString();
+            return System.Drawing.Color.FromKnownColor(1 + System.Drawing.KnownColor.AliceBlue + index).Name;
         }
 
         /// <summary>
-        /// Convert <see cref="UnityEngine.Color32"/> to <see cref="System.Drawing.KnownColor"/>.
+        /// Convert <see cref="System.Drawing.Color"/> to <see cref="System.Drawing.KnownColor"/>.
         /// </summary>
         /// <remarks>
         /// <see href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.color.toknowncolor?view=netstandard-2.1"/>
@@ -127,42 +409,87 @@ namespace TCGE
         /// </remarks>
         /// <returns>The equivalent <see cref="System.Drawing.KnownColor"/>, or 0 if no exact match was found.
         /// -1 is not used so that <see cref="System.Drawing.KnownColor"/> can be safely cast to a <see langword="byte"/>.</returns>
-        public static System.Drawing.KnownColor ToKnownColor(this Color32 colour)
+        public static System.Drawing.KnownColor ToNamedColor(this System.Drawing.Color color)
         {
-#if ZERO
-            // Range of named colours
-            var knownColours = new NativeArray<System.Drawing.Color>(1 + System.Drawing.KnownColor.YellowGreen - System.Drawing.KnownColor.AliceBlue,
-                Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+            return color.ToKnownColor();
+        }
 
-            for (int i = 0; i < knownColours.Length; i++)
+        /// <summary>
+        /// Convert <see cref="UnityEngine.Color32"/> to <see cref="System.Drawing.KnownColor"/>.
+        /// </summary>
+        /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
+        public static System.Drawing.KnownColor ToNamedColor(this Color32 colour)
+        {
+            return colour.FromColor32().ToKnownColor();
+        }
+
+        /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
+        public static System.Drawing.KnownColor ToNamedColorIgnoreAlpha(this System.Drawing.Color color)
+        {
+            for (var i = System.Drawing.KnownColor.AliceBlue; i <= System.Drawing.KnownColor.YellowGreen; i++)
             {
-                knownColours[i] = System.Drawing.Color.FromKnownColor(i + System.Drawing.KnownColor.AliceBlue);
-            }
-
-            int index = System.MemoryExtensions.IndexOf(knownColours.AsReadOnlySpan(), colour.FromColor32());
-            knownColours.Dispose();
-            return index != -1 ? index + System.Drawing.KnownColor.AliceBlue : 0;
-#else
-            System.Drawing.KnownColor found = 0;
-            System.Drawing.Color color = colour.FromColor32();
-            const int namedColours = 1 + (int)System.Drawing.KnownColor.YellowGreen;
-
-            for (int i = (int)System.Drawing.KnownColor.AliceBlue; i < namedColours; i++)
-            {
-                System.Drawing.KnownColor knownColor = (System.Drawing.KnownColor)i;
-                if (color == System.Drawing.Color.FromKnownColor(knownColor))
+                System.Drawing.Color namedColor = System.Drawing.Color.FromKnownColor(i);
+                if (color.R == namedColor.R && color.G == namedColor.G && color.B == namedColor.B)
                 {
-                    found = knownColor;
-                    break;
+                    return i;
                 }
             }
 
-            return found;
-#endif // ZERO
+            return default;
+        }
+
+        /// <inheritdoc cref="ToNamedColor(Color32)"/>
+        public static System.Drawing.KnownColor ToNamedColorIgnoreAlpha(this Color32 colour)
+        {
+            return colour.FromColor32().ToNamedColorIgnoreAlpha();
+        }
+
+        /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
+        public static System.Drawing.KnownColor ToNamedColorNearest(this System.Drawing.Color color)
+        {
+            return ((Color)color.ToColor32()).ToNamedColorNearest();
+        }
+
+        /// <inheritdoc cref="ToNamedColor(Color32)"/>
+        public static System.Drawing.KnownColor ToNamedColorNearest(this Color colour)
+        {
+            float min = float.MaxValue;
+            System.Drawing.KnownColor minIdx = 0;
+
+            for (var i = System.Drawing.KnownColor.AliceBlue; i <= System.Drawing.KnownColor.YellowGreen; i++)
+            {
+                float distance = colour.Distance(System.Drawing.Color.FromKnownColor(i).ToColor32());
+                if (distance < min)
+                {
+                    min = distance;
+                    minIdx = i;
+                }
+            }
+
+            return minIdx;
         }
         #endregion // System.Drawing
 
         #region Colour
+        public static float Distance(this Color c0, Color c1)
+        {
+            Color.RGBToHSV(c0, out float h0, out float s0, out float v0);
+            Color.RGBToHSV(c1, out float h1, out float s1, out float v1);
+
+            if (h1 - h0 > 0.5f)
+            {
+                ++h0;
+            }
+            else if (h0 - h1 > 0.5f)
+            {
+                ++h1;
+            }
+
+            return Vector3.Distance(
+                new Vector3(h0, s0, v0),
+                new Vector3(h1, s1, v1));
+        }
+
         /// <summary>
         /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
         /// </summary>
