@@ -26,7 +26,7 @@ namespace PKGE
         readonly DateTime _date = new DateTime(2024, 4, 21, 0, 0, 0, DateTimeKind.Utc).Date;
 
         [SerializeField, HideInInspector]
-	    private GUIStyle sliderStyle;
+	    private GUIStyle? sliderStyle;
 
         private static TimeOfDay _instance = null!;
 

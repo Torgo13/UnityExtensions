@@ -204,7 +204,7 @@ namespace PKGE
         public static readonly Kernel SobelX = new Kernel(3, 3, new double[] { 1, 0, -1, 2, 0, -2, 1, 0, -1 });
         public static readonly Kernel SobelY = new Kernel(3, 3, new double[] { 1, 2, 1, 0, 0, 0, -1, -2, -1 });
 
-        public Color[] gradients { get; private set; }
+        public Color[] gradients { get; private set; } = System.Array.Empty<Color>();
 
         public readonly float Threshold;
 
@@ -293,7 +293,7 @@ namespace PKGE
 
         public GaussianFilter(int size, double sigma)
         {
-            RebuildKernels(size, sigma);
+            (_kernelX, _kernelY) = RebuildKernels(size, sigma);
         }
 
         public ImagePixels Apply(ImagePixels source)
@@ -302,7 +302,7 @@ namespace PKGE
             return Filtering.Convolve(resultX, _kernelY);
         }
 
-        void RebuildKernels(int size, double sigma)
+        (Kernel, Kernel) RebuildKernels(int size, double sigma)
         {
             if (size % 2 == 0)
                 throw new ArgumentException("Kernel size must be odd.", nameof(size));
@@ -319,6 +319,8 @@ namespace PKGE
 
             _kernelX = new Kernel(size, 1, kernelValues);
             _kernelY = new Kernel(1, size, kernelValues);
+
+            return (_kernelX, _kernelY);
         }
 
         public static int GetSizeFromSigma(double sigma)
@@ -946,6 +948,7 @@ namespace PKGE
             ComputeHistogram(pixels, histogram);
         }
 
+        readonly
         struct LocalColorMap
         {
             public readonly Histogram Histogram;
@@ -1066,6 +1069,7 @@ namespace PKGE
             }
         }
 
+        readonly
         struct LocalHistogramCount
         {
             public readonly EdgeHistogram Histogram;

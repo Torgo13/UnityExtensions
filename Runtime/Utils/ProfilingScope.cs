@@ -115,11 +115,12 @@ namespace PKGE
 #endif
         }
 
+#nullable enable
         /// <summary>
         /// Begin the profiling block.
         /// </summary>
         /// <param name="cmd">Command buffer used by the profiling block.</param>
-        public void Begin([System.Diagnostics.CodeAnalysis.MaybeNull] CommandBuffer cmd)
+        public void Begin(CommandBuffer? cmd)
         {
             if (cmd != null)
 #if UNITY_USE_RECORDER
@@ -137,7 +138,7 @@ namespace PKGE
         /// End the profiling block.
         /// </summary>
         /// <param name="cmd">Command buffer used by the profiling block.</param>
-        public void End([System.Diagnostics.CodeAnalysis.MaybeNull] CommandBuffer cmd)
+        public void End(CommandBuffer? cmd)
         {
             if (cmd != null)
 #if UNITY_USE_RECORDER
@@ -150,6 +151,7 @@ namespace PKGE
 #endif
             inlineSampler?.End();
         }
+#nullable disable
 
         internal bool IsValid() { return (sampler != null && inlineSampler != null); }
 

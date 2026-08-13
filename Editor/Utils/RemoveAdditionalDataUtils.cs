@@ -97,6 +97,7 @@ namespace PKGE.Editor
             }
         }
 
+#nullable enable
         //internal for tests
         [MustUseReturnValue]
         internal static bool TryGetComponentsToRemove(IAdditionalData additionalData, List<Type> componentsToRemove,

@@ -31,6 +31,7 @@ namespace PKGE.Editor
             return new SerializedBitArrayAny(serializedProperty, capacity);
         }
 
+#nullable enable
         /// <summary>Try to construct a SerializedBitArray of appropriate size</summary>
         /// <param name="serializedProperty">The SerializedProperty</param>
         /// <param name="targetSerializedObjects">An individual SerializedObject for each targetObject</param>

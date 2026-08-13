@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,26 +23,27 @@ namespace PKGE
         // We inline the first value so if there's only one, there's
         // no additional allocation. If more are added, we allocate an array.
         public int length;
-        public TValue firstValue;
-        public TValue[] additionalValues;
+        public TValue? firstValue;
+        public TValue?[] additionalValues;
 
+        readonly
         public int Capacity => additionalValues?.Length + 1 ?? 1;
 
         public InlinedArray(TValue value)
         {
             length = 1;
             firstValue = value;
-            additionalValues = null;
+            additionalValues = Array.Empty<TValue>();
         }
 
-        public InlinedArray(TValue firstValue, [System.Diagnostics.CodeAnalysis.NotNull] params TValue[] additionalValues)
+        public InlinedArray(TValue firstValue, params TValue[] additionalValues)
         {
             length = 1 + additionalValues.Length;
             this.firstValue = firstValue;
             this.additionalValues = additionalValues;
         }
 
-        public InlinedArray([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<TValue> values)
+        public InlinedArray(IEnumerable<TValue> values)
             : this()
         {
 #if USING_LINQ
@@ -66,7 +68,7 @@ namespace PKGE
             if (length > 1)
                 additionalValues = new TValue[length - 1];
             else
-                additionalValues = null;
+                additionalValues = Array.Empty<TValue>();
             
             firstValue = list[0];
 
@@ -77,8 +79,9 @@ namespace PKGE
 #endif // USING_LINQ
         }
 
-        public TValue this[int index]
+        public TValue? this[int index]
         {
+            readonly
             get
             {
                 if (index < 0 || index >= length)
@@ -105,7 +108,7 @@ namespace PKGE
         {
             length = 0;
             firstValue = default;
-            additionalValues = null;
+            additionalValues = Array.Empty<TValue>();
         }
 
         public void ClearWithCapacity()
@@ -123,7 +126,7 @@ namespace PKGE
             {
                 length = length,
                 firstValue = firstValue,
-                additionalValues = additionalValues != null ? ArrayExtensions.Copy(additionalValues) : null
+                additionalValues = additionalValues != null ? ArrayExtensions.Copy(additionalValues) : Array.Empty<TValue>()
             };
         }
 
@@ -142,13 +145,14 @@ namespace PKGE
                 Array.Resize(ref additionalValues, size - 1);
         }
 
-        public TValue[] ToArray()
+        readonly
+        public TValue?[] ToArray()
         {
             return ArrayExtensions.Join(firstValue, additionalValues);
         }
 
-        [JetBrains.Annotations.CanBeNull]
-        public TOther[] ToArray<TOther>(Func<TValue, TOther> mapFunction)
+        readonly
+        public TOther[]? ToArray<TOther>(Func<TValue?, TOther> mapFunction)
         {
             if (length == 0)
                 return null;
@@ -162,9 +166,10 @@ namespace PKGE
             return result;
         }
 
+        readonly
         public int IndexOf(TValue value)
         {
-            var comparer = EqualityComparer<TValue>.Default;
+            var comparer = EqualityComparer<TValue?>.Default;
             if (length > 0)
             {
                 if (comparer.Equals(firstValue, value))
@@ -180,7 +185,7 @@ namespace PKGE
             return -1;
         }
 
-        public int Append(TValue value)
+        public int Append(TValue? value)
         {
             if (length == 0)
             {
@@ -231,7 +236,7 @@ namespace PKGE
                 Array.Copy(values.additionalValues, additionalValues, length - 1);
         }
 
-        public void Append([System.Diagnostics.CodeAnalysis.NotNull] IEnumerable<TValue> values)
+        public void Append(IEnumerable<TValue> values)
         {
             foreach (var value in values)
                 Append(value);
@@ -242,7 +247,7 @@ namespace PKGE
             if (length < 1)
                 return;
 
-            if (EqualityComparer<TValue>.Default.Equals(firstValue, value))
+            if (EqualityComparer<TValue?>.Default.Equals(firstValue, value))
             {
                 RemoveAt(0);
             }
@@ -250,7 +255,7 @@ namespace PKGE
             {
                 for (var i = 0; i < length - 1; ++i)
                 {
-                    if (EqualityComparer<TValue>.Default.Equals(additionalValues[i], value))
+                    if (EqualityComparer<TValue?>.Default.Equals(additionalValues[i], value))
                     {
                         RemoveAt(i + 1);
                         break;
@@ -303,7 +308,7 @@ namespace PKGE
                 {
                     firstValue = additionalValues[0];
                     if (additionalValues.Length == 1)
-                        additionalValues = null;
+                        additionalValues = Array.Empty<TValue>();
                     else
                     {
                         Array.Copy(additionalValues, 1, additionalValues, 0, additionalValues.Length - 1);
@@ -323,7 +328,7 @@ namespace PKGE
                 if (numAdditionalValues == 1)
                 {
                     // Remove only entry in array.
-                    additionalValues = null;
+                    additionalValues = Array.Empty<TValue>();
                 }
                 else if (index == length - 1)
                 {
@@ -373,8 +378,6 @@ namespace PKGE
             }
             else
             {
-                Debug.Assert(additionalValues != null);
-
                 ArrayExtensions.EraseAtByMovingTail(additionalValues, ref numAdditionalValues, index - 1);
             }
 
@@ -391,7 +394,8 @@ namespace PKGE
             return true;
         }
 
-        public bool Contains(TValue value, IEqualityComparer<TValue> comparer)
+        readonly
+        public bool Contains(TValue? value, IEqualityComparer<TValue?> comparer)
         {
             for (var n = 0; n < length; ++n)
                 if (comparer.Equals(this[n], value))
@@ -401,7 +405,7 @@ namespace PKGE
 
         public void Merge(InlinedArray<TValue> other)
         {
-            var comparer = EqualityComparer<TValue>.Default;
+            var comparer = EqualityComparer<TValue?>.Default;
             for (var i = 0; i < other.length; ++i)
             {
                 var value = other[i];
@@ -423,7 +427,7 @@ namespace PKGE
             return GetEnumerator();
         }
 
-        private struct Enumerator : IEnumerator<TValue>
+        private struct Enumerator : IEnumerator<TValue?>
         {
             public InlinedArray<TValue> array;
             public int index;
@@ -441,9 +445,12 @@ namespace PKGE
                 index = -1;
             }
 
-            public TValue Current => array[index];
-            object IEnumerator.Current => Current;
+            readonly
+            public TValue? Current => array[index];
+            readonly
+            object? IEnumerator.Current => Current;
 
+            readonly
             public void Dispose()
             {
             }
@@ -468,7 +475,7 @@ namespace PKGE
         public static bool Contains<TValue>(this InlinedArray<TValue> array, TValue value)
         {
             for (var i = 0; i < array.length; ++i)
-                if (array[i].Equals(value))
+                if (array[i]?.Equals(value) ?? false)
                     return true;
             return false;
         }

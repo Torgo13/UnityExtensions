@@ -242,6 +242,7 @@ namespace PKGE
                         return true;
                 }
             }
+
             return false;
         }
 
@@ -555,7 +556,7 @@ namespace PKGE
             return offset;
         }
 
-        public static TValue[] Join<TValue>(this TValue? value, params TValue[] values)
+        public static TValue[] Join<TValue>(this TValue? value, params TValue[]? values)
         {
             return value.Join(values.AsSpan());
         }
