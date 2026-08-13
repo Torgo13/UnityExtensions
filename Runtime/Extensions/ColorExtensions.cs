@@ -126,20 +126,20 @@ namespace TCGE
 #pragma warning disable IDE1006 // Naming Styles
         public byte r
         {
-            readonly get => (byte)(((rgb >> 8) & 0b1111_1000) | (rgb >> 13));
-            set => rgb = (ushort)((rgb & 0b0000_0111_1111_1111) | ((value & 0b1111_1000) << 8));
+            readonly get => ColorExtensions.UShortToR(rgb);
+            set => rgb = (ushort)((rgb & 0b_0000_0111_1111_1111) | ((value & 0b_1111_1000) << 8));
         }
 
         public byte g
         {
-            readonly get => (byte)(((rgb >> 3) & 0b1111_1100) | ((rgb >> 9) & 0b0000_0011));
-            set => rgb = (ushort)((rgb & 0b1111_1000_0001_1111) | ((value & 0b1111_1100) << 3));
+            readonly get => ColorExtensions.UShortToG(rgb);
+            set => rgb = (ushort)((rgb & 0b_1111_1000_0001_1111) | ((value & 0b_1111_1100) << 3));
         }
 
         public byte b
         {
-            readonly get => (byte)(((rgb << 3) & 0b1111_1000) | ((rgb >> 2) & 0b0000_0111));
-            set => rgb = (ushort)((rgb & 0b1111_1111_1110_0000) | ((value & 0b1111_1000) >> 3));
+            readonly get => ColorExtensions.UShortToB(rgb);
+            set => rgb = (ushort)((rgb & 0b_1111_1111_1110_0000) | ((value & 0b_1111_1000) >> 3));
         }
 
         public readonly byte a
@@ -151,19 +151,19 @@ namespace TCGE
 
         public float R
         {
-            readonly get => (rgb >> 11) * (1f / 0b0001_1111);
+            readonly get => (rgb >> 11) * (1f / 0b_0001_1111);
             set => r = (byte)(value * byte.MaxValue);
         }
 
         public float G
         {
-            readonly get => ((rgb >> 5) & 0b0011_1111) * (1f / 0b0011_1111);
+            readonly get => ((rgb >> 5) & 0b_0011_1111) * (1f / 0b_0011_1111);
             set => g = (byte)(value * byte.MaxValue);
         }
 
         public float B
         {
-            readonly get => (rgb & 0b0001_1111) * (1f / 0b0001_1111);
+            readonly get => (rgb & 0b_0001_1111) * (1f / 0b_0001_1111);
             set => b = (byte)(value * byte.MaxValue);
         }
 
@@ -244,20 +244,20 @@ namespace TCGE
 #pragma warning disable IDE1006 // Naming Styles
         public byte r
         {
-            readonly get => (byte)((rgb & 0b1110_0000) | ((rgb >> 3) & 0b0001_1100) | (rgb >> 6));
-            set => rgb = (byte)((rgb & 0b0001_1111) | (value & 0b1110_0000));
+            readonly get => ColorExtensions.ByteToR(rgb);
+            set => rgb = (byte)((rgb & 0b_0001_1111) | (value & 0b_1110_0000));
         }
 
         public byte g
         {
-            readonly get => (byte)(((rgb << 3) & 0b1110_0000) | (rgb & 0b0001_1100) | ((rgb >> 3) & 0b0000_0011));
-            set => rgb = (byte)((rgb & 0b1110_0011) | ((value & 0b1110_0000) >> 3));
+            readonly get => ColorExtensions.ByteToG(rgb);
+            set => rgb = (byte)((rgb & 0b_1110_0011) | ((value & 0b_1110_0000) >> 3));
         }
 
         public byte b
         {
-            readonly get => (byte)(((rgb << 6) & 0b1100_0000) | ((rgb << 4) & 0b0011_0000) | ((rgb << 2) & 0b0000_1100) | (rgb & 0b0000_0011));
-            set => rgb = (byte)((rgb & 0b1111_1100) | ((value & 0b1100_0000) >> 6));
+            readonly get => ColorExtensions.ByteToB(rgb);
+            set => rgb = (byte)((rgb & 0b_1111_1100) | ((value & 0b_1100_0000) >> 6));
         }
 
         public readonly byte a
@@ -269,19 +269,19 @@ namespace TCGE
 
         public float R
         {
-            readonly get => (rgb >> 5) * (1f / 0b0000_0111);
+            readonly get => (rgb >> 5) * (1f / 0b_0000_0111);
             set => r = (byte)(value * byte.MaxValue);
         }
 
         public float G
         {
-            readonly get => ((rgb >> 2) & 0b0000_0111) * (1f / 0b0000_0111);
+            readonly get => ((rgb >> 2) & 0b_0000_0111) * (1f / 0b_0000_0111);
             set => g = (byte)(value * byte.MaxValue);
         }
 
         public float B
         {
-            readonly get => (rgb & 0b0000_0011) * (1f / 0b0000_0011);
+            readonly get => (rgb & 0b_0000_0011) * (1f / 0b_0000_0011);
             set => b = (byte)(value * byte.MaxValue);
         }
 
@@ -490,123 +490,175 @@ namespace TCGE
                 new Vector3(h1, s1, v1));
         }
 
+        #region Byte
         /// <summary>
-        /// Encodes Color32.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// Encodes Color32.RGB values to a <see langword="byte"/>, using 3:3:2 bits for RGB.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values down.
+        /// </remarks>
         /// <param name="c">The colour to encode.</param>
-        /// <returns>Byte containing the encoded RGB values.</returns>
+        /// <returns><see langword="byte"/> containing the encoded RGB values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static byte Color32ToByte(Color32 c)
         {
-            int r = c.r & 0b1110_0000;
-            int g = c.g & 0b1110_0000;
-            int b = c.b & 0b1100_0000;
+            int r = c.r & 0b_1110_0000;
+            int g = c.g & 0b_1110_0000;
+            int b = c.b & 0b_1100_0000;
 
             return (byte)(r | g >> 3 | b >> 6);
         }
 
         /// <summary>
-        /// Decodes a byte to Color32.RGB values.
+        /// Decodes a <see langword="byte"/> to Color32.RGB values.
         /// </summary>
-        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
-        /// <returns>Color32 containing the decoded values.</returns>
+        /// <remarks>
+        /// Rounds the colour values up by repeating the masked bits.
+        /// </remarks>
+        /// <param name="b"><see langword="byte"/> with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns><see cref="Color32"/> containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Color32 ByteToColor32(byte b)
         {
             return new Color32(
-                (byte)(b & 0b1110_0000 | b >> 3 & 0b0001_1100 | b >> 6 & 0b0000_0011),
-                (byte)(b << 3 & 0b1110_0000 | b & 0b1110_0000 | b >> 3 & 0b0000_0011),
-                (byte)(b << 6 & 0b1100_0000 | b << 4 & 0b0011_0000 | b << 2 & 0b0000_1100 | b & 0b0000_0011),
+                ByteToR(b),
+                ByteToG(b),
+                ByteToB(b),
                 byte.MaxValue);
         }
 
-        /// <summary>
-        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
-        /// </summary>
-        /// <param name="c">The colour to encode.</param>
-        /// <returns>Byte containing the encoded RGB values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static byte ColorToByte(Color c)
+        public static byte ByteToR(byte b)
         {
-            int r = Mathf.RoundToInt(c.r * 0b1110_0000);
-            int g = Mathf.RoundToInt(c.g * 0b0001_1100);
-            int b = Mathf.RoundToInt(c.b * 0b0000_0011);
+            return (byte)(b & 0b_1110_0000 | (b >> 3) & 0b_0001_1100 | (b >> 6) & 0b_0000_0011);
+        }
 
-            return (byte)(r & 0b1110_0000 | g & 0b0001_1100 | b & 0b0000_0011);
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte ByteToG(byte b)
+        {
+            return (byte)((b << 3) & 0b_1110_0000 | b & 0b_0001_1100 | (b >> 3) & 0b_0000_0011);
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte ByteToB(byte b)
+        {
+            return (byte)((b << 6) & 0b_1100_0000 | (b << 4) & 0b_0011_0000 | (b << 2) & 0b_0000_1100 | b & 0b_0000_0011);
         }
 
         /// <summary>
-        /// Decodes a byte to Color.RGB values.
+        /// Encodes Color.RGB values to a <see langword="byte"/>, using 3:3:2 bits for RGB.
         /// </summary>
-        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
-        /// <returns>Color containing the decoded values.</returns>
+        /// <param name="c">The colour to encode.</param>
+        /// <returns><see langword="byte"/> containing the encoded RGB values.</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte ColorToByte(Color c)
+        {
+            int r = Mathf.RoundToInt(c.r * 0b_1110_0000);
+            int g = Mathf.RoundToInt(c.g * 0b_0001_1100);
+            int b = Mathf.RoundToInt(c.b * 0b_0000_0011);
+
+            return (byte)(r & 0b_1110_0000 | g & 0b_0001_1100 | b & 0b_0000_0011);
+        }
+
+        /// <summary>
+        /// Decodes a <see langword="byte"/> to Color.RGB values.
+        /// </summary>
+        /// <param name="b"><see langword="byte"/> with RGB colours encoded in 3:3:2 bits.</param>
+        /// <returns><see cref="Color"/> containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Color ByteToColor(byte b)
         {
             return new Color(
-                (b & 0b1110_0000) / (float)0b1110_0000,
-                (b & 0b0001_1100) / (float)0b0001_1100,
-                (b & 0b0000_0011) / (float)0b0000_0011);
+                (b & 0b_1110_0000) * (1f / 0b_1110_0000),
+                (b & 0b_0001_1100) * (1f / 0b_0001_1100),
+                (b & 0b_0000_0011) * (1f / 0b_0000_0011));
         }
+        #endregion // Byte
 
+        #region UShort
         /// <summary>
-        /// Encodes Color32.RGB values to a ushort, using 5:6:5 bits for RGB.
+        /// Encodes Color32.RGB values to a <see langword="ushort"/>, using 5:6:5 bits for RGB.
         /// </summary>
+        /// <remarks>
+        /// Rounds the colour values down.
+        /// </remarks>
         /// <param name="c">The colour to encode.</param>
-        /// <returns>Short containing the encoded RGB values.</returns>
+        /// <returns><see langword="ushort"/> containing the encoded RGB values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ushort Color32ToUShort(Color32 c)
         {
-            int r = c.r & 0b1111_1000;
-            int g = c.g & 0b1111_1100;
-            int b = c.b & 0b1111_1000;
+            int r = c.r & 0b_1111_1000;
+            int g = c.g & 0b_1111_1100;
+            int b = c.b & 0b_1111_1000;
 
             return (ushort)(r << 8 | g << 3 | b >> 3);
         }
 
         /// <summary>
-        /// Decodes a ushort to Color32.RGB values.
+        /// Decodes a <see langword="ushort"/> to Color32.RGB values.
         /// </summary>
-        /// <param name="b">Short with RGB colours encoded in 5:6:5 bits.</param>
-        /// <returns>Color32 containing the decoded values.</returns>
+        /// <remarks>
+        /// Rounds the colour values up by repeating the masked bits.
+        /// </remarks>
+        /// <param name="u"><see langword="ushort"/> with RGB colours encoded in 5:6:5 bits.</param>
+        /// <returns><see cref="Color32"/> containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static Color32 UShortToColor32(ushort b)
+        public static Color32 UShortToColor32(ushort u)
         {
             return new Color32(
-                (byte)(b >> 8 & 0b1111_1000),
-                (byte)(b >> 3 & 0b1111_1100),
-                (byte)(b << 3 & 0b1111_1000),
+                UShortToR(u),
+                UShortToG(u),
+                UShortToB(u),
                 byte.MaxValue);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte UShortToR(ushort u)
+        {
+            return (byte)((u >> 8) & 0b_1111_1000 | (u >> 13) & 0b_0000_0111);
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte UShortToG(ushort u)
+        {
+            return (byte)((u >> 3) & 0b_1111_1100 | (u >> 9) & 0b_0000_0011);
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte UShortToB(ushort u)
+        {
+            return (byte)((u << 3) & 0b_1111_1000 | (u >> 2) & 0b_0000_0111);
+        }
+
         /// <summary>
-        /// Encodes Color.RGB values to a byte, using 3:3:2 bits for RGB.
+        /// Encodes Color.RGB values to a <see langword="ushort"/>, using 5:6:5 bits for RGB.
         /// </summary>
         /// <param name="c">The colour to encode.</param>
-        /// <returns>Byte containing the encoded RGB values.</returns>
+        /// <returns><see langword="ushort"/> containing the encoded RGB values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ushort ColorToUShort(Color c)
         {
-            int r = Mathf.RoundToInt(c.r * 0b1111_1000_0000_0000);
-            int g = Mathf.RoundToInt(c.g * 0b0000_0111_1110_0000);
-            int b = Mathf.RoundToInt(c.b * 0b0000_0000_0001_1111);
+            int r = Mathf.RoundToInt(c.r * 0b_1111_1000_0000_0000);
+            int g = Mathf.RoundToInt(c.g * 0b_0000_0111_1110_0000);
+            int b = Mathf.RoundToInt(c.b * 0b_0000_0000_0001_1111);
 
-            return (ushort)(r & 0b1111_1000_0000_0000 | g & 0b0000_0111_1110_0000 | b & 0b0000_0000_0001_1111);
+            return (ushort)(r & 0b_1111_1000_0000_0000 | g & 0b_0000_0111_1110_0000 | b & 0b_0000_0000_0001_1111);
         }
 
         /// <summary>
-        /// Decodes a byte to Color.RGB values.
+        /// Decodes a <see langword="ushort"/> to Color.RGB values.
         /// </summary>
-        /// <param name="b">Byte with RGB colours encoded in 3:3:2 bits.</param>
-        /// <returns>Color containing the decoded values.</returns>
+        /// <param name="u"><see langword="ushort"/> with RGB colours encoded in 5:6:5 bits.</param>
+        /// <returns><see cref="Color"/> containing the decoded values.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static Color UShortToColor(ushort b)
+        public static Color UShortToColor(ushort u)
         {
             return new Color(
-                (b & 0b1111_1000_0000_0000) / (float)0b1111_1000_0000_0000,
-                (b & 0b0000_0111_1110_0000) / (float)0b0000_0111_1110_0000,
-                (b & 0b0000_0000_0001_1111) / (float)0b0000_0000_0001_1111);
+                (u & 0b_1111_1000_0000_0000) * (1f / 0b_1111_1000_0000_0000),
+                (u & 0b_0000_0111_1110_0000) * (1f / 0b_0000_0111_1110_0000),
+                (u & 0b_0000_0000_0001_1111) * (1f / 0b_0000_0000_0001_1111));
         }
+        #endregion // UShort
 
         public static int Color32ToInt(this Color32 color) => new Union4 { Color32 = color }.Int;
         public static Color32 IntToColor32(this int color) => new Union4 { Int = color }.Color32;
@@ -627,9 +679,7 @@ namespace TCGE
         {
             System.Span<char> hex = stackalloc char[17] { '<', 'c', 'o', 'l', 'o', 'r', '=', '#', 'R', 'r', 'G', 'g', 'B', 'b', 'A', 'a', '>' };
 
-            _ = color.GetColorHexSpan(hex.Slice(start: 8, length: 8));
-
-            return hex.ToString();
+            return color.GetColorHexSpan(hex.Slice(start: 8, length: 8)).ToString();
         }
 
         public static System.Span<char> GetColorHexSpan(this Color32 color, System.Span<char> hex)
@@ -675,6 +725,7 @@ namespace TCGE
 
 namespace PKGE
 {
+    [Unity.Burst.BurstCompile]
     public static class ColorExtensions
     {
         //https://github.com/needle-mirror/com.unity.xr.core-utils/blob/2.5.1/Runtime/MaterialUtils.cs
@@ -918,21 +969,35 @@ namespace PKGE
 
         public static (Color, Color) GetMinMax(NativeArray<Color> pixels)
         {
-            var min = new Color(float.MaxValue, float.MaxValue, float.MaxValue);
-            var max = new Color(float.MinValue, float.MinValue, float.MinValue);
+            GetMinMax(pixels, out Color min, out Color max);
+            return (min, max);
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void GetMinMax(in NativeArray<Color> pixels, out Color min, out Color max)
+        {
+            min = new Color(float.MaxValue, float.MaxValue, float.MaxValue);
+            max = new Color(float.MinValue, float.MinValue, float.MinValue);
             foreach (var pixel in pixels)
             {
-                for (var c = 0; c < 3; ++c)
-                {
-                    if (pixel[c] > max[c])
-                        max[c] = pixel[c];
+                if (pixel.r > max.r)
+                    max.r = pixel.r;
 
-                    if (pixel[c] < min[c])
-                        min[c] = pixel[c];
-                }
+                if (pixel.g > max.g)
+                    max.g = pixel.g;
+
+                if (pixel.b > max.b)
+                    max.b = pixel.b;
+
+                if (pixel.r < min.r)
+                    min.r = pixel.r;
+
+                if (pixel.g < min.g)
+                    min.g = pixel.g;
+
+                if (pixel.b < min.b)
+                    min.b = pixel.b;
             }
-
-            return (min, max);
         }
 
         public static (Color32, Color32) GetMinMax32(Texture2D image)
@@ -942,21 +1007,35 @@ namespace PKGE
 
         public static (Color32, Color32) GetMinMax32(NativeArray<Color32> pixels)
         {
-            var min = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
-            var max = new Color32(byte.MinValue, byte.MinValue, byte.MinValue, byte.MaxValue);
+            GetMinMax32(pixels, out Color32 min, out Color32 max);
+            return (min, max);
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void GetMinMax32(in NativeArray<Color32> pixels, out Color32 min, out Color32 max)
+        {
+            min = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+            max = new Color32(byte.MinValue, byte.MinValue, byte.MinValue, byte.MaxValue);
             foreach (var pixel in pixels)
             {
-                for (var c = 0; c < 3; ++c)
-                {
-                    if (pixel[c] > max[c])
-                        max[c] = pixel[c];
+                if (pixel.r > max.r)
+                    max.r = pixel.r;
 
-                    if (pixel[c] < min[c])
-                        min[c] = pixel[c];
-                }
+                if (pixel.g > max.g)
+                    max.g = pixel.g;
+
+                if (pixel.b > max.b)
+                    max.b = pixel.b;
+
+                if (pixel.r < min.r)
+                    min.r = pixel.r;
+
+                if (pixel.g < min.g)
+                    min.g = pixel.g;
+
+                if (pixel.b < min.b)
+                    min.b = pixel.b;
             }
-
-            return (min, max);
         }
         #endregion // com.unity.search.extensions        
     }

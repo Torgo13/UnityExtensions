@@ -131,11 +131,24 @@ namespace TCGE
         [FieldOffset(0)] public Union8 _0;
         [FieldOffset(8)] public Union8 _8;
 
-        [FieldOffset(0)] public Union12 _12;
+        [FieldOffset(0)] public Union12 U12_0;
 
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
         public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union6 : System.IEquatable<Union6>
+    {
+        [FieldOffset(0)] public Union2 U2_0;
+        [FieldOffset(2)] public Union2 U2_2;
+        [FieldOffset(4)] public Union2 U2_4;
+
+        public readonly bool Equals(Union6 other) => U2_0.Equals(other.U2_0) && U2_2.Equals(other.U2_2) && U2_4.Equals(other.U2_4);
+        public readonly override bool Equals(object? obj) => obj is Union6 other && Equals(other);
+        public readonly override int GetHashCode() => U2_0.GetHashCode() ^ (U2_2.GetHashCode() << 2) ^ (U2_4.GetHashCode() >> 2);
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -145,9 +158,9 @@ namespace TCGE
         [FieldOffset(0)] public Vector3 Vector3;
         [FieldOffset(0)] public Vector3Int Vector3Int;
 
-        [FieldOffset(0)] public Union4 Union4_0;
-        [FieldOffset(4)] public Union4 Union4_4;
-        [FieldOffset(8)] public Union4 Union4_8;
+        [FieldOffset(0)] public Union4 U4_0;
+        [FieldOffset(4)] public Union4 U4_4;
+        [FieldOffset(8)] public Union4 U4_8;
 
         public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
         public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
