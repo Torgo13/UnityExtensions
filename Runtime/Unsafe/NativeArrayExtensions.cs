@@ -57,11 +57,8 @@ namespace PKGE.Unsafe
     {
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
-        /// <summary>
-        /// IMPORTANT: Make sure you do not write to the value! There are no checks for this!
-        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref T AsRef<T>(this NativeReference<T> reference) where T : unmanaged
+        public static unsafe ref readonly T AsRef<T>(this NativeReference<T> reference) where T : unmanaged
         {
             return ref UnsafeUtility.AsRef<T>(reference.GetUnsafeReadOnlyPtr());
         }

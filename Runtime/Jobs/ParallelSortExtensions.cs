@@ -30,7 +30,7 @@ namespace PKGE
                 Assert.IsTrue(jobsCount * batchSize >= array.Length);
 
                 var supportArray = new NativeArray<int>(array.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-                var counter = new NativeList<int>(1, AllocatorManager.TempJob);
+                var counter = new NativeArray<int>(1, Allocator.TempJob);
                 var buckets = new NativeArray<int>(jobsCount * 256, Allocator.TempJob);
                 var indices = new NativeArray<int>(jobsCount * 256, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
                 var indicesSum = new NativeArray<int>(16, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
@@ -133,14 +133,14 @@ namespace PKGE
             [ReadOnly] public int JobsCount;
             [ReadOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Array;
 
-            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeList<int> Counter;
+            [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Counter;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> IndicesSum;
             [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Buckets;
             [WriteOnly] [NativeDisableContainerSafetyRestriction, NoAlias] public NativeArray<int> Indices;
 
-            private static int AtomicIncrement(NativeList<int> counter)
+            private static int AtomicIncrement(NativeArray<int> counter)
             {
-                return System.Threading.Interlocked.Increment(ref counter.ElementAt(0));
+                return System.Threading.Interlocked.Increment(ref counter.AsRef());
             }
 
             private int JobIndexPrefixSum(int sum, int i)

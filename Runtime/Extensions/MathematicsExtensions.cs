@@ -22,6 +22,21 @@ using quaternion = UnityEngine.Quaternion;
 
 namespace TCGE
 {
+    #region Half
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Half : System.IEquatable<Half>
+    {
+        public ushort value;
+
+        public static implicit operator Half(float f) => new Half { value = Mathf.FloatToHalf(f) };
+        public static implicit operator float(Half h) => Mathf.HalfToFloat(h.value);
+
+        public readonly bool Equals(Half other) => value == other.value;
+        public readonly override bool Equals(object? obj) => obj is Half other && Equals(other);
+        public readonly override int GetHashCode() => value.GetHashCode();
+    }
+    #endregion // Half
+
     #region Union
     /// <summary>
     /// <see href="https://github.com/Unity-Technologies/com.unity.netcode.gameobjects/blob/3417c4765f52f72d2384f2f7e65bd9d2d1dfd7ac/com.unity.netcode.gameobjects/Runtime/Serialization/MemoryStructures/UIntFloat.cs"/>
@@ -57,6 +72,8 @@ namespace TCGE
     {
         [FieldOffset(0)] public short Short;
         [FieldOffset(0)] public ushort UShort;
+
+        [FieldOffset(0)] public Half Half;
 
         [FieldOffset(0)] public PKGE.BitArray16 BitArray16;
 

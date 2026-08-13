@@ -86,6 +86,20 @@ namespace PKGE
             return ref nativeList.ElementAt(index);
         }
         #endregion // UnityEngine.Rendering.Universal
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T AsRefReadonly<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            return ref nativeList.AsRef();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T AsRef<T>(this NativeList<T> nativeList) where T : unmanaged
+        {
+            Assert.IsFalse(nativeList.IsEmpty);
+
+            return ref nativeList.ElementAt(0);
+        }
     }
 }
 #endif // INCLUDE_COLLECTIONS

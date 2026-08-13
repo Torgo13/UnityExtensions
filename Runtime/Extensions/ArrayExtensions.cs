@@ -1179,5 +1179,23 @@ namespace PKGE
             return ref MemoryMarshal.GetReference(array.AsSpan()[index..]);
         }
         #endregion // UnityEngine.Rendering.Universal
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T AsRefReadonly<T>(this NativeArray<T> array) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(array.Length > 0);
+
+            return ref MemoryMarshal.GetReference(array.AsReadOnlySpan());
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref T AsRef<T>(this NativeArray<T> array) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(array.Length > 0);
+
+            return ref MemoryMarshal.GetReference(array.AsSpan());
+        }
     }
 }

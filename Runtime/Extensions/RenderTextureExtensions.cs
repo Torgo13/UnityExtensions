@@ -156,7 +156,7 @@ namespace TCGE
         }
 
         [Unity.Burst.BurstCompile]
-        public static void AsColor32RHalf(in Unity.Collections.NativeArray<ushort> rHalf,
+        public static void AsColor32RHalf(in Unity.Collections.NativeArray<Union2> rHalf,
             out Unity.Collections.NativeArray<Color32> rgba32)
         {
             rgba32 = new Unity.Collections.NativeArray<Color32>(rHalf.Length,
@@ -165,16 +165,14 @@ namespace TCGE
 
 #if INCLUDE_MATHEMATICS
             var r16 = rHalf.Reinterpret<TCGE.Mathematics.Union2>();
+#else
+            var r16 = rHalf;
 #endif // INCLUDE_MATHEMATICS
 
             for (int i = rHalf.Length - 1; i >= 0; i--)
             {
                 rgba32[i] = new Color(
-#if INCLUDE_MATHEMATICS
-                    r16[i].Half,
-#else
-                    Mathf.HalfToFloat(rHalf[i]),
-#endif // INCLUDE_MATHEMATICS
+                    (float)r16[i].Half,
                     0,
                     0);
             }
@@ -190,18 +188,15 @@ namespace TCGE
 
 #if INCLUDE_MATHEMATICS
             var rg32 = rgHalf.Reinterpret<TCGE.Mathematics.Union4>();
+#else
+            var rg32 = rgHalf;
 #endif // INCLUDE_MATHEMATICS
 
             for (int i = rgHalf.Length - 1; i >= 0; i--)
             {
                 rgba32[i] = new Color(
-#if INCLUDE_MATHEMATICS
-                    rg32[i]._0.Half,
-                    rg32[i]._2.Half,
-#else
-                    Mathf.HalfToFloat(rgHalf[i]._0.UShort),
-                    Mathf.HalfToFloat(rgHalf[i]._2.UShort),
-#endif // INCLUDE_MATHEMATICS
+                    (float)rg32[i]._0.Half,
+                    (float)rg32[i]._2.Half,
                     0);
             }
         }
@@ -216,22 +211,17 @@ namespace TCGE
 
 #if INCLUDE_MATHEMATICS
             var rgba64 = rgbaHalf.Reinterpret<TCGE.Mathematics.Union8>();
+#else
+            var rgba64 = rgbaHalf;
 #endif // INCLUDE_MATHEMATICS
 
             for (int i = rgbaHalf.Length - 1; i >= 0; i--)
             {
                 rgba32[i] = new Color(
-#if INCLUDE_MATHEMATICS
-                    rgba64[i]._0._0.Half,
-                    rgba64[i]._0._2.Half,
-                    rgba64[i]._4._0.Half,
-                    rgba64[i]._4._2.Half);
-#else
-                    Mathf.HalfToFloat(rgbaHalf[i]._0._0.UShort),
-                    Mathf.HalfToFloat(rgbaHalf[i]._0._2.UShort),
-                    Mathf.HalfToFloat(rgbaHalf[i]._4._0.UShort),
-                    Mathf.HalfToFloat(rgbaHalf[i]._4._2.UShort));
-#endif // INCLUDE_MATHEMATICS
+                    (float)rgba64[i]._0._0.Half,
+                    (float)rgba64[i]._0._2.Half,
+                    (float)rgba64[i]._4._0.Half,
+                    (float)rgba64[i]._4._2.Half);
             }
         }
 
@@ -431,7 +421,7 @@ namespace TCGE
             }
             else if (format == TextureFormat.RHalf)
             {
-                AsColor32RHalf(tex.GetPixelData<ushort>(mipLevel: 0), out rgba32);
+                AsColor32RHalf(tex.GetPixelData<Union2>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGHalf)
             {

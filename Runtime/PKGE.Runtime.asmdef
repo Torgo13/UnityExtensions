@@ -109,6 +109,11 @@
             "define": "INCLUDE_COLLECTIONS"
         },
         {
+            "name": "com.unity.collections",
+            "expression": "2.1.4",
+            "define": "UNITY_COLLECTIONS_2_1_4_OR_NEWER"
+        },
+        {
             "name": "com.unity.mathematics",
             "expression": "",
             "define": "INCLUDE_MATHEMATICS"
@@ -140,7 +145,7 @@
         },
         {
             "name": "com.unity.render-pipelines.universal",
-            "expression": "(14.0.0,14.9.0)",
+            "expression": "[14.0.0,15.0.0)",
             "define": "URP_14"
         },
         {

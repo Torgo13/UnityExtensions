@@ -48,6 +48,20 @@ namespace PKGE
             return ref unsafeList.ElementAt(index);
         }
         #endregion // UnityEngine.Rendering.Universal
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T AsRefReadonly<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return ref unsafeList.AsRef();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref T AsRef<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            Assert.IsFalse(unsafeList.IsEmpty);
+
+            return ref unsafeList.ElementAt(0);
+        }
     }
 }
 #endif // INCLUDE_COLLECTIONS

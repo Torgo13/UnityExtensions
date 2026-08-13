@@ -230,6 +230,7 @@ namespace PKGE
 
             return planes;
         }
+#endif // INCLUDE_COLLECTIONS
 
         public static NativeArray<PlanePacket4> BuildSOAPlanePackets(NativeArray<Plane> cullingPlanes, Allocator allocator)
         {
@@ -241,7 +242,6 @@ namespace PKGE
 
             return planes;
         }
-#endif // INCLUDE_COLLECTIONS
 
 #if INCLUDE_MATHEMATICS
         /// <summary>
