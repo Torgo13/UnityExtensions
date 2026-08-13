@@ -35,6 +35,7 @@ namespace PKGE
 
 namespace TCGE
 {
+    [Unity.Burst.BurstCompile]
     public static class TextureExtensions
     {
         public static bool Uncompressed(TextureFormat format)
@@ -52,53 +53,345 @@ namespace TCGE
                 || (format >= TextureFormat.ETC_RGB4Crunched && format <= TextureFormat.ASTC_HDR_12x12);
         }
 
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32Alpha8(in Unity.Collections.NativeArray<byte> a8,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(a8.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = a8.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, a8[i]);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32ARGB4444(in Unity.Collections.NativeArray<ushort> argb16,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(argb16.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = argb16.Length - 1; i >= 0; i--)
+            {
+                int a = (argb16[i] & 0b_1111_0000_0000_0000) >> 8;
+                int r = (argb16[i] & 0b_0000_1111_0000_0000) >> 8;
+                int g = argb16[i] & 0b_0000_0000_1111_0000;
+                int b = argb16[i] & 0b_0000_0000_0000_1111;
+
+                rgba32[i] = new Color32(
+                    (byte)(r | (r << 4)),
+                    (byte)(g | (g >> 4)),
+                    (byte)(b | (b << 4)),
+                    (byte)(a | (a >> 4)));
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGB24(in Unity.Collections.NativeArray<Color24> rgb24,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgb24.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgb24.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = (Color32)rgb24[i];
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGB565(in Unity.Collections.NativeArray<Color565> rgb16,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgb16.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgb16.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = (Color32)rgb16[i];
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32R16(in Unity.Collections.NativeArray<ushort> r16,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(r16.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = r16.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32((byte)(r16[i] >> 8), 0, 0, byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGBA4444(in Unity.Collections.NativeArray<ushort> rgba16,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgba16.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgba16.Length - 1; i >= 0; i--)
+            {
+                int r = (rgba16[i] & 0b_1111_0000_0000_0000) >> 8;
+                int g = (rgba16[i] & 0b_0000_1111_0000_0000) >> 8;
+                int b = rgba16[i] & 0b_0000_0000_1111_0000;
+                int a = rgba16[i] & 0b_0000_0000_0000_1111;
+
+                rgba32[i] = new Color32(
+                    (byte)(r | (r << 4)),
+                    (byte)(g | (g >> 4)),
+                    (byte)(b | (b << 4)),
+                    (byte)(a | (a >> 4)));
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RHalf(in Unity.Collections.NativeArray<ushort> rHalf,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rHalf.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+#if INCLUDE_MATHEMATICS
+            var r16 = rHalf.Reinterpret<TCGE.Mathematics.Union2>();
+#endif // INCLUDE_MATHEMATICS
+
+            for (int i = rHalf.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color(
+#if INCLUDE_MATHEMATICS
+                    r16[i].Half,
+#else
+                    Mathf.HalfToFloat(rHalf[i]),
+#endif // INCLUDE_MATHEMATICS
+                    0,
+                    0);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGHalf(in Unity.Collections.NativeArray<Union4> rgHalf,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgHalf.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+#if INCLUDE_MATHEMATICS
+            var rg32 = rgHalf.Reinterpret<TCGE.Mathematics.Union4>();
+#endif // INCLUDE_MATHEMATICS
+
+            for (int i = rgHalf.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color(
+#if INCLUDE_MATHEMATICS
+                    rg32[i]._0.Half,
+                    rg32[i]._2.Half,
+#else
+                    Mathf.HalfToFloat(rgHalf[i]._0.UShort),
+                    Mathf.HalfToFloat(rgHalf[i]._2.UShort),
+#endif // INCLUDE_MATHEMATICS
+                    0);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGBAHalf(in Unity.Collections.NativeArray<Union8> rgbaHalf,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaHalf.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+#if INCLUDE_MATHEMATICS
+            var rgba64 = rgbaHalf.Reinterpret<TCGE.Mathematics.Union8>();
+#endif // INCLUDE_MATHEMATICS
+
+            for (int i = rgbaHalf.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color(
+#if INCLUDE_MATHEMATICS
+                    rgba64[i]._0._0.Half,
+                    rgba64[i]._0._2.Half,
+                    rgba64[i]._4._0.Half,
+                    rgba64[i]._4._2.Half);
+#else
+                    Mathf.HalfToFloat(rgbaHalf[i]._0._0.UShort),
+                    Mathf.HalfToFloat(rgbaHalf[i]._0._2.UShort),
+                    Mathf.HalfToFloat(rgbaHalf[i]._4._0.UShort),
+                    Mathf.HalfToFloat(rgbaHalf[i]._4._2.UShort));
+#endif // INCLUDE_MATHEMATICS
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RFloat(in Unity.Collections.NativeArray<float> rFloat,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rFloat.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rFloat.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    (byte)(rFloat[i] * byte.MaxValue),
+                    0,
+                    0,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGFloat(in Unity.Collections.NativeArray<Vector2> rgFloat,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgFloat.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgFloat.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    (byte)(rgFloat[i].x * byte.MaxValue),
+                    (byte)(rgFloat[i].y * byte.MaxValue),
+                    0,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGBAFloat(in Unity.Collections.NativeArray<Color> rgbaFloat,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgbaFloat.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = (Color32)rgbaFloat[i];
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RG16(in Unity.Collections.NativeArray<Union2> rg16,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rg16.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rg16.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    rg16[i]._0.Byte,
+                    rg16[i]._1.Byte,
+                    0,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32R8(in Unity.Collections.NativeArray<byte> r8,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(r8.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = r8.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    r8[i],
+                    0,
+                    0,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RG32(in Unity.Collections.NativeArray<Union4> rg32,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rg32.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rg32.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    rg32[i]._0._0.Byte,
+                    rg32[i]._2._0.Byte,
+                    0,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGB48(in Unity.Collections.NativeArray<Union6> rgb48,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgb48.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgb48.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    rgb48[i].U2_0._0.Byte,
+                    rgb48[i].U2_2._0.Byte,
+                    rgb48[i].U2_4._0.Byte,
+                    byte.MaxValue);
+            }
+        }
+
+        [Unity.Burst.BurstCompile]
+        public static void AsColor32RGBA64(in Unity.Collections.NativeArray<Union8> rgba64,
+            out Unity.Collections.NativeArray<Color32> rgba32)
+        {
+            rgba32 = new Unity.Collections.NativeArray<Color32>(rgba64.Length,
+                Unity.Collections.Allocator.Persistent,
+                Unity.Collections.NativeArrayOptions.UninitializedMemory);
+
+            for (int i = rgba64.Length - 1; i >= 0; i--)
+            {
+                rgba32[i] = new Color32(
+                    rgba64[i]._0._0._0.Byte,
+                    rgba64[i]._0._2._0.Byte,
+                    rgba64[i]._4._0._0.Byte,
+                    rgba64[i]._4._2._0.Byte);
+            }
+        }
+
         public static Unity.Collections.NativeArray<Color32> AsColor32(this Texture2D tex, out bool dispose)
         {
-            const Unity.Collections.Allocator allocator = Unity.Collections.Allocator.Persistent;
-            const Unity.Collections.NativeArrayOptions options = Unity.Collections.NativeArrayOptions.UninitializedMemory;
-
             TextureFormat format = tex.format;
             dispose = format != TextureFormat.RGBA32 && format != TextureFormat.ARGB32 && format != TextureFormat.BGRA32;
             Unity.Collections.NativeArray<Color32> rgba32;
 
             if (format == TextureFormat.Alpha8)
             {
-                var a8 = tex.GetPixelData<byte>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(a8.Length, allocator, options);
-
-                for (int i = a8.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, a8[i]);
-                }
+                AsColor32Alpha8(tex.GetPixelData<byte>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.ARGB4444)
             {
-                var argb16 = tex.GetPixelData<ushort>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(argb16.Length, allocator, options);
-
-                for (int i = argb16.Length - 1; i >= 0; i--)
-                {
-                    int a = (argb16[i] & 0b_1111_0000_0000_0000) >> 8;
-                    int r = (argb16[i] & 0b_0000_1111_0000_0000) >> 8;
-                    int g = argb16[i] & 0b_0000_0000_1111_0000;
-                    int b = argb16[i] & 0b_0000_0000_0000_1111;
-
-                    rgba32[i] = new Color32(
-                        (byte)(r | (r << 4)),
-                        (byte)(g | (g >> 4)),
-                        (byte)(b | (b << 4)),
-                        (byte)(a | (a >> 4)));
-                }
+                AsColor32ARGB4444(tex.GetPixelData<ushort>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGB24)
             {
-                var rgb24 = tex.GetPixelData<Color24>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb24.Length, allocator, options);
-
-                for (int i = rgb24.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = (Color32)rgb24[i];
-                }
+                AsColor32RGB24(tex.GetPixelData<Color24>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGBA32)
             {
@@ -116,42 +409,15 @@ namespace TCGE
             }
             else if (format == TextureFormat.RGB565)
             {
-                var rgb16 = tex.GetPixelData<Color565>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb16.Length, allocator, options);
-
-                for (int i = rgb16.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = (Color32)rgb16[i];
-                }
+                AsColor32RGB565(tex.GetPixelData<Color565>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.R16)
             {
-                var r16 = tex.GetPixelData<ushort>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(r16.Length, allocator, options);
-
-                for (int i = r16.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32((byte)(r16[i] >> 8), 0, 0, byte.MaxValue);
-                }
+                AsColor32R16(tex.GetPixelData<ushort>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGBA4444)
             {
-                var rgba16 = tex.GetPixelData<ushort>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgba16.Length, allocator, options);
-
-                for (int i = rgba16.Length - 1; i >= 0; i--)
-                {
-                    int r = (rgba16[i] & 0b_1111_0000_0000_0000) >> 8;
-                    int g = (rgba16[i] & 0b_0000_1111_0000_0000) >> 8;
-                    int b = rgba16[i] & 0b_0000_0000_1111_0000;
-                    int a = rgba16[i] & 0b_0000_0000_0000_1111;
-
-                    rgba32[i] = new Color32(
-                        (byte)(r | (r << 4)),
-                        (byte)(g | (g >> 4)),
-                        (byte)(b | (b << 4)),
-                        (byte)(a | (a >> 4)));
-                }
+                AsColor32RGBA4444(tex.GetPixelData<ushort>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.BGRA32)
             {
@@ -163,141 +429,54 @@ namespace TCGE
 
                 rgba32 = bgra32;
             }
-#if INCLUDE_MATHEMATICS
             else if (format == TextureFormat.RHalf)
             {
-                var rHalf = tex.GetPixelData<TCGE.Mathematics.Union2>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rHalf.Length, allocator, options);
-
-                for (int i = rHalf.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color(rHalf[i].Half, 0, 0);
-                }
+                AsColor32RHalf(tex.GetPixelData<ushort>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGHalf)
             {
-                var rgHalf = tex.GetPixelData<TCGE.Mathematics.Union4>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgHalf.Length, allocator, options);
-
-                for (int i = rgHalf.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color(rgHalf[i]._0.Half, rgHalf[i]._2.Half, 0);
-                }
+                AsColor32RGHalf(tex.GetPixelData<Union4>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGBAHalf)
             {
-                var rgbaFloat = tex.GetPixelData<TCGE.Mathematics.Union8>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length, allocator, options);
-
-                for (int i = rgbaFloat.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color(
-                        rgbaFloat[i]._0._0.Half,
-                        rgbaFloat[i]._0._2.Half,
-                        rgbaFloat[i]._4._0.Half,
-                        rgbaFloat[i]._4._2.Half);
-                }
+                AsColor32RGBAHalf(tex.GetPixelData<Union8>(mipLevel: 0), out rgba32);
             }
-#endif // INCLUDE_MATHEMATICS
             else if (format == TextureFormat.RFloat)
             {
-                var rFloat = tex.GetPixelData<float>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rFloat.Length, allocator, options);
-
-                for (int i = rFloat.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32((byte)(rFloat[i] * byte.MaxValue), 0, 0, byte.MaxValue);
-                }
+                AsColor32RFloat(tex.GetPixelData<float>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGFloat)
             {
-                var rgFloat = tex.GetPixelData<Vector2>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgFloat.Length, allocator, options);
-
-                for (int i = rgFloat.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(
-                        (byte)(rgFloat[i].x * byte.MaxValue),
-                        (byte)(rgFloat[i].y * byte.MaxValue),
-                        0,
-                        byte.MaxValue);
-                }
+                AsColor32RGFloat(tex.GetPixelData<Vector2>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGBAFloat)
             {
-                var rgbaFloat = tex.GetPixelData<Color>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgbaFloat.Length, allocator, options);
-
-                for (int i = rgbaFloat.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = (Color32)rgbaFloat[i];
-                }
+                AsColor32RGBAFloat(tex.GetPixelData<Color>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RG16)
             {
-                var rg16 = tex.GetPixelData<Union2>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rg16.Length, allocator, options);
-
-                for (int i = rg16.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(rg16[i]._0.Byte, rg16[i]._1.Byte, 0, byte.MaxValue);
-                }
+                AsColor32RG16(tex.GetPixelData<Union2>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.R8)
             {
-                var r8 = tex.GetPixelData<byte>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(r8.Length, allocator, options);
-
-                for (int i = r8.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(r8[i], 0, 0, byte.MaxValue);
-                }
+                AsColor32R8(tex.GetPixelData<byte>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RG32)
             {
-                var rg32 = tex.GetPixelData<Union4>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rg32.Length, allocator, options);
-
-                for (int i = rg32.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(
-                        rg32[i]._0._0.Byte,
-                        rg32[i]._2._0.Byte,
-                        0,
-                        byte.MaxValue);
-                }
+                AsColor32RG32(tex.GetPixelData<Union4>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGB48)
             {
-                var rgb48 = tex.GetPixelData<Union6>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgb48.Length, allocator, options);
-
-                for (int i = rgb48.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(
-                        (byte)(rgb48[i].U2_0.UShort >> 8),
-                        (byte)(rgb48[i].U2_2.UShort >> 8),
-                        (byte)(rgb48[i].U2_4.UShort >> 8),
-                        byte.MaxValue);
-                }
+                AsColor32RGB48(tex.GetPixelData<Union6>(mipLevel: 0), out rgba32);
             }
             else if (format == TextureFormat.RGBA64)
             {
-                var rgba64 = tex.GetPixelData<Union8>(mipLevel: 0);
-                rgba32 = new Unity.Collections.NativeArray<Color32>(rgba64.Length, allocator, options);
-
-                for (int i = rgba64.Length - 1; i >= 0; i--)
-                {
-                    rgba32[i] = new Color32(
-                        rgba64[i]._0._0._0.Byte,
-                        rgba64[i]._0._2._0.Byte,
-                        rgba64[i]._4._0._0.Byte,
-                        rgba64[i]._4._2._0.Byte);
-                }
+                AsColor32RGBA64(tex.GetPixelData<Union8>(mipLevel: 0), out rgba32);
             }
             else // TODO Handle signed 8-bit and 16-bit formats
             {
-                rgba32 = new Unity.Collections.NativeArray<Color32>(tex.GetPixels32(miplevel: 0), allocator);
+                rgba32 = new Unity.Collections.NativeArray<Color32>(tex.GetPixels32(miplevel: 0),
+                    Unity.Collections.Allocator.Persistent);
             }
 
             return rgba32;
