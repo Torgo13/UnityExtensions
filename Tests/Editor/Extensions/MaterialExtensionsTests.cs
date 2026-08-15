@@ -113,15 +113,15 @@ namespace PKGE.Editor.Tests
         [TestCase(0b000_000_00,   1,   1,   1, 255)] // k_HexColorGray
         public void ByteToColor32_DoesValidConversion(byte hex, byte r, byte g, byte b, byte a)
         {
-            Assert.AreEqual(hex, ColorUtils.Color32ToByte(new Color32(r, g, b, a)));
-            //Assert.AreEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor32(hex));
+            Assert.AreEqual(hex, TCGE.ColorExtensions.Color32ToByte(new Color32(r, g, b, a)));
+            //Assert.AreEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor32(hex));
 
             unchecked
             {
-                Assert.AreNotEqual((byte)(hex + 1), ColorUtils.Color32ToByte(new Color32(r, g, b, a)));
-                //Assert.AreNotEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor32((byte)(hex + 1)));
-                Assert.AreNotEqual((byte)(hex - 1), ColorUtils.Color32ToByte(new Color32(r, g, b, a)));
-                //Assert.AreNotEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor32((byte)(hex - 1)));
+                Assert.AreNotEqual((byte)(hex + 1), TCGE.ColorExtensions.Color32ToByte(new Color32(r, g, b, a)));
+                //Assert.AreNotEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor32((byte)(hex + 1)));
+                Assert.AreNotEqual((byte)(hex - 1), TCGE.ColorExtensions.Color32ToByte(new Color32(r, g, b, a)));
+                //Assert.AreNotEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor32((byte)(hex - 1)));
             }
         }
 
@@ -136,15 +136,15 @@ namespace PKGE.Editor.Tests
         [TestCase(0b000_000_00, 1, 1, 1, 255)] // k_HexColorGray
         public void ByteToColor_DoesValidConversion(byte hex, byte r, byte g, byte b, byte a)
         {
-            Assert.AreEqual(hex, ColorUtils.ColorToByte(new Color32(r, g, b, a)));
-            //Assert.AreEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor(hex));
+            Assert.AreEqual(hex, TCGE.ColorExtensions.ColorToByte(new Color32(r, g, b, a)));
+            //Assert.AreEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor(hex));
 
             unchecked
             {
-                Assert.AreNotEqual((byte)(hex + 1), ColorUtils.ColorToByte(new Color32(r, g, b, a)));
-                //Assert.AreNotEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor((byte)(hex + 1)));
-                Assert.AreNotEqual((byte)(hex - 1), ColorUtils.ColorToByte(new Color32(r, g, b, a)));
-                //Assert.AreNotEqual(new Color32(r, g, b, a), ColorUtils.ByteToColor((byte)(hex - 1)));
+                Assert.AreNotEqual((byte)(hex + 1), TCGE.ColorExtensions.ColorToByte(new Color32(r, g, b, a)));
+                //Assert.AreNotEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor((byte)(hex + 1)));
+                Assert.AreNotEqual((byte)(hex - 1), TCGE.ColorExtensions.ColorToByte(new Color32(r, g, b, a)));
+                //Assert.AreNotEqual(new Color32(r, g, b, a), TCGE.ColorExtensions.ByteToColor((byte)(hex - 1)));
             }
         }
 
