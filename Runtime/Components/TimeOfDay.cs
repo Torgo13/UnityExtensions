@@ -28,7 +28,10 @@ namespace PKGE
         [SerializeField, HideInInspector]
 	    private GUIStyle? sliderStyle;
 
-        private static TimeOfDay _instance = null!;
+        private static TimeOfDay? _instance;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void InitSingleton() => _instance = null;
 
         #region MonoBehaviour
         private void OnEnable()

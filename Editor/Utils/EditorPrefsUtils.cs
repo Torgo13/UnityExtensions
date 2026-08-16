@@ -184,8 +184,11 @@ namespace PKGE.Editor
             k_EditorPrefsValueSessionCache.Clear();
         }
 
-        static void SetEditorPrefsValue<T>(string prefsKey, T value)
+        static void SetEditorPrefsValue<T>(string prefsKey, T? value)
         {
+            if (value == null)
+                return;
+
             if (TryGetCachedEditorPrefsValue(prefsKey, out T? cachedValue) && cachedValue.Equals(value))
                 return;
 

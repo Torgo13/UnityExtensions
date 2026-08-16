@@ -2,9 +2,9 @@ using Unity.Collections;
 using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
-using System.Threading;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Interlocked = System.Threading.Interlocked;
 
 #if INCLUDE_MATHEMATICS
 using Unity.Mathematics;

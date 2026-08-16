@@ -11,7 +11,7 @@ namespace PKGE
     {
         //https://github.com/Unity-Technologies/BoatAttack/blob/e4864ca4381d59e553fe43f3dac6a12500eee8c7/Assets/Scripts/Environment/DayNightController.cs
         #region BoatAttack
-        private static DayNightController _instance = null!;
+        private static DayNightController? _instance;
         [Range(0, 1)]
         public float time = 0.5f; // the global 'time'
 
@@ -52,6 +52,13 @@ namespace PKGE
         static readonly int Rotation = Shader.PropertyToID("_Rotation");
         static readonly int Tint = Shader.PropertyToID("_Tint");
         static readonly int NightFade = Shader.PropertyToID("_NightFade");
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void InitSingleton()
+        {
+            _instance = null;
+            GlobalTime = 0;
+        }
 
         #region MonoBehaviour
         void Awake()
@@ -126,6 +133,9 @@ namespace PKGE
 
         public static void SelectPreset(float input)
         {
+            if (_instance == null)
+                return;
+
             _instance._currentPreset += Mathf.RoundToInt(input);
             _instance._currentPreset = (int)Mathf.Repeat(_instance._currentPreset, _instance._presets.Length);
             PlayerPrefs.SetInt(PresetKey, _instance._currentPreset);

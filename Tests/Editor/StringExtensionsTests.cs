@@ -225,7 +225,19 @@ namespace PKGE.Editor.Tests
         */
         #endregion // Regex
         #endregion // Unity.XR.CoreUtils
-        
+
+        [Test]
+        public void Test_SplitPascalCase()
+        {
+            Assert.AreEqual("Some Field", "someField".SplitPascalCase());
+            Assert.AreEqual("Layout Width", "layoutWidth".SplitPascalCase());
+            Assert.AreEqual("Target Count", "TargetCount".SplitPascalCase());
+            Assert.AreEqual("ABC", "ABC".SplitPascalCase());
+            Assert.AreEqual("ABC", "aBC".SplitPascalCase());
+            Assert.AreEqual("Ab C", "AbC".SplitPascalCase());
+            Assert.AreEqual("ABc", "ABc".SplitPascalCase());
+        }
+
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor.Tests/Extensions/StringExtensionsTests.cs
         #region Unity.Entities.Editor.Tests
         [Test]

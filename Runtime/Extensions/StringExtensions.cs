@@ -233,11 +233,23 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.graphtools.foundation/blob/0.11.2-preview/Runtime/Extensions/StringExtensions.cs
         #region UnityEngine.GraphToolsFoundation.Overdrive
-        static readonly Regex CodifyRegex = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled);
-
         public static string CodifyString(this string str)
         {
-            return CodifyRegex.Replace(str, "_");
+            if (string.IsNullOrEmpty(str))
+                return string.Empty;
+
+            var sb = StringBuilderPool.Get().Append(str);
+            for (int i = 0; i < sb.Length; i++)
+            {
+                if (!char.IsLetterOrDigit(sb[i]))
+                {
+                    sb[i] = '_';
+                }
+            }
+
+            string codified = sb.ToString();
+            StringBuilderPool.Release(sb);
+            return codified;
         }
         #endregion // UnityEngine.GraphToolsFoundation.Overdrive
 
@@ -281,12 +293,9 @@ namespace PKGE
 
         //https://github.com/needle-mirror/com.unity.entities/blob/1.3.9/Unity.Entities.Editor/Extensions/StringExtensions.cs
         #region Unity.Entities.Editor
-        static readonly Regex ToWordRegex = new Regex(@"[^\w]", RegexOptions.Compiled);
-        static readonly Regex SplitCaseRegex = new Regex(@"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))");
-
         public static string SingleQuoted(this string value, bool onlyIfSpaces = false)
         {
-            if (onlyIfSpaces && !value.Contains(' '))
+            if (onlyIfSpaces && !value.Contains(' ', StringComparison.Ordinal))
                 return value;
 
             return $"'{value.Trim('\'')}'";
@@ -294,7 +303,7 @@ namespace PKGE
 
         public static string DoubleQuoted(this string value, bool onlyIfSpaces = false)
         {
-            if (onlyIfSpaces && !value.Contains(' '))
+            if (onlyIfSpaces && !value.Contains(' ', StringComparison.Ordinal))
                 return value;
 
             return $"\"{value.Trim('\"')}\"";
@@ -307,7 +316,7 @@ namespace PKGE
 
         public static string ToIdentifier(this string value)
         {
-            return ToWordRegex.Replace(value, "_");
+            return value.CodifyString();
         }
 
         public static string ToForwardSlash(this string value) => value.Replace('\\', '/');
@@ -328,8 +337,23 @@ namespace PKGE
         /// </summary>
         public static string SplitPascalCase(this string str)
         {
-            str = SplitCaseRegex.Replace(str, " $1");
-            return char.ToUpper(str[0]) + str.Substring(1);
+            if (string.IsNullOrEmpty(str))
+                return string.Empty;
+
+            var sb = StringBuilderPool.Get().Append(str);
+            sb[0] = char.ToUpper(sb[0]);
+
+            for (int i = 1; i < sb.Length; i++)
+            {
+                if (char.IsUpper(sb[i]) && char.IsLower(sb[i - 1]))
+                {
+                    _ = sb.Insert(i++, ' ');
+                }
+            }
+
+            string splitPascalCase = sb.ToString();
+            StringBuilderPool.Release(sb);
+            return splitPascalCase;
         }
         #endregion // Unity.Entities.Editor
 
@@ -412,7 +436,6 @@ namespace PKGE
         /// <returns>True if the extension is found on the string path</returns>
         public static bool HasExtension(this string input, string extension) =>
             input.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
-
 
         /// <summary>
         /// Checks if a string contains any of the strings given in strings to check and early out if it does

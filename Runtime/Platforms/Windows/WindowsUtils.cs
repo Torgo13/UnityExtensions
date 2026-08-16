@@ -82,17 +82,23 @@ namespace PKGE
 
         private static bool GetProcessRect(Process process, ref LpRect rect)
         {
-            using var _0 = UnityEngine.Pool.ListPool<IntPtr>.Get(out var winPtrs);
-            GetProcessWindows(process.Id, winPtrs);
+            int processId = process.Id;
+            IntPtr winPtr = IntPtr.Zero;
 
-            for (int i = 0; i < winPtrs.Count; i++)
+            do
             {
-                bool gotRect = GetWindowRect(winPtrs[i], ref rect);
-                if (gotRect && rect.Left != 0 && rect.Top != 0)
+                winPtr = FindWindowEx(IntPtr.Zero, winPtr, windowClass: null, windowTitle: null);
+                _ = GetWindowThreadProcessId(winPtr, out int id);
+
+                if (id == processId)
                 {
-                    return true;
+                    bool gotRect = GetWindowRect(winPtr, ref rect);
+                    if (gotRect && rect.Left != 0 && rect.Top != 0)
+                    {
+                        return true;
+                    }
                 }
-            }
+            } while (winPtr != IntPtr.Zero);
             
             return false;
         }

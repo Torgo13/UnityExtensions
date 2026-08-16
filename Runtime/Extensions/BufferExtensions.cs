@@ -36,7 +36,7 @@ namespace PKGE
             UnityEngine.Assertions.Assert.IsTrue(buffer != null);
             UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
 
-            _ = MemoryMarshal.TryWrite(buffer[offset..], ref data);
+            MemoryMarshal.Write(buffer[offset..], ref data);
             return offset + SizeOfCache<T>.Size;
         }
 

@@ -181,7 +181,21 @@ namespace PKGE
         /// If the current platform supports Compute Shaders,
         /// use one to blend cubemaps in a single render pass.
         /// </summary>
-        private static bool supportsComputeShaders;
+        private static bool? _supportsComputeShaders;
+
+        /// <inheritdoc cref="_supportsComputeShaders"/>
+        public static bool SupportsComputeShaders
+        {
+            get
+            {
+                if (!_supportsComputeShaders.HasValue)
+                {
+                    _supportsComputeShaders = SystemInfo.supportsComputeShaders;
+                }
+
+                return _supportsComputeShaders.Value;
+            }
+        }
 
         internal static ComputeShader? _texture2DArrayLerp;
 
@@ -282,9 +296,6 @@ namespace PKGE
                 _ = _renderTextures[i].Create();
             }
 
-            supportsComputeShaders = SystemInfo.supportsComputeShaders
-                & _texture2DArrayLerp != null;
-
 #if BLEND_SHADER
             UpdateSkybox();
 #else
@@ -294,7 +305,7 @@ namespace PKGE
                 dimension = TextureDimension.Cube,
                 useMipMap = true,
                 autoGenerateMips = true,
-                enableRandomWrite = supportsComputeShaders,
+                enableRandomWrite = SupportsComputeShaders && _texture2DArrayLerp != null,
             };
 
             _blendedTexture = new RenderTexture(desc);

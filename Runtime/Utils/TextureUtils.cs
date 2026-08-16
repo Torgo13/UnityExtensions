@@ -407,8 +407,6 @@ namespace TCGE
             this.isCompressed = isCompressed;
             this.isLinear = isLinear;
             this.isTexture2D = isTexture2D;
-
-            CheckSupportsAsyncGPUReadback();
         }
 
         public Texture2DReadable(Texture tex)
@@ -417,32 +415,25 @@ namespace TCGE
             this.isCompressed = Texture2DParameters.PixelSize(tex.graphicsFormat) == -1;
             this.isLinear = !tex.isDataSRGB;
             this.isTexture2D = tex is Texture2D;
-
-            CheckSupportsAsyncGPUReadback();
         }
         #endregion // Constructors
 
         #region SupportsAsyncGPUReadback
-        private enum SupportsAsyncGPUReadback : sbyte
-        {
-            Unchecked = -1,
-            False,
-            True,
-        }
-
         /// <summary>Only check <see cref="SystemInfo.supportsAsyncGPUReadback"/>
         /// a single time across all instances as it doesn't change at runtime.</summary>
-        private static SupportsAsyncGPUReadback supportsAsyncGPUReadback = SupportsAsyncGPUReadback.Unchecked;
+        private static bool? _supportsAsyncGPUReadback;
 
-        /// <summary>Set supportsAsyncGPUReadback for the first and only time.</summary>
-        private static void CheckSupportsAsyncGPUReadback()
+        /// <inheritdoc cref="_supportsAsyncGPUReadback"/>
+        public static bool SupportsAsyncGPUReadback
         {
-            if (supportsAsyncGPUReadback == SupportsAsyncGPUReadback.Unchecked)
+            get
             {
-                // Set supportsAsyncGPUReadback for the first and only time
-                supportsAsyncGPUReadback = SystemInfo.supportsAsyncGPUReadback
-                    ? SupportsAsyncGPUReadback.True
-                    : SupportsAsyncGPUReadback.False;
+                if (!_supportsAsyncGPUReadback.HasValue)
+                {
+                    _supportsAsyncGPUReadback = SystemInfo.supportsAsyncGPUReadback;
+                }
+
+                return _supportsAsyncGPUReadback.Value;
             }
         }
         #endregion // SupportsAsyncGPUReadback
@@ -454,13 +445,13 @@ namespace TCGE
         public bool UncompressedReadable => !isCompressed && isReadable && isTexture2D;
         /// <summary>An <see cref="AsyncGPUReadback"/> is required if the <see cref="Texture"/> is not
         /// compressed and <see cref="supportsAsyncGPUReadback"/> is <see langword="true"/>.</summary>
-        public bool UncompressedUnreadable => !isCompressed && !isReadable && supportsAsyncGPUReadback == SupportsAsyncGPUReadback.True;
+        public bool UncompressedUnreadable => !isCompressed && !isReadable && SupportsAsyncGPUReadback;
         /// <summary>A <see cref="Graphics.Blit(Texture, RenderTexture)"/> is required if the <see cref="Texture"/> is
         /// compressed or <see cref="supportsAsyncGPUReadback"/> is <see langword="false"/></summary>
         public bool Compressed => !UncompressedReadable && !UncompressedUnreadable;
 
         public bool NoAllocation => !isCompressed && isReadable;
-        public bool PerformedReadback => !isCompressed && !isReadable && supportsAsyncGPUReadback == SupportsAsyncGPUReadback.True;
+        public bool PerformedReadback => !isCompressed && !isReadable && SupportsAsyncGPUReadback;
         public bool PerformedBlit => !NoAllocation && !PerformedReadback;
         public bool IsReady => isCompressed || isReadable;
         #endregion // Accessors
@@ -545,12 +536,40 @@ namespace TCGE
         /// <remarks><see href="https://docs.unity3d.com/ScriptReference/SystemInfo-maxTextureSize.html"/></remarks>
         /// <summary>Unity only supports textures up to a size of 16_384,
         /// even if <see cref="SystemInfo.maxTextureSize"/> returns a larger size.</summary>
-        public static int MaxTextureLength => Math.Min(16_384, SystemInfo.maxTextureSize);
+        private static int _maxTextureLength;
+
+        /// <inheritdoc cref="_maxTextureLength"/>
+        public static int MaxTextureLength
+        {
+            get
+            {
+                if (_maxTextureLength == 0)
+                {
+                    _maxTextureLength = Math.Min(16_384, SystemInfo.maxTextureSize);
+                }
+
+                return _maxTextureLength;
+            }
+        }
 
         /// <remarks><see href="https://docs.unity3d.com/Documentation/ScriptReference/NPOTSupport.Restricted.html"/></remarks>
         /// <summary>If <see langword="false"/>, limited NPOT support: no mipmaps and clamp wrap mode will be forced.
         /// If NPOT <see cref="Texture"/> does have mipmaps it will be upscaled/padded at loading time.</summary>
-        public static bool FullNpotSupport => SystemInfo.npotSupport == NPOTSupport.Full;
+        private static NPOTSupport _fullNpotSupport = (NPOTSupport)(-1);
+
+        /// <inheritdoc cref="_fullNpotSupport"/>
+        public static bool FullNpotSupport
+        {
+            get
+            {
+                if ((int)_fullNpotSupport == -1)
+                {
+                    _fullNpotSupport = SystemInfo.npotSupport;
+                }
+
+                return _fullNpotSupport == NPOTSupport.Full;
+            }
+        }
         #endregion // Accessors
 
         public MipLevelParameters GetMipParameters([AssumeRange(PKGE.TextureUtils.minMipLevel, PKGE.TextureUtils.maxMipLevel)] int mipLevel)

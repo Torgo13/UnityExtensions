@@ -149,9 +149,10 @@ namespace PKGE
 
         public static T SecureRandom<T>() where T : unmanaged
         {
-            System.Span<byte> bytes = stackalloc byte[SizeOfCache<T>.Size];
+            System.Span<T> t = stackalloc T[1];
+            System.Span<byte> bytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(t);
             System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
-            return System.Runtime.InteropServices.MemoryMarshal.Read<T>(bytes);
+            return t[0];
         }
         #endregion // Secure
 

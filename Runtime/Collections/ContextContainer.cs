@@ -13,22 +13,22 @@ using PKGE.Mathematics;
 namespace PKGE
 {
     /// <summary>
-    /// ContextContainer is a Dictionary-like storage where the key is a generic parameter and the value is of the same type.
+    /// <see cref="ContextContainer"/> is a <see cref="Dictionary{TKey, TValue}"/>-like storage where the key is a generic parameter and the value is of the same type.
     /// </summary>
     public class ContextContainer : IDisposable
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.core/Runtime/Common/ContextContainer.cs
         #region UnityEngine.Rendering
-        Item[] _items = new Item[64];
+        Item[] _items = Array.Empty<Item>();
         readonly List<uint> _activeItemIndices = new List<uint>();
 
         /// <summary>
-        /// Retrieves a T of class <c>ContextContainerItem</c> if it was previously created without it being disposed.
+        /// Retrieves a <typeparamref name="T"/> of <see langword="class"/> <see cref="ContextItem"/> if it was previously created without it being disposed.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch.
-        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
-        /// <returns>The value created previously using <![CDATA[Create<T>]]> .</returns>
-        /// <exception cref="InvalidOperationException">This is thrown if the value isn't previously created.</exception>
+        /// <typeparam name="T">Is the <see langword="class"/> which you are trying to fetch.
+        /// <typeparamref name="T"/> has to inherit from <see cref="ContextItem"/>.</typeparam>
+        /// <returns>The value created previously using <see cref="Create{T}"/>.</returns>
+        /// <exception cref="InvalidOperationException">This is thrown if the value wasn't previously created.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get<T>()
             where T : ContextItem, new()
@@ -39,16 +39,16 @@ namespace PKGE
                 throw new InvalidOperationException($"Type {typeof(T).FullName} has not been created yet.");
             }
 
-            return (T) _items[typeId].Storage;
+            return (T)_items[typeId].Storage;
         }
 
         /// <summary>
-        /// Creates the value of type T.
+        /// Creates the value of type <typeparamref name="T"/>.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch.
-        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
-         /// <returns>The value of type T created inside the <c>ContextContainer</c>.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if you try to create the value of type T again
+        /// <typeparam name="T">Is the <see langword="class"/> which you are trying to fetch.
+        /// <typeparamref name="T"/> has to inherit from <see cref="ContextItem"/>.</typeparam>
+        /// <returns>The value of type <typeparamref name="T"/> created inside the <see cref="ContextContainer"/>.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if you try to create the value of type <typeparamref name="T"/> again
         /// after it is already created.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
@@ -76,11 +76,11 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Creates the value of type T if the value is not previously created otherwise try to get the value of type T.
+        /// Creates the value of type <typeparamref name="T"/> if the value is not previously created otherwise try to get the value of type <typeparamref name="T"/>.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch.
-        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
-        /// <returns>Returns the value of type T which is created or retrieved.</returns>
+        /// <typeparam name="T">Is the <see langword="class"/> which you are trying to fetch.
+        /// <typeparamref name="T"/> has to inherit from <see cref="ContextItem"/>.</typeparam>
+        /// <returns>Returns the value of type <typeparamref name="T"/> which is created or retrieved.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
         public T GetOrCreate<T>([CallerLineNumber] int lineNumber = 0, [CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "")
@@ -92,7 +92,7 @@ namespace PKGE
             var typeId = TypeId<T>.Value;
             if (Contains(typeId))
             {
-                return (T) _items[typeId].Storage;
+                return (T)_items[typeId].Storage;
             }
 
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
@@ -103,11 +103,11 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Check if the value of type T has previously been created.
+        /// Check if the value of type <typeparamref name="T"/> has previously been created.
         /// </summary>
-        /// <typeparam name="T">Is the class which you are trying to fetch.
-        /// T has to inherit from <c>ContextContainerItem</c></typeparam>
-        /// <returns>Returns true if the value exists and false otherwise.</returns>
+        /// <typeparam name="T">Is the <see langword="class"/> which you are trying to fetch.
+        /// <typeparamref name="T"/> has to inherit from <see cref="ContextItem"/>.</typeparam>
+        /// <returns>Returns <see langword="true"/> if the value exists and false otherwise.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains<T>()
             where T : ContextItem, new()
@@ -117,7 +117,17 @@ namespace PKGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        bool Contains(uint typeId) => typeId < _items.Length && _items[typeId].IsSet;
+        bool Contains(uint typeId)
+        {
+            if (_items.Length == 0)
+            {
+                _items = System.Buffers.ArrayPool<Item>.Shared.Rent(64);
+                Array.Clear(_items, index: 0, length: _items.Length);
+                return false;
+            }
+
+            return typeId < _items.Length && _items[typeId].IsSet;
+        }
 
 #if CONTEXT_CONTAINER_ALLOCATOR_DEBUG
         T CreateAndGetData<T>(uint typeId, int lineNumber, string memberName, string filePath)
@@ -128,13 +138,8 @@ namespace PKGE
         {
             if (_items.Length <= typeId)
             {
-                var items = new Item[math.max(math.ceilpow2(_typeCount), _items.Length * 2)];
-                for (var i = 0; i < _items.Length; i++)
-                {
-                    items[i] = _items[i];
-                }
-
-                _items = items;
+                System.Buffers.ArrayPool<Item>.Shared.Resize(ref _items,
+                    (int)math.max(math.ceilpow2(_typeCount), _items.Length * 2), clearArray: true, copyArray: true);
             }
 
             _activeItemIndices.Add(typeId);
@@ -151,7 +156,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Call Dispose to remove the created values.
+        /// Call <see cref="Dispose"/> to remove the created values.
         /// </summary>
         public void Dispose()
         {
@@ -163,6 +168,8 @@ namespace PKGE
             }
 
             _activeItemIndices.Clear();
+            System.Buffers.ArrayPool<Item>.Shared.Return(_items, clearArray: true);
+            _items = Array.Empty<Item>();
         }
 
         static uint _typeCount;
@@ -188,8 +195,8 @@ namespace PKGE
     }
 
     /// <summary>
-    /// This is needed to add the data to <c>ContextContainer</c> and will control how the data are removed
-    /// when calling Dispose on the <c>ContextContainer</c>.
+    /// This is needed to add the data to <see cref="ContextContainer"/> and will control how the data are removed
+    /// when calling <see cref="ContextContainer.Dispose"/> on the <see cref="ContextContainer"/>.
     /// </summary>
     public abstract class ContextItem
     {
