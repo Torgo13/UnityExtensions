@@ -194,7 +194,7 @@ namespace PKGE
         {
             UnityEngine.Assertions.Assert.AreEqual(0, list.Count * SizeOfCache<TFrom>.Size % SizeOfCache<TTo>.Size);
 
-            return MemoryMarshal.Cast<TFrom, TTo>(list.AsSpan());
+            return list.AsSpan().Cast<TFrom, TTo>();
         }
 
         public static T[] AsArray<T>(this List<T> list)

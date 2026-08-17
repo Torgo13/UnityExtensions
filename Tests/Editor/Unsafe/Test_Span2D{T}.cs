@@ -522,7 +522,68 @@ namespace PKGE.Unsafe.Tests
 
             Assert.IsTrue(Unsafe.AreSame(ref r0, ref array[0, 0]));
         }
+#endif // ZERO
 
+        [Test]
+        public unsafe void Test_Span2DT_GetPinnableReference()
+        {
+            // Here we test that a ref from an empty Span2D<T> returns a null ref
+            Assert.IsTrue(AreSame(
+                ref Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AsRef<int>(null),
+                ref Span2D<int>.Empty.GetPinnableReference()));
+
+            int[] array =
+            {
+                1, 2, 3, 
+                4, 5, 6
+            };
+
+            Span2D<int> span2d = new(array, 2, 3);
+
+            ref int r0 = ref span2d.GetPinnableReference();
+
+            // Here we test that GetPinnableReference returns a ref to the first array element
+            Assert.IsTrue(AreSame(ref r0, ref array[0]));
+        }
+
+        [Test]
+        public unsafe void Test_Span2DT_DangerousGetReference()
+        {
+            // Same as above, but using DangerousGetReference instead (faster, no conditional check)
+            Assert.IsTrue(AreSame(
+                ref Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AsRef<int>(null),
+                ref Span2D<int>.Empty.DangerousGetReference()));
+
+            int[] array =
+            {
+                1, 2, 3,
+                4, 5, 6
+            };
+
+            Span2D<int> span2d = new(array, 2, 3);
+
+            ref int r0 = ref span2d.DangerousGetReference();
+
+            Assert.IsTrue(AreSame(ref r0, ref array[0]));
+        }
+
+        /// <summary>
+        /// <see href="https://stackoverflow.com/a/50846897"/>
+        /// Unreliable when the following conditions are met:
+        /// <list type="bullet">
+        /// <item>the two references are equal</item>
+        /// <item>the GC is triggered by another thread after the first side of the comparison is evaluated but before the other one is</item>
+        /// <item>your reference points somewhere to the managed heap</item>
+        /// <item>the referenced object is moved by the GC for heap compaction purposes</item>
+        /// </list>
+        /// </summary>
+        static unsafe bool AreSame(ref int a, ref int b)
+        {
+            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref a)
+                == Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref b);
+        }
+
+#if ZERO
         [Test]
         public void Test_Span2DT_Slice_1()
         {

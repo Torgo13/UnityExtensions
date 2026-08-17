@@ -54,31 +54,18 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this byte[] buffer, int offset = 0) where T : struct
         {
-            return ReadStruct<T>(buffer.AsSpan(), offset);
+            return ReadStruct<T>(buffer, offset, out _);
         }
 
         /// <inheritdoc cref="ReadStruct{T}(byte[], int)"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this Span<byte> buffer, int offset = 0) where T : struct
         {
-            UnityEngine.Assertions.Assert.IsTrue(buffer != null);
-            UnityEngine.Assertions.Assert.IsTrue(offset < buffer.Length);
-
-            return MemoryMarshal.Read<T>(buffer[offset..]);
+            return ReadStruct<T>(buffer, offset, out _);
         }
 
-        /// <summary>
-        /// Reads a blittable struct from the buffer.
-        /// </summary>
-        /// <remarks>
-        /// Does not validate the arguments, it is the caller's responsibility to check for buffer
-        /// overrun and underrun as needed.
-        /// </remarks>
-        /// <param name="buffer">The buffer to read the struct from.</param>
-        /// <param name="offset">The offset into the buffer to start reading from.</param>
+        /// <inheritdoc cref="ReadStruct{T}(byte[], int)"/>
         /// <param name="nextOffset">The index in the buffer immediately following the last byte read.</param>
-        /// <typeparam name="T">A blittable struct type.</typeparam>
-        /// <returns>The read struct.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this byte[] buffer, int offset, out int nextOffset) where T : struct
         {

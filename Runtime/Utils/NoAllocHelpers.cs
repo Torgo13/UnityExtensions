@@ -553,7 +553,7 @@ namespace PKGE
                 var ushortValue = (ushort)value;
                 ushortValue <<= (int)bitOffset;
                 var mask = ~((0xFFFFU >> (16 - (int)bitCount)) << (int)bitOffset);
-                var ushortPtr = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, ushort>(ptr);
+                var ushortPtr = ptr.Cast<byte, ushort>();
                 ushortPtr[0] = (ushort)((ushortPtr[0] & mask) | ushortValue);
                 return;
             }
@@ -564,7 +564,7 @@ namespace PKGE
                 var uintValue = value;
                 uintValue <<= (int)bitOffset;
                 var mask = ~((0xFFFFFFFFU >> (32 - (int)bitCount)) << (int)bitOffset);
-                var uintPtr = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(ptr);
+                var uintPtr = ptr.Cast<byte, uint>();
                 uintPtr[0] = (uintPtr[0] & mask) | uintValue;
                 return;
             }

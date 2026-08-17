@@ -1135,7 +1135,7 @@ namespace PKGE
         {
             Assert.AreEqual(0, array.Length * SizeOfCache<TFrom>.Size % SizeOfCache<TTo>.Size);
 
-            return MemoryMarshal.Cast<TFrom, TTo>(array.AsSpan());
+            return array.AsSpan().Cast<TFrom, TTo>();
         }
 
         /// <exception cref="IndexOutOfRangeException"/>
@@ -1158,6 +1158,15 @@ namespace PKGE
             return array == null || array.Length == 0;
         }
 
+        public static ref readonly T UnsafeElementAt<T>(this NativeArray<T>.ReadOnly array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(index >= 0);
+            Assert.IsTrue(index < array.Length);
+
+            return ref array.AsReadOnlySpan()[index..].DangerousGetReference();
+        }
+
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1167,7 +1176,7 @@ namespace PKGE
             Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < array.Length);
 
-            return ref MemoryMarshal.GetReference(array.AsReadOnlySpan()[index..]);
+            return ref array.AsReadOnlySpan()[index..].DangerousGetReference();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1177,9 +1186,18 @@ namespace PKGE
             Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < array.Length);
 
-            return ref MemoryMarshal.GetReference(array.AsSpan()[index..]);
+            return ref array.AsSpan()[index..].DangerousGetReference();
         }
         #endregion // UnityEngine.Rendering.Universal
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T AsRefReadonly<T>(this NativeArray<T>.ReadOnly array) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+            Assert.IsTrue(array.Length > 0);
+
+            return ref array.AsReadOnlySpan().DangerousGetReference();
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ref readonly T AsRefReadonly<T>(this NativeArray<T> array) where T : struct
@@ -1187,7 +1205,7 @@ namespace PKGE
             Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(array.Length > 0);
 
-            return ref MemoryMarshal.GetReference(array.AsReadOnlySpan());
+            return ref array.AsReadOnlySpan().DangerousGetReference();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1196,7 +1214,7 @@ namespace PKGE
             Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(array.Length > 0);
 
-            return ref MemoryMarshal.GetReference(array.AsSpan());
+            return ref array.AsSpan().DangerousGetReference();
         }
     }
 }

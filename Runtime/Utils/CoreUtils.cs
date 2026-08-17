@@ -1211,8 +1211,7 @@ namespace PKGE
             Assert.IsTrue(list != null);
             Assert.IsTrue(dest != null);
 
-            var destT = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, T>(dest);
-            list.CopyTo(destT);
+            list.AsBytes().CopyTo(dest);
         }
 
         private static void CalculateRadixParams(int radixBits, out int bitStates)

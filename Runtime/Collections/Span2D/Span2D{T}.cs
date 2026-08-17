@@ -451,89 +451,12 @@ namespace PKGE
                 ThrowHelper.ThrowArgumentException();
             }
 
-            this.span = MemoryMarshal.CreateSpan(ref span.DangerousGetReferenceAt(offset), height);
+            this.span = offset == 0
+                ? MemoryMarshal.CreateSpan(ref span.DangerousGetReference(), height)
+                : MemoryMarshal.CreateSpan(ref span.DangerousGetReferenceAt(offset), height);
             this.width = width;
             this.Stride = width + pitch;
         }
-
-#if ZERO
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Span2D{T}"/> struct.
-        /// </summary>
-        /// <param name="nativeArray">The target <see cref="Unity.Collections.NativeArray{T}"/> to wrap.</param>
-        /// <param name="height">The height of the resulting 2D area.</param>
-        /// <param name="width">The width of each row in the resulting 2D area.</param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when either <paramref name="height"/> or <paramref name="width"/> are invalid.
-        /// </exception>
-        /// <remarks>The total area must match the length of <paramref name="nativeArray"/>.</remarks>
-        internal Span2D(Unity.Collections.NativeArray<T> nativeArray, int height, int width)
-            : this(nativeArray, 0, height, width, 0)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Span2D{T}"/> struct.
-        /// </summary>
-        /// <param name="nativeArray">The target <see cref="Unity.Collections.NativeArray{T}"/> to wrap.</param>
-        /// <param name="offset">The initial offset within <paramref name="nativeArray"/>.</param>
-        /// <param name="height">The height of the resulting 2D area.</param>
-        /// <param name="width">The width of each row in the resulting 2D area.</param>
-        /// <param name="pitch">The pitch in the resulting 2D area.</param>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when one of the input parameters is out of range.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the requested area is outside of bounds for <paramref name="nativeArray"/>.
-        /// </exception>
-        internal Span2D(Unity.Collections.NativeArray<T> nativeArray, int offset, int height, int width, int pitch)
-        {
-            if ((uint)offset > (uint)nativeArray.Length)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForOffset();
-            }
-
-            if (height < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForHeight();
-            }
-
-            if (width < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForWidth();
-            }
-
-            if (pitch < 0)
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeExceptionForPitch();
-            }
-
-            if (width == 0 || height == 0)
-            {
-                this = default;
-
-                return;
-            }
-
-            int area = OverflowHelper.ComputeInt32Area(height, width, pitch);
-            int remaining = nativeArray.Length - offset;
-
-            if (area > remaining)
-            {
-                ThrowHelper.ThrowArgumentException();
-            }
-
-            unsafe
-            {
-                void* ptr = Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafePtr(nativeArray);
-                ref T arrayElement = ref Unity.Collections.LowLevel.Unsafe.UnsafeUtility.ArrayElementAsRef<T>(ptr, offset);
-                this.span = MemoryMarshal.CreateSpan(ref arrayElement, height);
-            }
-
-            this.width = width;
-            this.Stride = width + pitch;
-        }
-#endif // ZERO
 
         /// <summary>
         /// Creates a new instance of the <see cref="Span2D{T}"/> struct with the specified parameters.
@@ -845,9 +768,16 @@ namespace PKGE
                 return ref r0;
             }
 #else
-            UnityEngine.Assertions.Assert.IsTrue(span != null);
-            UnityEngine.Assertions.Assert.IsTrue(span.Length > 0);
-            return ref span.GetPinnableReference();
+            {
+                ref T r0 = ref MemoryMarshal.GetReference(default(Span<T>));
+
+                if (Length != 0)
+                {
+                    r0 = ref MemoryMarshal.GetReference(this.span);
+                }
+
+                return ref r0;
+            }
 #endif // ZERO
         }
 
@@ -1060,18 +990,21 @@ namespace PKGE
 #endif // ZERO
         #endregion // CommunityToolkit.HighPerformance
 
-        public override int GetHashCode() => HashCode.Combine(span.GetPinnableReference()?.GetHashCode() ?? 0, width, Stride);
+        /// <summary>
+        /// <see cref="Span2D{T}"/> is a <see langword="ref"/> <see langword="struct"/> so it cannot be boxed.
+        /// </summary>
         public override bool Equals(object? obj) => false;
         public bool Equals(Span2D<T> other) => this == other;
+        public override int GetHashCode() => HashCodeUtil.Combine(span == default || span.Length == 0 ? 0 : MemoryMarshal.GetReference(span)?.GetHashCode() ?? 0, width, Stride);
     }
 
-    public static class Span2DExtensions
+    public static class NativeArrayExtensions
     {
         public static Span2D<T> AsSpan2D<T>(this Unity.Collections.NativeArray<T> array,
             int height, int width, int pitch = 0) where T : struct
         {
             return new Span2D<T>(array.AsSpan(),
-                offset: 0, height, width, pitch);
+                height, width, pitch);
         }
 
         public static Span2D<T> AsSpan2D<T>(this Unity.Collections.NativeArray<T> array,

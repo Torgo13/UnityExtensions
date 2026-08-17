@@ -114,7 +114,7 @@ namespace PKGE.Unsafe
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this Span<T> span) where T : unmanaged
         {
-            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref span.GetPinnableReference()), span.Length);
+            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span)), span.Length);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
