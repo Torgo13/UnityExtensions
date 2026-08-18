@@ -313,13 +313,7 @@ namespace PKGE
             return container;
         }
 
-        /// <summary>
-        /// Returns a <see cref="Unity.Collections.NativeArray{T}"/> that is a copy of this <see cref="System.Collections.Generic.List{T}"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of elements in the list.</typeparam>
-        /// <param name="list">The list to copy.</param>
-        /// <param name="allocator">The allocator to use.</param>
-        /// <returns>An array that is a copy of this list.</returns>
+        /// <inheritdoc cref="ToNativeArray{T}(List{T}, Allocator)"/>
         public static NativeArray<T> ToNativeArray<T>(this List<T> list,
             AllocatorManager.AllocatorHandle allocator) where T : unmanaged
         {
@@ -329,12 +323,22 @@ namespace PKGE
             return container;
         }
         #endregion // Unity.Collections
-
-        public static void ResetListContents<T>(this List<T> list, NativeList<T> nativeList)
-            where T : unmanaged
-        {
-            NoAllocHelpers.ResetListContents(list, nativeList.AsReadOnly().AsReadOnlySpan());
-        }
 #endif // INCLUDE_COLLECTIONS
+
+        /// <summary>
+        /// Returns a <see cref="Unity.Collections.NativeArray{T}"/> that is a copy of this <see cref="System.Collections.Generic.List{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the list.</typeparam>
+        /// <param name="list">The list to copy.</param>
+        /// <param name="allocator">The allocator to use.</param>
+        /// <returns>An array that is a copy of this list.</returns>
+        public static Unity.Collections.NativeArray<T> ToNativeArray<T>(this List<T> list,
+            Unity.Collections.Allocator allocator) where T : struct
+        {
+            var container = new Unity.Collections.NativeArray<T>(list.Count, allocator, Unity.Collections.NativeArrayOptions.UninitializedMemory);
+            list.AsSpan().CopyTo(container.AsSpan());
+
+            return container;
+        }
     }
 }

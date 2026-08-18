@@ -37,6 +37,7 @@ namespace PKGE.Unsafe
             // the array contents down from after the index.
             if (index < count - 1)
             {
+#if ZERO
                 var elementSize = SizeOfCache<TValue>.Size;
                 unsafe
                 {
@@ -45,6 +46,10 @@ namespace PKGE.Unsafe
                     UnsafeUtility.MemCpy(arrayPtr + elementSize * index, arrayPtr + elementSize * (index + 1),
                         (count - index - 1) * elementSize);
                 }
+#else
+                var span = array.AsSpan();
+                span.Slice(index + 1, count - index - 1).CopyTo(span.Slice(index, count - index - 1));
+#endif // ZERO
             }
 
             --count;

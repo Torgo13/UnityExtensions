@@ -150,6 +150,10 @@ namespace TCGE
 
         [FieldOffset(0)] public Union12 U12_0;
 
+#if UNITY_EDITOR
+        [FieldOffset(0)] public UnityEditor.GUID GUID;
+#endif // UNITY_EDITOR
+
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
         public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);

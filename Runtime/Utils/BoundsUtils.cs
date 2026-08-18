@@ -185,9 +185,22 @@ namespace PKGE
         public static void CalcLocalBounds(Renderer renderer, Transform transform,
             out Bounds newBounds)
         {
-            Bounds bounds = renderer.bounds;
-            Matrix4x4 matrix = transform.worldToLocalMatrix;
-            CalcLocalBounds(bounds.min, bounds.max, matrix, out newBounds);
+            var resultBounds = new NativeArray<Bounds>(1, Allocator.TempJob);
+            var rendererBounds = new NativeArray<Bounds>(1,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory)
+            {
+                [0] = renderer.bounds,
+            };
+
+            Unity.Jobs.IJobExtensions.Run(new CalcLocalBoundsJob
+            {
+                matrix = transform.worldToLocalMatrix,
+                bounds = rendererBounds, // DeallocateOnJobCompletion
+                result = resultBounds,
+            });
+
+            newBounds = resultBounds[0];
+            resultBounds.Dispose();
         }
         
         public static Bounds CalcLocalBounds(Renderer renderer, Transform transform)
@@ -197,7 +210,6 @@ namespace PKGE
         }
         #endregion // Unity.HLODSystem.Utils
         
-        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
         public static void CalcLocalBounds(in Vector3 min, in Vector3 max, in Matrix4x4 matrix,
             out Bounds newBounds)
         {
@@ -240,6 +252,7 @@ namespace PKGE
         public struct CalcLocalBoundsJob : Unity.Jobs.IJob
         {
             public Matrix4x4 matrix;
+            [DeallocateOnJobCompletion]
             [ReadOnly] public NativeArray<Bounds> bounds;
             [NativeFixedLength(1)]
             [WriteOnly] public NativeArray<Bounds> result;
@@ -269,12 +282,23 @@ namespace PKGE
                 return ret;
             }
 
-            CalcLocalBounds(renderers[0], transform, out var bounds);
-            for (int i = 1; i < renderers.Length; ++i)
+            var resultBounds = new NativeArray<Bounds>(1, Allocator.TempJob);
+            var rendererBounds = new NativeArray<Bounds>(renderers.Length,
+                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            for (int i = 0; i < rendererBounds.Length; i++)
             {
-                CalcLocalBounds(renderers[i], transform, out var temp);
-                bounds.Encapsulate(temp);
+                rendererBounds[i] = renderers[i].bounds;
             }
+
+            Unity.Jobs.IJobExtensions.Run(new CalcLocalBoundsJob
+            {
+                matrix = transform.worldToLocalMatrix,
+                bounds = rendererBounds, // DeallocateOnJobCompletion
+                result = resultBounds,
+            });
+
+            var bounds = resultBounds[0];
+            resultBounds.Dispose();
 
             ret.center = bounds.center;
             float max = System.Math.Max(bounds.size.x, System.Math.Max(bounds.size.y, bounds.size.z));
@@ -307,13 +331,11 @@ namespace PKGE
             Unity.Jobs.IJobExtensions.Run(new CalcLocalBoundsJob
             {
                 matrix = transform.worldToLocalMatrix,
-                bounds = rendererBounds,
+                bounds = rendererBounds, // DeallocateOnJobCompletion
                 result = resultBounds,
             });
             
             result = resultBounds[0];
-
-            rendererBounds.Dispose();
             resultBounds.Dispose();
 
             return true;

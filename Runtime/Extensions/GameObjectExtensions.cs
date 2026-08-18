@@ -407,13 +407,11 @@ namespace TCGE
         {
 #if UNITY_EDITOR
 #if UNITY_6000_3_OR_NEWER
-            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
-            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID,
-                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(guid.GUID,
+                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(guid.GUID));
 #else
-            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
-            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID),
-                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(GUID));
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(guid.GUID),
+                UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(guid.GUID));
 #endif // UNITY_6000_3_OR_NEWER
 #else
             return default;
@@ -424,11 +422,9 @@ namespace TCGE
         {
 #if UNITY_EDITOR
 #if UNITY_6000_3_OR_NEWER
-            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
-            return UnityEditor.AssetDatabase.LoadAssetByGUID(GUID, type);
+            return UnityEditor.AssetDatabase.LoadAssetByGUID(guid.GUID, type);
 #else
-            var GUID = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid);
-            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(GUID), type);
+            return LoadAssetAtPath(UnityEditor.AssetDatabase.GUIDToAssetPath(guid.GUID), type);
 #endif // UNITY_6000_3_OR_NEWER
 #else
             return default;
@@ -439,11 +435,9 @@ namespace TCGE
         {
 #if UNITY_EDITOR
 #if UNITY_6000_3_OR_NEWER
-            return UnityEditor.AssetDatabase.LoadAssetByGUID<T>(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
+            return UnityEditor.AssetDatabase.LoadAssetByGUID<T>(guid.GUID);
 #else
-            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid)));
+            return LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid.GUID));
 #endif // UNITY_6000_3_OR_NEWER
 #else
             return default;
@@ -570,8 +564,7 @@ namespace TCGE
         public static System.Type GetMainAssetTypeFromGUID(Union16 guid)
         {
 #if UNITY_EDITOR
-            return UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
+            return UnityEditor.AssetDatabase.GetMainAssetTypeFromGUID(guid.GUID);
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -607,8 +600,7 @@ namespace TCGE
         public static string GUIDToAssetPath(Union16 guid)
         {
 #if UNITY_EDITOR
-            return UnityEditor.AssetDatabase.GUIDToAssetPath(
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid));
+            return UnityEditor.AssetDatabase.GUIDToAssetPath(guid.GUID);
 #else
             return string.Empty;
 #endif // UNITY_EDITOR
@@ -617,8 +609,7 @@ namespace TCGE
         public static Union16 GUIDFromAssetPath(string path)
         {
 #if UNITY_EDITOR
-            var guid = UnityEditor.AssetDatabase.GUIDFromAssetPath(path);
-            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<UnityEditor.GUID, Union16>(ref guid);
+            return new Union16 { GUID = UnityEditor.AssetDatabase.GUIDFromAssetPath(path), };
 #else
             return default;
 #endif // UNITY_EDITOR
@@ -694,7 +685,7 @@ namespace TCGE
         public static string GUIDToString(Union16 guid)
         {
 #if UNITY_EDITOR
-            return Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<Union16, UnityEditor.GUID>(ref guid).ToString();
+            return guid.GUID.ToString();
 #else
             return string.Empty;
 #endif // UNITY_EDITOR

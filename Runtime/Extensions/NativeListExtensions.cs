@@ -44,26 +44,39 @@ namespace PKGE
 
         /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, ReadOnlySpan<T> span) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
-            Assert.IsTrue(count <= array.Length);
 
             int start = nativeList.Length;
-            nativeList.ResizeUninitialized(start + count);
-            array.AsSpan(0, count).CopyTo(nativeList.AsSpan().Slice(start, count));
+            nativeList.ResizeUninitialized(start + span.Length);
+            span.CopyTo(nativeList.AsSpan().Slice(start, span.Length));
         }
 
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(this NativeList<T> nativeList, T[] array) where T : unmanaged
+        public static void AddRange<T>(this NativeList<T> nativeList, T[] array, int count) where T : unmanaged
         {
-            nativeList.AddRange(array, array.Length);
+            Assert.IsTrue(count <= array.Length);
+
+            nativeList.AddRange(array.AsSpan(start: 0, length: count));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this NativeList<T> nativeList, System.Collections.Generic.List<T> list) where T : unmanaged
         {
-            nativeList.AddRange(NoAllocHelpers.ExtractArrayFromList(list), list.Count);
+            nativeList.AddRange(list.AsSpan());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRangeNoResize<T>(this NativeList<T> nativeList, ReadOnlySpan<T> span) where T : unmanaged
+        {
+            Assert.IsTrue(nativeList.IsCreated);
+
+            if (nativeList.Capacity < nativeList.Length + span.Length)
+                return;
+
+            nativeList.AddRange(span);
         }
 
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs

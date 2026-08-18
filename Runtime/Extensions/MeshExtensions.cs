@@ -25,6 +25,7 @@ namespace TCGE
 {
     public static class MeshExtensions
     {
+#if INCLUDE_MATHEMATICS
         #region List
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetVertices(this Mesh mesh, List<float3> vertices)
@@ -44,6 +45,7 @@ namespace TCGE
             mesh.SetNormals(inNormals.As<float3, Vector3>());
         }
         #endregion // List
+#endif // INCLUDE_MATHEMATICS
 
         #region NativeArray
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

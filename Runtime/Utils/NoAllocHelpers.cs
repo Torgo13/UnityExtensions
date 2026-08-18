@@ -8,7 +8,7 @@ using UnityEngine.Scripting;
 namespace PKGE
 {
     // Non-allocating sorts.
-    public struct Sorting
+    public readonly struct Sorting
     {
         //https://github.com/Unity-Technologies/Graphics/blob/504e639c4e07492f74716f36acf7aad0294af16e/Packages/com.unity.render-pipelines.universal/Runtime/NoAllocUtils.cs
         #region UnityEngine.Rendering.Universal

@@ -1,9 +1,10 @@
 #if INCLUDE_COLLECTIONS
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace PKGE
+namespace TCGE
 {
     public static class UnsafeListExtensions
     {
@@ -28,8 +29,6 @@ namespace PKGE
                 unsafeList.Capacity = capacity;
         }
 
-        //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
-        #region UnityEngine.Rendering.Universal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref readonly T UnsafeElementAt<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
@@ -40,6 +39,7 @@ namespace PKGE
         public static ref T UnsafeElementAtMutable<T>(ref this UnsafeList<T> unsafeList, int index) where T : unmanaged
         {
             Assert.IsTrue(unsafeList.IsCreated);
+            Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < unsafeList.Capacity);
 
             if (index >= unsafeList.Length)
@@ -47,7 +47,6 @@ namespace PKGE
 
             return ref unsafeList.ElementAt(index);
         }
-        #endregion // UnityEngine.Rendering.Universal
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref readonly T AsRefReadonly<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
@@ -61,6 +60,54 @@ namespace PKGE
             Assert.IsFalse(unsafeList.IsEmpty);
 
             return ref unsafeList.ElementAt(0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, System.Collections.Generic.List<T> list) where T : unmanaged
+        {
+            unsafeList.AddRange(PKGE.ListExtensions.AsReadOnlySpan(list));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, ReadOnlySpan<T> span) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            if (span == default || span.Length == 0)
+                return;
+
+            int length = unsafeList.Length;
+            unsafeList.Length = length + span.Length;
+
+            span.CopyTo(unsafeList.AsSpan()[length..]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRangeNoResize<T>(ref this UnsafeList<T> unsafeList, ReadOnlySpan<T> span) where T : unmanaged
+        {
+            Assert.IsTrue(unsafeList.IsCreated);
+
+            if (span == default || span.Length == 0)
+                return;
+
+            if (unsafeList.Capacity < unsafeList.Length + span.Length)
+                return;
+
+            unsafeList.AddRange(span);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<T> AsSpan<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(
+                ref unsafeList.ElementAt(0), unsafeList.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
+        {
+            return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(
+                ref unsafeList.ElementAt(0), unsafeList.Length);
         }
     }
 }

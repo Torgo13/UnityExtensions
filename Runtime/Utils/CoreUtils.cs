@@ -10,6 +10,39 @@ using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityObject = UnityEngine.Object;
 
+namespace TCGE
+{
+    public static class CoreUtils
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref TTo Cast<TFrom, TTo>(ref this TFrom value)
+            where TFrom : struct
+            where TTo : struct
+        {
+            return ref System.Runtime.InteropServices.MemoryMarshal.Cast<TFrom, TTo>(
+                System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref value, 1))[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref readonly TTo Cast<TFrom, TTo>(this TFrom value)
+            where TFrom : struct
+            where TTo : struct
+        {
+            return ref System.Runtime.InteropServices.MemoryMarshal.Cast<TFrom, TTo>(
+                System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref value, 1))[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref readonly TTo CastReadOnly<TFrom, TTo>(ref this TFrom value)
+            where TFrom : struct
+            where TTo : struct
+        {
+            return ref System.Runtime.InteropServices.MemoryMarshal.Cast<TFrom, TTo>(
+                System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref value, 1))[0];
+        }
+    }
+}
+
 namespace PKGE
 {
     /// <summary>
@@ -424,41 +457,37 @@ namespace PKGE
         /// <param name="mask">Bitfield to test the flag against.</param>
         /// <param name="flag">Flag to be tested against the provided mask.</param>
         /// <returns>True if the flag is present in the mask.</returns>
-        public static bool HasFlag<T>(T mask, T flag) where T : struct, IConvertible
+        public static bool HasFlag<T>(T mask, T flag) where T : unmanaged, IConvertible
         {
-            Assert.AreEqual(SizeOfCache<T>.Size, sizeof(int));
-            var maskInt = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumToInt(mask);
-            var flagInt = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.EnumToInt(flag);
-            return (maskInt & flagInt) != 0;
-        }
-        
-        /// <inheritdoc cref="HasFlag{T}(T, T)"/>
-        public static bool HasFlagSafe<T>(T mask, T flag) where T : struct, IConvertible
-        {
-            switch (SizeOfCache<T>.Size)
+            switch (mask.GetTypeCode())
             {
-                case sizeof(ulong):
+                case TypeCode.UInt64:
+                case TypeCode.Int64:
                 {
-                    var maskUlong = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ulong>(ref mask);
-                    var flagUlong = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ulong>(ref flag);
+                    var maskUlong = TCGE.CoreUtils.Cast<T, ulong>(mask);
+                    var flagUlong = TCGE.CoreUtils.Cast<T, ulong>(flag);
                     return (maskUlong & flagUlong) != 0;
                 }
-                case sizeof(uint):
+                case TypeCode.UInt32:
+                case TypeCode.Int32:
                 {
-                    var maskUint = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, uint>(ref mask);
-                    var flagUint = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, uint>(ref flag);
+                    var maskUint = TCGE.CoreUtils.Cast<T, uint>(mask);
+                    var flagUint = TCGE.CoreUtils.Cast<T, uint>(flag);
                     return (maskUint & flagUint) != 0;
                 }
-                case sizeof(ushort):
+                case TypeCode.UInt16:
+                case TypeCode.Int16:
                 {
-                    var maskUshort = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ushort>(ref mask);
-                    var flagUshort = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, ushort>(ref flag);
+                    var maskUshort = TCGE.CoreUtils.Cast<T, ushort>(mask);
+                    var flagUshort = TCGE.CoreUtils.Cast<T, ushort>(flag);
                     return (maskUshort & flagUshort) != 0;
                 }
-                case sizeof(byte):
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Boolean:
                 {
-                    var maskByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref mask);
-                    var flagByte = Unity.Collections.LowLevel.Unsafe.UnsafeUtility.As<T, byte>(ref flag);
+                    var maskByte = TCGE.CoreUtils.Cast<T, byte>(mask);
+                    var flagByte = TCGE.CoreUtils.Cast<T, byte>(flag);
                     return (maskByte & flagByte) != 0;
                 }
                 default:

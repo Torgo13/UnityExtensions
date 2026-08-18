@@ -57,12 +57,7 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteStruct<T>(this Stream stream, ref T data) where T : struct
         {
-            var size = SizeOfCache<T>.Size;
-
-            using var tempBuffer = new DisposeArrayPool<byte>(size);
-            _ = tempBuffer.PooledArray.WriteStruct(ref data);
-
-            stream.Write(tempBuffer.PooledArray, 0, size);
+            stream.Write(System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref data, 1).AsBytes());
         }
 
         /// <summary>
@@ -74,12 +69,10 @@ namespace PKGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStruct<T>(this Stream stream) where T : struct
         {
-            var size = SizeOfCache<T>.Size;
-
-            using var tempBuffer = new DisposeArrayPool<byte>(size);
-            Read(stream, size, tempBuffer.PooledArray);
-
-            return tempBuffer.PooledArray.ReadStruct<T>();
+            T data = default;
+            Span<T> buffer = System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref data, 1);
+            _ = stream.Read(System.Runtime.InteropServices.MemoryMarshal.AsBytes(buffer));
+            return data;
         }
 
         /// <summary>
@@ -155,7 +148,7 @@ namespace PKGE
                 return false;
             }
 
-            stream.Write(array.Reinterpret<byte>(SizeOfCache<T>.Size).AsReadOnlySpan());
+            stream.Write(System.Runtime.InteropServices.MemoryMarshal.AsBytes(array.AsReadOnlySpan()));
             return true;
         }
         #endregion // Unity.LiveCapture.Networking

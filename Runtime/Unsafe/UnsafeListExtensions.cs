@@ -53,52 +53,6 @@ namespace PKGE.Unsafe
             unsafeList.AsNativeArray().GetSubArray(start, length);
         #endregion // CullingExtensions
 
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if count is negative.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array, int count) where T : unmanaged
-        {
-            Assert.IsTrue(unsafeList.IsCreated);
-            Assert.IsTrue(count >= 0);
-            Assert.IsTrue(count <= array.Length);
-
-            unsafeList.AddRange(array.AsSpan(start: 0, length: count));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, T[] array) where T : unmanaged
-        {
-            unsafeList.AddRange(array.AsSpan());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, List<T> list) where T : unmanaged
-        {
-            unsafeList.AddRange(list.AsSpan());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddRange<T>(ref this UnsafeList<T> unsafeList, Span<T> span) where T : unmanaged
-        {
-            Assert.IsTrue(unsafeList.IsCreated);
-            
-            if (span == default || span.Length == 0)
-                return;
-
-            unsafeList.AddRange(span.AsUnsafeList());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
-        {
-            return unsafeList.AsNativeArray().AsSpan();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this UnsafeList<T> unsafeList) where T : unmanaged
-        {
-            return unsafeList.AsNativeArray().AsReadOnlySpan();
-        }
-
         /// <summary>Create an <see cref="UnsafeList{T}"/> that aliases a <paramref name="nativeArray"/>.</summary>
         /// <remarks>The returned <see cref="UnsafeList{T}"/> must not have its <see cref="UnsafeList{T}.Capacity"/> changed.</remarks>
         /// <typeparam name="T"><see cref="NativeArray{T}"/> supports <see langword="struct"/>, but it can only
@@ -109,12 +63,6 @@ namespace PKGE.Unsafe
         public static unsafe UnsafeList<T> AsUnsafeList<T>(this NativeArray<T> nativeArray) where T : unmanaged
         {
             return new UnsafeList<T>((T*)nativeArray.GetUnsafePtr(), nativeArray.Length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe UnsafeList<T> AsUnsafeList<T>(this Span<T> span) where T : unmanaged
-        {
-            return new UnsafeList<T>((T*)UnsafeUtility.AddressOf(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span)), span.Length);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

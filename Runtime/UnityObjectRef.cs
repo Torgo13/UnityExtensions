@@ -147,19 +147,40 @@ namespace PKGE
         {
             EntityId instanceId;
 
-#if DEBUG // Log a warning each time a UnityObjectRef<T> is created from a background thread
-            try
+            if (instance == null)
             {
-                instanceId = instance == null ? 0 : instance.GetEntityId();
+                instanceId = 0;
             }
-            catch (InvalidOperationException ex)
+            else
             {
-                Debug.LogWarning(ex.Message, instance);
-                instanceId = instance == null ? 0 : instance.GetHashCode();
-            }
+#if UNITY_6000_4_OR_NEWER // m_EntityId is private so accessing it from a background thread requires reflection
+                try
+                {
+                    instanceId = instance.GetEntityId();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning(ex.Message, instance);
+                    instanceId = (EntityId)typeof(Object).GetField("m_EntityId",
+                        System.Reflection.BindingFlags.Instance
+                        | System.Reflection.BindingFlags.NonPublic).GetValue(instance);
+                }
 #else
-            instanceId = instance == null ? 0 : instance.GetHashCode();
+#if DEBUG // Log a warning each time a UnityObjectRef<T> is created from a background thread
+                try
+                {
+                    instanceId = instance.GetEntityId();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning(ex.Message, instance);
+                    instanceId = instance.GetHashCode();
+                }
+#else
+                instanceId = instance.GetHashCode();
 #endif // DEBUG
+#endif // UNITY_6000_4_OR_NEWER
+            }
 
             return FromInstanceID(instanceId);
         }

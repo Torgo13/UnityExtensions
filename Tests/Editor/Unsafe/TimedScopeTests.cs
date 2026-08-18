@@ -29,22 +29,23 @@ namespace PKGE.Unsafe.Tests
         }
 
         /// <summary>
-        /// This test validates the TimedScope.FromRef method using a ref parameter.
+        /// This test validates the TimedScope.From method using a NativeArray.
         /// </summary>
         [Test]
-        public void TimedScope_FromRef_UpdatesDuration()
+        public void TimedScope_From_UpdatesDuration()
         {
             // Arrange
-            double duration = 0;
+            using var duration = new Unity.Collections.NativeArray<double>(1,
+                Unity.Collections.Allocator.TempJob);
 
             // Act
-            using (TimedScope.FromRef(ref duration))
+            using (TimedScope.From(duration))
             {
                 Thread.Sleep(150); // Simulate work
             }
 
             // Assert
-            Assert.That(duration, Is.GreaterThanOrEqualTo(100).And.LessThan(200),
+            Assert.That(duration[0], Is.GreaterThanOrEqualTo(100).And.LessThan(200),
                 "Duration should reflect the elapsed time accurately.");
         }
     }

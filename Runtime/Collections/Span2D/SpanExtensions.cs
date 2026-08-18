@@ -172,6 +172,23 @@ namespace PKGE
             return ref MemoryMarshal.GetReference(span);
         }
         #endregion // CommunityToolkit.HighPerformance
+
+        /// <inheritdoc cref="SpanExtensions.AsBytes{T}(Span{T})"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<byte> AsBytes<T>(this ReadOnlySpan<T> span)
+            where T : struct
+        {
+            return MemoryMarshal.AsBytes(span);
+        }
+
+        /// <inheritdoc cref="SpanExtensions.Cast{TFrom, TTo}(Span{TFrom})"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ReadOnlySpan<TTo> Cast<TFrom, TTo>(this ReadOnlySpan<TFrom> span)
+            where TFrom : struct
+            where TTo : struct
+        {
+            return MemoryMarshal.Cast<TFrom, TTo>(span);
+        }
     }
 
     internal static class Unsafe

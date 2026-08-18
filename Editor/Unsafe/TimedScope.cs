@@ -55,9 +55,9 @@ namespace PKGE.Editor.Unsafe
         /// </summary>
         /// <param name="durationMs">The location to write the duration in milliseconds to.</param>
         /// <returns>A <see cref="TimedScope"/></returns>
-        public static TimedScope FromRef(ref double durationMs)
+        public static TimedScope From(Unity.Collections.NativeArray<double> durationMs)
         {
-            return new TimedScope((double*)Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AddressOf(ref durationMs));
+            return new TimedScope((double*)Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility.GetUnsafePtr(durationMs));
         }
         #endregion // UnityEditor.Rendering
     }

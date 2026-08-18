@@ -194,15 +194,7 @@ namespace PKGE
 
         public static bool Contains<TValue>(this TValue[]? array, TValue value)
         {
-            if (array == null)
-                return false;
-
-            var comparer = EqualityComparer<TValue>.Default;
-            for (var i = 0; i < array.Length; ++i)
-                if (comparer.Equals(array[i], value))
-                    return true;
-
-            return false;
+            return -1 != array.IndexOf(value);
         }
 
         public static bool ContainsReference<TValue>(this TValue[]? array, TValue value)
@@ -1158,15 +1150,6 @@ namespace PKGE
             return array == null || array.Length == 0;
         }
 
-        public static ref readonly T UnsafeElementAt<T>(this NativeArray<T>.ReadOnly array, int index) where T : struct
-        {
-            Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
-
-            return ref array.AsReadOnlySpan()[index..].DangerousGetReference();
-        }
-
         //https://github.com/Unity-Technologies/Graphics/blob/2ecb711df890ca21a0817cf610ec21c500cb4bfe/Packages/com.unity.render-pipelines.universal/Runtime/UniversalRenderPipelineCore.cs
         #region UnityEngine.Rendering.Universal
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1176,15 +1159,13 @@ namespace PKGE
             Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < array.Length);
 
-            return ref array.AsReadOnlySpan()[index..].DangerousGetReference();
+            return ref array.AsReadOnly().UnsafeElementAt(index);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ref T UnsafeElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
         {
             Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
 
             return ref array.AsSpan()[index..].DangerousGetReference();
         }
@@ -1196,7 +1177,7 @@ namespace PKGE
             Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(array.Length > 0);
 
-            return ref array.AsReadOnlySpan().DangerousGetReference();
+            return ref array.UnsafeElementAt(0);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1205,7 +1186,7 @@ namespace PKGE
             Assert.IsTrue(array.IsCreated);
             Assert.IsTrue(array.Length > 0);
 
-            return ref array.AsReadOnlySpan().DangerousGetReference();
+            return ref array.AsReadOnly().UnsafeElementAt(0);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
