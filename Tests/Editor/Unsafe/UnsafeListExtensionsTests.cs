@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using TCGE;
 
 using NUnitAssert = NUnit.Framework.Assert;
 
@@ -99,7 +100,7 @@ namespace PKGE.Unsafe.Tests
             int[] array = { 6, 7, 8, 9, 10 };
             int count = 3;
 
-            unsafeList.AddRange(array, count);
+            unsafeList.AddRange(array.AsSpan(0, count));
 
             Assert.AreEqual(8, unsafeList.Length);
             for (int i = 0; i < count; i++)
@@ -250,7 +251,7 @@ namespace PKGE.Unsafe.Tests
             // UnityEngine.Assertions.Assert throws UnityEngine.Assertions.AssertionException
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                PKGE.UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
+                TCGE.UnsafeListExtensions.EnsureCapacity(ref _intDefault, 1);
             });
         }
 
@@ -263,7 +264,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    PKGE.UnsafeListExtensions.EnsureCapacity(ref list, requested);
+                    TCGE.UnsafeListExtensions.EnsureCapacity(ref list, requested);
                 });
             }
             finally
@@ -287,7 +288,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.AreEqual(4, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity);
-                PKGE.UnsafeListExtensions.EnsureCapacity(ref list, 32);
+                TCGE.UnsafeListExtensions.EnsureCapacity(ref list, 32);
                 NUnitAssert.AreEqual(32, list.Capacity);
             }
             finally
@@ -303,7 +304,7 @@ namespace PKGE.Unsafe.Tests
             var list = new UnsafeList<int>(16, Allocator.Persistent);
             try
             {
-                PKGE.UnsafeListExtensions.EnsureCapacity(ref list, 10);
+                TCGE.UnsafeListExtensions.EnsureCapacity(ref list, 10);
                 NUnitAssert.AreEqual(16, list.Capacity);
             }
             finally
@@ -320,7 +321,7 @@ namespace PKGE.Unsafe.Tests
         {
             NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
             {
-                PKGE.UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
+                TCGE.UnsafeListExtensions.EnsureRoom(ref _intDefault, 1);
             });
         }
 
@@ -333,7 +334,7 @@ namespace PKGE.Unsafe.Tests
             {
                 NUnitAssert.Throws<UnityEngine.Assertions.AssertionException>(() =>
                 {
-                    PKGE.UnsafeListExtensions.EnsureRoom(ref list, room);
+                    TCGE.UnsafeListExtensions.EnsureRoom(ref list, room);
                 });
             }
             finally
@@ -354,7 +355,7 @@ namespace PKGE.Unsafe.Tests
                 NUnitAssert.AreEqual(3, list.Length);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
 
-                PKGE.UnsafeListExtensions.EnsureRoom(ref list, 5);
+                TCGE.UnsafeListExtensions.EnsureRoom(ref list, 5);
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -371,7 +372,7 @@ namespace PKGE.Unsafe.Tests
             try
             {
                 Populate(ref list, new[] { 10, 20, 30 }); // length = 3
-                PKGE.UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
+                TCGE.UnsafeListExtensions.EnsureRoom(ref list, 2); // needs 5
                 NUnitAssert.AreEqual(16, list.Capacity); // Minimum capacity is 16
             }
             finally
@@ -466,7 +467,7 @@ namespace PKGE.Unsafe.Tests
             if (!list.IsCreated)
                 list = new UnsafeList<T>(values.Length, Allocator.Persistent);
 
-            PKGE.UnsafeListExtensions.EnsureCapacity(ref list, values.Length);
+            TCGE.UnsafeListExtensions.EnsureCapacity(ref list, values.Length);
             list.Length = values.Length;
 
             for (int i = 0; i < values.Length; i++)

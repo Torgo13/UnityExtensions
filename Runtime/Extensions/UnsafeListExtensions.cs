@@ -99,6 +99,9 @@ namespace TCGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
         {
+            if (unsafeList.IsEmpty)
+                return default;
+
             return System.Runtime.InteropServices.MemoryMarshal.CreateSpan(
                 ref unsafeList.ElementAt(0), unsafeList.Length);
         }
@@ -106,6 +109,9 @@ namespace TCGE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(ref this UnsafeList<T> unsafeList) where T : unmanaged
         {
+            if (unsafeList.IsEmpty)
+                return default;
+
             return System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(
                 ref unsafeList.ElementAt(0), unsafeList.Length);
         }
