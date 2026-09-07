@@ -188,13 +188,13 @@ namespace TCGE
         public Color565(Vector3 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToUShort(new Color32((byte)f.x, (byte)f.y, (byte)f.z, byte.MaxValue));
         }
 
         public Color565(Vector4 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToUShort(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToUShort(new Color32((byte)f.x, (byte)f.y, (byte)f.z, byte.MaxValue));
         }
         #endregion // Constructors
 
@@ -306,13 +306,13 @@ namespace TCGE
         public Color332(Vector3 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToByte(new Color32((byte)f.x, (byte)f.y, (byte)f.z, byte.MaxValue));
         }
 
         public Color332(Vector4 f, float scale = byte.MaxValue)
         {
             f *= scale;
-            rgb = ColorExtensions.Color32ToByte(new Color(f.x, f.y, f.z));
+            rgb = ColorExtensions.Color32ToByte(new Color32((byte)f.x, (byte)f.y, (byte)f.z, byte.MaxValue));
         }
         #endregion // Constructors
 
@@ -367,6 +367,17 @@ namespace TCGE
         public static Color32 ToColor32(this System.Drawing.Color colour) => new Color32(colour.R, colour.G, colour.B, colour.A);
 
         /// <summary>
+        /// Convert <see cref="UnityEngine.Color"/> to <see cref="System.Drawing.Color"/>.
+        /// </summary>
+        public static System.Drawing.Color FromColor(this Color colour) => ((Color32)colour).FromColor32();
+
+        /// <summary>
+        /// Convert <see cref="System.Drawing.Color"/> to <see cref="UnityEngine.Color"/>.
+        /// </summary>
+        public static Color ToColor(this System.Drawing.Color colour) => new Color(
+            colour.R * (1f / byte.MaxValue), colour.G * (1f / byte.MaxValue), colour.B * (1f / byte.MaxValue), colour.A * (1f / byte.MaxValue));
+
+        /// <summary>
         /// Convert <see cref="System.Drawing.KnownColor"/> to <see cref="UnityEngine.Color32"/>.
         /// </summary>
         public static Color32 FromKnownColor(System.Drawing.KnownColor knownColor) => System.Drawing.Color.FromKnownColor(knownColor).ToColor32();
@@ -384,8 +395,7 @@ namespace TCGE
             if (index < 0 || index >= NamedColorsCount)
                 return (Color32)Color.magenta;
 
-            // 1 is added as KnownColor enum has no value for 0
-            return FromKnownColor(1 + System.Drawing.KnownColor.AliceBlue + index);
+            return FromKnownColor(System.Drawing.KnownColor.AliceBlue + index);
         }
 
         public static string ColorName(int index)
@@ -393,8 +403,7 @@ namespace TCGE
             if (index < 0 || index >= NamedColorsCount)
                 return string.Empty;
 
-            // 1 is added as KnownColor enum has no value for 0
-            return System.Drawing.Color.FromKnownColor(1 + System.Drawing.KnownColor.AliceBlue + index).Name;
+            return System.Drawing.Color.FromKnownColor(System.Drawing.KnownColor.AliceBlue + index).Name;
         }
 
         /// <summary>
@@ -423,6 +432,15 @@ namespace TCGE
             return colour.FromColor32().ToKnownColor();
         }
 
+        /// <summary>
+        /// Convert <see cref="UnityEngine.Color"/> to <see cref="System.Drawing.KnownColor"/>.
+        /// </summary>
+        /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
+        public static System.Drawing.KnownColor ToNamedColor(this Color colour)
+        {
+            return colour.FromColor().ToKnownColor();
+        }
+
         /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
         public static System.Drawing.KnownColor ToNamedColorIgnoreAlpha(this System.Drawing.Color color)
         {
@@ -444,10 +462,22 @@ namespace TCGE
             return colour.FromColor32().ToNamedColorIgnoreAlpha();
         }
 
+        /// <inheritdoc cref="ToNamedColor(Color32)"/>
+        public static System.Drawing.KnownColor ToNamedColorIgnoreAlpha(this Color colour)
+        {
+            return colour.FromColor().ToNamedColorIgnoreAlpha();
+        }
+
         /// <inheritdoc cref="ToNamedColor(System.Drawing.Color)"/>
         public static System.Drawing.KnownColor ToNamedColorNearest(this System.Drawing.Color color)
         {
-            return ((Color)color.ToColor32()).ToNamedColorNearest();
+            return color.ToColor().ToNamedColorNearest();
+        }
+
+        /// <inheritdoc cref="ToNamedColor(Color32)"/>
+        public static System.Drawing.KnownColor ToNamedColorNearest(this Color32 colour)
+        {
+            return ((Color)colour).ToNamedColorNearest();
         }
 
         /// <inheritdoc cref="ToNamedColor(Color32)"/>
@@ -458,7 +488,7 @@ namespace TCGE
 
             for (var i = System.Drawing.KnownColor.AliceBlue; i <= System.Drawing.KnownColor.YellowGreen; i++)
             {
-                float distance = colour.Distance(System.Drawing.Color.FromKnownColor(i).ToColor32());
+                float distance = colour.Distance(System.Drawing.Color.FromKnownColor(i).ToColor());
                 if (distance < min)
                 {
                     min = distance;
@@ -906,7 +936,7 @@ namespace PKGE
 
         static byte GammaToLinear(byte value)
         {
-            float v = value / (float)byte.MaxValue;
+            float v = value * (1f / byte.MaxValue);
 
             if (v <= 0.04045f)
                 return (byte)(v / 12.92 * byte.MaxValue);

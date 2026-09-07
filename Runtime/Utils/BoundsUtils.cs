@@ -138,7 +138,7 @@ namespace PKGE
 
             return default;
         }
-#endif
+#endif // INCLUDE_PHYSICS_MODULE
 
         /// <summary>
         /// Gets the bounds that encapsulate a list of points.
@@ -344,6 +344,7 @@ namespace PKGE
 
         //https://github.com/Unity-Technologies/FPSSample/blob/6b8b27aca3690de9e46ca3fe5780af4f0eff5faa/Assets/Scripts/Utils/PhysicsUtils.cs
         #region FPSSample
+#if INCLUDE_PHYSICS_MODULE
         public static Vector3 GetClosestPointOnCollider(this Collider c, Vector3 p)
         {
             if (c is SphereCollider csc)
@@ -387,6 +388,7 @@ namespace PKGE
 
             return c.ClosestPointOnBounds(p);
         }
+#endif // INCLUDE_PHYSICS_MODULE
         #endregion // FPSSample
 
         [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]

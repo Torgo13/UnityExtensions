@@ -206,8 +206,10 @@ namespace PKGE
             {
                 case Renderer r:
                     return !r.enabled;
+#if INCLUDE_PHYSICS_MODULE
                 case Collider c:
                     return !c.enabled;
+#endif // INCLUDE_PHYSICS_MODULE
                 case LODGroup l:
                     return !l.enabled;
                 case Behaviour b:

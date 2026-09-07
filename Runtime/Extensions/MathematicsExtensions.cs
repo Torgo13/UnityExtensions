@@ -26,14 +26,14 @@ namespace TCGE
     [StructLayout(LayoutKind.Sequential)]
     public struct Half : System.IEquatable<Half>
     {
-        public ushort value;
+        public ushort Value;
 
-        public static implicit operator Half(float f) => new Half { value = Mathf.FloatToHalf(f) };
-        public static implicit operator float(Half h) => Mathf.HalfToFloat(h.value);
+        public static explicit operator Half(float f) => new Half { Value = Mathf.FloatToHalf(f) };
+        public static implicit operator float(Half h) => Mathf.HalfToFloat(h.Value);
 
-        public readonly bool Equals(Half other) => value == other.value;
+        public readonly bool Equals(Half other) => Value == other.Value;
         public readonly override bool Equals(object? obj) => obj is Half other && Equals(other);
-        public readonly override int GetHashCode() => value.GetHashCode();
+        public readonly override int GetHashCode() => Value.GetHashCode();
     }
     #endregion // Half
 
@@ -64,6 +64,13 @@ namespace TCGE
         public readonly bool Equals(Union1 other) => Byte == other.Byte;
         public readonly override bool Equals(object? obj) => obj is Union1 other && Equals(other);
         public readonly override int GetHashCode() => Byte.GetHashCode();
+
+        public static implicit operator Union1(byte value) => new Union1 { Byte = value, };
+        public static implicit operator byte(Union1 value) => value.Byte;
+        public static implicit operator Union1(sbyte value) => new Union1 { SByte = value, };
+        public static implicit operator sbyte(Union1 value) => value.SByte;
+        public static implicit operator Union1(bool value) => new Union1 { Bool = value, };
+        public static explicit operator bool(Union1 value) => value.Bool;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -83,6 +90,17 @@ namespace TCGE
         public readonly bool Equals(Union2 other) => Short == other.Short;
         public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
         public readonly override int GetHashCode() => Short.GetHashCode();
+
+        public static implicit operator Union2(short value) => new Union2 { Short = value, };
+        public static implicit operator short(Union2 value) => value.Short;
+        public static implicit operator Union2(ushort value) => new Union2 { UShort = value, };
+        public static implicit operator ushort(Union2 value) => value.UShort;
+
+        public static implicit operator Union2(Half value) => new Union2 { Half = value, };
+        public static implicit operator Half(Union2 value) => value.Half;
+
+        public static implicit operator Union2(Union1 value) => new Union2 { _0 = value, };
+        public static explicit operator Union1(Union2 value) => value._0;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -104,6 +122,23 @@ namespace TCGE
         public readonly bool Equals(Union4 other) => Int == other.Int;
         public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
         public readonly override int GetHashCode() => Int.GetHashCode();
+
+        public static implicit operator Union4(float value) => new Union4 { Float = value, };
+        public static implicit operator float(Union4 value) => value.Float;
+        public static implicit operator Union4(int value) => new Union4 { Int = value, };
+        public static implicit operator int(Union4 value) => value.Int;
+        public static implicit operator Union4(uint value) => new Union4 { UInt = value, };
+        public static implicit operator uint(Union4 value) => value.UInt;
+        public static implicit operator Union4(Color32 value) => new Union4 { Color32 = value, };
+        public static implicit operator Color32(Union4 value) => value.Color32;
+
+        public static implicit operator Union4(Color24 value) => new Union4 { Color24 = value, };
+        public static explicit operator Color24(Union4 value) => value.Color24;
+
+        public static implicit operator Union4(Union1 value) => new Union4 { _0 = value, };
+        public static explicit operator Union1(Union4 value) => (Union1)value._0;
+        public static implicit operator Union4(Union2 value) => new Union4 { _0 = value, };
+        public static explicit operator Union2(Union4 value) => value._0;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -126,6 +161,27 @@ namespace TCGE
         public readonly bool Equals(Union8 other) => Long == other.Long;
         public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
         public readonly override int GetHashCode() => Long.GetHashCode();
+
+        public static implicit operator Union8(double value) => new Union8 { Double = value, };
+        public static implicit operator double(Union8 value) => value.Double;
+        public static implicit operator Union8(long value) => new Union8 { Long = value, };
+        public static implicit operator long(Union8 value) => value.Long;
+        public static implicit operator Union8(ulong value) => new Union8 { ULong = value, };
+        public static implicit operator ulong(Union8 value) => value.ULong;
+
+        public static implicit operator Union8(RangeInt value) => new Union8 { RangeInt = value, };
+        public static implicit operator RangeInt(Union8 value) => value.RangeInt;
+        public static implicit operator Union8(Vector2 value) => new Union8 { Vector2 = value, };
+        public static implicit operator Vector2(Union8 value) => value.Vector2;
+        public static implicit operator Union8(Vector2Int value) => new Union8 { Vector2Int = value, };
+        public static implicit operator Vector2Int(Union8 value) => value.Vector2Int;
+
+        public static implicit operator Union8(Union1 value) => new Union8 { _0 = value, };
+        public static explicit operator Union1(Union8 value) => (Union1)value._0;
+        public static implicit operator Union8(Union2 value) => new Union8 { _0 = value, };
+        public static explicit operator Union2(Union8 value) => (Union2)value._0;
+        public static implicit operator Union8(Union4 value) => new Union8 { _0 = value, };
+        public static explicit operator Union4(Union8 value) => value._0;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -157,6 +213,36 @@ namespace TCGE
         public readonly bool Equals(Union16 other) => _0.Long == other._0.Long && _8.Long == other._8.Long;
         public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
         public readonly override int GetHashCode() => _0.Long.GetHashCode() ^ (_8.Long.GetHashCode() << 2);
+
+        public static implicit operator Union16(Quaternion value) => new Union16 { Quaternion = value, };
+        public static implicit operator Quaternion(Union16 value) => value.Quaternion;
+        public static implicit operator Union16(Color value) => new Union16 { Color = value, };
+        public static implicit operator Color(Union16 value) => value.Color;
+        public static implicit operator Union16(Rect value) => new Union16 { Rect = value, };
+        public static implicit operator Rect(Union16 value) => value.Rect;
+        public static implicit operator Union16(RectInt value) => new Union16 { RectInt = value, };
+        public static implicit operator RectInt(Union16 value) => value.RectInt;
+
+        public static implicit operator Union16(Plane value) => new Union16 { Plane = value, };
+        public static implicit operator Plane(Union16 value) => value.Plane;
+        public static implicit operator Union16(UnityEngine.Random.State value) => new Union16 { State = value, };
+        public static implicit operator UnityEngine.Random.State(Union16 value) => value.State;
+        public static implicit operator Union16(Vector4 value) => new Union16 { Vector4 = value, };
+        public static implicit operator Vector4(Union16 value) => value.Vector4;
+
+        public static implicit operator Union16(Vector3 value) => new Union16 { Vector3 = value, };
+        public static explicit operator Vector3(Union16 value) => value.Vector3;
+        public static implicit operator Union16(Vector3Int value) => new Union16 { Vector3Int = value, };
+        public static explicit operator Vector3Int(Union16 value) => value.Vector3Int;
+
+        public static implicit operator Union16(Union1 value) => new Union16 { _0 = value, };
+        public static explicit operator Union1(Union16 value) => (Union1)value._0;
+        public static implicit operator Union16(Union2 value) => new Union16 { _0 = value, };
+        public static explicit operator Union2(Union16 value) => (Union2)value._0;
+        public static implicit operator Union16(Union4 value) => new Union16 { _0 = value, };
+        public static explicit operator Union4(Union16 value) => (Union4)value._0;
+        public static implicit operator Union16(Union8 value) => new Union16 { _0 = value, };
+        public static explicit operator Union8(Union16 value) => value._0;
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -166,6 +252,8 @@ namespace TCGE
         [FieldOffset(0)] public Union2 U2_0;
         [FieldOffset(2)] public Union2 U2_2;
         [FieldOffset(4)] public Union2 U2_4;
+
+        [FieldOffset(0)] public Union4 U4_0;
 
         public readonly bool Equals(Union6 other) => U2_0.Equals(other.U2_0) && U2_2.Equals(other.U2_2) && U2_4.Equals(other.U2_4);
         public readonly override bool Equals(object? obj) => obj is Union6 other && Equals(other);
@@ -182,6 +270,8 @@ namespace TCGE
         [FieldOffset(0)] public Union4 U4_0;
         [FieldOffset(4)] public Union4 U4_4;
         [FieldOffset(8)] public Union4 U4_8;
+
+        [FieldOffset(0)] public Union8 U8_0;
 
         public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
         public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
@@ -207,6 +297,194 @@ namespace TCGE
     }
     #endregion // Union
 }
+
+#if INCLUDE_MATHEMATICS
+namespace TCGE.Mathematics
+{
+    #region Union
+    /// <remarks>Use __0 to access the Union without extensions.</remarks>
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union2 : System.IEquatable<Union2>
+    {
+        [FieldOffset(0)] public TCGE.Union2 __0;
+
+        [FieldOffset(0)] public half Half;
+
+        public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
+        public readonly override int GetHashCode() => __0.Short.GetHashCode();
+
+        public static implicit operator Union2(TCGE.Union2 value) => new Union2 { __0 = value, };
+        public static implicit operator TCGE.Union2(Union2 value) => value.__0;
+
+        public static implicit operator Union2(half value) => new Union2 { Half = value, };
+        public static implicit operator half(Union2 value) => value.Half;
+
+        public static implicit operator Union2(Union1 value) => new Union2 { __0 = value, };
+        public static explicit operator Union1(Union2 value) => value.__0._0;
+    }
+
+    /// <inheritdoc cref="Union2"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union4 : System.IEquatable<Union4>
+    {
+        [FieldOffset(0)] public TCGE.Union4 __0;
+
+        [FieldOffset(0)] public Random Random;
+        [FieldOffset(0)] public half2 Half2;
+
+        [FieldOffset(0)] public Union2 _0;
+        [FieldOffset(2)] public Union2 _2;
+
+        public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
+        public readonly override int GetHashCode() => __0.Int.GetHashCode();
+
+        public static implicit operator Union4(TCGE.Union4 value) => new Union4 { __0 = value, };
+        public static implicit operator TCGE.Union4(Union4 value) => value.__0;
+
+        public static implicit operator Union4(Random value) => new Union4 { Random = value, };
+        public static implicit operator Random(Union4 value) => value.Random;
+        public static implicit operator Union4(half2 value) => new Union4 { Half2 = value, };
+        public static implicit operator half2(Union4 value) => value.Half2;
+
+        public static implicit operator Union4(Union1 value) => new Union4 { _0 = value, };
+        public static explicit operator Union1(Union4 value) => (Union1)value._0;
+        public static implicit operator Union4(Union2 value) => new Union4 { _0 = value, };
+        public static explicit operator Union2(Union4 value) => value._0;
+    }
+
+    /// <inheritdoc cref="Union2"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union8 : System.IEquatable<Union8>
+    {
+        [FieldOffset(0)] public TCGE.Union8 __0;
+
+        [FieldOffset(0)] public float2 Float2;
+        [FieldOffset(0)] public int2 Int2;
+        [FieldOffset(0)] public uint2 UInt2;
+        [FieldOffset(0)] public half4 Half4;
+
+        [FieldOffset(0)] public Union4 _0;
+        [FieldOffset(4)] public Union4 _4;
+
+        public readonly bool Equals(Union8 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
+        public readonly override int GetHashCode() => __0.GetHashCode();
+
+        public static implicit operator Union8(TCGE.Union8 value) => new Union8 { __0 = value, };
+        public static implicit operator TCGE.Union8(Union8 value) => value.__0;
+
+        public static implicit operator Union8(float2 value) => new Union8 { Float2 = value, };
+        public static implicit operator float2(Union8 value) => value.Float2;
+        public static implicit operator Union8(int2 value) => new Union8 { Int2 = value, };
+        public static implicit operator int2(Union8 value) => value.Int2;
+        public static implicit operator Union8(uint2 value) => new Union8 { UInt2 = value, };
+        public static implicit operator uint2(Union8 value) => value.UInt2;
+        public static implicit operator Union8(half4 value) => new Union8 { Half4 = value, };
+        public static implicit operator half4(Union8 value) => value.Half4;
+
+        public static implicit operator Union8(Union1 value) => new Union8 { _0 = value, };
+        public static explicit operator Union1(Union8 value) => (Union1)value._0;
+        public static implicit operator Union8(Union2 value) => new Union8 { _0 = value, };
+        public static explicit operator Union2(Union8 value) => (Union2)value._0;
+        public static implicit operator Union8(Union4 value) => new Union8 { _0 = value, };
+        public static explicit operator Union4(Union8 value) => value._0;
+    }
+
+    /// <inheritdoc cref="Union2"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union16 : System.IEquatable<Union16>
+    {
+        [FieldOffset(0)] public TCGE.Union16 __0;
+
+        [FieldOffset(0)] public quaternion Quaternion;
+        [FieldOffset(0)] public double2 Double2;
+        [FieldOffset(0)] public float4 Float4;
+        [FieldOffset(0)] public int4 Int4;
+        [FieldOffset(0)] public uint4 UInt4;
+
+        [FieldOffset(0)] public Union8 _0;
+        [FieldOffset(8)] public Union8 _8;
+
+        [FieldOffset(0)] public Union12 U12_0;
+
+        public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
+        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
+        public readonly override int GetHashCode() => UInt4.GetHashCode();
+
+        public static implicit operator Union16(TCGE.Union16 value) => new Union16 { __0 = value, };
+        public static implicit operator TCGE.Union16(Union16 value) => value.__0;
+
+        public static implicit operator Union16(quaternion value) => new Union16 { Quaternion = value, };
+        public static implicit operator quaternion(Union16 value) => value.Quaternion;
+        public static implicit operator Union16(double2 value) => new Union16 { Double2 = value, };
+        public static implicit operator double2(Union16 value) => value.Double2;
+        public static implicit operator Union16(float4 value) => new Union16 { Float4 = value, };
+        public static implicit operator float4(Union16 value) => value.Float4;
+        public static implicit operator Union16(int4 value) => new Union16 { Int4 = value, };
+        public static implicit operator int4(Union16 value) => value.Int4;
+        public static implicit operator Union16(uint4 value) => new Union16 { UInt4 = value, };
+        public static implicit operator uint4(Union16 value) => value.UInt4;
+
+        public static implicit operator Union16(Union1 value) => new Union16 { _0 = value, };
+        public static explicit operator Union1(Union16 value) => (Union1)value._0;
+        public static implicit operator Union16(Union2 value) => new Union16 { _0 = value, };
+        public static explicit operator Union2(Union16 value) => (Union2)value._0;
+        public static implicit operator Union16(Union4 value) => new Union16 { _0 = value, };
+        public static explicit operator Union4(Union16 value) => (Union4)value._0;
+        public static implicit operator Union16(Union8 value) => new Union16 { _0 = value, };
+        public static explicit operator Union8(Union16 value) => value._0;
+
+        public static implicit operator Union16(Union12 value) => new Union16 { U12_0 = value, };
+        public static explicit operator Union12(Union16 value) => value.U12_0;
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union12 : System.IEquatable<Union12>
+    {
+        [FieldOffset(0)] public TCGE.Union12 __0;
+
+        [FieldOffset(0)] public float3 Float3;
+        [FieldOffset(0)] public int3 Int3;
+        [FieldOffset(0)] public uint3 UInt3;
+
+        [FieldOffset(0)] public Union4 U4_0;
+        [FieldOffset(4)] public Union4 U4_4;
+        [FieldOffset(8)] public Union4 U4_8;
+
+        public readonly bool Equals(Union12 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
+        public readonly override int GetHashCode() => __0.GetHashCode();
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Union48 : System.IEquatable<Union48>
+    {
+        [FieldOffset(0)] public TCGE.Union48 __0;
+
+        [FieldOffset(00)] public Union16 U16_00;
+        [FieldOffset(16)] public Union16 U16_16;
+        [FieldOffset(32)] public Union16 U16_32;
+
+        [FieldOffset(00)] public Union12 U12_00;
+        [FieldOffset(12)] public Union12 U12_12;
+        [FieldOffset(24)] public Union12 U12_24;
+        [FieldOffset(36)] public Union12 U12_36;
+
+        [FieldOffset(00)] public float3x4 Float3x4_00;
+        [FieldOffset(00)] public float4x3 Float4x3_00;
+
+        public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
+        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
+        public readonly override int GetHashCode() => __0.GetHashCode();
+    }
+    #endregion // Union
+}
+#endif // INCLUDE_MATHEMATICS
 
 namespace PKGE
 {
@@ -266,6 +544,11 @@ namespace PKGE
         
         public static bool AsBool(byte @byte) => new ByteBool { ByteValue = @byte }.BoolValue;
         public static byte AsByte(bool @bool) => new ByteBool { BoolValue = @bool }.ByteValue;
+
+        public static implicit operator ByteBool(bool value) => new ByteBool { BoolValue = value, };
+        public static explicit operator bool(ByteBool value) => value.BoolValue;
+        public static implicit operator ByteBool(byte value) => new ByteBool { ByteValue = value, };
+        public static implicit operator byte(ByteBool value) => value.ByteValue;
     }
     #endregion // Unity.Netcode
 
@@ -2044,124 +2327,3 @@ namespace PKGE
 #endif // INCLUDE_MATHEMATICS
     }
 }
-
-#if INCLUDE_MATHEMATICS
-namespace TCGE.Mathematics
-{
-    #region Union
-    /// <remarks>Use __0 to access the Union without extensions.</remarks>
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union2 : System.IEquatable<Union2>
-    {
-        [FieldOffset(0)] public TCGE.Union2 __0;
-
-        [FieldOffset(0)] public half Half;
-
-        public readonly bool Equals(Union2 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object? obj) => obj is Union2 other && Equals(other);
-        public readonly override int GetHashCode() => __0.Short.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union2"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union4 : System.IEquatable<Union4>
-    {
-        [FieldOffset(0)] public TCGE.Union4 __0;
-
-        [FieldOffset(0)] public Random Random;
-        [FieldOffset(0)] public half2 Half2;
-
-        [FieldOffset(0)] public Union2 _0;
-        [FieldOffset(2)] public Union2 _2;
-
-        public readonly bool Equals(Union4 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object? obj) => obj is Union4 other && Equals(other);
-        public readonly override int GetHashCode() => __0.Int.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union2"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union8 : System.IEquatable<Union8>
-    {
-        [FieldOffset(0)] public TCGE.Union8 __0;
-
-        [FieldOffset(0)] public float2 Float2;
-        [FieldOffset(0)] public int2 Int2;
-        [FieldOffset(0)] public uint2 UInt2;
-        [FieldOffset(0)] public half4 Half4;
-
-        [FieldOffset(0)] public Union4 _0;
-        [FieldOffset(4)] public Union4 _4;
-
-        public readonly bool Equals(Union8 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object? obj) => obj is Union8 other && Equals(other);
-        public readonly override int GetHashCode() => __0.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union2"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union16 : System.IEquatable<Union16>
-    {
-        [FieldOffset(0)] public TCGE.Union16 __0;
-
-        [FieldOffset(0)] public quaternion Quaternion;
-        [FieldOffset(0)] public double2 Double2;
-        [FieldOffset(0)] public float4 Float4;
-        [FieldOffset(0)] public int4 Int4;
-        [FieldOffset(0)] public uint4 UInt4;
-
-        [FieldOffset(0)] public Union8 _0;
-        [FieldOffset(8)] public Union8 _8;
-
-        [FieldOffset(0)] public Union12 _12;
-
-        public readonly bool Equals(Union16 other) => Int4.Equals(other.Int4);
-        public readonly override bool Equals(object? obj) => obj is Union16 other && Equals(other);
-        public readonly override int GetHashCode() => UInt4.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union12 : System.IEquatable<Union12>
-    {
-        [FieldOffset(0)] public TCGE.Union12 __0;
-
-        [FieldOffset(0)] public float3 Float3;
-        [FieldOffset(0)] public int3 Int3;
-        [FieldOffset(0)] public uint3 UInt3;
-
-        [FieldOffset(0)] public Union4 Union4_0;
-        [FieldOffset(4)] public Union4 Union4_4;
-        [FieldOffset(8)] public Union4 Union4_8;
-
-        public readonly bool Equals(Union12 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
-        public readonly override int GetHashCode() => __0.GetHashCode();
-    }
-
-    /// <inheritdoc cref="Union1"/>
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Union48 : System.IEquatable<Union48>
-    {
-        [FieldOffset(0)] public TCGE.Union48 __0;
-
-        [FieldOffset(00)] public Union16 U16_00;
-        [FieldOffset(16)] public Union16 U16_16;
-        [FieldOffset(32)] public Union16 U16_32;
-
-        [FieldOffset(00)] public Union12 U12_00;
-        [FieldOffset(12)] public Union12 U12_12;
-        [FieldOffset(24)] public Union12 U12_24;
-        [FieldOffset(36)] public Union12 U12_36;
-
-        [FieldOffset(00)] public float3x4 Float3x4_00;
-        [FieldOffset(00)] public float4x3 Float4x3_00;
-
-        public readonly bool Equals(Union48 other) => __0.Equals(other.__0);
-        public readonly override bool Equals(object? obj) => obj is Union48 other && Equals(other);
-        public readonly override int GetHashCode() => __0.GetHashCode();
-    }
-    #endregion // Union
-}
-#endif // INCLUDE_MATHEMATICS

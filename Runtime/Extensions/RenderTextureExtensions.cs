@@ -235,11 +235,10 @@ namespace TCGE
 
             for (int i = rFloat.Length - 1; i >= 0; i--)
             {
-                rgba32[i] = new Color32(
-                    (byte)(rFloat[i] * byte.MaxValue),
+                rgba32[i] = new Color(
+                    rFloat[i],
                     0,
-                    0,
-                    byte.MaxValue);
+                    0);
             }
         }
 
@@ -253,11 +252,10 @@ namespace TCGE
 
             for (int i = rgFloat.Length - 1; i >= 0; i--)
             {
-                rgba32[i] = new Color32(
-                    (byte)(rgFloat[i].x * byte.MaxValue),
-                    (byte)(rgFloat[i].y * byte.MaxValue),
-                    0,
-                    byte.MaxValue);
+                rgba32[i] = new Color(
+                    rgFloat[i].x,
+                    rgFloat[i].y,
+                    0);
             }
         }
 
