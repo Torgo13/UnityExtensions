@@ -91,6 +91,7 @@ namespace PKGE
         public static ref T UnsafeElementAtMutable<T>(this NativeList<T> nativeList, int index) where T : unmanaged
         {
             Assert.IsTrue(nativeList.IsCreated);
+            Assert.IsTrue(index >= 0);
             Assert.IsTrue(index < nativeList.Capacity);
 
             if (index >= nativeList.Length)

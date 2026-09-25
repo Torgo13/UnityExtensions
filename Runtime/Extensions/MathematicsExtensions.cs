@@ -247,6 +247,34 @@ namespace TCGE
 
     /// <inheritdoc cref="Union1"/>
     [StructLayout(LayoutKind.Explicit)]
+    public struct Union32 : System.IEquatable<Union32>
+    {
+        [FieldOffset(00)] public PKGE.BitArray256 BitArray256;
+
+        [FieldOffset(00)] public Union16 _0;
+        [FieldOffset(16)] public Union16 _16;
+
+        [FieldOffset(00)] public Union12 U12_00;
+        [FieldOffset(12)] public Union12 U12_12;
+
+        public readonly bool Equals(Union32 other) => _0.Equals(other._0) && _16.Equals(other._16);
+        public readonly override bool Equals(object? obj) => obj is Union32 other && Equals(other);
+        public readonly override int GetHashCode() => _0.GetHashCode() ^ (_16.GetHashCode() << 2);
+
+        public static implicit operator Union32(Union1 value) => new Union32 { _0 = value, };
+        public static explicit operator Union1(Union32 value) => (Union1)value._0;
+        public static implicit operator Union32(Union2 value) => new Union32 { _0 = value, };
+        public static explicit operator Union2(Union32 value) => (Union2)value._0;
+        public static implicit operator Union32(Union4 value) => new Union32 { _0 = value, };
+        public static explicit operator Union4(Union32 value) => (Union4)value._0;
+        public static implicit operator Union32(Union8 value) => new Union32 { _0 = value, };
+        public static explicit operator Union8(Union32 value) => (Union8)value._0;
+        public static implicit operator Union32(Union16 value) => new Union32 { _0 = value, };
+        public static explicit operator Union16(Union32 value) => value._0;
+    }
+
+    /// <inheritdoc cref="Union1"/>
+    [StructLayout(LayoutKind.Explicit)]
     public struct Union6 : System.IEquatable<Union6>
     {
         [FieldOffset(0)] public Union2 U2_0;
@@ -257,7 +285,7 @@ namespace TCGE
 
         public readonly bool Equals(Union6 other) => U2_0.Equals(other.U2_0) && U2_2.Equals(other.U2_2) && U2_4.Equals(other.U2_4);
         public readonly override bool Equals(object? obj) => obj is Union6 other && Equals(other);
-        public readonly override int GetHashCode() => U2_0.GetHashCode() ^ (U2_2.GetHashCode() << 2) ^ (U2_4.GetHashCode() >> 2);
+        public readonly override int GetHashCode() => U4_0.GetHashCode() ^ (U2_4.GetHashCode() << 2);
     }
 
     /// <inheritdoc cref="Union1"/>
@@ -275,7 +303,7 @@ namespace TCGE
 
         public readonly bool Equals(Union12 other) => Vector3Int == other.Vector3Int;
         public readonly override bool Equals(object? obj) => obj is Union12 other && Equals(other);
-        public readonly override int GetHashCode() => Vector3Int.GetHashCode();
+        public readonly override int GetHashCode() => U8_0.GetHashCode() ^ (U4_8.GetHashCode() << 2);
     }
 
     /// <inheritdoc cref="Union1"/>

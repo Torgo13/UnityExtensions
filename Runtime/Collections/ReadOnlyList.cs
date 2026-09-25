@@ -8,7 +8,7 @@ namespace PKGE
 {
     /// <summary>
     /// Wraps a <see cref="List{T}"/> to provide a read-only view of its memory without copying any elements.
-    /// It is preferable to use this collection in API designs instead of `IReadOnlyCollection` because
+    /// It is preferable to use this collection in API designs instead of <see cref="IReadOnlyCollection{T}"/> because
     /// <see cref="GetEnumerator"/> returns a value-type enumerator and does not perform any heap allocations.
     /// </summary>
     /// <remarks>

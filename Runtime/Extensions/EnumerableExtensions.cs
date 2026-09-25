@@ -42,10 +42,10 @@ namespace PKGE
             pooledList.AddRange(collection);
             return pooledObject;
         }
-        
+
         //https://github.com/needle-mirror/com.unity.film-internal-utilities/blob/2cfc425a6f0bf909732b9ca80f2385ea3ff92850/Runtime/Scripts/Extensions/EnumerableExtensions.cs
         #region Unity.FilmInternalUtilities
-        //Returns false with ret set to default(T) if not found
+        /// <returns><see langword="false"/> with <paramref name="ret"/> set to <see langword="default"/>(T) if not found</returns>
         public static bool FindElementAt<T>(this IEnumerable<T> collection, int index, out T? ret)
         {
             int i = 0;

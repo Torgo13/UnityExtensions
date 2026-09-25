@@ -7,11 +7,11 @@ using UnityEngine.Pool;
 namespace PKGE
 {
     /// <summary>
-    /// Wraps a list or array to provide a read-only view of some or all elements. Elements are not copied, so if the
-    /// underlying collection changes, the `ReadOnlyListSpan` will see the updated elements.
+    /// Wraps a <see cref="List{T}"/> or <see cref="Array"/> to provide a read-only view of some or all elements. Elements are not copied, so if the
+    /// underlying collection changes, the <see cref="ReadOnlyListSpan{T}"/> will see the updated elements.
     /// </summary>
     /// <remarks>
-    /// It is preferable to use this collection in API designs instead of `IReadOnlyCollection` because
+    /// It is preferable to use this collection in API designs instead of <see cref="IReadOnlyCollection{T}"/> because
     /// <see cref="GetEnumerator"/> returns a value-type enumerator and does not perform any heap allocations.
     /// This collection is not thread-safe.
     /// </remarks>
@@ -92,7 +92,7 @@ namespace PKGE
         /// <param name="length">The desired length for the slice.</param>
         /// <returns>A new <see cref="ReadOnlyListSpan{T}"/> that is a read only view of a slice of a list.</returns>
         /// <exception cref="ArgumentOutOfRangeException"> Thrown if
-        /// start or length are outside the bounds of the current ReadOnlyListSpan.</exception>
+        /// start or length are outside the bounds of the current <see cref="ReadOnlyListSpan{T}"/>.</exception>
         public ReadOnlyListSpan<T?> Slice(int start, int length)
         {
             var newStart = _enumerator.start + start;
@@ -213,7 +213,7 @@ namespace PKGE
         }
 
         /// <summary>
-        /// Provides an enumerator for the elements of `ReadOnlyListSpan`.
+        /// Provides an enumerator for the elements of <see cref="ReadOnlyListSpan{T}"/>.
         /// </summary>
         public struct Enumerator : IEnumerator<T?>
         {
@@ -231,7 +231,7 @@ namespace PKGE
             /// Gets the element in the collection at the current position of the enumerator.
             /// </summary>
             /// <exception cref="ArgumentOutOfRangeException">Thrown if the current position is outside the bounds of
-            /// the ReadOnlyListSpan.</exception>
+            /// the <see cref="ReadOnlyListSpan{T}"/>.</exception>
             public readonly T? Current
             {
                 get
@@ -280,7 +280,7 @@ namespace PKGE
             /// </summary>
             public void Reset() => _currentIndex = start - 1;
 
-            void IDisposable.Dispose() { }
+            readonly void IDisposable.Dispose() { }
         }
 #endregion // Unity.XR.CoreUtils.Collections
     }

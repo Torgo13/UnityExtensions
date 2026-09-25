@@ -19,7 +19,7 @@ namespace PKGE
         public static void Decompose(this Guid guid, out ulong low, out ulong high)
         {
             Span<byte> bytes = stackalloc byte[16];
-            guid.TryWriteBytes(bytes);
+            _ = guid.TryWriteBytes(bytes);
             low = BitConverter.ToUInt64(bytes.Slice(0, 8));
             high = BitConverter.ToUInt64(bytes.Slice(8, 8));
         }

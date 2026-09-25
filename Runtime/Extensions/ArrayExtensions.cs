@@ -1156,8 +1156,6 @@ namespace PKGE
         public static ref readonly T UnsafeElementAt<T>(this NativeArray<T> array, int index) where T : struct
         {
             Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(index >= 0);
-            Assert.IsTrue(index < array.Length);
 
             return ref array.AsReadOnly().UnsafeElementAt(index);
         }
@@ -1167,15 +1165,38 @@ namespace PKGE
         {
             Assert.IsTrue(array.IsCreated);
 
-            return ref array.AsSpan()[index..].DangerousGetReference();
+            return ref array.AsSpan()[index];
         }
         #endregion // UnityEngine.Rendering.Universal
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T ElementAt<T>(this NativeArray<T>.ReadOnly array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+
+            return ref array.AsReadOnlySpan()[index];
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref readonly T ElementAt<T>(this NativeArray<T> array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+
+            return ref array.AsReadOnlySpan()[index];
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static ref T ElementAtMutable<T>(this NativeArray<T> array, int index) where T : struct
+        {
+            Assert.IsTrue(array.IsCreated);
+
+            return ref array.AsSpan()[index];
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ref readonly T AsRefReadonly<T>(this NativeArray<T>.ReadOnly array) where T : struct
         {
             Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(array.Length > 0);
 
             return ref array.UnsafeElementAt(0);
         }
@@ -1184,7 +1205,6 @@ namespace PKGE
         public static ref readonly T AsRefReadonly<T>(this NativeArray<T> array) where T : struct
         {
             Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(array.Length > 0);
 
             return ref array.AsReadOnly().UnsafeElementAt(0);
         }
@@ -1193,9 +1213,8 @@ namespace PKGE
         public static ref T AsRef<T>(this NativeArray<T> array) where T : struct
         {
             Assert.IsTrue(array.IsCreated);
-            Assert.IsTrue(array.Length > 0);
 
-            return ref array.AsSpan().DangerousGetReference();
+            return ref array.AsSpan()[0];
         }
     }
 }
