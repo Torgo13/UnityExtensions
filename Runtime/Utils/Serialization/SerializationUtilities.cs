@@ -80,6 +80,7 @@ namespace PKGE
                     case ObjectType.Int32: return BitConverter.ToInt32(keyData, dataIndex);
                     case ObjectType.Hash128: return Hash128.Parse(Encoding.ASCII.GetString(keyData, dataIndex + 1, keyData[dataIndex]));
                     case ObjectType.Type: return Type.GetTypeFromCLSID(new Guid(Encoding.ASCII.GetString(keyData, dataIndex + 1, keyData[dataIndex])));
+#if INCLUDE_JSONSERIALIZE
                     case ObjectType.JsonObject:
                     {
                         int assemblyNameLength = keyData[dataIndex];
@@ -98,6 +99,7 @@ namespace PKGE
                         var t = assembly.GetType(className);
                         return JsonUtility.FromJson(jsonText, t);
                     }
+#endif // INCLUDE_JSONSERIALIZE
                 }
             }
             catch (Exception ex)
@@ -181,6 +183,7 @@ namespace PKGE
                 return tmp.Length + 2;
             }
 
+#if INCLUDE_JSONSERIALIZE
             var attrs = objectType.GetCustomAttributes(typeof(SerializableAttribute), true);
             if (attrs.Length == 0)
                 return 0;
@@ -212,6 +215,9 @@ namespace PKGE
             buffer.AddRange(tmpJson);
             length += tmpJson.Length;
             return length;
+#else
+            return 0;
+#endif // INCLUDE_JSONSERIALIZE
         }
         #endregion // UnityEngine.AddressableAssets.Utility
     }

@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace PKGE.Tests
 {
@@ -54,12 +54,12 @@ namespace PKGE.Tests
 
         public static void AreEqual(float expected, float actual, float delta = 0.0f)
         {
-            Assert.AreEqual(expected, actual, delta);
+            Assert.IsTrue(Mathf.Abs(expected - actual) < delta);
         }
 
         public static void AreEqual(double expected, double actual, double delta = 0.0)
         {
-            Assert.AreEqual(expected, actual, delta);
+            Assert.IsTrue(System.Math.Abs(expected - actual) < delta);
         }
 
         // int

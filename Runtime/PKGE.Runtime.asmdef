@@ -152,6 +152,11 @@
             "name": "com.unity.entities.graphics",
             "expression": "",
             "define": "INCLUDE_ENTITIES_GRAPHICS"
+        },
+        {
+            "name": "com.unity.modules.jsonserialize",
+            "expression": "1.0.0",
+            "define": "INCLUDE_JSONSERIALIZE"
         }
     ],
     "noEngineReferences": false
