@@ -24,15 +24,6 @@ namespace TCGE
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref readonly TTo Cast<TFrom, TTo>(this TFrom value)
-            where TFrom : struct
-            where TTo : struct
-        {
-            return ref System.Runtime.InteropServices.MemoryMarshal.Cast<TFrom, TTo>(
-                System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpan(ref value, 1))[0];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref readonly TTo CastReadOnly<TFrom, TTo>(ref this TFrom value)
             where TFrom : struct
             where TTo : struct
@@ -464,30 +455,30 @@ namespace PKGE
                 case TypeCode.UInt64:
                 case TypeCode.Int64:
                 {
-                    var maskUlong = TCGE.CoreUtils.Cast<T, ulong>(mask);
-                    var flagUlong = TCGE.CoreUtils.Cast<T, ulong>(flag);
+                    var maskUlong = TCGE.CoreUtils.CastReadOnly<T, ulong>(ref mask);
+                    var flagUlong = TCGE.CoreUtils.CastReadOnly<T, ulong>(ref flag);
                     return (maskUlong & flagUlong) != 0;
                 }
                 case TypeCode.UInt32:
                 case TypeCode.Int32:
                 {
-                    var maskUint = TCGE.CoreUtils.Cast<T, uint>(mask);
-                    var flagUint = TCGE.CoreUtils.Cast<T, uint>(flag);
+                    var maskUint = TCGE.CoreUtils.CastReadOnly<T, uint>(ref mask);
+                    var flagUint = TCGE.CoreUtils.CastReadOnly<T, uint>(ref flag);
                     return (maskUint & flagUint) != 0;
                 }
                 case TypeCode.UInt16:
                 case TypeCode.Int16:
                 {
-                    var maskUshort = TCGE.CoreUtils.Cast<T, ushort>(mask);
-                    var flagUshort = TCGE.CoreUtils.Cast<T, ushort>(flag);
+                    var maskUshort = TCGE.CoreUtils.CastReadOnly<T, ushort>(ref mask);
+                    var flagUshort = TCGE.CoreUtils.CastReadOnly<T, ushort>(ref flag);
                     return (maskUshort & flagUshort) != 0;
                 }
                 case TypeCode.Byte:
                 case TypeCode.SByte:
                 case TypeCode.Boolean:
                 {
-                    var maskByte = TCGE.CoreUtils.Cast<T, byte>(mask);
-                    var flagByte = TCGE.CoreUtils.Cast<T, byte>(flag);
+                    var maskByte = TCGE.CoreUtils.CastReadOnly<T, byte>(ref mask);
+                    var flagByte = TCGE.CoreUtils.CastReadOnly<T, byte>(ref flag);
                     return (maskByte & flagByte) != 0;
                 }
                 default:
@@ -1122,40 +1113,35 @@ namespace PKGE
             Assert.IsTrue(outCorners != null);
             Assert.IsTrue(outCorners.Length >= 4);
 
-            var outCornersArray = new NativeArray<Vector3>(4,
-                Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-
-            Unity.Jobs.IJobExtensions.Run(new CalculateViewSpaceCornersJob
-            {
-                invProj = Matrix4x4.Inverse(in proj),
-                z = z,
-                outCorners = outCornersArray,
-            });
-
-            outCornersArray.AsReadOnlySpan().CopyTo(outCorners);
-            outCornersArray.Dispose();
+            CoreUtilsBurst.CalculateViewSpaceCorners(proj, z, ref outCorners[0]);
         }
-        
-        [Unity.Burst.BurstCompile(FloatMode = Unity.Burst.FloatMode.Fast)]
-        public struct CalculateViewSpaceCornersJob : Unity.Jobs.IJob
+
+        [Unity.Burst.BurstCompile]
+        static class CoreUtilsBurst
         {
-            [ReadOnly] public Matrix4x4 invProj;
-            [ReadOnly] public float z;
-            [NativeFixedLength(4)]
-            [WriteOnly] public NativeArray<Vector3> outCorners;
-            
-            public void Execute()
+            [Unity.Burst.BurstCompile(FloatPrecision = Unity.Burst.FloatPrecision.Low, FloatMode = Unity.Burst.FloatMode.Fast)]
+            public static void CalculateViewSpaceCorners(in Matrix4x4 proj, float z, ref Vector3 outCorner)
             {
-                Span<Vector4> temp = stackalloc Vector4[4];
+#if INCLUDE_MATHEMATICS
+                Matrix4x4 invProj = Unity.Mathematics.math.inverse(proj);
+#else
+                Matrix4x4 invProj = Matrix4x4.Inverse(in proj);
+#endif // INCLUDE_MATHEMATICS
+
+                const int length = 4;
+                var outCorners = System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref outCorner, length);
 
                 // We transform a point further than near plane and closer than far plane, for precision reasons.
                 // In a perspective camera setup (near=0.1, far=1000), a point at 0.95 projected depth is about
                 // 5 units from the camera.
                 const float projZ = 0.95f;
-                temp[0] = invProj.MultiplyPoint(new Vector3(-1, -1, projZ));
-                temp[1] = invProj.MultiplyPoint(new Vector3(1, -1, projZ));
-                temp[2] = invProj.MultiplyPoint(new Vector3(1, 1, projZ));
-                temp[3] = invProj.MultiplyPoint(new Vector3(-1, 1, projZ));
+                ReadOnlySpan<Vector4> temp = stackalloc Vector4[]
+                {
+                    invProj.MultiplyPoint(new Vector3(-1, -1, projZ)),
+                    invProj.MultiplyPoint(new Vector3(+1, -1, projZ)),
+                    invProj.MultiplyPoint(new Vector3(+1, +1, projZ)),
+                    invProj.MultiplyPoint(new Vector3(-1, +1, projZ)),
+                };
 
                 // Rescale vectors to have the desired z distance.
                 for (int r = 0; r < 4; ++r)

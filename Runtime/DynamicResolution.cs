@@ -318,7 +318,7 @@ namespace PKGE
 
             GUILayout.Label(
                 string.Format(
-                    "Enabled: {0}\nResolution: {1} x {2}\nScaleFactor: {3:F3}\nGPU: {4:F3} CPU: {5:F3}",
+                    "Enabled: {0}\nResolution: {1} x {2}\nScaleFactor: {3:F3}\nGPU: {4:000.0} CPU: {5:000.0}",
                     SystemEnabled,
                     rezWidth,
                     rezHeight,
@@ -333,23 +333,24 @@ namespace PKGE
     //https://github.com/Unity-Technologies/DynamicResolutionSample/blob/9677fbd4d890f809d95aa1c3c266966646bb23c6/DynamicResolution.cs
     public class DynamicResolution : MonoBehaviour
     {
-        public ref double DesiredFrameRate => ref DynamicResolutionImpl.DesiredFrameRate;
+        public double DesiredFrameRate = 60;
 
         #region Tweakables
         // If your pipeline utilizes the DRH then the min and max scale factors should be defined by a separate config asset.
         // If not, then these values provide you that configuration.
 #if !PIPELINE_IMPLEMENTS_DRH
         [Range(0.25f, DynamicResolutionImpl.MaxScaleFactor)]
-        public ref float MinScaleFactor => ref DynamicResolutionImpl.MinScaleFactor;
+        public float MinScaleFactor = 0.5f;
 #endif
         #endregion // Tweakables
 
         #region Internal Tracking
-        public ref bool SystemEnabled => ref DynamicResolutionImpl.SystemEnabled; // Default to false if you plan to init from external settings.
+        public bool SystemEnabled = true; // Default to false if you plan to init from external settings.
         #endregion // Internal Tracking
 
         private void Update()
         {
+            Validate();
             DynamicResolutionImpl.Update();
         }
 
@@ -369,6 +370,22 @@ namespace PKGE
             DynamicResolutionImpl.OnGUI();
         }
 #endif
+
+        private void Validate()
+        {
+            DynamicResolutionImpl.SystemEnabled = SystemEnabled;
+            DynamicResolutionImpl.DesiredFrameRate = DesiredFrameRate = System.Math.Max(1, DesiredFrameRate);
+#if !PIPELINE_IMPLEMENTS_DRH
+            DynamicResolutionImpl.MinScaleFactor = MinScaleFactor = Mathf.Clamp(MinScaleFactor, 0.25f, DynamicResolutionImpl.MaxScaleFactor);
+#endif
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            Validate();
+        }
+#endif // UNITY_EDITOR
     }
 }
 #endif // INCLUDE_RENDER_PIPELINES_CORE

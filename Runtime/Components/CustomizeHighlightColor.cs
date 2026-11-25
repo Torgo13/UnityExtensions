@@ -19,10 +19,10 @@ namespace PKGE
         Renderer _renderer;
 
 #if UNITY_6000_3_OR_NEWER
-        MeshRenderer _meshRenderer;
+        MeshRenderer? _meshRenderer;
         bool _isMeshRenderer;
 
-        SkinnedMeshRenderer _skinnedMeshRenderer;
+        SkinnedMeshRenderer? _skinnedMeshRenderer;
         bool _isSkinnedMeshRenderer;
 #endif // UNITY_6000_3_OR_NEWER
 
@@ -56,9 +56,9 @@ namespace PKGE
         {
 #if UNITY_6000_3_OR_NEWER
             if (_isMeshRenderer)
-                _meshRenderer.SetShaderUserValue(new TCGE.Union4 { Color32 = selectionColor }.UInt);
+                _meshRenderer!.SetShaderUserValue(new TCGE.Union4 { Color32 = selectionColor }.UInt);
             else if (_isSkinnedMeshRenderer)
-                _skinnedMeshRenderer.SetShaderUserValue(new TCGE.Union4 { Color32 = selectionColor }.UInt);
+                _skinnedMeshRenderer!.SetShaderUserValue(new TCGE.Union4 { Color32 = selectionColor }.UInt);
             else
 #endif // UNITY_6000_3_OR_NEWER
             {

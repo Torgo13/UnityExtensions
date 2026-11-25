@@ -11,8 +11,8 @@ namespace PKGE.Editor
     {
         //https://github.com/Unity-Technologies/Megacity-2019/blob/1d90090d6d23417c661e7937e283b77b8e1db29d/Assets/Scripts/Utils/Editor/Toolbox.cs
         #region Unity.Megacity.EditorTools
-        private List<GameObject> currentSelection; // The selected GameObjects.
-        public GameObject replacementObject; // GameObject to replace selection with.
+        private List<GameObject>? currentSelection; // The selected GameObjects.
+        public GameObject? replacementObject; // GameObject to replace selection with.
 
         public static bool preserveChildren = true;
         public bool autoOffsetTransform = false; //auto-offset

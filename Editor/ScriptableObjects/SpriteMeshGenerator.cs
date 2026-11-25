@@ -6,12 +6,12 @@ namespace PKGE.Editor
     [CreateAssetMenu(fileName = "SpriteMeshGenerator.asset", menuName = "2D/Sprite Mesh Generator", order = 1)]
     public class SpriteMeshGenerator : ScriptableObject
     {
-        public Sprite[] sprites;
-        [SerializeField] internal string hash;
+        public Sprite[] sprites = System.Array.Empty<Sprite>();
+        [SerializeField] internal string hash = string.Empty;
 
         internal void OnValidate()
         {
-            if (sprites == null || sprites.Length <= 0)
+            if (sprites.Length == 0)
                 return;
 
             using var _0 = UnityEngine.Pool.StringBuilderPool.Get(out var sb);

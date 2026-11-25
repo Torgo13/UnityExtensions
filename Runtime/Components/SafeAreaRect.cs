@@ -18,7 +18,7 @@ namespace PKGE
             "a value of 1 means the new rect will be equal to the safe are rect.")]
         float m_Weighting = 1f;
 
-        RectTransform m_RectTransform;
+        RectTransform m_RectTransform = null!;
         ScreenOrientation m_Orientation = ScreenOrientation.LandscapeLeft;
         Vector2Int m_ScreenSize = Vector2Int.zero;
         Rect m_SafeArea = Rect.zero;
